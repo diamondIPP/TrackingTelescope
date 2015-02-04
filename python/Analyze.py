@@ -14,6 +14,7 @@ import sys
 import ROOT
 
 import RunInfos
+from root_style import root_style
 
 
 
@@ -84,7 +85,7 @@ for i_run, run in enumerate(li_runs_up + li_runs_down):
         h.GetXaxis().SetNdivisions(505)
         if "Charge" in name:
             h.GetXaxis().SetTitle("Charge [electrons]")
-        h.GetYaxis().SetTitle("Fraction of Clusters [%]")
+        h.GetYaxis().SetTitle("Fraction of clusters [%]")
         di_histos[name][run]=h
 
 
@@ -92,18 +93,22 @@ for i_run, run in enumerate(li_runs_up + li_runs_down):
 # Prepare pretty ROOT
 ###############################
 
-ROOT.gStyle.SetPadLeftMargin(0.15)
-ROOT.gStyle.SetPadBottomMargin(0.15)
-ROOT.gStyle.SetPadRightMargin(0.05)
-ROOT.gStyle.SetPadTopMargin(0.05)
+rs = root_style()
+rs.set_style(1000,1000,1)
 ROOT.gROOT.ForceStyle()
 
+#ROOT.gStyle.SetPadLeftMargin(0.15)
+#ROOT.gStyle.SetPadBottomMargin(0.15)
+#ROOT.gStyle.SetPadRightMargin(0.05)
+#ROOT.gStyle.SetPadTopMargin(0.05)
+#ROOT.gROOT.ForceStyle()
 
-c = ROOT.TCanvas("","",800,800)
+
+c = rs.get_canvas("")
 
 
 
-c.SetGrid(1,1)
+#c.SetGrid(1,1)
 
 li_colors = [ROOT.kRed,      ROOT.kBlue+1,     ROOT.kBlack,
              ROOT.kOrange-1, ROOT.kViolet+1,   ROOT.kGreen+1,
@@ -133,19 +138,13 @@ for name in li_names:
             li_runs = li_runs_down
 
         legend_origin_x     = 0.6
-        legend_origin_y     = 0.5
-        legend_size_x       = 0.1
-        legend_size_y       = 0.045 * len(li_runs)
+        legend_origin_y     = 0.8
 
-        legend = ROOT.TLegend( legend_origin_x,
-                           legend_origin_y,
-                           legend_origin_x + legend_size_x,
-                           legend_origin_y + legend_size_y )
-        legend.SetBorderSize(1)
-        legend.SetFillColor(0)
-        legend.SetTextSize(0.06)
-        legend.SetBorderSize(0)
-
+        legend = rs.make_legend(legend_origin_x, 
+                                legend_origin_y,
+                                len(li_runs))
+        legend.SetTextAlign(32)
+        legend.SetMargin(.4)
 
         the_max = max( [GetMaximumExceptBin(di_histos[name][run])for run in li_runs])
         the_max *= 1.1
@@ -160,10 +159,10 @@ for name in li_names:
             di_histos[name][run].SetMaximum(the_max)
             di_histos[name][run].GetXaxis().SetRange(0, 49900)
 
-            di_histos[name][run].GetXaxis().SetTitleSize(0.06)
-            di_histos[name][run].GetYaxis().SetTitleSize(0.06)
-            di_histos[name][run].GetXaxis().SetLabelSize(0.06)
-            di_histos[name][run].GetYaxis().SetLabelSize(0.06)
+            #di_histos[name][run].GetXaxis().SetTitleSize(0.06)
+            #di_histos[name][run].GetYaxis().SetTitleSize(0.06)
+            #di_histos[name][run].GetXaxis().SetLabelSize(0.06)
+            #di_histos[name][run].GetYaxis().SetLabelSize(0.06)
 
             if i_run == 0:
                 di_histos[name][run].Draw()

@@ -14,6 +14,7 @@ import sys
 import ROOT
 
 import RunInfos
+from root_style import root_style
 
 
 ###############################
@@ -43,6 +44,57 @@ except KeyError:
     sys.exit()
 
 
+###############################
+# Helper: FWHM
+###############################
+
+def get_fwhm(h_input):
+
+    h = h_input.Clone()
+
+    debug_this = False
+
+    # First find the maximum bin
+    bin_max = h.GetMaximumBin()    
+    maximum = h.GetBinContent(bin_max)
+
+    if debug_this:
+        print "Maximum {0} found at {1} (=bin: {2})".format(maximum,
+                                                            h.GetBinCenter(bin_max),
+                                                            bin_max)
+
+    # Go leftwards from the maximum
+    # look for the first bin with a value < maximum and record its right edge (technically, the up-edge of the next bin)
+    # if none is found, stop at the left edge of the plot    
+    for bin_i in reversed(range(1, bin_max)):
+        if h.GetBinContent(bin_i) < maximum / 2.:
+            break
+    bin_left = bin_i    
+
+    left_side_value = h.GetBinLowEdge(bin_left+1)
+
+    if debug_this:
+        print "Left edge at at {0} (=bin: {1})".format(left_side_value, bin_left)
+
+    # Go rightwards from the maximum
+    # look for the first bin with a value < maximum and record its left edge
+    # if none is found, stop at the right edge of the plot    
+    for bin_i in range(bin_max+1, h.GetNbinsX()+1):
+        if h.GetBinContent(bin_i) < maximum / 2.:
+            break
+    bin_right = bin_i    
+
+    right_side_value = h.GetBinLowEdge(bin_right)        
+
+    if debug_this:
+        print "Right edge at at {0} (=bin: {1})".format(right_side_value, bin_right)
+
+    fwhm = right_side_value - left_side_value
+
+    if debug_this:
+        print "FWHM = {0}".format(fwhm)
+    
+    return fwhm
 
 
 
@@ -60,10 +112,10 @@ cluster_size_fraction_1 = {}
 cluster_size_fraction_12 = {}
 second_charge = {}
 
+print "{0:>4} {1:>4} {2:>7} {3:>6} {4:>6} {5:>6} {6:>6} {7:>6}".format("Run", "ROC", "Mean", "FWHM", "Entr.", "Gaus", "Left", "Right")
+
 # Loop over runs
 for i_run, run in enumerate(di_runs):
-
-    print "At: ", run
 
     charge[run] = []
     sum_charge[run] = []
@@ -97,9 +149,47 @@ for i_run, run in enumerate(di_runs):
         h_charge = f.Get("1stCharge4_ROC" + str(i_roc))
         charge[run].append(h_charge.Project3D("z").GetMean())
 
-        # Use the sum of  charges within a 2-pixel radius
+        # Use the sum of  charges within a 4-pixel radius
         h_sumcharge = f.Get("SumCharge4_ROC" + str(i_roc))
-        sum_charge[run].append(h_sumcharge.Project3D("z").GetMean())
+        h_sumcharge_proj_z = h_sumcharge.Project3D("z")
+
+        # Ignore the zero-bin!
+        h_sumcharge_proj_z.SetBinContent(1,0)
+
+        sum_charge[run].append(h_sumcharge_proj_z.GetMean())
+
+        rs = root_style()
+        rs.set_style(1000,1000,1)
+        ROOT.gROOT.ForceStyle()
+        
+        c = rs.get_canvas("")
+        h_sumcharge_proj_z.Draw()
+        c.Print("sumcharge_{0}_{1}.pdf".format(run, i_roc))
+
+        
+
+
+        if run in [322, 325, 327, 330, 333]:
+            if i_roc in [3,4]:
+            
+                entries = h_sumcharge_proj_z.Integral()
+                mean = h_sumcharge_proj_z.GetMean()
+                fwhm = get_fwhm(h_sumcharge_proj_z)
+                sigma = fwhm/2.
+
+                bin_4_sigma_left = h_sumcharge_proj_z.FindBin(mean - 4*sigma)
+                bin_3_sigma_left = h_sumcharge_proj_z.FindBin(mean - 3*sigma)
+                bin_3_sigma_right = h_sumcharge_proj_z.FindBin(mean + 3*sigma)
+                bin_4_sigma_right = h_sumcharge_proj_z.FindBin(mean + 4*sigma)
+
+                integral_left = h_sumcharge_proj_z.Integral(bin_4_sigma_left, bin_3_sigma_left)
+                integral_right = h_sumcharge_proj_z.Integral(bin_3_sigma_right, bin_4_sigma_right)
+
+                f_gauss_3_to_4 = (0.2699796-0.006334)/(2*100)
+                
+
+                print "{0:>4} {1:>4} {2:>7.1f} {3:>6.0f} {4:>6.0f} {5:>6.1f} {6:>6.1f} {7:>6.1f}".format(run, i_roc, mean, fwhm, entries, entries * f_gauss_3_to_4, integral_left, integral_right)
+
 
     # End of loop over ROCs
 # End loop over runs
@@ -121,17 +211,14 @@ class VariableError(Exception):
 def make_plots():
 
     # Prepare pretty ROOT
-    ROOT.gStyle.SetOptStat(0)
-    ROOT.gStyle.SetPadLeftMargin(0.23)
-    ROOT.gStyle.SetPadBottomMargin(0.15)
-    ROOT.gStyle.SetPadRightMargin(0.05)
-    ROOT.gStyle.SetPadTopMargin(0.05)
+    rs = root_style()
+    rs.set_style(1000,1000,1)
     ROOT.gROOT.ForceStyle()
 
-    c = ROOT.TCanvas("", "", 800, 800)
-
+    c = rs.get_canvas("")
     c.SetLogx(1)
-    c.SetGrid(1, 1)
+
+
 
     for plot_var in ["cluster_size", 
                      #"cluster_size_fraction_1", 
@@ -144,7 +231,7 @@ def make_plots():
         if plot_var == "cluster_size":
             di_values = cluster_size
             legend_origin_x = 0.3
-            legend_origin_y = 0.2
+            legend_origin_y = 0.4
         elif plot_var == "cluster_size_fraction_1":
             di_values = cluster_size_fraction_1
             legend_origin_x = 0.3
@@ -160,7 +247,7 @@ def make_plots():
         elif plot_var == "sum_charge":
             di_values = sum_charge
             legend_origin_x = 0.3
-            legend_origin_y = 0.8
+            legend_origin_y = 0.85
         elif plot_var == "second_charge":
             di_values = second_charge
             legend_origin_x = 0.3
@@ -177,25 +264,23 @@ def make_plots():
         # Loop over ROCs
         for i_roc in range(1, 5):
 
+            if plot_var == "sum_charge" and i_roc ==4:
+                legend_origin_y = 0.5
+            
             # Prepare Legend
-            legend = ROOT.TLegend(legend_origin_x,
-                                  legend_origin_y,
-                                  legend_origin_x + legend_size_x,
-                                  legend_origin_y + legend_size_y)
-            legend.SetBorderSize(1)
-            legend.SetFillColor(0)
-            legend.SetTextSize(0.06)
-            legend.SetBorderSize(0)
-
+            legend = rs.make_legend(legend_origin_x, 
+                                    legend_origin_y,
+                                    3)
+                                
             if plot_var == "cluster_size":
                 h = ROOT.TH2F("", "", 100, 1, 40000, 100, 0., 3)
-                h.GetYaxis().SetTitle("Mean Cluster Size")
+                h.GetYaxis().SetTitle("Mean cluster size")
             elif plot_var == "cluster_size_fraction_1":
                 h = ROOT.TH2F("", "", 100, 1, 40000, 100, 0., 1.)
-                h.GetYaxis().SetTitle("Fraction of size == 1 Clusters")
+                h.GetYaxis().SetTitle("Fraction of size == 1 clusters")
             elif plot_var == "cluster_size_fraction_12":
                 h = ROOT.TH2F("", "", 100, 1, 40000, 100, 0., 1.)
-                h.GetYaxis().SetTitle("Fraction of 1 <= size <= 2 Clusters")
+                h.GetYaxis().SetTitle("Fraction of 1 <= size <= 2 clusters")
             elif plot_var == "charge":
                 h = ROOT.TH2F("", "", 100, 1, 40000, 100, 0., 30000)
                 h.GetYaxis().SetTitle("Leading charge within 4-pixel radius")
@@ -211,23 +296,24 @@ def make_plots():
             h.GetXaxis().SetTitle("Flux [kHz/cm^{2}]")
             #
 
-            h.GetXaxis().SetTitleSize(0.06)
-            h.GetYaxis().SetTitleSize(0.06)
-            h.GetXaxis().SetLabelSize(0.06)
-            h.GetYaxis().SetLabelSize(0.06)
-
-            if plot_var ==  "cluster_size":
-                h.GetYaxis().SetTitleOffset(1.5)
-            else:
-                h.GetYaxis().SetTitleOffset(1.85)
+            #h.GetXaxis().SetTitleSize(0.06)
+            #h.GetYaxis().SetTitleSize(0.06)
+            #h.GetXaxis().SetLabelSize(0.06)
+            #h.GetYaxis().SetLabelSize(0.06)
 
             h.Draw()
 
             # Prepare efficiency TGraphs
             li_grs = []
 
+            if plot_var ==  "cluster_size":
+                pass
+            else:
+                h.GetYaxis().SetTitleOffset(1.95)
 
-            for direction in ["up", "down", "final"]:
+
+
+            for direction in ["up"]:
 
                 # Choose runs to use
                 if direction == "up":
@@ -248,11 +334,11 @@ def make_plots():
                 # Legend Entries
 
                 if direction == "up":
-                    legend.AddEntry(gr, "Increasing Flux", "P")
+                    legend.AddEntry(gr, "Increasing flux", "P")
                 elif direction == "down":
-                    legend.AddEntry(gr, "Decreasing Flux", "P")
+                    legend.AddEntry(gr, "Decreasing flux", "P")
                 elif direction == "final":
-                    legend.AddEntry(gr, "Highest Flux", "P")
+                    legend.AddEntry(gr, "Highest flux", "P")
 
                 # Markers
                 # going up
@@ -270,7 +356,7 @@ def make_plots():
 
                 # Protect graphs from autodelete
                 li_grs.append(gr)
-                gr.SetMarkerSize(1.5)
+                gr.SetMarkerSize(3)
                 gr.Draw("PSAME")
                 legend.Draw()
 
@@ -292,6 +378,7 @@ def make_plots():
             outfile_name += "_Telescope{0}_{1}_{2}".format(telescope, di_rocs[i_roc], "all")
 
             c.Print(outfile_name + ".png")
+            c.Print(outfile_name + ".pdf")
 
 # End of Make Plots
 
