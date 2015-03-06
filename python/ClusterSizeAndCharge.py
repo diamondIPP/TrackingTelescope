@@ -10,6 +10,7 @@ Extract the cluster size, leading and second highest charge of  hit as a functio
 # ##############################
 
 import sys
+import math
 
 import ROOT
 
@@ -112,7 +113,16 @@ cluster_size_fraction_1 = {}
 cluster_size_fraction_12 = {}
 second_charge = {}
 
-print "{0:>4} {1:>4} {2:>7} {3:>6} {4:>6} {5:>6} {6:>6} {7:>6}".format("Run", "ROC", "Mean", "FWHM", "Entr.", "Gaus", "Left", "Right")
+#print "{0:>4} {1:>4} {2:>7} {3:>6} {4:>6}".format("Run", "ROC", "Mean", "FWHM", "Entr.", "Gaus", "Left", "Right")
+print "{0:>4}   {1:>10}   {2:>4}   {3:>7} {4:>6} {5:>6} {6:>6}".format("Run", "Rate (kHz)", "I", "Mean", "RMS", "Entr.", "SE")
+
+
+means = {
+    "first_three" : [],
+    "low_rate"    : [],
+    "high_rate"   : [],
+}
+
 
 # Loop over runs
 for i_run, run in enumerate(di_runs):
@@ -151,48 +161,84 @@ for i_run, run in enumerate(di_runs):
 
         # Use the sum of  charges within a 4-pixel radius
         h_sumcharge = f.Get("SumCharge4_ROC" + str(i_roc))
-        h_sumcharge_proj_z = h_sumcharge.Project3D("z")
 
-        # Ignore the zero-bin!
-        h_sumcharge_proj_z.SetBinContent(1,0)
+        htmp = h_sumcharge.Project3D("z")
+        htmp.SetBinContent(1, 0)
+        sum_charge[run].append(htmp.GetMean())
+        
 
-        sum_charge[run].append(h_sumcharge_proj_z.GetMean())
-
+        
+        
         rs = root_style()
         rs.set_style(1000,1000,1)
         ROOT.gROOT.ForceStyle()
         
         c = rs.get_canvas("")
-        h_sumcharge_proj_z.Draw()
-        c.Print("sumcharge_{0}_{1}.pdf".format(run, i_roc))
-
-        
-
-
-        if run in [322, 325, 327, 330, 333]:
-            if i_roc in [3,4]:
             
-                entries = h_sumcharge_proj_z.Integral()
-                mean = h_sumcharge_proj_z.GetMean()
-                fwhm = get_fwhm(h_sumcharge_proj_z)
-                sigma = fwhm/2.
-
-                bin_4_sigma_left = h_sumcharge_proj_z.FindBin(mean - 4*sigma)
-                bin_3_sigma_left = h_sumcharge_proj_z.FindBin(mean - 3*sigma)
-                bin_3_sigma_right = h_sumcharge_proj_z.FindBin(mean + 3*sigma)
-                bin_4_sigma_right = h_sumcharge_proj_z.FindBin(mean + 4*sigma)
-
-                integral_left = h_sumcharge_proj_z.Integral(bin_4_sigma_left, bin_3_sigma_left)
-                integral_right = h_sumcharge_proj_z.Integral(bin_3_sigma_right, bin_4_sigma_right)
-
-                f_gauss_3_to_4 = (0.2699796-0.006334)/(2*100)
+        #if run in [322, 325, 327, 330, 333]:
+        if True:
+            h_sumcharge_proj_z = h_sumcharge.Project3D("z")
+            if i_roc in [4]:
                 
+                for i_iter in range(-1,3):
 
-                print "{0:>4} {1:>4} {2:>7.1f} {3:>6.0f} {4:>6.0f} {5:>6.1f} {6:>6.1f} {7:>6.1f}".format(run, i_roc, mean, fwhm, entries, entries * f_gauss_3_to_4, integral_left, integral_right)
+                    # Ignore the zero-bin
+                    if i_iter == 0:
+                        h_sumcharge_proj_z.SetBinContent(1,0)                    
 
+
+                        if run in [322, 325, 327]:
+                            means["first_three"].append(h_sumcharge_proj_z.GetMean()) 
+                        if run in [322, 347, 348]:
+                            means["low_rate"].append(h_sumcharge_proj_z.GetMean())
+                        if run in [333, 350, 352]:
+                            means["high_rate"].append(h_sumcharge_proj_z.GetMean())
+                           
+
+                    if i_iter == 1:
+                        # Highest Bin
+                        h_sumcharge_proj_z.SetBinContent( h_sumcharge_proj_z.GetNbinsX(), 0)
+                        # Overflow Bin
+                        h_sumcharge_proj_z.SetBinContent( h_sumcharge_proj_z.GetNbinsX()+1, 0)
+
+                    if i_iter == 2:
+                        # Bins below 7500
+                        for i_bin in range( h_sumcharge_proj_z.FindBin(7500)+1):
+                            h_sumcharge_proj_z.SetBinContent(i_bin, 0)
+                    
+
+                    entries = h_sumcharge_proj_z.Integral()
+                    mean = h_sumcharge_proj_z.GetMean()
+                    rms  = h_sumcharge_proj_z.GetRMS()
+                    #fwhm = get_fwhm(h_sumcharge_proj_z)
+                    #sigma = fwhm/2.
+                    #
+                    #bin_4_sigma_left = h_sumcharge_proj_z.FindBin(mean - 4*sigma)
+                    #bin_3_sigma_left = h_sumcharge_proj_z.FindBin(mean - 3*sigma)
+                    #bin_3_sigma_right = h_sumcharge_proj_z.FindBin(mean + 3*sigma)
+                    #bin_4_sigma_right = h_sumcharge_proj_z.FindBin(mean + 4*sigma)
+                    #
+                    #integral_left = h_sumcharge_proj_z.Integral(bin_4_sigma_left, bin_3_sigma_left)
+                    #integral_right = h_sumcharge_proj_z.Integral(bin_3_sigma_right, bin_4_sigma_right)
+                    #
+                    #f_gauss_3_to_4 = (0.2699796-0.006334)/(2*100)
+                    #print "{0:>4} {1:>4} {2:>7.1f} {3:>6.0f} {4:>6.0f} {5:>6.1f} {6:>6.1f} {7:>6.1f}".format(run, i_roc, mean, fwhm, entries, entries * f_gauss_3_to_4, integral_left, integral_right)
+
+                    print "{0:>4}   {1:>10.0f}   {2:>4}   {3:>7.1f} {4:>6.0f} {5:>6.0f} {6:>6.0f}".format(run, di_runs[run], i_iter, mean, rms, entries, rms/math.sqrt(entries))
+
+                
 
     # End of loop over ROCs
 # End loop over runs
+
+print means
+print "{0:>15}: {1:>10} {2:>10}".format("Runs", "Mean", "RMS")
+for k,v in means.iteritems():
+
+    m = 1. * sum(v)/len(v)
+    rms = math.sqrt(1.*sum([pow(x-m,2) for x in v])/len(v))
+    
+    print "{0:>15}: {1:>10.1f} {2:>10.1f}".format(k, m, rms)
 
 
 ###############################
@@ -324,11 +370,12 @@ def make_plots():
                     li_runs = li_runs_final
 
                 # Initialize TGraph objects. For tracking we need more points for multiple event slices
-                gr = ROOT.TGraph(len(li_runs))
+                gr = ROOT.TGraphErrors(len(li_runs))
 
                 # Loop over runs
                 for irun, run in enumerate(sorted(li_runs)):
                     gr.SetPoint(irun, di_runs[run], di_values[run][i_roc-1])  # i_roc-1 since we have no data for ROC0
+                    gr.SetPointError(irun, 0, 490) # two sigma
 
                 # Make things look nice:
                 # Legend Entries
