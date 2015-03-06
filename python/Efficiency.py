@@ -223,7 +223,7 @@ def make_plots(add_si, do_zoom, do_slice):
         li_grs = []
 
 
-        for direction in ["up", "down", "final"]:
+        for direction in ["up"]:
 
             # Choose runs to use
             if direction == "up":
@@ -277,7 +277,7 @@ def make_plots(add_si, do_zoom, do_slice):
 
             # Markers
             gr_si.SetMarkerStyle(2)
-            gr_tr.SetMarkerSize(1.5)
+            gr_tr.SetMarkerSize(3.)
             # going up
             if direction == "up":
                 gr_tr.SetMarkerStyle(22)
@@ -304,6 +304,7 @@ def make_plots(add_si, do_zoom, do_slice):
         if do_slice:
             outfile_name += "_sliced"
         c.Print(outfile_name + ".png")
+        c.Print(outfile_name + ".pdf")
 
 # End of Make Plots
 
