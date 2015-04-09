@@ -84,7 +84,7 @@ for i_run, run in enumerate(li_runs_up + li_runs_down):
         h.SetTitle("")
         h.GetXaxis().SetNdivisions(505)
         if "Charge" in name:
-            h.GetXaxis().SetTitle("Charge [electrons]")
+            h.GetXaxis().SetTitle("signal a.u.")
         h.GetYaxis().SetTitle("Fraction of clusters [%]")
         di_histos[name][run]=h
 
@@ -129,7 +129,7 @@ def GetMaximumExceptBin(h, ibin=1):
 ###############################
 
 for name in li_names:
-    for direction in ["up", "down"]:
+    for direction in ["up"]:
 
         # Choose runs to use
         if direction == "up":
@@ -137,7 +137,11 @@ for name in li_names:
         elif direction == "down":
             li_runs = li_runs_down
 
+<<<<<<< HEAD
         legend_origin_x     = 0.6
+=======
+        legend_origin_x     = 0.55
+>>>>>>> six-plane
         legend_origin_y     = 0.8
 
         legend = rs.make_legend(legend_origin_x, 
@@ -147,18 +151,40 @@ for name in li_names:
         legend.SetMargin(.4)
 
         the_max = max( [GetMaximumExceptBin(di_histos[name][run])for run in li_runs])
+
+        print h.GetNbinsX()
+        
+        x = ROOT.Long()
+        h = di_histos[name][li_runs[0]]
+        h.GetBinWithContent(GetMaximumExceptBin(h),x)
+        f = h.GetXaxis().GetXmax()/h.GetBinCenter(x)
+        print f
+
+        #print max_bin
+
         the_max *= 1.1
 
         for i_run, run in enumerate(li_runs):
+        
+
+            di_histos[name][run].GetXaxis().SetLimits(0, f)
+            
+        
 
             di_histos[name][run].SetLineColor( li_colors[i_run])
             rate = int(round((round_to_2(di_runs[run]))))
-            legend.AddEntry( di_histos[name][run], "{0} kHz".format(rate), "L" )
+            legend.AddEntry( di_histos[name][run], "{0} kHz/cm".format(rate)+"^{2}", "L" )
 
             di_histos[name][run].SetMinimum(0)
             di_histos[name][run].SetMaximum(the_max)
-            di_histos[name][run].GetXaxis().SetRange(0, 49900)
+            #di_histos[name][run].GetXaxis().SetRange(0, 49900)
 
+
+<<<<<<< HEAD
+=======
+            di_histos[name][run].GetXaxis().SetRangeUser(0, 3)
+            
+>>>>>>> six-plane
             #di_histos[name][run].GetXaxis().SetTitleSize(0.06)
             #di_histos[name][run].GetYaxis().SetTitleSize(0.06)
             #di_histos[name][run].GetXaxis().SetLabelSize(0.06)

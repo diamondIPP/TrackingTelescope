@@ -561,6 +561,12 @@ void TestPlaneEfficiency (std::string const InFileName,
   float max_dr_y = 0.02;
 
   gStyle->SetOptStat(0);
+
+  gStyle->SetPadLeftMargin(0.15);
+  gStyle->SetPadBottomMargin(0.15);
+
+
+
   TString const PlotsDir = "plots/";
   TString const OutDir = PlotsDir + RunNumber + "/";
 
@@ -632,6 +638,28 @@ void TestPlaneEfficiency (std::string const InFileName,
   TH1F hFractionContainted3 = TH1F(Form("FractionContained3_ROC%i", plane_under_test), "Fraction Contained", 50, 0, 1.1);
   TH1F hFractionContainted4 = TH1F(Form("FractionContained4_ROC%i", plane_under_test), "Fraction Contained", 50, 0, 1.1);
 
+
+  TH1F hCS1_1stCharge = TH1F( Form("CS1_1stCharge_ROC%i",plane_under_test),   "Cluster Size 1, 1st Charge", 100, 0, 50000);
+  TH1F hCS1_SumCharge = TH1F( Form("CS1_SumCharge_ROC%i",plane_under_test),   "Cluster Size 1, Sum Charge", 100, 0, 50000);
+
+  TH1F hCS2_1stCharge = TH1F( Form("CS2_1stCharge_ROC%i",plane_under_test),   "Cluster Size 2, 1st Charge", 100, 0, 50000);
+  TH1F hCS2_2ndCharge = TH1F( Form("CS2_2ndCharge_ROC%i",plane_under_test),   "Cluster Size 2, 2nd Charge", 100, 0, 50000);
+  TH1F hCS2_SumCharge = TH1F( Form("CS2_SumCharge_ROC%i",plane_under_test),   "Cluster Size 2, Sum Charge", 100, 0, 50000);
+
+  TH2F hCS2_2D = TH2F( Form("CS2_2D_ROC%i",plane_under_test),   "Cluster Size 2, 2D", 100, 0, 50000, 100, 0, 50000);
+
+  TH1F hCS3_1stCharge = TH1F( Form("CS3_1stCharge_ROC%i",plane_under_test),   "Cluster Size 3, 1st Charge", 100, 0, 50000);
+  TH1F hCS3_2ndCharge = TH1F( Form("CS3_2ndCharge_ROC%i",plane_under_test),   "Cluster Size 3, 2nd Charge", 100, 0, 50000);
+  TH1F hCS3_3rdCharge = TH1F( Form("CS3_3rdCharge_ROC%i",plane_under_test),   "Cluster Size 3, 3rd Charge", 100, 0, 50000);
+  TH1F hCS3_SumCharge = TH1F( Form("CS3_SumCharge_ROC%i",plane_under_test),   "Cluster Size 3, Sum Charge", 100, 0, 50000);
+
+  TH1F hCS4_1stCharge = TH1F( Form("CS4_1stCharge_ROC%i",plane_under_test),   "Cluster Size 4, 1st Charge", 100, 0, 50000);
+  TH1F hCS4_2ndCharge = TH1F( Form("CS4_2ndCharge_ROC%i",plane_under_test),   "Cluster Size 4, 2nd Charge", 100, 0, 50000);
+  TH1F hCS4_3rdCharge = TH1F( Form("CS4_3rdCharge_ROC%i",plane_under_test),   "Cluster Size 4, 3rd Charge", 100, 0, 50000);
+  TH1F hCS4_4thCharge = TH1F( Form("CS4_4thCharge_ROC%i",plane_under_test),   "Cluster Size 4, 4th Charge", 100, 0, 50000);
+  TH1F hCS4_SumCharge = TH1F( Form("CS4_SumCharge_ROC%i",plane_under_test),   "Cluster Size 4, Sum Charge", 100, 0, 50000);
+
+
   TH3F hClusterSize       = TH3F( Form("ClusterSize_ROC%i", plane_under_test), "Cluster Size", 52,0,52, 80,0,80,11,-0.5,10.5);
 
   TH1F hdtx = TH1F( Form("SinglePlaneTestDX_ROC%i",plane_under_test),   "SinglePlaneTest_DX",   100, -0.2, 0.2 );
@@ -643,6 +671,18 @@ void TestPlaneEfficiency (std::string const InFileName,
   TH1F hChi2  = TH1F( Form("SinglePlaneTestChi2_ROC%i",plane_under_test),   "SinglePlaneTest_Chi2",    200, 0, 50 );
   TH1F hChi2X = TH1F( Form("SinglePlaneTestChi2X_ROC%i",plane_under_test),  "SinglePlaneTest_Chi2X",   100, 0, 20 );
   TH1F hChi2Y = TH1F( Form("SinglePlaneTestChi2Y_ROC%i",plane_under_test),  "SinglePlaneTest_Chi2Y",   100, 0, 20 );
+
+
+  hChi2X.GetXaxis()->SetTitleSize(0.06);
+  hChi2X.GetYaxis()->SetTitleSize(0.06);
+  hChi2X.GetXaxis()->SetLabelSize(0.06);
+  hChi2X.GetYaxis()->SetLabelSize(0.06);
+
+  hChi2Y.GetXaxis()->SetTitleSize(0.06);
+  hChi2Y.GetYaxis()->SetTitleSize(0.06);
+  hChi2Y.GetXaxis()->SetLabelSize(0.06);
+  hChi2Y.GetYaxis()->SetLabelSize(0.06);
+
 
   TH1F hAngleBeforeChi2X = TH1F( Form("SinglePlaneAngleBeforeChi2CutX_ROC%i",plane_under_test), "SinglePlaneAngleBeforeChi2CutX", 100, -0.04, 0.04 );
   TH1F hAngleBeforeChi2Y = TH1F( Form("SinglePlaneAngleBeforeChi2CutY_ROC%i",plane_under_test), "SinglePlaneAngleBeforeChi2CutX", 100, -0.04, 0.04 );
@@ -679,6 +719,17 @@ void TestPlaneEfficiency (std::string const InFileName,
       hAngleBeforeChi2X.Fill(angleX);
       hAngleBeforeChi2Y.Fill(angleY);
 
+  
+
+      hChi2.Fill( BFR.Track(0)->Chi2());
+      hChi2X.Fill( BFR.Track(0)->Chi2X());
+      hChi2Y.Fill( BFR.Track(0)->Chi2Y());
+
+      // Only accept reasonably central events
+      if ((fabs(angleX) > 0.02) || (fabs(angleY) > 0.02))
+        continue;
+
+
       // Look at the 90% quantile
       if (BFR.Track(0)->Chi2X() > 6.25)
         continue;
@@ -687,14 +738,6 @@ void TestPlaneEfficiency (std::string const InFileName,
     
       hAngleAfterChi2X.Fill(angleX);
       hAngleAfterChi2Y.Fill(angleY);
-  
-      // Only accept reasonably central events
-      if ((fabs(angleX) > 0.02) || (fabs(angleY) > 0.02))
-        continue;
-
-      hChi2.Fill( BFR.Track(0)->Chi2());
-      hChi2X.Fill( BFR.Track(0)->Chi2X());
-      hChi2Y.Fill( BFR.Track(0)->Chi2Y());
 
       // Get the intersection of track and plane under test and fill
       // denominator histogram
@@ -872,6 +915,43 @@ void TestPlaneEfficiency (std::string const InFileName,
       FillIth(&h2ndCharge3ADC, px, py, adcs_in_ell_3, -2, false);
       FillIth(&h2ndCharge4ADC, px, py, adcs_in_ell_4, -2, false);
 
+      
+      if (charges_in_ell_4.size() == 1){      
+	hCS1_1stCharge.Fill(charges_in_ell_4[0]);
+	hCS1_SumCharge.Fill(charges_in_ell_4[0]);
+      }
+
+      if (charges_in_ell_4.size() == 2){      
+	  hCS2_1stCharge.Fill(charges_in_ell_4[1]);
+	  hCS2_2ndCharge.Fill(charges_in_ell_4[0]);	  
+	  hCS2_SumCharge.Fill(charges_in_ell_4[0]+charges_in_ell_4[1]);
+	  
+	  if (rand() % 2 == 1)
+	    hCS2_2D.Fill(charges_in_ell_4[0], charges_in_ell_4[1]);
+	  else
+	    hCS2_2D.Fill(charges_in_ell_4[1], charges_in_ell_4[0]);
+
+      }
+
+      if (charges_in_ell_4.size() == 3){      
+    	  hCS3_1stCharge.Fill(charges_in_ell_4[2]);	  
+	  hCS3_2ndCharge.Fill(charges_in_ell_4[1]);	  
+	  hCS3_3rdCharge.Fill(charges_in_ell_4[0]);	  	  
+	  hCS3_SumCharge.Fill(charges_in_ell_4[0]+charges_in_ell_4[1]+charges_in_ell_4[2]);
+      }			
+
+      if (charges_in_ell_4.size() == 4){      
+	hCS4_1stCharge.Fill(charges_in_ell_4[3]);	  
+	hCS4_2ndCharge.Fill(charges_in_ell_4[2]);	  
+	hCS4_3rdCharge.Fill(charges_in_ell_4[1]);	  
+	hCS4_4thCharge.Fill(charges_in_ell_4[0]);	  
+	hCS4_SumCharge.Fill(charges_in_ell_4[0]+charges_in_ell_4[1]+charges_in_ell_4[2]+charges_in_ell_4[3]);
+      }			
+      
+
+
+
+
     } // end of having one track
   } // End of Event Loop
 
@@ -1039,14 +1119,19 @@ void TestPlaneEfficiency (std::string const InFileName,
   Can.SaveAs( OutDir+ TString(hChi2.GetName()) +".gif");
   Can.SaveAs( OutDir+ TString(hChi2.GetName()) +".pdf");
 
+  hChi2X.SetTitle("");
+  hChi2X.GetXaxis()->SetTitle("#chi^{2} (x)");
+  hChi2X.GetYaxis()->SetTitle("A.U.");
   hChi2X.Scale( 1/ hChi2X.Integral());
   hChi2X.SetAxisRange(0, 0.07,"Y");
+  hChi2X.SetLineWidth(2);
   hChi2X.Draw("hist");
 
 
   TF1 fun_chi2_3dof("chi2_3dof", "exp(-x/2.)*sqrt(x)/(5*sqrt(2*3.1415))");
   fun_chi2_3dof.SetRange(0.,20.);
   fun_chi2_3dof.SetNpx(1000);
+  fun_chi2_3dof.SetLineWidth(2);
   fun_chi2_3dof.Draw("SAME");
 
 
@@ -1055,14 +1140,38 @@ void TestPlaneEfficiency (std::string const InFileName,
   Can.SaveAs( OutDir+ TString(hChi2X.GetName()) +".pdf");
 
 
+  hChi2Y.SetTitle("");
+  hChi2Y.GetXaxis()->SetTitle("#chi^{2} (y)");
+  hChi2Y.GetYaxis()->SetTitle("A.U.");
   hChi2Y.Scale(1/hChi2Y.Integral());
   hChi2Y.SetAxisRange(0, 0.08,"Y");
+  hChi2Y.SetLineWidth(2);
   hChi2Y.Draw();
   fun_chi2_3dof.Draw("SAME");
   hChi2Y.Write();
   Can.SaveAs( OutDir+ TString(hChi2Y.GetName()) +".gif");
   Can.SaveAs( OutDir+ TString(hChi2Y.GetName()) +".pdf");
 
+
+
+  hCS1_1stCharge.Write();
+  hCS2_1stCharge.Write();
+  hCS2_2ndCharge.Write();
+  hCS3_1stCharge.Write();
+  hCS3_2ndCharge.Write();
+  hCS3_3rdCharge.Write();
+  hCS4_1stCharge.Write();
+  hCS4_2ndCharge.Write();
+  hCS4_3rdCharge.Write();
+  hCS4_4thCharge.Write();
+
+
+  hCS1_SumCharge.Write();
+  hCS2_SumCharge.Write();
+  hCS3_SumCharge.Write();
+  hCS4_SumCharge.Write();
+
+  hCS2_2D.Write();
 
   std::vector <TH3*> hs_mean_sum_charge;
   hs_mean_sum_charge.push_back( &hSumCharge1 );
