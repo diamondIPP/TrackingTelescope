@@ -2,14 +2,21 @@
 
 
 
-PLTGainCal::PLTGainCal ()
+PLTGainCal::PLTGainCal (): NROCS(6)
 {
   ResetGC();
   fIsGood = false;
   fIsExternalFunction = false;
 }
 
-PLTGainCal::PLTGainCal (std::string const GainCalFileName, int const NParams)
+PLTGainCal::PLTGainCal (int nrocs): NROCS(nrocs)
+{
+  ResetGC();
+  fIsGood = false;
+  fIsExternalFunction = false;
+}
+
+PLTGainCal::PLTGainCal (std::string const GainCalFileName, int const NParams): NROCS(6)
 {
   ResetGC();
   fIsGood = false;
@@ -26,7 +33,7 @@ PLTGainCal::PLTGainCal (std::string const GainCalFileName, int const NParams)
 }
 
 
-PLTGainCal::~PLTGainCal ()
+PLTGainCal::~PLTGainCal ()  
 {
 }
 
@@ -123,6 +130,9 @@ float PLTGainCal::GetCharge(int const ch, int const roc, int const col, int cons
 
 void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName)
 {
+  
+  std::cout << "ReadGainCalFile" << std::endl;
+
   if (GainCalFileName == "") {
     fIsGood = false;
     return;
@@ -605,17 +615,35 @@ void PLTGainCal::ReadTesterGainCalFile (std::string const GainCalFileName)
 
 void PLTGainCal::ResetGC ()
 {
+  GC.resize(0);
+
   // Reset everything
   for (int i = 0; i != NCHNS; ++i) {
+    
+    std::vector<std::vector<std::vector<std::vector<float> > > > tmp_4d;
+
     for (int j = 0; j != NROCS; ++j) {
+      
+      std::vector<std::vector<std::vector<float> > > tmp_3d;
+
       for (int k = 0; k != PLTU::NCOL; ++k) {
+
+	std::vector<std::vector<float> > tmp_2d;
+
         for (int m = 0; m != PLTU::NROW; ++m) {
-          for (int n = 0; n != 5; ++n) {
-            GC[i][j][k][m][n] = 0;
+
+	  std::vector<float> tmp_1d;	  
+          for (int n = 0; n != 5; ++n) {	    
+	    tmp_1d.push_back(0.);
           }
+
+	tmp_2d.push_back(tmp_1d);
         }
+      tmp_3d.push_back(tmp_2d);
       }
+    tmp_4d.push_back(tmp_3d);    
     }
+  GC.push_back(tmp_4d);
   }
   return;
 }

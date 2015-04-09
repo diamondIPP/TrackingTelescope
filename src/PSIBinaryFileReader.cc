@@ -13,37 +13,14 @@
 #include "TMarker.h"
 #include "TLine.h"
 
-
-
-
-PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName, 
-					  int const nmaxrocs) : NMAXROCS(nmaxrocs)
-{
-  // constructor
-  fEOF = 0;
-  fBinaryFileName = InFileName;
-  if (!OpenFile()) {
-    std::cerr << "ERROR: cannot open input file: " << InFileName << std::endl;
-    throw;
-  }
-
-  // Initialize fLevelsROC with zeros
-  for (int i_roc=0; i_roc != NMAXROCS; i_roc++){    
-    std::vector<float> tmp;
-    for (int i_lev=0; i_lev != 6; i_lev++){
-      tmp.push_back(0.);
-    }
-    fLevelsROC.push_back(tmp);    
-  }
-
-}
-
-
 PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
                                           std::string const CalibrationList,
                                           std::string const AlignmentFileName,
-					  int const nmaxrocs) : NMAXROCS(nmaxrocs)
-{
+					  int const nrocs,
+					  bool const useGainInterpolator
+					  ) : NMAXROCS(nrocs), 
+					      fGainCal(nrocs),
+					      fUseGainInterpolator(useGainInterpolator){
   // constructor
   fEOF = 0;
   fBinaryFileName = InFileName;
@@ -62,6 +39,13 @@ PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
     fLevelsROC.push_back(tmp);    
   }
 
+  // Initialize fCalibrationFile and fRawCalibrationFile with empty
+  // strings
+  for (int i_roc=0; i_roc != NMAXROCS; i_roc++){    
+    fCalibrationFile.push_back("");
+    fRawCalibrationFile.push_back("");
+  }
+  
 
   std::ifstream fCL(CalibrationList.c_str());
   if (!fCL.is_open()) {
@@ -70,38 +54,24 @@ PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
   }
 
   fCL >> fBaseCalDir;
-  fCL >> fCalibrationFile[0];
-  fCL >> fCalibrationFile[1];
-  fCL >> fCalibrationFile[2];
-  fCL >> fCalibrationFile[3];
-//  fCL >> fCalibrationFile[4];
-//  fCL >> fCalibrationFile[5];
-  fCL >> fRawCalibrationFile[0];
-  fCL >> fRawCalibrationFile[1];
-  fCL >> fRawCalibrationFile[2];
-  fCL >> fRawCalibrationFile[3];
-//  fCL >> fRawCalibrationFile[4];
-//  fCL >> fRawCalibrationFile[5];
+  
+  for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
+    fCL >> fCalibrationFile[i_roc];    
 
-  fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[0]);
-  fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[1]);
-  fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[2]);
-  fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[3]);
-//  fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[4]);
-//  fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[5]);
+  for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
+    fCL >> fRawCalibrationFile[i_roc];
 
-  fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[0], 0);
-  fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[1], 1);
-  fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[2], 2);
-  fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[3], 3);
-//  fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[4], 4);
-//  fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[5], 5);
+  for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
+    fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[i_roc]);
+
+  for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
+    fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[i_roc], i_roc);
 
   fAlignment.ReadAlignmentFile(AlignmentFileName);
   SetTrackingAlignment(&fAlignment);
+  
+  // TODO: Make sure this works correctly also for <6 planes!!
   SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
-
-  std::cout << "Done with PSIBinaryFileReade constructor" << std::endl;
 
 }
 
@@ -110,6 +80,7 @@ PSIBinaryFileReader::~PSIBinaryFileReader ()
 {
   // Destructor
   Clear();
+ 
 }
 
 
@@ -548,10 +519,11 @@ void PSIBinaryFileReader::DecodeHits ()
         //printf("Hit iroc %2i  col %2i  row %2i  PH: %4i\n", iroc, colrow.first, colrow.second, fData[ UBPosition[3 + iroc] + 2 + 6 + ihit * 6 ]);
         PLTHit* Hit = new PLTHit(1, iroc, colrow.first, colrow.second, fData[ UBPosition[3 + iroc] + 2 + 6 + ihit * 6 ]);
 
-	// Fits (use for Telescope 1 at the moment)
-        fGainCal.SetCharge(*Hit);	
-	// Linear Interpolation (use for Telescope 2 at the moment)
-        //fGainInterpolator.SetCharge(*Hit);
+	if (fUseGainInterpolator)
+	  fGainInterpolator.SetCharge(*Hit);
+	else
+	  fGainCal.SetCharge(*Hit);	
+
         fAlignment.AlignHit(*Hit);
         fHits.push_back(Hit);
         fPlaneMap[Hit->ROC()].AddHit(Hit);

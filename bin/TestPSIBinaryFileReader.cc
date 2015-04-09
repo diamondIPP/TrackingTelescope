@@ -192,6 +192,14 @@ int GetNumberOfROCS(int telescopeID){
   }
 }
 
+int GetUseGainInterpolator(int telescopeID){
+
+  if (telescopeID == 2)
+    return true;
+  else
+    return false;
+}
+
 
 bool CheckEllipse(float dx, float dy, float max_dx, float max_dy){
   if ( (dx*dx/(max_dx*max_dx)) + (dy*dy/(max_dy*max_dy)) <= 1.01)
@@ -427,21 +435,21 @@ void TestPlaneEfficiency (std::string const InFileName,
   gStyle->SetPadLeftMargin(0.15);
   gStyle->SetPadBottomMargin(0.15);
 
-
-
   TString const PlotsDir = "plots/";
   TString const OutDir = PlotsDir + RunNumber + "/";
 
   // Initialize Reader
   PSIBinaryFileReader BFR(InFileName,
                           GetCalibrationFilename(telescopeID),
-                          GetAlignmentFilename(telescopeID), 4);
+                          GetAlignmentFilename(telescopeID), 
+			  GetNumberOfROCS(telescopeID),
+			  GetUseGainInterpolator(telescopeID)
+			  );
   BFR.GetAlignment()->SetErrors(telescopeID);
   BFR.SetPlaneUnderTest(plane_under_test);
 
   // Apply Masking
   BFR.ReadPixelMask(GetMaskingFilename(telescopeID));
-
   BFR.CalculateLevels(10000, OutDir);
 
   // Prepare Occupancy histograms
@@ -540,10 +548,10 @@ void TestPlaneEfficiency (std::string const InFileName,
 
 
   TH1F hAngleBeforeChi2X = TH1F( Form("SinglePlaneAngleBeforeChi2CutX_ROC%i",plane_under_test), "SinglePlaneAngleBeforeChi2CutX", 100, -0.04, 0.04 );
-  TH1F hAngleBeforeChi2Y = TH1F( Form("SinglePlaneAngleBeforeChi2CutY_ROC%i",plane_under_test), "SinglePlaneAngleBeforeChi2CutX", 100, -0.04, 0.04 );
+  TH1F hAngleBeforeChi2Y = TH1F( Form("SinglePlaneAngleBeforeChi2CutY_ROC%i",plane_under_test), "SinglePlaneAngleBeforeChi2CutY", 100, -0.04, 0.04 );
 
   TH1F hAngleAfterChi2X = TH1F( Form("SinglePlaneAngleAfterChi2CutX_ROC%i",plane_under_test), "SinglePlaneAngleAfterChi2CutX", 100, -0.04, 0.04 );
-  TH1F hAngleAfterChi2Y = TH1F( Form("SinglePlaneAngleAfterChi2CutY_ROC%i",plane_under_test), "SinglePlaneAngleAfterChi2CutX", 100, -0.04, 0.04 );
+  TH1F hAngleAfterChi2Y = TH1F( Form("SinglePlaneAngleAfterChi2CutY_ROC%i",plane_under_test), "SinglePlaneAngleAfterChi2CutY", 100, -0.04, 0.04 );
 
 
   double tz = BFR.GetAlignment()->GetTZ(1, plane_under_test);
@@ -1122,6 +1130,8 @@ void TestPlaneEfficiency (std::string const InFileName,
                        &Can,
                        OutDir);
 
+  std::cout << "Done with TestPlaneEfficiency " << std::endl;
+
 }
 
 int TestPlaneEfficiencySilicon (std::string const InFileName,
@@ -1136,21 +1146,46 @@ int TestPlaneEfficiencySilicon (std::string const InFileName,
   o) Check if we have a hit in the other planes
   */
 
+  // TODO: Currently hard coded number of planes
+  // Was fine as we only did pixel-analysis (where this is called)
+  // with a six-plane telescope before.
+  // Fix this!
+
+  if (DEBUG)
+    std::cout << "DEBUG: Entering TestPlaneEfficiencySilicon" << std::endl;
+
   gStyle->SetOptStat(0);
   TString const PlotsDir = "plots/";
   TString const OutDir = PlotsDir + RunNumber + "/";
 
-  // Open Alignment
+
   // Initialize Reader
+  if (DEBUG)
+    std::cout << "DEBUG: Initializing BinaryFileReader" << std::endl;
   PSIBinaryFileReader BFR(InFileName,
                           GetCalibrationFilename(telescopeID),
-                          GetAlignmentFilename(telescopeID), 4);
+                          GetAlignmentFilename(telescopeID), 
+			  GetNumberOfROCS(telescopeID),
+			  GetUseGainInterpolator(telescopeID)
+			  );
+  if (DEBUG)
+    std::cout << "DEBUG: Done initializing BinaryFileReader" << std::endl;
+
   BFR.GetAlignment()->SetErrors(telescopeID);
 
+
   // Apply Masking
+  // TODO: More dynamic selection of masking for this
   BFR.ReadPixelMask("outerPixelMask_forSiEff.txt");
 
+    if (DEBUG)
+    std::cout << "DEBUG: Before Level Calculation" << std::endl;
+
   BFR.CalculateLevels(10000, OutDir);
+
+    if (DEBUG)
+    std::cout << "DEBUG: After Level Calculation" << std::endl;
+
 
   // numerators and denominators for efficiency calculation
   std::vector<int> nums(6);
@@ -1210,8 +1245,12 @@ int TestPlaneEfficiencySilicon (std::string const InFileName,
 
   }
 
+  if (DEBUG)
+    std::cout << "DEBUG: Leaving TestPlaneEfficiencySilicon" << std::endl;
+
   return n_events;
 }
+
 
 
 
@@ -1236,14 +1275,17 @@ int TestPSIBinaryFileReader (std::string const InFileName,
     for (int iplane=1; iplane != 5; iplane++){
       std::cout << "Going to call TestPlaneEfficiency " << iplane << std::endl;
 
-      TestPlaneEfficiency(InFileName,
-                          out_f,
-                          RunNumber,
+      TestPlaneEfficiency(InFileName, 
+      			  out_f, 
+      			  RunNumber,
                           iplane,
                           n_events,
                           telescopeID);
+      std::cout << "This is ridiculous!" << std::endl;
     }
   }
+
+  std::cout << "Blub? " <<  std::endl;
 
   // Setup Output Directory and gStyle
   TString const PlotsDir = "plots/";
@@ -1254,7 +1296,10 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   // Initialize Reader
   PSIBinaryFileReader BFR(InFileName,
                           GetCalibrationFilename(telescopeID),
-                          GetAlignmentFilename(telescopeID), 4);
+                          GetAlignmentFilename(telescopeID), 
+			  GetNumberOfROCS(telescopeID),
+			  GetUseGainInterpolator(telescopeID)
+			  );
   BFR.GetAlignment()->SetErrors(telescopeID);
   FILE* f = fopen("MyGainCal.dat", "w");
   BFR.GetGainCal()->PrintGainCal(f);
@@ -2111,7 +2156,10 @@ int DoAlignment (std::string const InFileName,
   // Initialize Reader
   PSIBinaryFileReader BFR(InFileName,
                           GetCalibrationFilename(telescopeID),
-                          GetAlignmentFilename(telescopeID, true), 4);
+                          GetAlignmentFilename(telescopeID, true), 
+			  GetNumberOfROCS(telescopeID),
+			  GetUseGainInterpolator(telescopeID)
+			  );
   BFR.GetAlignment()->SetErrors(telescopeID, true);
 
   // Apply Masking
@@ -2461,7 +2509,10 @@ int FindResiduals(std::string const InFileName,
   // Initialize Reader
   PSIBinaryFileReader BFR(InFileName,
                           GetCalibrationFilename(telescopeID),
-                          GetAlignmentFilename(telescopeID), 4);
+                          GetAlignmentFilename(telescopeID), 
+			  GetNumberOfROCS(telescopeID),
+			  GetUseGainInterpolator(telescopeID)
+			  );
   BFR.GetAlignment()->SetErrors(telescopeID, true);
 
   FILE* f = fopen("MyGainCal.dat", "w");

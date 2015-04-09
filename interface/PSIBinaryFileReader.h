@@ -13,14 +13,13 @@
 class PSIBinaryFileReader : public PLTTelescope, public PLTTracking
 {
   public:
-    PSIBinaryFileReader (std::string const, int const );
     PSIBinaryFileReader (std::string const, 
 			 std::string const, 
 			 std::string const,
-			 int const );
+			 int const,
+			 bool const);
     ~PSIBinaryFileReader ();
 
-    std::string fBinaryFileName;
     bool OpenFile ();
     void ResetFile ();
     void Clear ();
@@ -30,7 +29,6 @@ class PSIBinaryFileReader : public PLTTelescope, public PLTTracking
     bool IsPixelMasked (int const);
 
     bool ReadAddressesFromFile (std::string const);
-
 
     unsigned short readBinaryWordFromFile ();
     int nextBinaryHeader ();
@@ -82,15 +80,22 @@ class PSIBinaryFileReader : public PLTTelescope, public PLTTracking
     std::set<int> fPixelMask;
     std::vector<PLTHit*> fHits;
 
-    PLTGainCal fGainCal;
     PSIGainInterpolator fGainInterpolator;
+    PLTGainCal fGainCal;
     PLTAlignment fAlignment;
 
+    std::string fBinaryFileName;
+    
+    // Should we use the GainInterpolator instead of GainCal
+    // -> Only for Telescope 2 from May 2014 testmeab for now    
+    bool fUseGainInterpolator;
+    
     std::map<int, PLTPlane> fPlaneMap;
 
     std::string fBaseCalDir;
-    std::string fCalibrationFile[4];
-    std::string fRawCalibrationFile[4];
+    
+    std::vector<std::string> fCalibrationFile;
+    std::vector<std::string> fRawCalibrationFile;
 
 };
 

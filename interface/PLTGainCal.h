@@ -21,6 +21,7 @@ class PLTGainCal
 {
   public:
     PLTGainCal ();
+    PLTGainCal (int); // init with number of ROCs
     PLTGainCal (std::string const, int const NParams = 5);
     ~PLTGainCal ();
 
@@ -70,18 +71,18 @@ class PLTGainCal
     static int const NCHNS =   MAXCHNS;
     static int const NROWS =  PLTU::NROW;
     static int const NCOLS =  PLTU::NCOL;
-    static int const NROCS =   4;
+
+    int const NROCS;
 
     static int const IROWMIN = PLTU::FIRSTCOL;
     static int const IROWMAX = PLTU::LASTCOL;
     static int const ICOLMIN = PLTU::FIRSTROW;
     static int const ICOLMAX = PLTU::LASTROW;
 
-    // ch,roc,col,row [3]
-    //float GC[NCHNS][NROCS][NCOLS][NROWS][5];
-    //float GC[1][1][1][1][1];
-    //float GC[36][4][52][80][5];
-    float GC[NCHNS][NROCS][NCOLS][NROWS][6];
+    // Switched from 
+    // float GC[NCHNS][NROCS][NCOLS][NROWS][6]
+    std::vector<std::vector<std::vector<std::vector<std::vector<float > > > > > GC;
+    
 
     // Map for hardware locations by fed channel
     std::map<int, int> fHardwareMap;
