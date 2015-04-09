@@ -399,149 +399,11 @@ void Write1DFraction(std::vector<TH1*> hs, TCanvas *Can, TString OutDir){
 
 }
 
-int FindHotPixels (std::string const InFileName,
-                   TFile * out_f,
-                   TString const RunNumber,
-                   std::vector< std::vector< std::vector<int> > > & hot_pixels,
-                   int telescopeID
-                   )
-{
-  // FindHotPixels
-  // Loop over the event and add pixels with > 10xmean occupancy (per ROC)
-  // to the hot_pixels matrix.
-    std::cout << "Entering FindHotPixels" << std::endl;
-
-  gStyle->SetOptStat(0);
-  TString const PlotsDir = "plots/";
-  TString const OutDir = PlotsDir + RunNumber + "/";
-
-  // Initialize Reader
-  PSIBinaryFileReader BFR(InFileName,
-                          GetCalibrationFilename(telescopeID),
-                          GetAlignmentFilename(telescopeID), 4);
-  BFR.GetAlignment()->SetErrors(telescopeID);
-
-  // Apply Masking
-  BFR.ReadPixelMask(GetMaskingFilename(telescopeID));
-
-  std::cout << "Read pixel mask" << std::endl;
-
-  // Add hot pixels we are given to mask
-  // Since we now do multiple iterations in the histograms in one FindHotPixels call
-  // instead of multiple FindHotPixels calls this should not be necessary anymore.
-  for (int iroc=0; iroc != 6; iroc++){
-    for (int icolrow=0; icolrow != hot_pixels[iroc].size(); icolrow++){
-      std::cout << "HOT: " << iroc << " " << hot_pixels[iroc][icolrow][0] << " " << hot_pixels[iroc][icolrow][1] << std::endl;
-      BFR.AddToPixelMask( 1, iroc, hot_pixels[iroc][icolrow][0], hot_pixels[iroc][icolrow][1]);
-    }
-  }
-
-  BFR.CalculateLevels(10000, OutDir);
-
-  std::cout << "calculated levels" << std::endl;
-
-  // Prepare Occupancy histograms
-  // x == columns
-  // y == rows
-  std::vector< TH2F > hOccupancy;
-  for (int iroc = 0; iroc != 6; ++iroc){
-    hOccupancy.push_back( TH2F( Form("Occupancy_ROC%i",iroc),
-                                Form("Occupancy_ROC%i",iroc), 52, 0, 52, 80, 0, 80));
-  }
-
-  // Event Loop
-  for (int ievent = 0; BFR.GetNextEvent() >= 0; ++ievent) {
-
-    // print progress
-    if (ievent % 1 == 0) {
-      std::cout << "Processing event: " << ievent << std::endl;
-    }
-
-    // loop over planes and fill occupancy histograms
-    for (size_t iplane = 0; iplane != BFR.NPlanes(); ++iplane) {
-
-      PLTPlane* Plane = BFR.Plane(iplane);
-
-      for (size_t ihit = 0; ihit != Plane->NHits(); ++ihit) {
-        PLTHit* Hit = Plane->Hit(ihit);
-
-        if (Hit->ROC() < 6) {
-          hOccupancy[Hit->ROC()].Fill(Hit->Column(), Hit->Row());
-        }
-        else {
-          std::cerr << "Oops, ROC >= 6?" << std::endl;
-        }
-      } // End of loop over hits
-    } // End of loop over planes
-  } // End of Event Loop
-
-
-  int total_hot_pixels=0;
-
-  while (1){
-
-    int new_hot_pixels = 0;
-
-    // Look for new hot pixels
-    for (int iroc = 0; iroc != 6; ++iroc) {
-
-      // Calculate mean occupancy of nonzero pixels
-      double sum = 0;
-      int n_nonzero_pixels = 0;
-      for (int icol=1; icol != hOccupancy[iroc].GetNbinsX()+1; icol++){
-        for (int irow=1; irow != hOccupancy[iroc].GetNbinsY()+1; irow++){
-
-          if (hOccupancy[iroc].GetBinContent(icol, irow) > 0){
-            sum += hOccupancy[iroc].GetBinContent( icol, irow);
-            n_nonzero_pixels++;
-          }
-        }
-      }
-      float mean_occupancy;
-      if (n_nonzero_pixels>0)
-        mean_occupancy = sum/n_nonzero_pixels;
-      else
-        mean_occupancy = -1;
-
-      std::cout << "FindHotPixels, ROC: " << iroc << " Mean Occupancy: " << mean_occupancy << std::endl;
-
-      // Find with an occupancy of more than 10 times the mean
-      for (int icol=1; icol != hOccupancy[iroc].GetNbinsX()+1; icol++){
-        for (int irow=1; irow != hOccupancy[iroc].GetNbinsY()+1; irow++){
-
-          if (hOccupancy[iroc].GetBinContent(icol, irow) > 10*mean_occupancy){
-
-            new_hot_pixels++;
-            std::vector<int> colrow;
-            // Store column and row
-            // decrement by one (histogram bins vs real location)
-            colrow.push_back( icol-1 );
-            colrow.push_back( irow-1 );
-            hOccupancy[iroc].SetBinContent( icol, irow, 0);
-            hot_pixels[iroc].push_back( colrow );
-            std::cout << "Masking ROC COL ROW: " << iroc << " " << icol-1 << " " << irow-1 << std::endl;
-          }
-        }
-      }
-    } // end of loop over ROCs
-
-    total_hot_pixels += new_hot_pixels;
-
-    if (new_hot_pixels==0)
-      break;
-
-  }
-
-  std::cout << "Leaving FindHotPixels, found: " << total_hot_pixels << std::endl;
-  return 0;
-}
-
 
 
 void TestPlaneEfficiency (std::string const InFileName,
                           TFile * out_f,
                           TString const RunNumber,
-                          std::vector< std::vector< std::vector<int> > > & hot_pixels,
                           int plane_under_test,
                           int n_events,
                           int telescopeID)
@@ -579,13 +441,6 @@ void TestPlaneEfficiency (std::string const InFileName,
 
   // Apply Masking
   BFR.ReadPixelMask(GetMaskingFilename(telescopeID));
-
-  // Add additional hot pixels (from FindHotPixels to mask)
-  for (int iroc=0; iroc != 6; iroc++){
-    for (int icolrow=0; icolrow != hot_pixels[iroc].size(); icolrow++){
-      BFR.AddToPixelMask( 1, iroc, hot_pixels[iroc][icolrow][0], hot_pixels[iroc][icolrow][1]);
-    }
-  }
 
   BFR.CalculateLevels(10000, OutDir);
 
@@ -1272,7 +1127,6 @@ void TestPlaneEfficiency (std::string const InFileName,
 int TestPlaneEfficiencySilicon (std::string const InFileName,
                                  TFile * out_f,
                                  TString const RunNumber,
-                                 std::vector< std::vector< std::vector<int> > > & hot_pixels,
                                  int telescopeID)
 {
   /* TestPlaneEfficiencySilicon
@@ -1295,13 +1149,6 @@ int TestPlaneEfficiencySilicon (std::string const InFileName,
 
   // Apply Masking
   BFR.ReadPixelMask("outerPixelMask_forSiEff.txt");
-
-  // Add additional hot pixels (from FindHotPixels to mask)
-  for (int iroc=0; iroc != 6; iroc++){
-    for (int icolrow=0; icolrow != hot_pixels[iroc].size(); icolrow++){
-      BFR.AddToPixelMask( 1, iroc, hot_pixels[iroc][icolrow][0], hot_pixels[iroc][icolrow][1]);
-    }
-  }
 
   BFR.CalculateLevels(10000, OutDir);
 
@@ -1376,20 +1223,6 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   // Run default analysis
   const int NROC = GetNumberOfROCS(telescopeID);
 
-  // Initialize hot-pixel array
-  std::vector< std::vector< std::vector<int> > > hot_pixels;
-  for (int iroc = 0; iroc != NROC; ++iroc) {
-    std::vector< std::vector<int> > tmp;
-    hot_pixels.push_back( tmp );
-  }
-
-  // Look for hot pixels
-  //FindHotPixels(InFileName,
-  //              out_f,
-  //              RunNumber,
-  //              hot_pixels,
-  //              telescopeID);
-
 
   // For Telescopes from May testbeam:
   //   Do single plane studies
@@ -1398,7 +1231,6 @@ int TestPSIBinaryFileReader (std::string const InFileName,
     int n_events = TestPlaneEfficiencySilicon(InFileName,
 					      out_f,
 					      RunNumber,
-					      hot_pixels,
 					      telescopeID);
     
     for (int iplane=1; iplane != 5; iplane++){
@@ -1407,7 +1239,6 @@ int TestPSIBinaryFileReader (std::string const InFileName,
       TestPlaneEfficiency(InFileName,
                           out_f,
                           RunNumber,
-                          hot_pixels,
                           iplane,
                           n_events,
                           telescopeID);
@@ -1431,16 +1262,7 @@ int TestPSIBinaryFileReader (std::string const InFileName,
 
   // Apply Masking
   BFR.ReadPixelMask(GetMaskingFilename(telescopeID));
-
-  //Add hot pixels we found to mask
-  for (int iroc=0; iroc != NROC; iroc++){
-    for (int icolrow=0; icolrow != hot_pixels[iroc].size(); icolrow++){
-      BFR.AddToPixelMask( 1, iroc, hot_pixels[iroc][icolrow][0], hot_pixels[iroc][icolrow][1]);
-    }
-  }
-
   BFR.CalculateLevels(10000, OutDir);
-
 
   // Prepare Occupancy histograms
   // x == columns
@@ -3113,7 +2935,7 @@ f << "<br>\n";
 int main (int argc, char* argv[])
 {
   if (argc != 4) {
-    std::cerr << "Usage: " << argv[0] << " InFileName action telescopeUD" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " InFileName action telescopeID" << std::endl;
     std::cerr << "action: 0 for analysis, 1 for producing alignment file, 2 for finding residuals" << std::endl;
     return 1;
   }
@@ -3132,9 +2954,9 @@ int main (int argc, char* argv[])
   */
 
   std::string const InFileName = argv[1];
-  TString const FullRunName = InFileName;
-  Int_t const Index = FullRunName.Index("bt2014_09r",0);
-  TString const RunNumber = FullRunName(Index+10,6);
+  //TString const FullRunName = InFileName;
+  //Int_t const Index = FullRunName.Index("bt2014_09r",0);
+  TString const RunNumber = "test"; //FullRunName(Index+10,6);
   gSystem->mkdir("./plots/" + RunNumber);
 
   // 0: Analysis
