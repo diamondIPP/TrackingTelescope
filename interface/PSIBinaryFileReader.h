@@ -4,9 +4,6 @@
 #include <fstream>
 #include <set>
 
-#include "PLTGainCal.h"
-#include "PSIGainInterpolator.h"
-#include "PLTAlignment.h"
 #include "PSIFileReader.h"
 
 class PSIBinaryFileReader : public PSIFileReader
