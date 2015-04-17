@@ -940,6 +940,8 @@ void TestPlaneEfficiency (std::string const InFileName,
   TCanvas Can;
   Can.cd();
 
+  out_f->cd();
+
   for (int i=0; i!= n_slices; i++){
     hOccupancyNum_eventSlices[i].Write();
     hOccupancyDenom_eventSlices[i].Write();
@@ -1259,6 +1261,8 @@ int TestPlaneEfficiencySilicon (std::string const InFileName,
     }
 
   } // End of Event Loop
+
+  out_f->cd();
 
   // Store the numerators and denominators to the file
   for (int i=0; i!=6; i++){
@@ -1631,14 +1635,14 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   // "times" for counting
   int const StartTime = 0;
   int ThisTime;
-
-  // tree for timing information
-  TTree *time_tree = new TTree("time_tree", "time_tree");
   
   long long br_time;
   int br_ievent;
   int br_hit_plane_bits;
   float br_track_x, br_track_y;
+
+  // tree for timing information
+  TTree *time_tree = new TTree("time_tree", "time_tree");
 
   time_tree->Branch("time", &br_time);
   time_tree->Branch("ievent", &br_ievent);
@@ -1842,12 +1846,9 @@ int TestPSIBinaryFileReader (std::string const InFileName,
 
     }
 
-
-
-
   } // End of Event Loop
 
-  time_tree->Write();
+  delete FR;  
 
 
   // Catch up on PH by time graph
@@ -1863,9 +1864,14 @@ int TestPSIBinaryFileReader (std::string const InFileName,
     }
     ++NGraphPoints;
 
+
+
   TCanvas Can;
   Can.cd();
 
+  out_f->cd();
+
+  time_tree->Write();
 
   for (int iroc = 0; iroc != NROC; ++iroc) {
 
@@ -1951,12 +1957,11 @@ int TestPSIBinaryFileReader (std::string const InFileName,
     hOccupancyTrack6[iroc].Draw("colz");
     Can.SaveAs( OutDir+TString(hOccupancyTrack6[iroc].GetName()) + ".gif");
 
-
-		float_t oneovertwo[iroc],oneoverthree[iroc],twooverthree[iroc];
-
-		oneovertwo[iroc] = onepc[iroc]/twopc[iroc];
-		oneoverthree[iroc] = onepc[iroc]/threepc[iroc];
-		twooverthree[iroc] = twopc[iroc]/threepc[iroc];
+    float_t oneovertwo[iroc],oneoverthree[iroc],twooverthree[iroc];
+    
+    oneovertwo[iroc] = onepc[iroc]/twopc[iroc];
+    oneoverthree[iroc] = onepc[iroc]/threepc[iroc];
+    twooverthree[iroc] = twopc[iroc]/threepc[iroc];
 
     // Draw the PulseHeights
     gStyle->SetOptStat(0);
@@ -2166,7 +2171,7 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   WriteHTML(PlotsDir + RunNumber,
             GetCalibrationFilename(telescopeID));
 
-  delete FR;
+
 
   return 0;
 }

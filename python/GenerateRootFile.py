@@ -95,10 +95,10 @@ for i in xrange(n_events):
     # first decide how many hits we want
     n_hits = random.randint(0,10)
     for i_hit in range(n_hits):
-        d["plane"].push_back( random.randint(0,6))
+        d["plane"].push_back( random.randint(0,5))
         d["col"].push_back( random.randint(20,50))
         d["row"].push_back( random.randint(20,50))
-        d["adc"].push_back( random.randint(0,800))
+        d["adc"].push_back( random.randint(80,120))
         d["charge"].push_back( random.randint(3000,20000))
     # End of per-hit loop
 
