@@ -16,32 +16,13 @@ struct Digits {
 typedef std::vector<Digits> Vd;
 
 
-
-
-PLTTracking::PLTTracking () : fNPlanes(6)
-{   
-  SetAllPlanes();
-}
-
-
 PLTTracking::PLTTracking (int nplanes) : fNPlanes(nplanes)
 {     
   SetAllPlanes();  
 }
 
-
-//PLTTracking::PLTTracking (PLTAlignment* Alignment, TrackingAlgorithm const Algorithm)
-//{
-//  SetTrackingAlignment(Alignment);
-//  SetTrackingAlgorithm(Algorithm);
-//
-//  SetAllPlanes();
-//}
-
-
 PLTTracking::~PLTTracking ()
 {
-  // Destructor!
 }
 
 

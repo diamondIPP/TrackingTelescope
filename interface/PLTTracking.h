@@ -22,9 +22,7 @@ class PLTTracking
       kTrackingAlgorithm_6PlanesHit
     };
 
-    PLTTracking ();
     PLTTracking (int);
-    //PLTTracking (PLTAlignment*, TrackingAlgorithm const);
     ~PLTTracking ();
 
     void SetTrackingAlignment (PLTAlignment*);
