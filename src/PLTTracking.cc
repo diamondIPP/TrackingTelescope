@@ -17,19 +17,26 @@ typedef std::vector<Digits> Vd;
 
 
 
-PLTTracking::PLTTracking ()
-{
+
+PLTTracking::PLTTracking () : fNPlanes(6)
+{   
   SetAllPlanes();
 }
 
 
-PLTTracking::PLTTracking (PLTAlignment* Alignment, TrackingAlgorithm const Algorithm)
-{
-  SetTrackingAlignment(Alignment);
-  SetTrackingAlgorithm(Algorithm);
-
-  SetAllPlanes();
+PLTTracking::PLTTracking (int nplanes) : fNPlanes(nplanes)
+{     
+  SetAllPlanes();  
 }
+
+
+//PLTTracking::PLTTracking (PLTAlignment* Alignment, TrackingAlgorithm const Algorithm)
+//{
+//  SetTrackingAlignment(Alignment);
+//  SetTrackingAlgorithm(Algorithm);
+//
+//  SetAllPlanes();
+//}
 
 
 PLTTracking::~PLTTracking ()
@@ -64,16 +71,17 @@ int PLTTracking::GetTrackingAlgorithm ()
 
 
 void PLTTracking::SetAllPlanes(){
-
-  // TODO: make flexible!!!
-  for (int i=0;i!=4;i++) {
-    fUsePlanesForTracking[i]=2;
+  
+  fUsePlanesForTracking.resize(0);  
+  for (int i=0;i!=fNPlanes;i++) {
+    fUsePlanesForTracking.push_back(2);
   }
-  fDoSinglePlaneEfficiency = false;
 
+  fDoSinglePlaneEfficiency = false;
 }
 
-void PLTTracking::SetPlaneUnderTest( int put){
+
+void PLTTracking::SetPlaneUnderTest(int put){
 
     fDoSinglePlaneEfficiency = true;
 
@@ -82,7 +90,7 @@ void PLTTracking::SetPlaneUnderTest( int put){
     //  requires exactly 6 hits)
 
     // For single-plane efficiency we want (for example): 333033
-    for (int i=0;i!=6;i++){
+    for (int i=0;i!=fUsePlanesForTracking.size();i++){
       if (i==put){
         fUsePlanesForTracking[i] = 0;
       }

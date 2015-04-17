@@ -16,9 +16,10 @@
 PSIFileReader::PSIFileReader (std::string const CalibrationList,
 			      std::string const AlignmentFileName,
 			      int const nrocs, 
-			      bool const useGainInterpolator) : NMAXROCS(nrocs), 
-								fGainCal(nrocs),
-								fUseGainInterpolator(useGainInterpolator){
+			      bool const useGainInterpolator) :   PLTTracking(nrocs),
+								  NMAXROCS(nrocs), 
+								  fGainCal(nrocs),
+								  fUseGainInterpolator(useGainInterpolator){
 
   // Initialize fCalibrationFile and fRawCalibrationFile with empty
   // strings
@@ -50,7 +51,6 @@ PSIFileReader::PSIFileReader (std::string const CalibrationList,
   fAlignment.ReadAlignmentFile(AlignmentFileName);
   SetTrackingAlignment(&fAlignment);
   
-  // TODO: Make sure this works correctly also for <6 planes!!
   SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
 
 }

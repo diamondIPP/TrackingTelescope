@@ -23,7 +23,8 @@ class PLTTracking
     };
 
     PLTTracking ();
-    PLTTracking (PLTAlignment*, TrackingAlgorithm const);
+    PLTTracking (int);
+    //PLTTracking (PLTAlignment*, TrackingAlgorithm const);
     ~PLTTracking ();
 
     void SetTrackingAlignment (PLTAlignment*);
@@ -31,7 +32,7 @@ class PLTTracking
     int  GetTrackingAlgorithm ();
     static bool CompareTrackD2 (PLTTrack*, PLTTrack*);
 
-    void SetAllPlanes();  // 222222
+    void SetAllPlanes(); // 222222
     void SetPlaneUnderTest(int); // 330333
     void SetPlaneUnderTestSandwich(int); // 303000
 
@@ -50,23 +51,26 @@ class PLTTracking
     TrackingAlgorithm fTrackingAlgorithm;
 
     // Which planes to use for tracking
-    // One int per plane (0..5)
+    // One int per plane
     // Decoding:
     //  0: ignore plane for tracking (use for DUT)
     //  1: use plane for tracking (a cluster is optional)
     //  2: use plane for tracking (a cluster is required)
     //  3: use plane for tracking (exactle one cluster is required)
-    // Initialize with default values for convenience 222222, can change using
+    // Initialize with default values for convenience 2 for all planes, can change using
     //  SetPlanesForTracking
     // The defaults require at least one hit per plane. For the standard analysis there
     //  is an additional step in the caller that makes sure exactly one hit per plane
     //  using the hitBit to speed things up.
     // For the planeEfficiency analysis this additional condition is not there and
     //  we check the single hit requirement in the tracking code directly.
-    int fUsePlanesForTracking[4]; // TODO: make flexible!!!
+    std::vector<int> fUsePlanesForTracking; 
     bool fDoSinglePlaneEfficiency;
 
     static bool const DEBUG = false;
+
+    int const fNPlanes;
+
 };
 
 

@@ -51,11 +51,11 @@ class PSIFileReader : public PLTTelescope, public PLTTracking
 
     long long GetTime () {return fTime;}
 
+    const int  NMAXROCS;
 
   protected:
 
 
-    const int  NMAXROCS;
 
     long long fTime;
 
