@@ -17,7 +17,8 @@ class PSIFileReader : public PLTTelescope, public PLTTracking
 		 std::string const, 
 		 int const, 
 		 bool const);
-    ~PSIFileReader ();
+
+    virtual ~PSIFileReader (){};
 
     virtual bool OpenFile () = 0;
     virtual void ResetFile () = 0 ;

@@ -46,6 +46,7 @@ PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
 
 PSIBinaryFileReader::~PSIBinaryFileReader ()
 { 
+  Clear(); 
 }
 
 

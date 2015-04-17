@@ -56,14 +56,6 @@ PSIFileReader::PSIFileReader (std::string const CalibrationList,
 }
 
 
-PSIFileReader::~PSIFileReader ()
-{
-  // Destructor
-  Clear();
- 
-}
-
-
 size_t PSIFileReader::NHits ()
 {
   return fHits.size();

@@ -1278,6 +1278,8 @@ int TestPlaneEfficiencySilicon (std::string const InFileName,
   if (DEBUG)
     std::cout << "DEBUG: Leaving TestPlaneEfficiencySilicon" << std::endl;
 
+  delete FR;
+
   return n_events;
 }
 
@@ -2164,6 +2166,8 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   WriteHTML(PlotsDir + RunNumber,
             GetCalibrationFilename(telescopeID));
 
+  delete FR;
+
   return 0;
 }
 
@@ -2544,6 +2548,8 @@ for (int ialign=1; ialign!=15;ialign++){
 
   FR->GetAlignment()->WriteAlignmentFile("NewAlignment.dat");
 
+  delete FR;
+
   return 0;
 }
 
@@ -2736,6 +2742,8 @@ int FindResiduals(std::string const InFileName,
     }
 
   } // end of residual finding loop
+
+  delete FR;
 
   return 0;
 }
