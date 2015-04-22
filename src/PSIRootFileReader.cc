@@ -76,6 +76,11 @@ int PSIRootFileReader::GetNextEvent (){
 
   Clear(); 
 
+  for (int i = 0; i != NMAXROCS; ++i) {
+    fPlaneMap[i].SetROC(i);;
+  }
+
+
   if (fAtEntry == fNEntries)
     return -1;
 
@@ -106,7 +111,6 @@ int PSIRootFileReader::GetNextEvent (){
       fPlaneMap[Hit->ROC()].AddHit(Hit);
     }
   }
-
   
   // Loop over all planes and clusterize each one, then add each plane to the correct telescope (by channel number
   for (std::map< int, PLTPlane>::iterator it = fPlaneMap.begin(); it != fPlaneMap.end(); ++it) {

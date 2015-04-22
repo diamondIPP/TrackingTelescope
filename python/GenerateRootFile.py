@@ -93,9 +93,8 @@ for i in xrange(n_events):
 
     # Fill per hit branches    
     # first decide how many hits we want
-    n_hits = random.randint(0,10)
-    for i_hit in range(n_hits):
-        d["plane"].push_back( random.randint(0,5))
+    for i_plane in range(4):
+        d["plane"].push_back(i_plane)
         d["col"].push_back( random.randint(20,50))
         d["row"].push_back( random.randint(20,50))
         d["adc"].push_back( random.randint(80,120))

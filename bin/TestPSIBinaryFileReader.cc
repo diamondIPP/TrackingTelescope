@@ -111,10 +111,10 @@ std::string GetAlignmentFilename(int telescopeID, bool useInitial=0){
   // Get the correct Alignment for a given telescope
   // Initial Alignment (start values for finding alignment)
   if (useInitial){
-    if ((telescopeID==1) || (telescopeID==2) || (telescopeID==-1)){
+    if ((telescopeID==1) || (telescopeID==2) ){
       return "ALIGNMENT/Alignment_ETHTelescope_initial.dat";
     }
-    else if ((telescopeID==5) || (telescopeID==6)){
+    else if ((telescopeID==5) || (telescopeID==6) || (telescopeID==-1)){
       return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
     }
     else{
@@ -134,7 +134,7 @@ std::string GetAlignmentFilename(int telescopeID, bool useInitial=0){
     else if (telescopeID==6)
       return "ALIGNMENT/Alignment_ETHTelescope_4planesCERN_run71.dat";
     else if (telescopeID==-1)
-      return "ALIGNMENT/Alignment_ETHTelescope_initial.dat";
+      return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
     else{
       std::cout << "ERROR: No Alignment file for telescopeID=" << telescopeID << std::endl;
       std::cout << "Exiting.." << std::endl;
@@ -155,7 +155,7 @@ std::string GetMaskingFilename(int telescopeID){
   else if (telescopeID == 6)
     return "outerPixelMask_Telescope6.txt";
   else if (telescopeID == -1)
-    return "outerPixelMask_Telescope1.txt";
+    return "outerPixelMask_Telescope5.txt";
   else{
     std::cout << "ERROR: No Masking file for telescopeID=" << telescopeID << std::endl;
     std::cout << "Exiting.." << std::endl;
@@ -174,7 +174,7 @@ std::string GetCalibrationFilename(int telescopeID){
   else if (telescopeID == 6)
     return "GKCalibrationList_Telescope6.txt";
   else if (telescopeID == -1)
-    return "GKCalibrationList.txt";
+    return "GKCalibrationList_Telescope5.txt";
   else{
     std::cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << std::endl;
     std::cout << "Exiting.." << std::endl;
@@ -186,11 +186,11 @@ std::string GetCalibrationFilename(int telescopeID){
 
 int GetNumberOfROCS(int telescopeID){
 
-  if ((telescopeID == 1) || (telescopeID == 2) || (telescopeID == 3) || (telescopeID == -1))
+  if ((telescopeID == 1) || (telescopeID == 2) || (telescopeID == 3))
     return 6;
   else if (telescopeID == 4)
     return 2;
-  else if ((telescopeID == 5) || (telescopeID == 6))
+  else if ((telescopeID == 5) || (telescopeID == 6) || (telescopeID == -1))
     return 4;
   else{
     std::cout << "ERROR: Number of ROCs not defined for telescopeID=" << telescopeID << std::endl;
@@ -225,7 +225,7 @@ bool CheckEllipse(float dx, float dy, float max_dx, float max_dy){
 
 
 
-void WriteHTML (TString const, TString const);
+void WriteHTML (TString const, TString const, int telescopeID);
 
 void Write2DCharge( TH3* h, TCanvas * Can, float maxz, TString OutDir){
   TProfile2D * ph = h->Project3DProfile("yx");
@@ -1698,7 +1698,8 @@ int TestPSIBinaryFileReader (std::string const InFileName,
 
     // draw tracks
     static int ieventdraw = 0;
-    if (ieventdraw < 20 && FR->NClusters() >= NROC) {
+
+    if (ieventdraw < 20 && FR->NClusters() >= NROC) {     
       FR->DrawTracksAndHits( TString::Format(OutDir + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
     }
 
@@ -1766,15 +1767,17 @@ int TestPSIBinaryFileReader (std::string const InFileName,
 
     }
 
-    if (telescopeID != 5 &&
+    if (telescopeID != -1 &&
 	FR->NTracks() == 1 &&
         FR->Track(0)->NClusters() == NROC &&
         FR->Track(0)->Cluster(0)->Charge() < 300000 &&
         FR->Track(0)->Cluster(1)->Charge() < 300000 &&
         FR->Track(0)->Cluster(2)->Charge() < 300000 &&
-        FR->Track(0)->Cluster(3)->Charge() < 300000 &&
-        FR->Track(0)->Cluster(4)->Charge() < 300000 &&
-        FR->Track(0)->Cluster(5)->Charge() < 300000 ) {
+        FR->Track(0)->Cluster(3)->Charge() < 300000 
+	// TODO: make proper dunamic!!!
+        //FR->Track(0)->Cluster(4)->Charge() < 300000 &&
+        //FR->Track(0)->Cluster(5)->Charge() < 300000 
+	) {
 
         PLTTrack* Track = FR->Track(0);
         double slopeX = Track->fTVX / Track->fTVZ;
@@ -2169,7 +2172,8 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   gStyle->SetOptStat(0);
 
   WriteHTML(PlotsDir + RunNumber,
-            GetCalibrationFilename(telescopeID));
+            GetCalibrationFilename(telescopeID),
+	    telescopeID);
 
 
 
@@ -2278,8 +2282,6 @@ int DoAlignment (std::string const InFileName,
 
       if (! FR->Plane(iroc_align)->NClusters()==1)
         continue;
-
-      //std::cout << "blug" << std::endl;
 
       float max_charge = -1;
       float h_LX = -9999;
@@ -2763,7 +2765,7 @@ int FindResiduals(std::string const InFileName,
 
 
 
-void WriteHTML (TString const OutDir, TString const CalFile)
+void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 {
   // This function to write the HTML output for a run
 
@@ -2802,7 +2804,7 @@ void WriteHTML (TString const OutDir, TString const CalFile)
   }
   fCL.close();
 
-  int nplanes = 4;
+  int nplanes = GetNumberOfROCS(telescopeID);
 
   // LEVELS
   f << "<hr />\n";
@@ -2899,14 +2901,14 @@ void WriteHTML (TString const OutDir, TString const CalFile)
   f << "<br>\n";
 
   // OFFLINE
-  f << "<h2>Straight Tracks</h2>\n";
-
-  f << "<br>\n";
-  for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"PulseHeightOffline_ROC%i.gif\"><img width=\"150\" src=\"PulseHeightOffline_ROC%i.gif\"></a>\n", i, i);
-  }
-  f << "<br>\n";
-
+//  f << "<h2>Straight Tracks</h2>\n";
+//
+//  f << "<br>\n";
+//  for (int i = 0; i != nplanes; ++i) {
+//    f << Form("<a href=\"PulseHeightOffline_ROC%i.gif\"><img width=\"150\" src=\"PulseHeightOffline_ROC%i.gif\"></a>\n", i, i);
+//  }
+//  f << "<br>\n";
+//
 
   // TRACK RESIDUALS
   f << "<h2>Track Residuals</h2>\n";
@@ -2922,110 +2924,111 @@ void WriteHTML (TString const OutDir, TString const CalFile)
 
 
   // Single Plane Studies
-  f << "<h2>Single Plane Studies</h2>\n";
-  f << "<br>" << std::endl;
+  if ( (telescopeID==1) || (telescopeID==2)){
+    f << "<h2>Single Plane Studies</h2>\n";
+    f << "<br>" << std::endl;
 
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"TracksPassing_ROC%i.gif\"><img width=\"150\" src=\"TracksPassing_ROC%i.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"PlaneEfficiency_ROC%i.gif\"><img width=\"150\" src=\"PlaneEfficiency_ROC%i.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"ClusterSize_ROC%i_profile.gif\"><img width=\"150\" src=\"ClusterSize_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"SumCharge_ROC%i.gif\"><img width=\"150\" src=\"SumCharge_ROC%i.gif\"></a>\n", i, i);
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"TracksPassing_ROC%i.gif\"><img width=\"150\" src=\"TracksPassing_ROC%i.gif\"></a>\n", i, i);
     f << "<br>\n";
 
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"1stCharge_ROC%i.gif\"><img width=\"150\" src=\"1stCharge_ROC%i.gif\"></a>\n", i, i);
-  f << "<br>\n";
 
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"2ndCharge_ROC%i.gif\"><img width=\"150\" src=\"2ndCharge_ROC%i.gif\"></a>\n", i, i);
-  f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"PlaneEfficiency_ROC%i.gif\"><img width=\"150\" src=\"PlaneEfficiency_ROC%i.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
-
-
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"SumCharge_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-  for (int i = 1; i != 5; i++)
-   f << Form("<a href=\"SumCharge2_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge2_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-  for (int i = 1; i != 5; i++)
-   f << Form("<a href=\"SumCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge3_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-  for (int i = 1; i != 5; i++)
-  f << Form("<a href=\"SumCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge4_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"ClusterSize_ROC%i_profile.gif\"><img width=\"150\" src=\"ClusterSize_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
 
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"1stCharge_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SumCharge_ROC%i.gif\"><img width=\"150\" src=\"SumCharge_ROC%i.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
-  for (int i = 1; i != 5; i++)
-   f << Form("<a href=\"1stCharge2_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge2_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"1stCharge_ROC%i.gif\"><img width=\"150\" src=\"1stCharge_ROC%i.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
-  for (int i = 1; i != 5; i++)
-   f << Form("<a href=\"1stCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge3_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-  for (int i = 1; i != 5; i++)
-  f << Form("<a href=\"1stCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge4_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"2ndCharge_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-  for (int i = 1; i != 5; i++)
-   f << Form("<a href=\"2ndCharge2_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge2_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-  for (int i = 1; i != 5; i++)
-   f << Form("<a href=\"2ndCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge3_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
-
-  for (int i = 1; i != 5; i++)
-  f << Form("<a href=\"2ndCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge4_ROC%i_profile.gif\"></a>\n", i, i);
-  f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"2ndCharge_ROC%i.gif\"><img width=\"150\" src=\"2ndCharge_ROC%i.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
 
 
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SumCharge_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"SinglePlaneTestChi2_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestChi2_ROC%i.gif\"></a>\n", i, i);
-  f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SumCharge2_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge2_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
-for (int i = 1; i != 5; i++)
-  f << Form("<a href=\"SinglePlaneTestChi2X_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestChi2X_ROC%i.gif\"></a>\n", i, i);
-f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SumCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge3_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
-for (int i = 1; i != 5; i++)
-  f << Form("<a href=\"SinglePlaneTestChi2Y_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestChi2Y_ROC%i.gif\"></a>\n", i, i);
-f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SumCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge4_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
 
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"SinglePlaneTestDY_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestDY_ROC%i.gif\"></a>\n", i, i);
-  f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"1stCharge_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
-  for (int i = 1; i != 5; i++)
-    f << Form("<a href=\"SinglePlaneTestDR_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestDR_ROC%i.gif\"></a>\n", i, i);
-  f << "<br>\n";
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"1stCharge2_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge2_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
 
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"1stCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge3_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"1stCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge4_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"2ndCharge_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"2ndCharge2_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge2_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"2ndCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge3_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"2ndCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge4_ROC%i_profile.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+
+
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestChi2_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestChi2_ROC%i.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestChi2X_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestChi2X_ROC%i.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestChi2Y_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestChi2Y_ROC%i.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestDY_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestDY_ROC%i.gif\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestDR_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestDR_ROC%i.gif\"></a>\n", i, i);
+    f << "<br>\n";
+  }
 
   // EVENT DISPLAYS
   f << "<h2>Event Displays</h2>\n";
@@ -3040,18 +3043,6 @@ f << "<br>\n";
   }
   f << "<br>\n";
 
-  // HOT PIXELS
-  // f << "<h2>Hot Pixels</h2>\n";
-  //
-  // f << "<br>" << std::endl;
-  // for (int i = 0; i != 6; i++)
-  //   f << Form("<a href=\"PulseHeightHot_ROC%i.gif\"><img width=\"150\" src=\"PulseHeightHot_ROC%i.gif\"></a>\n", i, i);
-  // f << "<br>\n";
-  //
-  //
-  // for (int i = 0; i != 6; i++)
-  //   f << Form("<a href=\"OccupancyHot_ROC%i.gif\"><img width=\"150\" src=\"OccupancyHot_ROC%i.gif\"></a>\n", i, i);
-  // f << "<br>\n";
 
   f << "</body></html>";
   f.close();
