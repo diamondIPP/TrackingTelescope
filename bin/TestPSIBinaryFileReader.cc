@@ -114,9 +114,13 @@ std::string GetAlignmentFilename(int telescopeID, bool useInitial=0){
     if ((telescopeID==1) || (telescopeID==2) ){
       return "ALIGNMENT/Alignment_ETHTelescope_initial.dat";
     }
+    else if (telescopeID==7){
+      return "ALIGNMENT/Alignment_ETHTelescope_initial_telescope7.dat";
+    }
     else if ((telescopeID==5) || (telescopeID==6) || (telescopeID==-1)){
       return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
     }
+ 
     else{
       std::cout << "ERROR: No Initial-Alignment file for telescopeID=" << telescopeID << std::endl;
       std::cout << "Exiting.." << std::endl;
@@ -133,8 +137,11 @@ std::string GetAlignmentFilename(int telescopeID, bool useInitial=0){
       return "ALIGNMENT/Alignment_ETHTelescope_4planes_run63.dat";
     else if (telescopeID==6)
       return "ALIGNMENT/Alignment_ETHTelescope_4planesCERN_run71.dat";
+    else if (telescopeID==7)
+      return "ALIGNMENT/Alignment_ETHTelescope_initial_telescope7.dat";
     else if (telescopeID==-1)
       return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
+
     else{
       std::cout << "ERROR: No Alignment file for telescopeID=" << telescopeID << std::endl;
       std::cout << "Exiting.." << std::endl;
@@ -154,6 +161,8 @@ std::string GetMaskingFilename(int telescopeID){
     return "outerPixelMask_Telescope5.txt";
   else if (telescopeID == 6)
     return "outerPixelMask_Telescope6.txt";
+  else if (telescopeID == 7)
+    return "outerPixelMask_Telescope7.txt";
   else if (telescopeID == -1)
     return "outerPixelMask_Telescope5.txt";
   else{
@@ -173,6 +182,8 @@ std::string GetCalibrationFilename(int telescopeID){
     return "GKCalibrationList_Telescope5.txt";
   else if (telescopeID == 6)
     return "GKCalibrationList_Telescope6.txt";
+  else if (telescopeID == 7)
+    return "GKCalibrationList_Telescope5.txt";
   else if (telescopeID == -1)
     return "GKCalibrationList_Telescope5.txt";
   else{
@@ -190,7 +201,7 @@ int GetNumberOfROCS(int telescopeID){
     return 6;
   else if (telescopeID == 4)
     return 2;
-  else if ((telescopeID == 5) || (telescopeID == 6) || (telescopeID == -1))
+  else if ((telescopeID == 5) || (telescopeID == 6) || (telescopeID == 7) || (telescopeID == -1))
     return 4;
   else{
     std::cout << "ERROR: Number of ROCs not defined for telescopeID=" << telescopeID << std::endl;
@@ -209,7 +220,7 @@ int GetUseGainInterpolator(int telescopeID){
 
 int GetUseRootInput(int telescopeID){
 
-  if (telescopeID == -1)
+  if ((telescopeID == -1) || (telescopeID == 7))
     return true;
   else
     return false;
@@ -1654,6 +1665,8 @@ int TestPSIBinaryFileReader (std::string const InFileName,
     }
         
     // Done with timing tree
+
+    time_tree->cd();
     time_tree->Fill();
 
     hCoincidenceMap.Fill(FR->HitPlaneBits());
@@ -1743,7 +1756,7 @@ int TestPSIBinaryFileReader (std::string const InFileName,
 
     }
 
-    if (telescopeID == -1 &&
+    if (telescopeID == 7 &&
 	FR->NTracks() == 1 &&
         FR->Track(0)->NClusters() == NROC &&
         FR->Track(0)->Cluster(0)->Charge() < 300000 &&
@@ -3000,6 +3013,7 @@ int main (int argc, char* argv[])
   //  4: Two-Plane Silicon Telescope (July Testbeam)
   //  5: Four-Plane Silicon Telescope (September Testbeam at PSI)
   //  6: Four-Plane Silicon Telescope (October Testbeam at CERN)
+  //  7: Four-Plane Silicon Telescope (May 2015 Testbeam at PSI)
   int telescopeID = atoi(argv[3]);
 
   // Open a ROOT file to store histograms in
@@ -3007,6 +3021,9 @@ int main (int argc, char* argv[])
   TString const PlotsDir = "plots/";
   TString const OutDir = PlotsDir + RunNumber + "/";
   TFile out_f( OutDir + "histos.root", "recreate");
+
+  std::cout << "Action = " << action << std::endl;
+  std::cout << "TelescopeID = " << telescopeID << std::endl;
 
   // ALIGNMENT
   if (action==1)
