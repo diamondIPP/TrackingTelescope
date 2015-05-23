@@ -1687,7 +1687,7 @@ int TestPSIBinaryFileReader (std::string const InFileName,
     // draw tracks
     static int ieventdraw = 0;
 
-    if (ieventdraw < 20 && FR->NClusters() >= NROC) {     
+    if (ieventdraw < 20) {     
       FR->DrawTracksAndHits( TString::Format(OutDir + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
     }
 
@@ -1852,8 +1852,8 @@ int TestPSIBinaryFileReader (std::string const InFileName,
 
     // Draw Occupancy histograms
     hOccupancy[iroc].SetMinimum(0);
-    hOccupancy[iroc].SetAxisRange(12,38,"X");
-    hOccupancy[iroc].SetAxisRange(39,80,"Y");
+    //hOccupancy[iroc].SetAxisRange(12,38,"X");
+    //hOccupancy[iroc].SetAxisRange(39,80,"Y");
     hOccupancy[iroc].Draw("colz");
     Can.SaveAs( OutDir+TString(hOccupancy[iroc].GetName()) + ".gif");
     hOccupancy[iroc].Write();
