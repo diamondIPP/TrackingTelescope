@@ -950,7 +950,6 @@ void TestPlaneEfficiency (std::string const InFileName,
   // Prepare drawing
   TCanvas Can;
   Can.cd();
-
   out_f->cd();
 
   for (int i=0; i!= n_slices; i++){
@@ -1629,6 +1628,7 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   float br_track_x, br_track_y;
 
   // tree for timing information
+  out_f->cd();
   TTree *time_tree = new TTree("time_tree", "time_tree");
 
   time_tree->Branch("time", &br_time);
@@ -1666,7 +1666,6 @@ int TestPSIBinaryFileReader (std::string const InFileName,
         
     // Done with timing tree
 
-    time_tree->cd();
     time_tree->Fill();
 
     hCoincidenceMap.Fill(FR->HitPlaneBits());
@@ -1847,7 +1846,6 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   Can.cd();
 
   out_f->cd();
-
   time_tree->Write();
 
   for (int iroc = 0; iroc != NROC; ++iroc) {
