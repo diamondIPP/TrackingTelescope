@@ -2993,9 +2993,9 @@ int main (int argc, char* argv[])
   */
 
   std::string const InFileName = argv[1];
-  //TString const FullRunName = InFileName;
-  //Int_t const Index = FullRunName.Index("bt2014_09r",0);
-  TString const RunNumber = "test"; //FullRunName(Index+10,6);
+  TString const FullRunName = InFileName;
+  Int_t const Index = FullRunName.Index("test",0);
+  TString const RunNumber = FullRunName(Index+4,6);
   gSystem->mkdir("./plots/" + RunNumber);
 
   // 0: Analysis
