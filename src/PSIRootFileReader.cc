@@ -11,11 +11,13 @@ PSIRootFileReader::PSIRootFileReader (std::string const InFileName,
 				      std::string const CalibrationList,
 				      std::string const AlignmentFileName,
 				      int const nrocs,
-				      bool const useGainInterpolator
+				      bool const useGainInterpolator,
+				      bool const useExternalCalibrationFunction
 				      ) : PSIFileReader(CalibrationList,
 							AlignmentFileName,
 							nrocs,
-							useGainInterpolator)
+							useGainInterpolator,
+							useExternalCalibrationFunction)
 {
   
   fFileName = InFileName;
@@ -104,7 +106,13 @@ int PSIRootFileReader::GetNextEvent (){
       //  fGainCal.SetCharge(*Hit);	
       
       // Dummy calibration for now
-      Hit->SetCharge((*f_adc)[i_hit] * 65);
+      //Hit->SetCharge((*f_adc)[i_hit] * 65);
+      
+
+      
+      //std::cout << roc << " " << col << " " << row << 
+      fGainCal.SetCharge(*Hit);	
+      //std::cout << "  " << Hit->Charge() << std::endl;
       
       fAlignment.AlignHit(*Hit);
       fHits.push_back(Hit);

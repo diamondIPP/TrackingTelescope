@@ -13,6 +13,7 @@ class PSIBinaryFileReader : public PSIFileReader
 			 std::string const, 
 			 std::string const,
 			 int const,
+			 bool const,
 			 bool const);
     ~PSIBinaryFileReader ();
 

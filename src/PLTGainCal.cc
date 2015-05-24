@@ -9,11 +9,12 @@ PLTGainCal::PLTGainCal (): NROCS(6)
   fIsExternalFunction = false;
 }
 
-PLTGainCal::PLTGainCal (int nrocs): NROCS(nrocs)
+PLTGainCal::PLTGainCal (int nrocs, 
+			bool isExternalFunction ): NROCS(nrocs)
 {
   ResetGC();
   fIsGood = false;
-  fIsExternalFunction = false;
+  fIsExternalFunction = isExternalFunction;
 }
 
 PLTGainCal::PLTGainCal (std::string const GainCalFileName, int const NParams): NROCS(6)
@@ -107,7 +108,7 @@ float PLTGainCal::GetCharge(int const ch, int const roc, int const col, int cons
     for (int ipar = 0; ipar < fNParams; ++ipar) {
       fFitFunction.SetParameter(ipar, GC[ich][iroc][icol][irow][ipar]);
     }
-    charge = fFitFunction.Eval(adc);
+    charge = 65. * fFitFunction.GetX(adc);
   } else {
     if (fNParams == 3) {
       charge = 65. * (float(adc * adc) * GC[ich][iroc][icol][irow][2] + float(adc) * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][0]);
@@ -128,7 +129,7 @@ float PLTGainCal::GetCharge(int const ch, int const roc, int const col, int cons
   return charge;
 }
 
-void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName)
+void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
 {
   
   std::cout << "ReadGainCalFile" << std::endl;
@@ -178,7 +179,7 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName)
   printf("PLTGainCal sees a parameter file with %i params\n", fNParams);
 
   if (fIsExternalFunction) {
-    ReadGainCalFileExt(GainCalFileName);
+    ReadGainCalFileExt(GainCalFileName, roc);
   } else {
     if (fNParams == 5) {
       ReadGainCalFile5(GainCalFileName);
@@ -321,8 +322,8 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
   std::string PixWord;
 
   // Just check this number to make sure it's the right size...
-  float Coefs[6];
-  if (fNParams > 6) {
+  float Coefs[4];
+  if (fNParams > 4) {
     std::cerr << "ERROR: NParams is too huge PLTGainCal::ReadGainCalFileExt()" << std::endl;
     exit(1);
   }
@@ -378,7 +379,7 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
 
 void PLTGainCal::CheckGainCalFile(std::string const GainCalFileName, int const Channel)
 {
-  ReadGainCalFile(GainCalFileName);
+  ReadGainCalFile(GainCalFileName, 0);
 
   int const ich  = ChIndex(Channel);
 

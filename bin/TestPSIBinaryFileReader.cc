@@ -183,7 +183,7 @@ std::string GetCalibrationFilename(int telescopeID){
   else if (telescopeID == 6)
     return "GKCalibrationList_Telescope6.txt";
   else if (telescopeID == 7)
-    return "GKCalibrationList_Telescope5.txt";
+    return "GKCalibrationList_Telescope7.txt";
   else if (telescopeID == -1)
     return "GKCalibrationList_Telescope5.txt";
   else{
@@ -213,6 +213,14 @@ int GetNumberOfROCS(int telescopeID){
 int GetUseGainInterpolator(int telescopeID){
 
   if (telescopeID == 2)
+    return true;
+  else
+    return false;
+}
+
+int GetUseExternalCalibrationFunction(int telescopeID){
+
+  if (telescopeID == 7)
     return true;
   else
     return false;
@@ -472,7 +480,8 @@ void TestPlaneEfficiency (std::string const InFileName,
 			       GetCalibrationFilename(telescopeID),
 			       GetAlignmentFilename(telescopeID), 
 			       GetNumberOfROCS(telescopeID),
-			       GetUseGainInterpolator(telescopeID)
+			       GetUseGainInterpolator(telescopeID),
+			       GetUseExternalCalibrationFunction(telescopeID)
 			       );
   }
   else{
@@ -480,7 +489,8 @@ void TestPlaneEfficiency (std::string const InFileName,
 				 GetCalibrationFilename(telescopeID),
 				 GetAlignmentFilename(telescopeID), 
 				 GetNumberOfROCS(telescopeID),
-				 GetUseGainInterpolator(telescopeID)
+				 GetUseGainInterpolator(telescopeID),
+				 GetUseExternalCalibrationFunction(telescopeID)
 				 );
     ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
   }
@@ -1210,7 +1220,8 @@ int TestPlaneEfficiencySilicon (std::string const InFileName,
 			       GetCalibrationFilename(telescopeID),
 			       GetAlignmentFilename(telescopeID), 
 			       GetNumberOfROCS(telescopeID),
-			       GetUseGainInterpolator(telescopeID)
+			       GetUseGainInterpolator(telescopeID),
+			       GetUseExternalCalibrationFunction(telescopeID)
 			       );
   }
   else{
@@ -1218,7 +1229,8 @@ int TestPlaneEfficiencySilicon (std::string const InFileName,
 				 GetCalibrationFilename(telescopeID),
 				 GetAlignmentFilename(telescopeID), 
 				 GetNumberOfROCS(telescopeID),
-				 GetUseGainInterpolator(telescopeID)
+				 GetUseGainInterpolator(telescopeID),
+				 GetUseExternalCalibrationFunction(telescopeID)
 				 );
     ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
   }
@@ -1345,7 +1357,8 @@ int TestPSIBinaryFileReader (std::string const InFileName,
 			       GetCalibrationFilename(telescopeID),
 			       GetAlignmentFilename(telescopeID), 
 			       GetNumberOfROCS(telescopeID),
-			       GetUseGainInterpolator(telescopeID)
+			       GetUseGainInterpolator(telescopeID),
+			       GetUseExternalCalibrationFunction(telescopeID)
 			       );
   }
   else{
@@ -1353,7 +1366,8 @@ int TestPSIBinaryFileReader (std::string const InFileName,
 				 GetCalibrationFilename(telescopeID),
 				 GetAlignmentFilename(telescopeID), 
 				 GetNumberOfROCS(telescopeID),
-				 GetUseGainInterpolator(telescopeID)
+				 GetUseGainInterpolator(telescopeID),
+				 GetUseExternalCalibrationFunction(telescopeID)
 				 );
     ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
   }
@@ -2145,7 +2159,8 @@ int DoAlignment (std::string const InFileName,
 			       GetCalibrationFilename(telescopeID),
 			       GetAlignmentFilename(telescopeID), 
 			       GetNumberOfROCS(telescopeID),
-			       GetUseGainInterpolator(telescopeID)
+			       GetUseGainInterpolator(telescopeID),
+			       GetUseExternalCalibrationFunction(telescopeID)
 			       );
   }
   else{
@@ -2153,7 +2168,8 @@ int DoAlignment (std::string const InFileName,
 				 GetCalibrationFilename(telescopeID),
 				 GetAlignmentFilename(telescopeID, true), 
 				 GetNumberOfROCS(telescopeID),
-				 GetUseGainInterpolator(telescopeID)
+				 GetUseGainInterpolator(telescopeID),
+				 GetUseExternalCalibrationFunction(telescopeID)
 				 );
     ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
   }
@@ -2509,7 +2525,8 @@ int FindResiduals(std::string const InFileName,
 			       GetCalibrationFilename(telescopeID),
 			       GetAlignmentFilename(telescopeID), 
 			       GetNumberOfROCS(telescopeID),
-			       GetUseGainInterpolator(telescopeID)
+			       GetUseGainInterpolator(telescopeID),
+			       GetUseExternalCalibrationFunction(telescopeID)
 			       );
   }
   else{
@@ -2517,7 +2534,8 @@ int FindResiduals(std::string const InFileName,
 				 GetCalibrationFilename(telescopeID),
 				 GetAlignmentFilename(telescopeID), 
 				 GetNumberOfROCS(telescopeID),
-				 GetUseGainInterpolator(telescopeID)
+				 GetUseGainInterpolator(telescopeID),
+				 GetUseExternalCalibrationFunction(telescopeID)
 				 );
     ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
   }

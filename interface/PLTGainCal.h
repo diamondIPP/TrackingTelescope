@@ -21,7 +21,7 @@ class PLTGainCal
 {
   public:
     PLTGainCal ();
-    PLTGainCal (int); // init with number of ROCs
+    PLTGainCal (int, bool); // number of ROCs, isExternalFunction
     PLTGainCal (std::string const, int const NParams = 5);
     ~PLTGainCal ();
 
@@ -30,7 +30,7 @@ class PLTGainCal
 
     void  SetCharge (PLTHit&);
     float GetCharge(int const ch, int const roc, int const col, int const row, int adc);
-    void  ReadGainCalFile (std::string const GainCalFileName);
+    void  ReadGainCalFile (std::string const GainCalFileName, int roc);
     void  ReadGainCalFile3 (std::string const GainCalFileName);
     void  ReadGainCalFile5 (std::string const GainCalFileName);
     void  ReadGainCalFileExt (std::string const GainCalFileName, int const roc = 0);

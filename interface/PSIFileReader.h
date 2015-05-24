@@ -16,6 +16,7 @@ class PSIFileReader : public PLTTelescope, public PLTTracking
   PSIFileReader (std::string const, 
 		 std::string const, 
 		 int const, 
+		 bool const,
 		 bool const);
 
     virtual ~PSIFileReader (){};

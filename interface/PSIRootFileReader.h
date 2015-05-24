@@ -13,6 +13,7 @@ class PSIRootFileReader : public PSIFileReader
 		       std::string const, 
 		       std::string const,
 		       int const,
+		       bool const,
 		       bool const);
     ~PSIRootFileReader ();
 

@@ -16,9 +16,11 @@
 PSIFileReader::PSIFileReader (std::string const CalibrationList,
 			      std::string const AlignmentFileName,
 			      int const nrocs, 
-			      bool const useGainInterpolator) :   PLTTracking(nrocs),
+			      bool const useGainInterpolator,
+			      bool const useExternalCalibrationFunction
+			      ) :   PLTTracking(nrocs),
 								  NMAXROCS(nrocs), 
-								  fGainCal(nrocs),
+								  fGainCal(nrocs, useExternalCalibrationFunction),
 								  fUseGainInterpolator(useGainInterpolator){
 
   // Initialize fCalibrationFile and fRawCalibrationFile with empty
@@ -39,14 +41,22 @@ PSIFileReader::PSIFileReader (std::string const CalibrationList,
   for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
     fCL >> fCalibrationFile[i_roc];    
 
-  for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
-    fCL >> fRawCalibrationFile[i_roc];
+  // Only look for additional files if we want to use the GainInterpolator
+  if (useGainInterpolator){
+    for (int i_roc=0; i_roc != NMAXROCS; i_roc++){
+      fCL >> fRawCalibrationFile[i_roc];
+    }
+  }
 
   for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
-    fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[i_roc]);
+    fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[i_roc], i_roc);
 
-  for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
-    fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[i_roc], i_roc);
+  // Only read-in additional files if we want to use the GainInterpolator
+  if (useGainInterpolator){
+    for (int i_roc=0; i_roc != NMAXROCS; i_roc++){
+      fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[i_roc], i_roc);
+    }
+  }
 
   fAlignment.ReadAlignmentFile(AlignmentFileName);
   SetTrackingAlignment(&fAlignment);

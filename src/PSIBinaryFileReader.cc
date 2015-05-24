@@ -17,11 +17,14 @@ PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
                                           std::string const CalibrationList,
                                           std::string const AlignmentFileName,
 					  int const nrocs,
-					  bool const useGainInterpolator
+					  bool const useGainInterpolator,
+					  bool const useExternalCalibrationFunction
 					  ) : PSIFileReader(CalibrationList,
 							    AlignmentFileName,
 							    nrocs,
-							    useGainInterpolator)
+							    useGainInterpolator,
+							    useExternalCalibrationFunction
+							    )
 {
  
  // constructor
