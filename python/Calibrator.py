@@ -25,7 +25,7 @@ hi_range_string = "High range:"
 
 hi_range_factor = 7
 
-produce_debugplots = False
+produce_debugplots = True
 
 output_header = "Parameters of the vcal vs. pulse height fits"
 
@@ -122,7 +122,7 @@ for line in in_f:
     
     if produce_debugplots:
         gr.Draw("APL*")    
-        c1.Print("debugplots/Pix_{0}_{1}.gif".format(atoms[pix_index+1], atoms[pix_index+2]))
+        c1.Print("debugplots/Pix_{0}_{1}.pdf".format(atoms[pix_index+1], atoms[pix_index+2]))
 
     out_string = "{0} {1} {2} {3}    Pix {4} {5}".format( fun.GetParameter(0),
                                                           fun.GetParameter(1),
