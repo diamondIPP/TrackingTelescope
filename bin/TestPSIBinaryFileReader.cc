@@ -1653,7 +1653,7 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   if (GetUseRootInput(telescopeID) && (telescopeID==7)){
 
     std::string newfile_name = InFileName.c_str(); // force deepcopy
-    newfile_name.insert(4, "_withTracks_");
+    newfile_name.insert(int(newfile_name.length()-5), "_withTracks");
     
     intree = ((PSIRootFileReader*) FR)->fTree;
     newfile = new TFile(newfile_name.c_str(), "RECREATE");
