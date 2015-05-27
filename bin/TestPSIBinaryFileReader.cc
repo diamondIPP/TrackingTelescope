@@ -3013,8 +3013,10 @@ int main (int argc, char* argv[])
   std::string const InFileName = argv[1];
   TString const FullRunName = InFileName;
   Int_t const Index = FullRunName.Index("test",0);
-  TString const RunNumber = FullRunName(Index+4,6);
+  TString const RunNumber = FullRunName(Index+4,9);
   gSystem->mkdir("./plots/" + RunNumber);
+
+  gROOT->ProcessLine("#include <vector>");
 
   // 0: Analysis
   // 1: Alignment
