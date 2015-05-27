@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <numeric>
 #include <string>
+#include <sstream>
 
 #include "TLegend.h"
 #include "TLegendEntry.h"
@@ -1652,7 +1653,11 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   // twice
   if (GetUseRootInput(telescopeID) && (telescopeID==7)){
 
-    std::string newfile_name = InFileName.c_str(); // force deepcopy
+    // Extract filename if a full path is given
+    std::stringstream ss(InFileName);
+    std::string newfile_name;
+    while (std::getline(ss, newfile_name, '/')){}
+    
     newfile_name.insert(int(newfile_name.length()-5), "_withTracks");
     
     intree = ((PSIRootFileReader*) FR)->fTree;
