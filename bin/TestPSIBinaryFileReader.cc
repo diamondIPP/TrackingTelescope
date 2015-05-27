@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <numeric>
+#include <string>
 
 #include "TLegend.h"
 #include "TLegendEntry.h"
@@ -474,7 +475,7 @@ void TestPlaneEfficiency (std::string const InFileName,
 
   // Initialize Reader
   PSIFileReader * FR;
-
+  
   if (GetUseRootInput(telescopeID)){
     FR = new PSIRootFileReader(InFileName,
 			       GetCalibrationFilename(telescopeID),
@@ -482,7 +483,7 @@ void TestPlaneEfficiency (std::string const InFileName,
 			       GetNumberOfROCS(telescopeID),
 			       GetUseGainInterpolator(telescopeID),
 			       GetUseExternalCalibrationFunction(telescopeID)
-			       );
+			       );    
   }
   else{
     FR = new PSIBinaryFileReader(InFileName,
@@ -1635,22 +1636,36 @@ int TestPSIBinaryFileReader (std::string const InFileName,
   // "times" for counting
   int const StartTime = 0;
   int ThisTime;
+
+  // Create a couple of pointers we only need when using root file
+  // input to add the tracks to the output
+  TTree * intree;
+  TFile *newfile;
+  TTree *newtree;
   
-  long long br_time;
-  int br_ievent;
   int br_hit_plane_bits;
-  float br_track_x, br_track_y;
+  float br_diam1_track_x, br_diam1_track_y;
+  float br_diam2_track_x, br_diam2_track_y;
 
-  // tree for timing information
-  out_f->cd();
-  TTree *time_tree = new TTree("time_tree", "time_tree");
+  // Pointer to the actual input root tree. Only works for the
+  // root-file producer. Ugly hack to avoid opening the same ROOT file
+  // twice
+  if (GetUseRootInput(telescopeID) && (telescopeID==7)){
 
-  time_tree->Branch("time", &br_time);
-  time_tree->Branch("ievent", &br_ievent);
-  time_tree->Branch("hit_plane_bits", &br_hit_plane_bits);
-  time_tree->Branch("track_x", &br_track_x);
-  time_tree->Branch("track_y", &br_track_y);
-  
+    std::string newfile_name = InFileName;
+    newfile_name.insert(4, "_withTracks_");
+    
+    intree = ((PSIRootFileReader*) FR)->fTree;
+    newfile = new TFile(newfile_name.c_str(), "RECREATE");
+    newtree = intree->CloneTree(0); // Do no copy the data yet
+    
+    newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
+    newtree->Branch("diam1_track_x", &br_diam1_track_x);
+    newtree->Branch("diam1_track_y", &br_diam1_track_y);
+    newtree->Branch("diam2_track_x", &br_diam2_track_x);
+    newtree->Branch("diam2_track_y", &br_diam2_track_y);
+  }
+     
   // Event Loop
   for (int ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
@@ -1662,25 +1677,30 @@ int TestPSIBinaryFileReader (std::string const InFileName,
     }
 
     // Write out information for PAD studies
-    br_time = FR->GetTime();
-    br_ievent = ievent;
-    br_hit_plane_bits = FR->HitPlaneBits();
+    if (GetUseRootInput(telescopeID)){
+      
+      br_hit_plane_bits = FR->HitPlaneBits();
 
-    // Add track info    
-    if (FR->NTracks()==1){
-      PLTTrack* Track = FR->Track(0);
-      // Plane 1 is at 2 cm and plane 2 at 8 cm so 5 cm should be the middle
-      br_track_x = Track->ExtrapolateX(5.);
-      br_track_y = Track->ExtrapolateY(5.);      
-    }
-    else {
-      br_track_x = -999.;
-      br_track_y = -999.;
-    }
-        
-    // Done with timing tree
+      float diam1_z = 3.5; // cm from front (front diamond)
+      float diam2_z = 5.5; 
 
-    time_tree->Fill();
+      // Add track info    
+      if (FR->NTracks()==1){
+	PLTTrack* Track = FR->Track(0);
+	br_diam1_track_x = Track->ExtrapolateX(diam1_z);
+	br_diam1_track_y = Track->ExtrapolateY(diam1_z);      
+	br_diam2_track_x = Track->ExtrapolateX(diam2_z);
+	br_diam2_track_y = Track->ExtrapolateY(diam2_z);      
+      }
+      else {
+	br_diam1_track_x = -999.;
+	br_diam1_track_y = -999.;
+	br_diam2_track_x = -999.;
+	br_diam2_track_y = -999.;
+      }
+      newtree->Fill();
+    }     
+
 
     hCoincidenceMap.Fill(FR->HitPlaneBits());
 
@@ -1842,25 +1862,29 @@ int TestPSIBinaryFileReader (std::string const InFileName,
 
 
   // Catch up on PH by time graph
-    for (int i = 0; i != NROC; ++i) {
-      for (int j = 0; j != 4; ++j) {
-        gAvgPH[i][j].Set(NGraphPoints+1);
-        gAvgPH[i][j].SetPoint(NGraphPoints, NGraphPoints*TimeWidth + TimeWidth/2, AvgPH[i][j]);
-        gAvgPH[i][j].SetPointError(NGraphPoints, TimeWidth/2, AvgPH[i][j]/sqrt((float) NAvgPH[i][j]));
-        printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, NAvgPH[i][j], AvgPH[i][j]);
-        NAvgPH[i][j] = 0;
-        AvgPH[i][j] = 0;
-      }
+  for (int i = 0; i != NROC; ++i) {
+    for (int j = 0; j != 4; ++j) {
+      gAvgPH[i][j].Set(NGraphPoints+1);
+      gAvgPH[i][j].SetPoint(NGraphPoints, NGraphPoints*TimeWidth + TimeWidth/2, AvgPH[i][j]);
+      gAvgPH[i][j].SetPointError(NGraphPoints, TimeWidth/2, AvgPH[i][j]/sqrt((float) NAvgPH[i][j]));
+      printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, NAvgPH[i][j], AvgPH[i][j]);
+      NAvgPH[i][j] = 0;
+      AvgPH[i][j] = 0;
     }
-    ++NGraphPoints;
+  }
+  ++NGraphPoints;
 
-
-
+  
+  // Store root file with added tracking info
+  if (GetUseRootInput(telescopeID)){
+    newfile->cd();
+    newtree->Write();
+  }
+  
   TCanvas Can;
   Can.cd();
-
+  
   out_f->cd();
-  time_tree->Write();
 
   for (int iroc = 0; iroc != NROC; ++iroc) {
 
@@ -2520,7 +2544,7 @@ int FindResiduals(std::string const InFileName,
   // Initialize Reader
   PSIFileReader * FR;
 
-  if (GetUseRootInput(telescopeID)){
+  if (GetUseRootInput(telescopeID)) {
     FR = new PSIRootFileReader(InFileName,
 			       GetCalibrationFilename(telescopeID),
 			       GetAlignmentFilename(telescopeID), 

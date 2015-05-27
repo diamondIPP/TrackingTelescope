@@ -21,10 +21,14 @@ class PSIRootFileReader : public PSIFileReader
     void ResetFile ();
     int GetNextEvent ();
 
+    // Make tree accessible
+    TTree * fTree;
+    TFile * fRootFile;
+
   private:
     std::string fFileName;
-    TFile * fRootFile;
-    TTree * fTree;
+
+
 
     //  Current entry and total number of entries
     int fAtEntry;
