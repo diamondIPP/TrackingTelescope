@@ -140,7 +140,7 @@ std::string GetAlignmentFilename(int telescopeID, bool useInitial=0){
     else if (telescopeID==6)
       return "ALIGNMENT/Alignment_ETHTelescope_4planesCERN_run71.dat";
     else if (telescopeID==7)
-      return "ALIGNMENT/Alignment_ETHTelescope_initial_telescope7.dat";
+      return "ALIGNMENT/Alignment_ETHTelescope_telescope7.dat";
     else if (telescopeID==-1)
       return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
 
