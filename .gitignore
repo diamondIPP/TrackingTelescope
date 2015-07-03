@@ -83,4 +83,10 @@ TestPSIGainInterpolator
 plots-*
 python/small-angle/
 python/wide-angle/
+*.root
+*~
+tracking.cbp
+tracking.cbp.save
+tracking.layout.save
+src/TestBinaryFileReader.cc.save
 

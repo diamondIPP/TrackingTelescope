@@ -29,6 +29,9 @@
 
 #include "PSIBinaryFileReader.h"
 #include "PSIRootFileReader.h"
+#include "GetNames.h"
+#include "TestPlaneEfficiencySilicon.h"
+#include "TestBinaryFileReader.h"
 
 #include "PLTPlane.h"
 #include "PLTAlignment.h"
@@ -71,19 +74,19 @@ void FillIth(TH3F *h, int px, int py, std::vector<T> values, int i, bool fill_wh
 // Helper function for sorting a <int, float> pair according to the float
 bool PairSort( std::pair<int, float> i, std::pair<int, float> j) { return (i.second < j.second); }
 
-std::pair<int, float> FindILowestIndexAndValue( std::vector<float> values, int i=0){
+std::pair<int, float> FindILowestIndexAndValue( std::vector<float> values, uint32_t i=0){
 
     std::vector<std::pair<int, float> > index_and_values;
 
     if (DEBUG){
         std::cout << "FindILowestIndexAndValue, before sort: ";
-        for (int iv = 0; iv != values.size(); iv++)
+        for (uint32_t iv = 0; iv != values.size(); iv++)
             std::cout << values[iv] << " ";
         std::cout << endl;
     }
 
     // SORT
-    for (int iv = 0; iv != values.size(); iv++)
+    for (uint32_t iv = 0; iv != values.size(); iv++)
         index_and_values.push_back(std::make_pair(iv, values[iv]));
 
 
@@ -91,7 +94,7 @@ std::pair<int, float> FindILowestIndexAndValue( std::vector<float> values, int i
 
    if (DEBUG){
         std::cout << "FindILowestIndexAndValue, after sort: ";
-        for (int iv = 0; iv != index_and_values.size(); iv++)
+        for (uint32_t iv = 0; iv != index_and_values.size(); iv++)
             std::cout << index_and_values[iv].second << " ";
         std::cout << endl;
     }
@@ -107,134 +110,6 @@ std::pair<int, float> FindILowestIndexAndValue( std::vector<float> values, int i
 
 }
 
-
-std::string GetAlignmentFilename(int telescopeID, bool useInitial=0){
-
-  // Get the correct Alignment for a given telescope
-  // Initial Alignment (start values for finding alignment)
-  if (useInitial){
-    if ((telescopeID==1) || (telescopeID==2) ){
-      return "ALIGNMENT/Alignment_ETHTelescope_initial.dat";
-    }
-    else if (telescopeID==7){
-      return "ALIGNMENT/Alignment_ETHTelescope_initial_telescope7.dat";
-    }
-    else if ((telescopeID==5) || (telescopeID==6) || (telescopeID==-1)){
-      return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
-    }
- 
-    else{
-      std::cout << "ERROR: No Initial-Alignment file for telescopeID=" << telescopeID << std::endl;
-      std::cout << "Exiting.." << std::endl;
-      std::exit(0);
-    }
-  }
-  // Real Alignment
-  else{
-    if (telescopeID==1)
-      return "ALIGNMENT/Alignment_ETHTelescope_run316.dat";
-    else if (telescopeID==2)
-      return "ALIGNMENT/Alignment_ETHTelescope_run466.dat";
-    else if (telescopeID==5)
-      return "ALIGNMENT/Alignment_ETHTelescope_4planes_run63.dat";
-    else if (telescopeID==6)
-      return "ALIGNMENT/Alignment_ETHTelescope_4planesCERN_run71.dat";
-    else if (telescopeID==7)
-      return "ALIGNMENT/Alignment_ETHTelescope_telescope7.dat";
-    else if (telescopeID==-1)
-      return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
-
-    else{
-      std::cout << "ERROR: No Alignment file for telescopeID=" << telescopeID << std::endl;
-      std::cout << "Exiting.." << std::endl;
-      std::exit(0);
-    }
-  }
-}
-
-
-std::string GetMaskingFilename(int telescopeID){
-
-  if (telescopeID == 1)
-    return "outerPixelMask_Telescope1.txt";
-  else if (telescopeID == 2)
-    return "outerPixelMask_Telescope2.txt";
-  else if (telescopeID == 5)
-    return "outerPixelMask_Telescope5.txt";
-  else if (telescopeID == 6)
-    return "outerPixelMask_Telescope6.txt";
-  else if (telescopeID == 7)
-    return "outerPixelMask_Telescope7.txt";
-  else if (telescopeID == -1)
-    return "outerPixelMask_Telescope5.txt";
-  else{
-    std::cout << "ERROR: No Masking file for telescopeID=" << telescopeID << std::endl;
-    std::cout << "Exiting.." << std::endl;
-    std::exit(0);
-  }
-}
-
-std::string GetCalibrationFilename(int telescopeID){
-
-  if (telescopeID == 1)
-    return "GKCalibrationList.txt";
-  else if (telescopeID == 2)
-    return "GKCalibrationList_Telescope2.txt";
-  else if (telescopeID == 5)
-    return "GKCalibrationList_Telescope5.txt";
-  else if (telescopeID == 6)
-    return "GKCalibrationList_Telescope6.txt";
-  else if (telescopeID == 7)
-    return "GKCalibrationList_Telescope7.txt";
-  else if (telescopeID == -1)
-    return "GKCalibrationList_Telescope5.txt";
-  else{
-    std::cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << std::endl;
-    std::cout << "Exiting.." << std::endl;
-    std::exit(0);
-  }
-}
-
-
-
-int GetNumberOfROCS(int telescopeID){
-
-  if ((telescopeID == 1) || (telescopeID == 2) || (telescopeID == 3))
-    return 6;
-  else if (telescopeID == 4)
-    return 2;
-  else if ((telescopeID == 5) || (telescopeID == 6) || (telescopeID == 7) || (telescopeID == -1))
-    return 4;
-  else{
-    std::cout << "ERROR: Number of ROCs not defined for telescopeID=" << telescopeID << std::endl;
-    std::cout << "Exiting.." << std::endl;
-    std::exit(0);
-  }
-}
-
-int GetUseGainInterpolator(int telescopeID){
-
-  if (telescopeID == 2)
-    return true;
-  else
-    return false;
-}
-
-int GetUseExternalCalibrationFunction(int telescopeID){
-
-  if (telescopeID == 7)
-    return true;
-  else
-    return false;
-}
-
-int GetUseRootInput(int telescopeID){
-
-  if ((telescopeID == -1) || (telescopeID == 7))
-    return true;
-  else
-    return false;
-}
 
 
 bool CheckEllipse(float dx, float dy, float max_dx, float max_dy){
@@ -476,31 +351,31 @@ void TestPlaneEfficiency (std::string const InFileName,
 
   // Initialize Reader
   PSIFileReader * FR;
-  
+
   if (GetUseRootInput(telescopeID)){
     FR = new PSIRootFileReader(InFileName,
 			       GetCalibrationFilename(telescopeID),
-			       GetAlignmentFilename(telescopeID), 
+			       GetAlignmentFilename(telescopeID),
 			       GetNumberOfROCS(telescopeID),
 			       GetUseGainInterpolator(telescopeID),
 			       GetUseExternalCalibrationFunction(telescopeID)
-			       );    
+			       );
   }
   else{
     FR = new PSIBinaryFileReader(InFileName,
 				 GetCalibrationFilename(telescopeID),
-				 GetAlignmentFilename(telescopeID), 
+				 GetAlignmentFilename(telescopeID),
 				 GetNumberOfROCS(telescopeID),
 				 GetUseGainInterpolator(telescopeID),
 				 GetUseExternalCalibrationFunction(telescopeID)
 				 );
     ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
   }
-  
+
   FR->GetAlignment()->SetErrors(telescopeID);
   FR->SetPlaneUnderTest(plane_under_test);
-  
-  // Apply Masking 
+
+  // Apply Masking
   FR->ReadPixelMask(GetMaskingFilename(telescopeID));
 
   // Prepare Occupancy histograms
@@ -618,7 +493,7 @@ void TestPlaneEfficiency (std::string const InFileName,
     int i_slice = ievent/slice_size;
     if (i_slice==n_slices)
         i_slice--;
- 
+
     // require exactly one track
     if (FR->NTracks() == 1){
 
@@ -646,7 +521,7 @@ void TestPlaneEfficiency (std::string const InFileName,
         continue;
       if (FR->Track(0)->Chi2Y() > 6.25)
         continue;
-    
+
       hAngleAfterChi2X.Fill(angleX);
       hAngleAfterChi2Y.Fill(angleY);
 
@@ -826,17 +701,17 @@ void TestPlaneEfficiency (std::string const InFileName,
       FillIth(&h2ndCharge3ADC, px, py, adcs_in_ell_3, -2, false);
       FillIth(&h2ndCharge4ADC, px, py, adcs_in_ell_4, -2, false);
 
-      
-      if (charges_in_ell_4.size() == 1){      
+
+      if (charges_in_ell_4.size() == 1){
 	hCS1_1stCharge.Fill(charges_in_ell_4[0]);
 	hCS1_SumCharge.Fill(charges_in_ell_4[0]);
       }
 
-      if (charges_in_ell_4.size() == 2){      
+      if (charges_in_ell_4.size() == 2){
 	  hCS2_1stCharge.Fill(charges_in_ell_4[1]);
-	  hCS2_2ndCharge.Fill(charges_in_ell_4[0]);	  
+	  hCS2_2ndCharge.Fill(charges_in_ell_4[0]);
 	  hCS2_SumCharge.Fill(charges_in_ell_4[0]+charges_in_ell_4[1]);
-	  
+
 	  if (rand() % 2 == 1)
 	    hCS2_2D.Fill(charges_in_ell_4[0], charges_in_ell_4[1]);
 	  else
@@ -844,21 +719,21 @@ void TestPlaneEfficiency (std::string const InFileName,
 
       }
 
-      if (charges_in_ell_4.size() == 3){      
-    	  hCS3_1stCharge.Fill(charges_in_ell_4[2]);	  
-	  hCS3_2ndCharge.Fill(charges_in_ell_4[1]);	  
-	  hCS3_3rdCharge.Fill(charges_in_ell_4[0]);	  	  
+      if (charges_in_ell_4.size() == 3){
+    	  hCS3_1stCharge.Fill(charges_in_ell_4[2]);
+	  hCS3_2ndCharge.Fill(charges_in_ell_4[1]);
+	  hCS3_3rdCharge.Fill(charges_in_ell_4[0]);
 	  hCS3_SumCharge.Fill(charges_in_ell_4[0]+charges_in_ell_4[1]+charges_in_ell_4[2]);
-      }			
+      }
 
-      if (charges_in_ell_4.size() == 4){      
-	hCS4_1stCharge.Fill(charges_in_ell_4[3]);	  
-	hCS4_2ndCharge.Fill(charges_in_ell_4[2]);	  
-	hCS4_3rdCharge.Fill(charges_in_ell_4[1]);	  
-	hCS4_4thCharge.Fill(charges_in_ell_4[0]);	  
+      if (charges_in_ell_4.size() == 4){
+	hCS4_1stCharge.Fill(charges_in_ell_4[3]);
+	hCS4_2ndCharge.Fill(charges_in_ell_4[2]);
+	hCS4_3rdCharge.Fill(charges_in_ell_4[1]);
+	hCS4_4thCharge.Fill(charges_in_ell_4[0]);
 	hCS4_SumCharge.Fill(charges_in_ell_4[0]+charges_in_ell_4[1]+charges_in_ell_4[2]+charges_in_ell_4[3]);
-      }			
-      
+      }
+
 
 
 
@@ -1184,973 +1059,9 @@ void TestPlaneEfficiency (std::string const InFileName,
 
 }
 
-int TestPlaneEfficiencySilicon (std::string const InFileName,
-                                 TFile * out_f,
-                                 TString const RunNumber,
-                                 int telescopeID)
-{
-  /* TestPlaneEfficiencySilicon
+int TestPlaneEfficiencySilicon(std::string const InFileName, TFile * out_f,
+                                TString const RunNumber, int telescopeID);
 
-  o) Consider one plane to be the plane under test
-  o) Require at least one hit in both silicon planes
-  o) Check if we have a hit in the other planes
-  */
-
-  // TODO: Currently hard coded number of planes
-  // Was fine as we only did pixel-analysis (where this is called)
-  // with a six-plane telescope before.
-  // Fix this!
-
-  if (DEBUG)
-    std::cout << "DEBUG: Entering TestPlaneEfficiencySilicon" << std::endl;
-
-  gStyle->SetOptStat(0);
-  TString const PlotsDir = "plots/";
-  TString const OutDir = PlotsDir + RunNumber + "/";
-
-
-  // Initialize Reader
-  if (DEBUG)
-    std::cout << "DEBUG: Initializing BinaryFileReader" << std::endl;
-
-  
-  // Initialize Reader
-  PSIFileReader * FR;
-
-  if (GetUseRootInput(telescopeID)){
-    FR = new PSIRootFileReader(InFileName,
-			       GetCalibrationFilename(telescopeID),
-			       GetAlignmentFilename(telescopeID), 
-			       GetNumberOfROCS(telescopeID),
-			       GetUseGainInterpolator(telescopeID),
-			       GetUseExternalCalibrationFunction(telescopeID)
-			       );
-  }
-  else{
-    FR = new PSIBinaryFileReader(InFileName,
-				 GetCalibrationFilename(telescopeID),
-				 GetAlignmentFilename(telescopeID), 
-				 GetNumberOfROCS(telescopeID),
-				 GetUseGainInterpolator(telescopeID),
-				 GetUseExternalCalibrationFunction(telescopeID)
-				 );
-    ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
-  }
-
-  FR->GetAlignment()->SetErrors(telescopeID);
-
-  // Apply Masking
-  // TODO: More dynamic selection of masking for this
-  FR->ReadPixelMask("outerPixelMask_forSiEff.txt");
-
-  // numerators and denominators for efficiency calculation
-  std::vector<int> nums(6);
-  std::vector<int> denoms(6);
-  for (int i = 0; i != 6; i++){
-    nums[i]   = 0;
-    denoms[i] = 0;
-  }
-
-  int n_events = 0;
-  // Event Loop
-  for (int ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
-
-    n_events++;
-
-    // print progress
-    if (ievent % 10000 == 0) {
-      std::cout << "Processing event: " << ievent << std::endl;
-    }
-
-    // Initializes all planes as un-hit
-    std::vector<bool> plane_is_hit;
-    for (int i=0;i!=6;i++)
-      plane_is_hit.push_back(false);
-
-    // then loop and see where we have a hit
-    for (int ihit = 0; ihit != FR->NHits(); ++ihit)
-      plane_is_hit[ FR->Hit(ihit)->ROC() ] = true;
-
-    // Check for Coincidence of silicon hits
-    if (plane_is_hit[0] && plane_is_hit[5]){
-
-      // Increment denominators
-      for (int i = 0; i != 6; i++)
-        denoms[i]++;
-
-      // Increment numerators
-      for (int i = 0; i != 6; i++)
-        if (plane_is_hit[i])
-          nums[i]++;
-    }
-
-  } // End of Event Loop
-
-  out_f->cd();
-
-  // Store the numerators and denominators to the file
-  for (int i=0; i!=6; i++){
-
-    // Numerator
-    TParameter<int> n;
-    n.SetVal( nums[i]);
-    n.Write( Form("SiliconEfficiencyNumeratorROC%i",i));
-
-    // denominator
-    TParameter<int> d;
-    d.SetVal( denoms[i]);
-    d.Write( Form("SiliconEfficiencyDenominatorROC%i",i));
-
-  }
-
-  if (DEBUG)
-    std::cout << "DEBUG: Leaving TestPlaneEfficiencySilicon" << std::endl;
-
-  delete FR;
-
-  return n_events;
-}
-
-
-
-
-int TestPSIBinaryFileReader (std::string const InFileName,
-                             TFile * out_f,
-                             TString const RunNumber,
-                             int telescopeID)
-{
-  // Run default analysis
-  const int NROC = GetNumberOfROCS(telescopeID);
-
-
-  // For Telescopes from May testbeam:
-  //   Do single plane studies
-  if ((telescopeID == 1) || (telescopeID == 2)){
-
-    int n_events = TestPlaneEfficiencySilicon(InFileName,
-					      out_f,
-					      RunNumber,
-					      telescopeID);
-    
-    for (int iplane=1; iplane != 5; iplane++){
-      std::cout << "Going to call TestPlaneEfficiency " << iplane << std::endl;
-
-      TestPlaneEfficiency(InFileName, 
-      			  out_f, 
-      			  RunNumber,
-                          iplane,
-                          n_events,
-                          telescopeID);
-    }
-  }
-
-  // Setup Output Directory and gStyle
-  TString const PlotsDir = "plots/";
-  TString const OutDir = PlotsDir + RunNumber + "/";
-  std::cout<<OutDir<<std::endl;
-  gStyle->SetOptStat(0);
-
-
-  // Initialize Reader
-  PSIFileReader * FR;
-
-  if (GetUseRootInput(telescopeID)){
-    FR = new PSIRootFileReader(InFileName,
-			       GetCalibrationFilename(telescopeID),
-			       GetAlignmentFilename(telescopeID), 
-			       GetNumberOfROCS(telescopeID),
-			       GetUseGainInterpolator(telescopeID),
-			       GetUseExternalCalibrationFunction(telescopeID)
-			       );
-  }
-  else{
-    FR = new PSIBinaryFileReader(InFileName,
-				 GetCalibrationFilename(telescopeID),
-				 GetAlignmentFilename(telescopeID), 
-				 GetNumberOfROCS(telescopeID),
-				 GetUseGainInterpolator(telescopeID),
-				 GetUseExternalCalibrationFunction(telescopeID)
-				 );
-    ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
-  }
-
-  FR->GetAlignment()->SetErrors(telescopeID);
-  FILE* f = fopen("MyGainCal.dat", "w");
-  FR->GetGainCal()->PrintGainCal(f);
-  fclose(f);
-
-  // Apply Masking
-  FR->ReadPixelMask(GetMaskingFilename(telescopeID));
-
-  // Prepare Occupancy histograms
-  // x == columns
-  // y == rows
-  std::vector< TH2F > hOccupancy;
-  for (int iroc = 0; iroc != NROC; ++iroc){
-    hOccupancy.push_back( TH2F( Form("Occupancy_ROC%i",iroc),
-                                Form("Occupancy_ROC%i",iroc), 52, 0, 52, 80, 0, 80));
-  }
-
-  // Track slope plots
-  TH1F hTrackSlopeX("TrackSlopeX", "TrackSlopeX", 50, -0.05, 0.05);
-  TH1F hTrackSlopeY("TrackSlopeY", "TrackSlopeY", 50, -0.05, 0.05);
-
-
-  std::vector<TH2F> hOccupancyLowPH;
-  for (int iroc = 0; iroc != NROC; ++iroc){
-    hOccupancyLowPH.push_back( TH2F( Form("OccupancyLowPH_ROC%i",iroc),
-                                Form("OccupancyLowPH_ROC%i",iroc), 52, 0, 52, 80, 0, 80));
-  }
-  std::vector<TH2F> hOccupancyHighPH;
-  for (int iroc = 0; iroc != NROC; ++iroc){
-    hOccupancyHighPH.push_back( TH2F( Form("OccupancyHighPH_ROC%i",iroc),
-                                Form("OccupancyHighPH_ROC%i",iroc), 52, 0, 52, 80, 0, 80));
-  }
-
-  std::vector<TH1F> hNHitsPerCluster;
-  for (int iroc = 0; iroc != NROC; ++iroc){
-    hNHitsPerCluster.push_back( TH1F( Form("NHitsPerCluster_ROC%i",iroc),
-                                Form("NHitsPerCluster_ROC%i",iroc), 10, 0, 10));
-  }
-
-  std::vector<TH1F> hNClusters;
-  for (int iroc = 0; iroc != NROC; ++iroc){
-    hNClusters.push_back( TH1F( Form("NClusters_ROC%i",iroc),
-                                Form("NClusters_ROC%i",iroc), 10, 0, 10));
-  }
-
-
-  // Coincidence histogram
-  TH1F hCoincidenceMap("CoincidenceMap", "CoincidenceMap", 0x3f, 0, 0x3f);
-  char *bin[0x40] = {
-      (char*)"000000"
-    , (char*)"000001"
-    , (char*)"000010"
-    , (char*)"000011"
-    , (char*)"000100"
-    , (char*)"000101"
-    , (char*)"000110"
-    , (char*)"000111"
-    , (char*)"001000"
-    , (char*)"001001"
-    , (char*)"001010"
-    , (char*)"001011"
-    , (char*)"001100"
-    , (char*)"001101"
-    , (char*)"001110"
-    , (char*)"001111"
-    , (char*)"010000"
-    , (char*)"010001"
-    , (char*)"010010"
-    , (char*)"010011"
-    , (char*)"010100"
-    , (char*)"010101"
-    , (char*)"010110"
-    , (char*)"010111"
-    , (char*)"011000"
-    , (char*)"011001"
-    , (char*)"011010"
-    , (char*)"011011"
-    , (char*)"011100"
-    , (char*)"011101"
-    , (char*)"011110"
-    , (char*)"011111"
-    , (char*)"100000"
-    , (char*)"100001"
-    , (char*)"100010"
-    , (char*)"100011"
-    , (char*)"100100"
-    , (char*)"100101"
-    , (char*)"100110"
-    , (char*)"100111"
-    , (char*)"101000"
-    , (char*)"101001"
-    , (char*)"101010"
-    , (char*)"101011"
-    , (char*)"101100"
-    , (char*)"101101"
-    , (char*)"101110"
-    , (char*)"101111"
-    , (char*)"110000"
-    , (char*)"110001"
-    , (char*)"110010"
-    , (char*)"110011"
-    , (char*)"110100"
-    , (char*)"110101"
-    , (char*)"110110"
-    , (char*)"110111"
-    , (char*)"111000"
-    , (char*)"111001"
-    , (char*)"111010"
-    , (char*)"111011"
-    , (char*)"111100"
-    , (char*)"111101"
-    , (char*)"111110"
-    , (char*)"111111"
-  };
-  hCoincidenceMap.SetBit(TH1::kCanRebin);
-  for (int r = 0; r < 0x40; ++r)
-  {
-    hCoincidenceMap.Fill(bin[r], 0);
-  }
-
-  hCoincidenceMap.LabelsDeflate();
-  hCoincidenceMap.SetFillColor(40);
-  hCoincidenceMap.SetYTitle("Number of Hits");
-  hCoincidenceMap.GetYaxis()->SetTitleOffset(1.9);
-  hCoincidenceMap.GetYaxis()->CenterTitle();
-
-  // Prepare PulseHeight histograms
-  TH1F* hPulseHeight[NROC][4];
-  int const phMin = 0;
-  int const phMax = 50000;
-  int const phNBins = 50;
-  // Standard
-  for (int iroc = 0; iroc != NROC; ++iroc) {
-    TString Name = TString::Format("PulseHeight_ROC%i_All", iroc);
-    hPulseHeight[iroc][0] = new TH1F(Name, Name, phNBins, phMin, phMax);
-    Name = TString::Format("PulseHeight_ROC%i_NPix1", iroc);
-    hPulseHeight[iroc][1] = new TH1F(Name, Name, phNBins, phMin, phMax);
-    Name = TString::Format("PulseHeight_ROC%i_NPix2", iroc);
-    hPulseHeight[iroc][2] = new TH1F(Name, Name, phNBins, phMin, phMax);
-    Name = TString::Format("PulseHeight_ROC%i_NPix3Plus", iroc);
-    hPulseHeight[iroc][3] = new TH1F(Name, Name, phNBins, phMin, phMax);
-  }
-  // Long Histogram (see the Protons)
-  TH1F* hPulseHeightLong[NROC][4];
-  int const phLongMax = 300000;
-  for (int iroc = 0; iroc != 6; ++iroc) {
-    TString Name = TString::Format("PulseHeightLong_ROC%i_All", iroc);
-    hPulseHeightLong[iroc][0] = new TH1F(Name, Name, phNBins, phMin, phLongMax);
-    Name = TString::Format("PulseHeightLong_ROC%i_NPix1", iroc);
-    hPulseHeightLong[iroc][1] = new TH1F(Name, Name, phNBins, phMin, phLongMax);
-    Name = TString::Format("PulseHeightLong_ROC%i_NPix2", iroc);
-    hPulseHeightLong[iroc][2] = new TH1F(Name, Name, phNBins, phMin, phLongMax);
-    Name = TString::Format("PulseHeightLong_ROC%i_NPix3Plus", iroc);
-    hPulseHeightLong[iroc][3] = new TH1F(Name, Name, phNBins, phMin, phLongMax);
-  }
-  // For Tracks, using additional selections
-  TH1F* hPulseHeightOffline[NROC][4];
-  for (int iroc = 0; iroc != NROC; ++iroc) {
-    TString Name = TString::Format("PulseHeightOffline_ROC%i_All", iroc);
-    hPulseHeightOffline[iroc][0] = new TH1F(Name, Name, phNBins, phMin, phMax);
-    Name = TString::Format("PulseHeightOffline_ROC%i_NPix1", iroc);
-    hPulseHeightOffline[iroc][1] = new TH1F(Name, Name, phNBins, phMin, phMax);
-    Name = TString::Format("PulseHeightOffline_ROC%i_NPix2", iroc);
-    hPulseHeightOffline[iroc][2] = new TH1F(Name, Name, phNBins, phMin, phMax);
-    Name = TString::Format("PulseHeightOffline_ROC%i_NPix3Plus", iroc);
-    hPulseHeightOffline[iroc][3] = new TH1F(Name, Name, phNBins, phMin, phMax);
-  }
-
-
-
-  int const HistColors[4] = { 1, 4, 28, 2 };
-  for (int iroc = 0; iroc != NROC; ++iroc) {
-    for (int inpix = 0; inpix != 4; ++inpix) {
-    hPulseHeight[iroc][inpix]->SetXTitle("Charge (electrons)");
-    hPulseHeight[iroc][inpix]->SetYTitle("Number of Clusters");
-    hPulseHeight[iroc][inpix]->SetLineColor(HistColors[inpix]);
-    hPulseHeightLong[iroc][inpix]->SetXTitle("Charge (electrons)");
-    hPulseHeightLong[iroc][inpix]->SetYTitle("Number of Clusters");
-    hPulseHeightLong[iroc][inpix]->SetLineColor(HistColors[inpix]);
-    hPulseHeightOffline[iroc][inpix]->SetXTitle("Charge (electrons)");
-    hPulseHeightOffline[iroc][inpix]->SetYTitle("Number of Clusters");
-    hPulseHeightOffline[iroc][inpix]->SetLineColor(HistColors[inpix]);
-    }
-  }
-
-  // 2D Pulse Height maps for All and Track6
-  double AvgPH2D[NROC][PLTU::NCOL][PLTU::NROW];
-  int NAvgPH2D[NROC][PLTU::NCOL][PLTU::NROW];
-  for (int i = 0; i != NROC; ++i) {
-    for (int icol = 0; icol != PLTU::NCOL; ++icol) {
-      for (int irow = 0; irow != PLTU::NROW; ++irow) {
-        AvgPH2D[i][icol][irow] = 0;
-        NAvgPH2D[i][icol][irow] = 0;
-      }
-    }
-  }
-
-  // Pulse height average counts and averages.  Also define TGraphs
-  int NAvgPH[NROC][4];
-  double AvgPH[NROC][4];
-  std::vector< std::vector< TGraphErrors > > gAvgPH;
-
-  for (int i = 0; i != NROC; ++i) {
-
-    std::vector< TGraphErrors > tmp_gr_vector;
-
-    for (int j = 0; j != 4; ++j) {
-      NAvgPH[i][j] = 0;
-      AvgPH[i][j] = 0;
-      TGraphErrors gr;
-      gr.SetName( Form("PulseHeightTime_ROC%i_NPix%i", i, j) );
-      gr.SetTitle( Form("Average Pulse Height ROC %i NPix %i", i, j) );
-      gr.GetXaxis()->SetTitle("Event Number");
-      gr.GetYaxis()->SetTitle("Average Pulse Height (electrons)");
-      gr.SetLineColor(HistColors[j]);
-      gr.SetMarkerColor(HistColors[j]);
-      gr.SetMinimum(0);
-      gr.SetMaximum(60000);
-      gr.GetXaxis()->SetTitle("Event Number");
-      gr.GetYaxis()->SetTitle("Average Pulse Height (electrons)");
-      tmp_gr_vector.push_back(gr);
-    }
-    gAvgPH.push_back(tmp_gr_vector);
-  }
-
-  // Track Chi2 Distribution
-  TH1F hChi2("Chi2", "Chi2", 240, 0., 60.);
-
-  // Track Chi2 Distribution
-  TH1F hChi2X("Chi2X", "Chi2X", 240, 0., 60.);
-
-  // Track Chi2 Distribution
-  TH1F hChi2Y("Chi2Y", "Chi2Y", 240, 0., 60.);
-
-
-
-  // Prepare Residual histograms
-  // hResidual:    x=dX / y=dY
-  // hResidualXdY: x=X  / y=dY
-  // hResidualYdX: x=Y  / y=dX
-  std::vector< TH2F > hResidual;
-  std::vector< TH2F > hResidualXdY;
-  std::vector< TH2F > hResidualYdX;
-
-  for (int iroc = 0; iroc != NROC; ++iroc){
-    hResidual.push_back( TH2F(  Form("Residual_ROC%i",iroc),
-        Form("Residual_ROC%i",iroc), 100, -.15, .15, 100, -.15, .15));
-    hResidualXdY.push_back( TH2F(  Form("ResidualXdY_ROC%i",iroc),
-           Form("ResidualXdY_ROC%i",iroc), 200, -1, 1, 100, -.5, .5));
-    hResidualYdX.push_back( TH2F(  Form("ResidualYdX_ROC%i",iroc),
-           Form("ResidualYdX_ROC%i",iroc), 200, -1, 1, 100, -.5, .5));
-  }
-
-  float_t  onepc[NROC];
-  float_t  twopc[NROC];
-  float_t threepc[NROC];
-
-  int const TimeWidth = 20000;
-  int NGraphPoints = 0;
-
-  // "times" for counting
-  int const StartTime = 0;
-  int ThisTime;
-
-  // Create a couple of pointers we only need when using root file
-  // input to add the tracks to the output
-  TTree * intree;
-  TFile *newfile;
-  TTree *newtree;
-  
-  int br_hit_plane_bits;
-  float br_diam1_track_x, br_diam1_track_y;
-  float br_diam2_track_x, br_diam2_track_y;
-
-  // Pointer to the actual input root tree. Only works for the
-  // root-file producer. Ugly hack to avoid opening the same ROOT file
-  // twice
-  if (GetUseRootInput(telescopeID) && (telescopeID==7)){
-
-    // Extract filename if a full path is given
-    std::stringstream ss(InFileName);
-    std::string newfile_name;
-    while (std::getline(ss, newfile_name, '/')){}
-    
-    newfile_name.insert(int(newfile_name.length()-5), "_withTracks");
-    
-    intree = ((PSIRootFileReader*) FR)->fTree;
-    newfile = new TFile(newfile_name.c_str(), "RECREATE");
-    newtree = intree->CloneTree(0); // Do no copy the data yet
-    
-    newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
-    newtree->Branch("diam1_track_x", &br_diam1_track_x);
-    newtree->Branch("diam1_track_y", &br_diam1_track_y);
-    newtree->Branch("diam2_track_x", &br_diam2_track_x);
-    newtree->Branch("diam2_track_y", &br_diam2_track_y);
-  }
-     
-  // Event Loop
-  for (int ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
-
-    ThisTime = ievent;
-
-    // print progress
-    if (ievent % 10000 == 0) {
-      std::cout << "Processing event: " << ievent << std::endl;
-    }
-
-    // Write out information for PAD studies
-    if (GetUseRootInput(telescopeID)){
-      
-      br_hit_plane_bits = FR->HitPlaneBits();
-
-      float diam1_z = 3.5; // cm from front (front diamond)
-      float diam2_z = 5.5; 
-
-      // Add track info    
-      if (FR->NTracks()==1){
-	PLTTrack* Track = FR->Track(0);
-	br_diam1_track_x = Track->ExtrapolateX(diam1_z);
-	br_diam1_track_y = Track->ExtrapolateY(diam1_z);      
-	br_diam2_track_x = Track->ExtrapolateX(diam2_z);
-	br_diam2_track_y = Track->ExtrapolateY(diam2_z);      
-      }
-      else {
-	br_diam1_track_x = -999.;
-	br_diam1_track_y = -999.;
-	br_diam2_track_x = -999.;
-	br_diam2_track_y = -999.;
-      }
-      newtree->Fill();
-    }     
-
-
-    hCoincidenceMap.Fill(FR->HitPlaneBits());
-
-    if (ThisTime - (StartTime + NGraphPoints * TimeWidth) > TimeWidth) {
-      for (int i = 0; i != NROC; ++i) {
-        for (int j = 0; j != 4; ++j) {
-          gAvgPH[i][j].Set(NGraphPoints+1);
-          gAvgPH[i][j].SetPoint(NGraphPoints, ThisTime - TimeWidth/2, AvgPH[i][j]);
-          gAvgPH[i][j].SetPointError(NGraphPoints, TimeWidth/2, AvgPH[i][j]/sqrt((float) NAvgPH[i][j]));
-          printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, NAvgPH[i][j], AvgPH[i][j]);
-          NAvgPH[i][j] = 0;
-          AvgPH[i][j] = 0;
-        }
-      }
-      ++NGraphPoints;
-    }
-
-    // draw tracks
-    static int ieventdraw = 0;
-
-    if (ieventdraw < 20) {     
-      FR->DrawTracksAndHits( TString::Format(OutDir + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
-    }
-
-    for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
-      PLTPlane* Plane = FR->Plane(iplane);
-
-      hNClusters[Plane->ROC()].Fill(Plane->NClusters());
-
-      for (size_t icluster = 0; icluster != Plane->NClusters(); ++icluster) {
-        PLTCluster* Cluster = Plane->Cluster(icluster);
-
-        if (iplane < NROC) {
-          hPulseHeight[iplane][0]->Fill(Cluster->Charge());
-          hPulseHeightLong[iplane][0]->Fill(Cluster->Charge());
-
-	  if (Cluster->Charge() > 300000) {
-              continue;
-          }
-          PLTU::AddToRunningAverage(AvgPH2D[iplane][Cluster->SeedHit()->Column()][ Cluster->SeedHit()->Row()], NAvgPH2D[iplane][Cluster->SeedHit()->Column()][ Cluster->SeedHit()->Row()], Cluster->Charge());
-          PLTU::AddToRunningAverage(AvgPH[iplane][0], NAvgPH[iplane][0], Cluster->Charge());
-          if (Cluster->NHits() == 1) {
-            hPulseHeight[iplane][1]->Fill(Cluster->Charge());
-						onepc[iplane]++;
-            hPulseHeightLong[iplane][1]->Fill(Cluster->Charge());
-            PLTU::AddToRunningAverage(AvgPH[iplane][1], NAvgPH[iplane][1], Cluster->Charge());
-          } else if (Cluster->NHits() == 2) {
-            hPulseHeight[iplane][2]->Fill(Cluster->Charge());
-            twopc[iplane]++;
-						hPulseHeightLong[iplane][2]->Fill(Cluster->Charge());
-            PLTU::AddToRunningAverage(AvgPH[iplane][2], NAvgPH[iplane][2], Cluster->Charge());
-          } else if (Cluster->NHits() >= 3) {
-            hPulseHeight[iplane][3]->Fill(Cluster->Charge());
-            threepc[iplane]++;
-						hPulseHeightLong[iplane][3]->Fill(Cluster->Charge());
-            PLTU::AddToRunningAverage(AvgPH[iplane][3], NAvgPH[iplane][3], Cluster->Charge());
-          }
-        }
-      }
-
-      for (size_t ihit = 0; ihit != Plane->NHits(); ++ihit) {
-        PLTHit* Hit = Plane->Hit(ihit);
-
-
-        if (Hit->ROC() < NROC) {
-          hOccupancy[Hit->ROC()].Fill(Hit->Column(), Hit->Row());
-        } else {
-          std::cerr << "Oops, ROC >= NROC?" << std::endl;
-        }
-      }
-
-      for (size_t icluster = 0; icluster != Plane->NClusters(); ++icluster) {
-        PLTCluster* Cluster = Plane->Cluster(icluster);
-        hNHitsPerCluster[Cluster->ROC()].Fill(Cluster->NHits());
-        if (Cluster->Charge() > 50000) {
-          for (size_t ihit = 0; ihit != Cluster->NHits(); ++ihit) {
-            hOccupancyHighPH[Cluster->ROC()].Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
-          }
-        } else if (Cluster->Charge() > 10000 && Cluster->Charge() < 40000) {
-          for (size_t ihit = 0; ihit != Cluster->NHits(); ++ihit) {
-            hOccupancyLowPH[Cluster->ROC()].Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
-          }
-        }
-      }
-
-
-    }
-
-    if (telescopeID == 7 &&
-	FR->NTracks() == 1 &&
-        FR->Track(0)->NClusters() == NROC &&
-        FR->Track(0)->Cluster(0)->Charge() < 300000 &&
-        FR->Track(0)->Cluster(1)->Charge() < 300000 &&
-        FR->Track(0)->Cluster(2)->Charge() < 300000 &&
-        FR->Track(0)->Cluster(3)->Charge() < 300000 
-	// TODO: make proper dunamic!!!
-        //FR->Track(0)->Cluster(4)->Charge() < 300000 &&
-        //FR->Track(0)->Cluster(5)->Charge() < 300000 
-	) {
-
-        PLTTrack* Track = FR->Track(0);
-        double slopeX = Track->fTVX / Track->fTVZ;
-        double slopeY = Track->fTVY / Track->fTVZ;
-
-        hChi2X.Fill( Track->Chi2X() );
-        hChi2Y.Fill( Track->Chi2Y() );
-        hChi2.Fill( Track->Chi2() );
-
-        hTrackSlopeX.Fill( slopeX);
-        hTrackSlopeY.Fill( slopeY);
-
-        // Fill Residuals
-        // Loop over clusters
-        for (size_t icluster = 0; icluster < Track->NClusters(); icluster++){
-
-          // Get the ROC in which this cluster was recorded and fill the
-          // corresponding residual.
-          int ROC = Track->Cluster(icluster)->ROC();
-
-          // dX vs dY
-          hResidual[ROC].Fill( Track->LResidualX( ROC ),
-                               Track->LResidualY( ROC ));
-          // X vs dY
-          hResidualXdY[ROC].Fill( Track->Cluster(icluster)->LX(),
-                                  Track->LResidualY( ROC ));
-          // Y vs dX
-          hResidualYdX[ROC].Fill( Track->Cluster(icluster)->LY(),
-                                  Track->LResidualX( ROC ));
-
-        } // end of loop over clusters
-
-        for (size_t icluster = 0; icluster != Track->NClusters(); ++icluster) {
-          PLTCluster* Cluster = Track->Cluster(icluster);
-
-          if (Cluster->Charge() > 300000) {
-              //printf("High Charge: %13.3E\n", Cluster->Charge());
-              continue;
-          }
-
-          // Fill the Offline PulseHeights (Track6+|Slope| < 0.01 in x and y )
-          if ( (fabs(slopeX)< 0.01) && (fabs(slopeY)<0.01) ){
-            hPulseHeightOffline[Cluster->ROC()][0]->Fill(Cluster->Charge());
-            if (Cluster->NHits() == 1) {
-              hPulseHeightOffline[Cluster->ROC()][1]->Fill(Cluster->Charge());
-            } else if (Cluster->NHits() == 2) {
-              hPulseHeightOffline[Cluster->ROC()][2]->Fill(Cluster->Charge());
-            } else if (Cluster->NHits() >= 3) {
-              hPulseHeightOffline[Cluster->ROC()][3]->Fill(Cluster->Charge());
-            }
-          }
-
-        }
-
-    }
-
-  } // End of Event Loop
-
-  delete FR;  
-
-
-  // Catch up on PH by time graph
-  for (int i = 0; i != NROC; ++i) {
-    for (int j = 0; j != 4; ++j) {
-      gAvgPH[i][j].Set(NGraphPoints+1);
-      gAvgPH[i][j].SetPoint(NGraphPoints, NGraphPoints*TimeWidth + TimeWidth/2, AvgPH[i][j]);
-      gAvgPH[i][j].SetPointError(NGraphPoints, TimeWidth/2, AvgPH[i][j]/sqrt((float) NAvgPH[i][j]));
-      printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, NAvgPH[i][j], AvgPH[i][j]);
-      NAvgPH[i][j] = 0;
-      AvgPH[i][j] = 0;
-    }
-  }
-  ++NGraphPoints;
-
-  
-  // Store root file with added tracking info
-  if (GetUseRootInput(telescopeID)){
-    newfile->cd();
-    newtree->Write();
-  }
-  
-  TCanvas Can;
-  Can.cd();
-  
-  out_f->cd();
-
-  for (int iroc = 0; iroc != NROC; ++iroc) {
-
-    // Draw Occupancy histograms
-    hOccupancy[iroc].SetMinimum(0);
-    //hOccupancy[iroc].SetAxisRange(12,38,"X");
-    //hOccupancy[iroc].SetAxisRange(39,80,"Y");
-    hOccupancy[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hOccupancy[iroc].GetName()) + ".gif");
-    hOccupancy[iroc].Write();
-
-    TH1F* hOccupancy1DZ = PLTU::HistFrom2D(&hOccupancy[iroc]);
-    Can.cd();
-    hOccupancy1DZ->Draw("hist");
-    if (hOccupancy1DZ->GetEntries() > 0) {
-      Can.SetLogy(1);
-    }
-    Can.SaveAs(OutDir+TString(hOccupancy1DZ->GetName()) + ".gif");
-    hOccupancy1DZ->Write();
-    Can.SetLogy(0);
-
-    // Grab the quantile you're interested in here
-    Double_t QProbability[1] = { 0.95 }; // Quantile positions in [0, 1]
-    Double_t QValue[1];                  // Quantile values
-    hOccupancy1DZ->GetQuantiles(1, QValue, QProbability);
-    if(QValue[0] > 1 && hOccupancy[iroc].GetMaximum() > QValue[0]) {
-      hOccupancy[iroc].SetMaximum(QValue[0]);
-    }
-    Can.cd();
-    hOccupancy[iroc].Draw("colz");
-    Can.SaveAs( OutDir+Form("Occupancy_ROC%i_Quantile.gif", iroc) );
-    delete hOccupancy1DZ;
-
-    Can.cd();
-    hOccupancy1DZ = PLTU::HistFrom2D(&hOccupancy[iroc], 0, QValue[0], TString::Format("Occupancy1DZ_ROC%i_Quantile", iroc), 20);
-    hOccupancy1DZ->Draw("hist");
-    Can.SaveAs(OutDir+TString(hOccupancy1DZ->GetName()) + ".gif");
-    delete hOccupancy1DZ;
-
-
-    // Get 3x3 efficiency hists and draw
-    TH2F* h3x3 = PLTU::Get3x3EfficiencyHist(hOccupancy[iroc], 0, 51, 0, 79);
-    h3x3->SetTitle( TString::Format("Occupancy Efficiency 3x3 ROC%i", iroc) );
-    Can.cd();
-    h3x3->SetMinimum(0);
-    h3x3->SetMaximum(3);
-    h3x3->Draw("colz");
-    Can.SaveAs(OutDir+TString(h3x3->GetName()) + ".gif");
-
-    Can.cd();
-    TH1F* h3x3_1DZ = PLTU::HistFrom2D(h3x3, "", 50);
-    h3x3_1DZ->Draw("hist");
-    Can.SaveAs(OutDir+TString(h3x3_1DZ->GetName()) + ".gif");
-    delete h3x3;
-
-    Can.cd();
-    hNClusters[iroc].SetMinimum(0);
-    hNClusters[iroc].SetXTitle("Number of clusters per event");
-    hNClusters[iroc].SetYTitle("Events");
-    hNClusters[iroc].Draw("hist");
-    Can.SaveAs( OutDir+TString(hNClusters[iroc].GetName()) + ".gif");
-
-    // Draw Hits per cluster histograms
-    Can.cd();
-    hNHitsPerCluster[iroc].SetMinimum(0);
-    hNHitsPerCluster[iroc].SetXTitle("Number of hits per cluster");
-    hNHitsPerCluster[iroc].SetYTitle("Number of Clusters");
-    hNHitsPerCluster[iroc].Draw("hist");
-    Can.SaveAs( OutDir+TString(hNHitsPerCluster[iroc].GetName()) + ".gif");
-
-    Can.cd();
-    hOccupancyHighPH[iroc].SetMinimum(0);
-    hOccupancyHighPH[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hOccupancyHighPH[iroc].GetName()) + ".gif");
-
-    hOccupancyLowPH[iroc].SetMinimum(0);
-    hOccupancyLowPH[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hOccupancyLowPH[iroc].GetName()) + ".gif");
-
-    float_t oneovertwo[iroc],oneoverthree[iroc],twooverthree[iroc];
-    
-    oneovertwo[iroc] = onepc[iroc]/twopc[iroc];
-    oneoverthree[iroc] = onepc[iroc]/threepc[iroc];
-    twooverthree[iroc] = twopc[iroc]/threepc[iroc];
-
-    // Draw the PulseHeights
-    gStyle->SetOptStat(0);
-    TLegend Leg(0.75, 0.7, 0.90, 0.88, "");
-    Leg.SetFillColor(0);
-    Leg.SetBorderSize(0);
-    Leg.AddEntry(hPulseHeight[iroc][0], "All", "l");
-    Leg.AddEntry(hPulseHeight[iroc][1], "1 Pix", "l");
-    Leg.AddEntry(hPulseHeight[iroc][2], "2 Pix", "l");
-    Leg.AddEntry(hPulseHeight[iroc][3], "3+ Pix", "l");
-
-    hPulseHeight[iroc][0]->SetTitle( TString::Format("Pulse Height ROC%i", iroc) );
-    hPulseHeight[iroc][0]->Draw("hist");
-    hPulseHeight[iroc][1]->Draw("samehist");
-    hPulseHeight[iroc][2]->Draw("samehist");
-    hPulseHeight[iroc][3]->Draw("samehist");
-    TLegend lPulseHeight(0.7, 0.4, 0.95, 0.75, "Mean:");
-   // lPulseHeight.SetTextAlign(11);
-    lPulseHeight.SetFillStyle(0);
-    lPulseHeight.SetBorderSize(0);
-    lPulseHeight.AddEntry( "PH0PMean", TString::Format("%8.0f", hPulseHeight[iroc][0]->GetMean()), "")->SetTextColor(HistColors[0]);
-    lPulseHeight.AddEntry( "PH1PMean", TString::Format("%8.0f", hPulseHeight[iroc][1]->GetMean()), "")->SetTextColor(HistColors[1]);
-    lPulseHeight.AddEntry( "PH2PMean", TString::Format("%8.0f", hPulseHeight[iroc][2]->GetMean()), "")->SetTextColor(HistColors[2]);
-    lPulseHeight.AddEntry( "PH3PMean", TString::Format("%8.0f", hPulseHeight[iroc][3]->GetMean()), "")->SetTextColor(HistColors[3]);
-//    TLegend lRatio(0.75, 0.1, 0.90, 0.4, "Ratio:");
-//    lRatio.SetTextAlign(11);
-//    lRatio.SetFillStyle(0);
-//    lRatio.SetBorderSize(0);
-		lPulseHeight.AddEntry( "oneovertwo", TString::Format("%8.0f", oneovertwo[iroc])+" 1pix/2pix");
-//    lRatio.AddEntry( "oneoverthree", TString::Format("%8.0f", oneoverthree, "")+" 1 over 3");
-//    lRatio.AddEntry( "twooverthree", TString::Format("%8.0f", twooverthree, "")+" 2 over 3");
-//    lRatio.Draw("same");
-    lPulseHeight.Draw("same");
-    Leg.Draw("same");
-    Can.SaveAs(OutDir+TString::Format("PulseHeight_ROC%i.gif", iroc));
-
-    hPulseHeight[iroc][0]->Write();
-    hPulseHeight[iroc][1]->Write();
-    hPulseHeight[iroc][2]->Write();
-    hPulseHeight[iroc][3]->Write();
-
-    Can.cd();
-    hPulseHeightOffline[iroc][0]->SetTitle( TString::Format("Pulse Height Offline ROC%i", iroc) );
-    hPulseHeightOffline[iroc][0]->Draw("hist");
-    hPulseHeightOffline[iroc][1]->Draw("samehist");
-    hPulseHeightOffline[iroc][2]->Draw("samehist");
-    hPulseHeightOffline[iroc][3]->Draw("samehist");
-    TLegend lPulseHeightOffline(0.75, 0.4, 0.90, 0.7, "Mean:");
-    lPulseHeightOffline.SetTextAlign(11);
-    lPulseHeightOffline.SetFillStyle(0);
-    lPulseHeightOffline.SetBorderSize(0);
-    lPulseHeightOffline.AddEntry( "PH0PMean", TString::Format("%8.0f", hPulseHeightOffline[iroc][0]->GetMean()), "")->SetTextColor(HistColors[0]);
-    lPulseHeightOffline.AddEntry( "PH1PMean", TString::Format("%8.0f", hPulseHeightOffline[iroc][1]->GetMean()), "")->SetTextColor(HistColors[1]);
-    lPulseHeightOffline.AddEntry( "PH2PMean", TString::Format("%8.0f", hPulseHeightOffline[iroc][2]->GetMean()), "")->SetTextColor(HistColors[2]);
-    lPulseHeightOffline.AddEntry( "PH3PMean", TString::Format("%8.0f", hPulseHeightOffline[iroc][3]->GetMean()), "")->SetTextColor(HistColors[3]);
-    lPulseHeightOffline.Draw("same");
-    Leg.Draw("same");
-    Can.SaveAs(OutDir+TString::Format("PulseHeightOffline_ROC%i.gif", iroc));
-
-    hPulseHeightOffline[iroc][0]->Write();
-    hPulseHeightOffline[iroc][1]->Write();
-    hPulseHeightOffline[iroc][2]->Write();
-    hPulseHeightOffline[iroc][3]->Write();
-
-
-    Can.cd();
-    hPulseHeightLong[iroc][0]->SetTitle( TString::Format("Pulse Height ROC%i", iroc) );
-    hPulseHeightLong[iroc][0]->Draw("hist");
-    hPulseHeightLong[iroc][1]->Draw("samehist");
-    hPulseHeightLong[iroc][2]->Draw("samehist");
-    hPulseHeightLong[iroc][3]->Draw("samehist");
-    TLegend lPulseHeightLong(0.75, 0.4, 0.90, 0.7, "Mean:");
-    lPulseHeightLong.SetTextAlign(11);
-    lPulseHeightLong.SetFillStyle(0);
-    lPulseHeightLong.SetBorderSize(0);
-    lPulseHeightLong.AddEntry( "PH0PMean", TString::Format("%8.0f", hPulseHeightLong[iroc][0]->GetMean()), "")->SetTextColor(HistColors[0]);
-    lPulseHeightLong.AddEntry( "PH1PMean", TString::Format("%8.0f", hPulseHeightLong[iroc][1]->GetMean()), "")->SetTextColor(HistColors[1]);
-    lPulseHeightLong.AddEntry( "PH2PMean", TString::Format("%8.0f", hPulseHeightLong[iroc][2]->GetMean()), "")->SetTextColor(HistColors[2]);
-    lPulseHeightLong.AddEntry( "PH3PMean", TString::Format("%8.0f", hPulseHeightLong[iroc][3]->GetMean()), "")->SetTextColor(HistColors[3]);
-    lPulseHeightLong.Draw("same");
-    Leg.Draw("same");
-    Can.SaveAs(OutDir+TString::Format("PulseHeightLong_ROC%i.gif", iroc));
-
-    Can.cd();
-    gAvgPH[iroc][0].SetTitle( TString::Format("Average Pulse Height ROC%i", iroc) );
-    gAvgPH[iroc][0].Draw("Ape");
-    gAvgPH[iroc][1].Draw("samepe");
-    gAvgPH[iroc][2].Draw("samepe");
-    gAvgPH[iroc][3].Draw("samepe");
-    Leg.Draw("same");
-    Can.SaveAs(OutDir+TString::Format("PulseHeightTime_ROC%i.gif", iroc));
-
-
-    // Use AvgPH2D to draw PH 2D maps
-    TString Name = TString::Format("PulseHeightAvg2D_ROC%i", iroc);
-    TH2F hPulseHeightAvg2D(Name, Name, PLTU::NCOL, PLTU::FIRSTCOL, PLTU::LASTCOL, PLTU::NROW, PLTU::FIRSTROW, PLTU::LASTROW);
-    for (int icol = 0; icol != PLTU::NCOL; ++icol) {
-      for (int irow = 0; irow != PLTU::NROW; ++irow) {
-        hPulseHeightAvg2D.SetBinContent(icol+1, irow+1, AvgPH2D[iroc][icol][irow]);
-      }
-    }
-    Can.cd();
-    hPulseHeightAvg2D.SetMinimum(0);
-    hPulseHeightAvg2D.SetMaximum(100000);
-    hPulseHeightAvg2D.Draw("colz");
-    Can.SaveAs(OutDir+hPulseHeightAvg2D.GetName() + ".gif");
-
-    // 2D Residuals
-    Can.cd();
-    hResidual[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hResidual[iroc].GetName()) + ".gif");
-
-    // 2D Residuals X/dY
-    gStyle->SetOptStat(1111);
-    hResidualXdY[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hResidualXdY[iroc].GetName()) + ".gif");
-
-    // 2D Residuals Y/dX
-    gStyle->SetOptStat(1111);
-    hResidualYdX[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hResidualYdX[iroc].GetName()) + ".gif");
-
-    // Residual X-Projection
-    Can.cd();
-    hResidual[iroc].ProjectionX()->Draw();
-    Can.SaveAs( OutDir+TString(hResidual[iroc].GetName()) + "_X.gif");
-
-    // Residual Y-Projection
-    Can.cd();
-    hResidual[iroc].ProjectionY()->Draw();
-    Can.SaveAs( OutDir+TString(hResidual[iroc].GetName()) + "_Y.gif");
-
-    gStyle->SetOptStat(0);
-
-
-  } // end of loop over ROCs
-
-  TCanvas Can2("CoincidenceMap", "CoincidenceMap", 1200, 400);
-  Can2.cd();
-  Can2.SetLogy(1);
-  hCoincidenceMap.Draw("");
-  Can2.SaveAs(OutDir+"Occupancy_Coincidence.gif");
-  Can2.SetLogy(0);
-
-
-    Can.cd();
-    hTrackSlopeX.Draw("hist");
-    Can.SaveAs(OutDir + "TrackSlopeX.gif");
-
-    Can.cd();
-    hTrackSlopeY.Draw("hist");
-    Can.SaveAs(OutDir+"TrackSlopeY.gif");
-
-    Can.cd();
-    gStyle->SetOptStat(000001111);
-
-    hChi2.Draw("hist");
-    Can.SaveAs(OutDir+"Chi2.gif");
-    gStyle->SetOptStat(0);
-    hChi2X.Scale( 1/hChi2X.Integral());
-    
-    Can.SaveAs(OutDir+"Chi2X.gif");
-    gStyle->SetOptStat(0);
-
-    hChi2Y.Draw("hist");
-    Can.SaveAs(OutDir+"Chi2Y.gif");
-    gStyle->SetOptStat(0);
-
-
-  WriteHTML(PlotsDir + RunNumber,
-            GetCalibrationFilename(telescopeID),
-	    telescopeID);
-
-
-
-  return 0;
-}
 
 
 int DoAlignment (std::string const InFileName,
@@ -2179,14 +1090,14 @@ int DoAlignment (std::string const InFileName,
     r_align.push_back(0);
   }
 
-  
+
   // Initialize Reader
   PSIFileReader * FR;
 
   if (GetUseRootInput(telescopeID)){
     FR = new PSIRootFileReader(InFileName,
 			       GetCalibrationFilename(telescopeID),
-			       GetAlignmentFilename(telescopeID), 
+			       GetAlignmentFilename(telescopeID),
 			       GetNumberOfROCS(telescopeID),
 			       GetUseGainInterpolator(telescopeID),
 			       GetUseExternalCalibrationFunction(telescopeID)
@@ -2195,7 +1106,7 @@ int DoAlignment (std::string const InFileName,
   else{
     FR = new PSIBinaryFileReader(InFileName,
 				 GetCalibrationFilename(telescopeID),
-				 GetAlignmentFilename(telescopeID, true), 
+				 GetAlignmentFilename(telescopeID, true),
 				 GetNumberOfROCS(telescopeID),
 				 GetUseGainInterpolator(telescopeID),
 				 GetUseExternalCalibrationFunction(telescopeID)
@@ -2251,7 +1162,7 @@ int DoAlignment (std::string const InFileName,
 
       if (! (FR->NTracks()==1))
         continue;
-      
+
       PLTTrack * Track = FR->Track(0);
 
       if (! FR->Plane(iroc_align)->NClusters()==1)
@@ -2486,10 +1397,10 @@ for (int ialign=1; ialign!=15;ialign++){
   std::cout << "ROC: " << iroc << " Angle: " << angle << " Other Angle:" << other_angle << std::endl;
 
   for (int i=0; i!=4;i++){
-    printf("%2i   %1i        %15E                       %15E  %15E  %15E\n", 1, i, 
-	   FR->GetAlignment()->LR(1,i), 
-	   FR->GetAlignment()->LX(1,i), 
-	   FR->GetAlignment()->LY(1,i), 
+    printf("%2i   %1i        %15E                       %15E  %15E  %15E\n", 1, i,
+	   FR->GetAlignment()->LR(1,i),
+	   FR->GetAlignment()->LX(1,i),
+	   FR->GetAlignment()->LY(1,i),
 	   FR->GetAlignment()->LZ(1,i) );
   }
 
@@ -2545,14 +1456,14 @@ int FindResiduals(std::string const InFileName,
 
   gStyle->SetOptStat(0);
 
-  
+
   // Initialize Reader
   PSIFileReader * FR;
 
   if (GetUseRootInput(telescopeID)) {
     FR = new PSIRootFileReader(InFileName,
 			       GetCalibrationFilename(telescopeID),
-			       GetAlignmentFilename(telescopeID), 
+			       GetAlignmentFilename(telescopeID),
 			       GetNumberOfROCS(telescopeID),
 			       GetUseGainInterpolator(telescopeID),
 			       GetUseExternalCalibrationFunction(telescopeID)
@@ -2561,7 +1472,7 @@ int FindResiduals(std::string const InFileName,
   else{
     FR = new PSIBinaryFileReader(InFileName,
 				 GetCalibrationFilename(telescopeID),
-				 GetAlignmentFilename(telescopeID), 
+				 GetAlignmentFilename(telescopeID),
 				 GetNumberOfROCS(telescopeID),
 				 GetUseGainInterpolator(telescopeID),
 				 GetUseExternalCalibrationFunction(telescopeID)
@@ -2730,13 +1641,6 @@ int FindResiduals(std::string const InFileName,
 
   return 0;
 }
-
-
-
-
-
-
-
 
 
 
@@ -3020,79 +1924,79 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 
 int main (int argc, char* argv[])
 {
-  if (argc != 4) {
-    std::cerr << "Usage: " << argv[0] << " InFileName action telescopeID" << std::endl;
-    std::cerr << "action: 0 for analysis, 1 for producing alignment file, 2 for finding residuals" << std::endl;
-    return 1;
-  }
+    if (argc != 4) {
+        std::cerr << "Usage: " << argv[0] << " InFileName action telescopeID" << std::endl;
+        std::cerr << "action: 0 for analysis, 1 for producing alignment file, 2 for finding residuals" << std::endl;
+        return 1;
+    }
 
-  /* There three useage modes: analysis, alignment and residuals
+    /** There three usage modes: analysis, alignment and residuals
 
-  analysis uses alignment and residuals for the given telescope to perform
-    global and single plane studies
+    analysis: uses alignment and residuals for the given telescope to perform
+        global and single plane studies
 
-  alignment starts with all alignment constants zero and does several iterations
-    to minimize the residuals. All planes are shifted in x and y and rotated
-    around the z-axis. Residual plots of the last iteration are saved.
-    As output the file NewAlignment.dat is produced.
+    alignment: starts with all alignment constants zero and does several iterations
+        to minimize the residuals. All planes are shifted in x and y and rotated
+        around the z-axis. Residual plots of the last iteration are saved.
+        As output the file NewAlignment.dat is produced.
 
-  residuals tries to find the correct residuals for tracking
-  */
+    residuals: tries to find the correct residuals for tracking
 
-  std::string const InFileName = argv[1];
-  TString const FullRunName = InFileName;
-  Int_t const Index = FullRunName.Index("test",0);
-  TString const RunNumber = FullRunName(Index+4,9);
-  gSystem->mkdir("./plots/" + RunNumber);
+    0: Analysis
+    1: Alignment
+    2: Residuals */
+    int action = atoi(argv[2]);
 
-  gROOT->ProcessLine("#include <vector>");
+    std::string const InFileName = argv[1];
+    TString const FullRunName = InFileName;
+    Int_t const Index = FullRunName.Index("test",0);
+    TString const RunNumber = FullRunName(Index+4,9);
+    gSystem->mkdir("./plots/" + RunNumber);
 
-  // 0: Analysis
-  // 1: Alignment
-  // 2: Residuals
-  int action = atoi(argv[2]);
+    gROOT->ProcessLine("#include <vector>");
 
-  // Telescope IDs:
-  // -1: Root file format testing
-  //  1: First May-Testbeam Telescope (Si, PolyA, PolyD, S86,  S105, Si)
-  //  2: Second May-Tesbeam Telescope (Si, PolyB, PolyD, S108, Si,   Si)
-  //  3: First Silicon + 1 Diamond Telescope (July Testbeam)
-  //  4: Two-Plane Silicon Telescope (July Testbeam)
-  //  5: Four-Plane Silicon Telescope (September Testbeam at PSI)
-  //  6: Four-Plane Silicon Telescope (October Testbeam at CERN)
-  //  7: Four-Plane Silicon Telescope (May 2015 Testbeam at PSI)
-  int telescopeID = atoi(argv[3]);
 
-  // Open a ROOT file to store histograms in
-  // do it here and pass to all functions we call
-  TString const PlotsDir = "plots/";
-  TString const OutDir = PlotsDir + RunNumber + "/";
-  TFile out_f( OutDir + "histos.root", "recreate");
+    /** Telescope IDs:
+    -1: Root file format testing
+     1: First May-Testbeam Telescope (Si, PolyA, PolyD, S86,  S105, Si)
+     2: Second May-Tesbeam Telescope (Si, PolyB, PolyD, S108, Si,   Si)
+     3: First Silicon + 1 Diamond Telescope (July Testbeam)
+     4: Two-Plane Silicon Telescope (July Testbeam)
+     5: Four-Plane Silicon Telescope (September Testbeam at PSI)
+     6: Four-Plane Silicon Telescope (October Testbeam at CERN)
+     7: Four-Plane Silicon Telescope (May 2015 Testbeam at PSI) */
+    int telescopeID = atoi(argv[3]);
 
-  std::cout << "Action = " << action << std::endl;
-  std::cout << "TelescopeID = " << telescopeID << std::endl;
+    /** Open a ROOT file to store histograms in
+    do it here and pass to all functions we call */
+    TString const PlotsDir = "plots/";
+    TString const OutDir = PlotsDir + RunNumber + "/";
+    TFile out_f( OutDir + "histos.root", "recreate");
 
-  // ALIGNMENT
-  if (action==1)
+    std::cout << "Action = " << action << std::endl;
+    std::cout << "TelescopeID = " << telescopeID << std::endl;
+
+    /** ALIGNMENT */
+    if (action==1)
     DoAlignment(InFileName,
                 &out_f,
                 RunNumber,
                 telescopeID);
 
-  // RESIDUAL CALCULATION
-  else if (action==2)
+    /** RESIDUAL CALCULATION */
+    else if (action==2)
     FindResiduals(InFileName,
                   &out_f,
                   RunNumber,
                   telescopeID);
 
-  // ANALYSIS
-  else
+    /** ANALYSIS */
+    else
     TestPSIBinaryFileReader(InFileName,
                             &out_f,
                             RunNumber,
                             telescopeID);
 
 
-  return 0;
+    return 0;
 }

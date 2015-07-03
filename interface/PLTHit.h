@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <stdint.h>
 
 
 
@@ -46,7 +47,7 @@ class PLTHit
     void  SetGXYZ (float const, float const, float const);
     bool  MatchesColumnRow (PLTHit*);
     int   Channel ();
-    int   ROC ();
+    uint16_t   ROC ();
     int   LastDAC ();
     void  SetLastDAC (int const);
     int   Row ();
