@@ -18,6 +18,7 @@
 #include "TTree.h"
 #include "TText.h"
 #include "TPad.h"
+#include "TROOT.h"
 
 #include "PSIRootFileReader.h"
 #include "PSIBinaryFileReader.h"

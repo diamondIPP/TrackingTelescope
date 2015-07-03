@@ -47,7 +47,7 @@ class PLTHit
     void  SetGXYZ (float const, float const, float const);
     bool  MatchesColumnRow (PLTHit*);
     int   Channel ();
-    uint16_t   ROC ();
+    uint16_t ROC ();
     int   LastDAC ();
     void  SetLastDAC (int const);
     int   Row ();

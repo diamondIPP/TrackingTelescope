@@ -87,6 +87,6 @@ python/wide-angle/
 *~
 tracking.cbp
 tracking.cbp.save
-tracking.layout.save
+tracking.layout*
 src/TestBinaryFileReader.cc.save
 

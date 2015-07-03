@@ -98,7 +98,7 @@ int PLTHit::Channel ()
   return fChannel;
 }
 
-int PLTHit::ROC ()
+uint16_t PLTHit::ROC ()
 {
   // Get the ROC for this hit
   return fROC;

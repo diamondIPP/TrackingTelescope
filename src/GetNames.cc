@@ -48,12 +48,12 @@ string GetAlignmentFilename(int telescopeID, bool useInitial){
 
 string GetMaskingFilename(int telescopeID){
 
-    if      (telescopeID == 1)  return "outerPixelMask_Telescope1.txt";
-    else if (telescopeID == 2)  return "outerPixelMask_Telescope2.txt";
-    else if (telescopeID == 5)  return "outerPixelMask_Telescope5.txt";
-    else if (telescopeID == 6)  return "outerPixelMask_Telescope6.txt";
-    else if (telescopeID == 7)  return "outerPixelMask_Telescope7.txt";
-    else if (telescopeID == -1) return "outerPixelMask_Telescope5.txt";
+    if      (telescopeID == 1)  return "outer_pixel_masks/outerPixelMask_Telescope1.txt";
+    else if (telescopeID == 2)  return "outer_pixel_masks/outerPixelMask_Telescope2.txt";
+    else if (telescopeID == 5)  return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
+    else if (telescopeID == 6)  return "outer_pixel_masks/outerPixelMask_Telescope6.txt";
+    else if (telescopeID == 7)  return "outer_pixel_masks/outerPixelMask_Telescope7.txt";
+    else if (telescopeID == -1) return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
     else {
         cout << "ERROR: No Masking file for telescopeID=" << telescopeID << endl;
         cout << "Exiting.." << endl;
@@ -63,12 +63,12 @@ string GetMaskingFilename(int telescopeID){
 
 string GetCalibrationFilename(int telescopeID){
 
-    if      (telescopeID == 1)  return "GKCalibrationList.txt";
-    else if (telescopeID == 2)  return "GKCalibrationList_Telescope2.txt";
-    else if (telescopeID == 5)  return "GKCalibrationList_Telescope5.txt";
-    else if (telescopeID == 6)  return "GKCalibrationList_Telescope6.txt";
-    else if (telescopeID == 7)  return "GKCalibrationList_Telescope7.txt";
-    else if (telescopeID == -1) return "GKCalibrationList_Telescope5.txt";
+    if      (telescopeID == 1)  return "calibration_lists/GKCalibrationList.txt";
+    else if (telescopeID == 2)  return "calibration_lists/GKCalibrationList_Telescope2.txt";
+    else if (telescopeID == 5)  return "calibration_lists/GKCalibrationList_Telescope5.txt";
+    else if (telescopeID == 6)  return "calibration_lists/GKCalibrationList_Telescope6.txt";
+    else if (telescopeID == 7)  return "calibration_lists/GKCalibrationList_Telescope7.txt";
+    else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
         cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << endl;
         cout << "Exiting.." << endl;

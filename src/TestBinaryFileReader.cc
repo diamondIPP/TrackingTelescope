@@ -1,4 +1,5 @@
 #include "TestBinaryFileReader.h"
+#include "RootItems.h"
 
 using namespace std;
 
@@ -66,9 +67,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
 
     /** Track slope plots */
-    TH1F hTrackSlopeX("TrackSlopeX", "TrackSlopeX", 50, -0.05, 0.05);
-    TH1F hTrackSlopeY("TrackSlopeY", "TrackSlopeY", 50, -0.05, 0.05);
-
+    RootItems RootItems;
 
     /** ============================
      Prepare Occupancy histograms: x == columns, y == rows
@@ -514,8 +513,8 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 				hChi2.Fill(Track->Chi2() );
 
                 /** fill slope histos */
-				hTrackSlopeX.Fill(Track->fSlopeX);
-				hTrackSlopeY.Fill(Track->fSlopeY);
+                RootItems.TrackSlopeX()->Fill(Track->fSlopeX);
+                RootItems.TrackSlopeY()->Fill(Track->fSlopeY);
 
 				/** loop over the clusters */
 				for (size_t icluster = 0; icluster < Track->NClusters(); icluster++){
@@ -816,14 +815,19 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
     /** draw tracking slopes and chi2 */
     Can.cd();
-    hTrackSlopeX.Draw("hist");
+    gStyle->SetOptStat(1);
+    gStyle->SetOptFit();
+    RootItems.FitSlope();
+    RootItems.TrackSlopeX()->Draw();
+//    RootItems.LegendSlope(RootItems.TrackSlopeX() );
     Can.SaveAs(OutDir + "TrackSlopeX.gif");
-    hTrackSlopeX.Write();
+    RootItems.TrackSlopeX()->Write();
 
     Can.cd();
-    hTrackSlopeY.Draw("hist");
+    RootItems.TrackSlopeY()->Draw();
+    RootItems.LegendSlope(RootItems.TrackSlopeY() );
     Can.SaveAs(OutDir+"TrackSlopeY.gif");
-    hTrackSlopeY.Write();
+    RootItems.TrackSlopeY()->Write();
 
     Can.cd();
     gStyle->SetOptStat(000001111);
