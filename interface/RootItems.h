@@ -36,6 +36,8 @@ private:
 
     /** constants */
     uint16_t const nRoc;
+    TString const PlotsDir;
+    TString const OutDir;
 
     /** tracking */
     TH1F * hTrackSlopeX;
@@ -48,12 +50,16 @@ private:
     std::vector<TH2F*> hOccupancyLowPH;
     std::vector<TH2F*> hOccupancyHighPH;
 
+    /** cluster hits */
+    std::vector<TH1F*> hNHitsPerCluster;
+    std::vector<TH1F*> hNClusters;
+
 public:
 
     /** ============================
      CONSTRUCTOR
      =================================*/
-    RootItems(uint8_t telescopeID);
+    RootItems(uint8_t telescopeID, TString const RunNumber);
     ~RootItems();
 
 
@@ -62,18 +68,21 @@ public:
      =================================*/
     TH1F * TrackSlopeX() { return hTrackSlopeX; }
     TH1F * TrackSlopeY() { return hTrackSlopeY; }
-    TLegend * FitGauss() { return fGauss; }
+    TLegend * FitGauss() { return lFitGauss; }
     std::vector<TH2F*> Occupancy() { return hOccupancy; }
     std::vector<TH2F*> OccupancyLowPH() { return hOccupancyLowPH; }
     std::vector<TH2F*> OccupancyHighPH() { return hOccupancyHighPH; }
-
+    std::vector<TH1F*> nHitsPerCluster() { return hNHitsPerCluster; }
+    std::vector<TH1F*> nClusters() { return hNClusters; }
 
     /** ============================
-     HELPER FUNCTIONS
+     AUXILIARY FUNCTIONS
      =================================*/
     void FitSlope(TH1F * histo);
     void LegendSlope(TH1F * histo);
     std::vector<TH2F*> FillVectorTH2F(std::vector<TH2F*> histo, const char * name);
+    std::vector<TH1F*> FillVectorTH1F(std::vector<TH1F*> histo, const char * name);
+    void DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, TCanvas & c, const char * xTit, const char * yTit);
 
 
 

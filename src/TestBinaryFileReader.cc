@@ -49,7 +49,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
             GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID));
         ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
     }
-
     FR->GetAlignment()->SetErrors(telescopeID);
     FILE * f = fopen("MyGainCal.dat", "w");
     FR->GetGainCal()->PrintGainCal(f);
@@ -62,19 +61,18 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     /** ============================
      Prepare Root Items
      =================================*/
-    RootItems RootItems(telescopeID);
+    RootItems RootItems(telescopeID, RunNumber);
 
-    vector<TH1F> hNHitsPerCluster;
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
-        hNHitsPerCluster.push_back( TH1F( Form("NHitsPerCluster_ROC%i",iroc),
-                                          Form("NHitsPerCluster_ROC%i",iroc), 10, 0, 10));
-    }
 
-    vector<TH1F> hNClusters;
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
-        hNClusters.push_back( TH1F( Form("NClusters_ROC%i",iroc),
-                                    Form("NClusters_ROC%i",iroc), 10, 0, 10));
-    }
+//    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
+//        hNHitsPerCluster.push_back( TH1F( Form("NHitsPerCluster_ROC%i",iroc),
+//                                          Form("NHitsPerCluster_ROC%i",iroc), 10, 0, 10));
+//    }
+//
+//    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
+//        hNClusters.push_back( TH1F( Form("NClusters_ROC%i",iroc),
+//                                    Form("NClusters_ROC%i",iroc), 10, 0, 10));
+//    }
 
     /** ============================
      Prepare Coincidence Histogram
@@ -390,7 +388,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
             PLTPlane* Plane = FR->Plane(iplane);
 
             /** fill cluster histo */
-            hNClusters[Plane->ROC()].Fill(Plane->NClusters());
+            RootItems.nClusters()[Plane->ROC()]->Fill(Plane->NClusters());
 
             for (size_t icluster = 0; icluster != Plane->NClusters(); ++icluster) {
                 PLTCluster* Cluster = Plane->Cluster(icluster);
@@ -436,7 +434,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                 }
 
                 /** fill hits per cluster histo */
-                hNHitsPerCluster[Cluster->ROC()].Fill(Cluster->NHits());
+                RootItems.nHitsPerCluster()[Cluster->ROC()]->Fill(Cluster->NHits());
 
                 /** fill high occupancy high */
                 if (Cluster->Charge() > 50000)
@@ -595,20 +593,11 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     Can.SaveAs(OutDir+TString(h3x3_1DZ->GetName()) + ".gif");
     delete h3x3;
 
-    Can.cd();
-    hNClusters[iroc].SetMinimum(0);
-    hNClusters[iroc].SetXTitle("Number of clusters per event");
-    hNClusters[iroc].SetYTitle("Events");
-    hNClusters[iroc].Draw("hist");
-    Can.SaveAs( OutDir+TString(hNClusters[iroc].GetName()) + ".gif");
+    /** clusters per event */
+    RootItems.DrawSaveTH1F(RootItems.nClusters(), iroc, Can, "Number of clusters per event", "Events");
 
-    // Draw Hits per cluster histograms
-    Can.cd();
-    hNHitsPerCluster[iroc].SetMinimum(0);
-    hNHitsPerCluster[iroc].SetXTitle("Number of hits per cluster");
-    hNHitsPerCluster[iroc].SetYTitle("Number of Clusters");
-    hNHitsPerCluster[iroc].Draw("hist");
-    Can.SaveAs( OutDir+TString(hNHitsPerCluster[iroc].GetName()) + ".gif");
+    /** hits per cluster */
+    RootItems.DrawSaveTH1F(RootItems.nHitsPerCluster(), iroc, Can, "Number of hits per cluster", "Number of Clusters");
 
     Can.cd();
     RootItems.OccupancyHighPH()[iroc]->SetMinimum(0);
