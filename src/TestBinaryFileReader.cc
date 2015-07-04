@@ -349,17 +349,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
             br_hit_plane_bits = FR->HitPlaneBits();
 
-            /** some output to test the programm */
-//            if (indexi < 1000) {
-//                cout << "Number of hit Planes: " << br_hit_plane_bits << endl;
-//                cout << "Hits: " << FR->NHits() << endl;
-//                cout << "Planes: " << FR->NPlanes() << endl;
-//                if (FR->NHits() > 0) {
-//                    cout << "col: " << FR->Hit(0)->Column() << endl;
-//                    cout << "row: " << FR->Hit(0)->Row() << endl;
-//                }
-//            }
-
             br_n_tracks = FR->NTracks();
             br_n_clusters = FR->NClusters();
 
@@ -814,16 +803,16 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     Can2.SetLogy(0);
 
     /** draw tracking slopes and chi2 */
-    Can.cd();
-    gStyle->SetOptStat(1);
     gStyle->SetOptFit();
-    RootItems.FitSlope();
+    Can.cd();
+    RootItems.FitSlope(RootItems.TrackSlopeX() );
     RootItems.TrackSlopeX()->Draw();
-//    RootItems.LegendSlope(RootItems.TrackSlopeX() );
+    RootItems.LegendSlope(RootItems.TrackSlopeX() );
     Can.SaveAs(OutDir + "TrackSlopeX.gif");
     RootItems.TrackSlopeX()->Write();
 
     Can.cd();
+    RootItems.FitSlope(RootItems.TrackSlopeY() );
     RootItems.TrackSlopeY()->Draw();
     RootItems.LegendSlope(RootItems.TrackSlopeY() );
     Can.SaveAs(OutDir+"TrackSlopeY.gif");

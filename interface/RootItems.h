@@ -19,6 +19,7 @@
 #include "TText.h"
 #include "TPad.h"
 #include "TF2.h"
+#include "TPaveStats.h"
 
 #include "PSIRootFileReader.h"
 #include "PSIBinaryFileReader.h"
@@ -58,7 +59,7 @@ public:
     /** ============================
      HELPER FUNCTIONS
      =================================*/
-    void FitSlope();
+    void FitSlope(TH1F * histo);
     void LegendSlope(TH1F * histo);
 
 

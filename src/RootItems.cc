@@ -18,11 +18,11 @@ TLegend * RootItems::FitGauss(){ return lFitGauss; }
 
 /** helper functions */
 
-void RootItems::FitSlope(){
+
+void RootItems::FitSlope(TH1F * histo){
 
     fGauss->SetLineWidth(2);
-    hTrackSlopeX->Fit(fGauss, "U");
-    hTrackSlopeY->Fit(fGauss, "U");
+    histo->Fit(fGauss);
 }
 
 void RootItems::LegendSlope(TH1F * histo) {
@@ -31,6 +31,12 @@ void RootItems::LegendSlope(TH1F * histo) {
     lFitGauss->SetTextSize(0.03);
     lFitGauss->AddEntry(histo,"Track Slope X","l");
     lFitGauss->AddEntry(fGauss,"Global Fit","l");
+    TString s1 = "Mean: ";
+    TString s2 = "Max: ";
+    TString s3 = "Sigma: ";
+    lFitGauss->AddEntry("Mean", s1 + TString::Format("%1.3f", fGauss->GetParameter(1)), "");
+    lFitGauss->AddEntry("const", s2 + TString::Format("%5.1f", fGauss->GetParameter(0)), "");
+    lFitGauss->AddEntry("const", s3 + TString::Format("%1.3f", fGauss->GetParameter(2)), "");
     lFitGauss->Draw("same");
 }
 
