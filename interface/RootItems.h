@@ -23,6 +23,7 @@
 
 #include "PSIRootFileReader.h"
 #include "PSIBinaryFileReader.h"
+#include "GetNames.h"
 
 /** ============================
  ROOTITEMS CLASS
@@ -33,27 +34,38 @@ class RootItems {
 /** declare all the histograms, graphs, etc. */
 private:
 
+    /** constants */
+    uint16_t const nRoc;
+
     /** tracking */
     TH1F * hTrackSlopeX;
     TH1F * hTrackSlopeY;
     TF1 * fGauss;
     TLegend * lFitGauss;
 
+    /** occupancy */
+    std::vector<TH2F*> hOccupancy;
+    std::vector<TH2F*> hOccupancyLowPH;
+    std::vector<TH2F*> hOccupancyHighPH;
+
 public:
 
     /** ============================
      CONSTRUCTOR
      =================================*/
-    RootItems();
+    RootItems(uint8_t telescopeID);
     ~RootItems();
 
 
     /** ============================
      GET-FUNCTIONS
      =================================*/
-    TH1F * TrackSlopeX();
-    TH1F * TrackSlopeY();
-    TLegend * FitGauss();
+    TH1F * TrackSlopeX() { return hTrackSlopeX; }
+    TH1F * TrackSlopeY() { return hTrackSlopeY; }
+    TLegend * FitGauss() { return fGauss; }
+    std::vector<TH2F*> Occupancy() { return hOccupancy; }
+    std::vector<TH2F*> OccupancyLowPH() { return hOccupancyLowPH; }
+    std::vector<TH2F*> OccupancyHighPH() { return hOccupancyHighPH; }
 
 
     /** ============================
@@ -61,14 +73,11 @@ public:
      =================================*/
     void FitSlope(TH1F * histo);
     void LegendSlope(TH1F * histo);
+    std::vector<TH2F*> FillVectorTH2F(std::vector<TH2F*> histo, const char * name);
 
 
 
  };
-
-
-
-
 
 
 

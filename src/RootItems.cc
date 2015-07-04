@@ -3,21 +3,25 @@
 using namespace std;
 
 /** constructor */
-RootItems::RootItems() {
+RootItems::RootItems(uint8_t telescopeID):
+    nRoc(GetNumberOfROCS(telescopeID)) {
+
+    /** tracking */
     hTrackSlopeX = new TH1F("TrackSlopeX", "TrackSlopeX", 50, -0.05, 0.05);
     hTrackSlopeY = new TH1F("TrackSlopeY", "TrackSlopeY", 50, -0.05, 0.05);
     fGauss = new TF1("fGauss", "gaus", -0.05, 0.05);
     lFitGauss = new TLegend(0.7,0.65,0.88,0.85);
+
+    /** occupancy */
+    hOccupancy = FillVectorTH2F(hOccupancy, "Occupancy_ROC%i");
+    hOccupancyLowPH = FillVectorTH2F(hOccupancyLowPH, "OccupancyLowPH_ROC%i");
+    hOccupancyHighPH = FillVectorTH2F(hOccupancyHighPH, "OccupancyHighPH_ROC%i");
 }
 RootItems::~RootItems() { }
 
-/** get-functions*/
-TH1F * RootItems::TrackSlopeX(){ return hTrackSlopeX; }
-TH1F * RootItems::TrackSlopeY(){ return hTrackSlopeY; }
-TLegend * RootItems::FitGauss(){ return lFitGauss; }
+
 
 /** helper functions */
-
 
 void RootItems::FitSlope(TH1F * histo){
 
@@ -38,5 +42,14 @@ void RootItems::LegendSlope(TH1F * histo) {
     lFitGauss->AddEntry("const", s2 + TString::Format("%5.1f", fGauss->GetParameter(0)), "");
     lFitGauss->AddEntry("const", s3 + TString::Format("%1.3f", fGauss->GetParameter(2)), "");
     lFitGauss->Draw("same");
+}
+
+std::vector<TH2F*> RootItems::FillVectorTH2F(vector<TH2F*> histo, const char * name) {
+    cout << nRoc << endl;
+    for (uint16_t iroc = 0; iroc != nRoc; ++iroc){
+        TH2F * hist = new TH2F(Form(name, iroc), Form(name, iroc), 52, 0, 52, 80, 0, 80);
+        histo.push_back(hist);
+    }
+    return histo;
 }
 

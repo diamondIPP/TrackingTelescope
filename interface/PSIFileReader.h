@@ -12,13 +12,9 @@
 
 class PSIFileReader : public PLTTelescope, public PLTTracking
 {
-  public:
-  PSIFileReader (std::string const, 
-		 std::string const, 
-		 int const, 
-		 bool const,
-		 bool const);
 
+public:
+    PSIFileReader (std::string const, std::string const, int const, bool const, bool const);
     virtual ~PSIFileReader (){};
 
     virtual bool OpenFile () = 0;
@@ -29,7 +25,7 @@ class PSIFileReader : public PLTTelescope, public PLTTracking
     void ReadPixelMask (std::string const);
     void AddToPixelMask( int, int, int, int);
     bool IsPixelMasked (int const);
-   
+
     void DrawTracksAndHits (std::string const);
 
     virtual int GetNextEvent () = 0;
@@ -37,27 +33,16 @@ class PSIFileReader : public PLTTelescope, public PLTTracking
     size_t NHits ();
     PLTHit* Hit (size_t);
 
-    PLTGainCal* GetGainCal ()
-    {
-      return &fGainCal;
-    }
-
-    PLTAlignment* GetAlignment()
-    {
-      return &fAlignment;
-    }
-
-    const std::set<int> * GetPixelMask(){
-      return &fPixelMask;
-    }
+    PLTGainCal * GetGainCal () { return &fGainCal; }
+    PLTAlignment * GetAlignment() { return &fAlignment; }
+    const std::set<int> * GetPixelMask(){ return &fPixelMask; }
 
     long long GetTime () {return fTime;}
 
     const int  NMAXROCS;
 
+
   protected:
-
-
 
     long long fTime;
 
@@ -69,15 +54,15 @@ class PSIFileReader : public PLTTelescope, public PLTTracking
     PLTAlignment fAlignment;
 
     std::string fBinaryFileName;
-    
+
     // Should we use the GainInterpolator instead of GainCal
-    // -> Only for Telescope 2 from May 2014 testmeab for now    
+    // -> Only for Telescope 2 from May 2014 testmeab for now
     bool fUseGainInterpolator;
-    
+
     std::map<int, PLTPlane> fPlaneMap;
 
     std::string fBaseCalDir;
-    
+
     std::vector<std::string> fCalibrationFile;
     std::vector<std::string> fRawCalibrationFile;
 

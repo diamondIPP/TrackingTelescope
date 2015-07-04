@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <stdint.h>
-#include <stdlib.h>  
+#include <stdlib.h>
 
 #include "TGraph.h"
 #include "TString.h"
@@ -13,56 +13,48 @@
 #include "TMarker.h"
 #include "TLine.h"
 
-PSIFileReader::PSIFileReader (std::string const CalibrationList,
-			      std::string const AlignmentFileName,
-			      int const nrocs, 
-			      bool const useGainInterpolator,
-			      bool const useExternalCalibrationFunction
-			      ) :   PLTTracking(nrocs),
-								  NMAXROCS(nrocs), 
-								  fGainCal(nrocs, useExternalCalibrationFunction),
-								  fUseGainInterpolator(useGainInterpolator){
+using namespace std;
 
-  // Initialize fCalibrationFile and fRawCalibrationFile with empty
-  // strings
-  for (int i_roc=0; i_roc != NMAXROCS; i_roc++){    
-    fCalibrationFile.push_back("");
-    fRawCalibrationFile.push_back("");
-  }
-  
-  std::ifstream fCL(CalibrationList.c_str());
-  if (!fCL.is_open()) {
-      std::cerr << "ERROR: cannot open calibration list file: " << CalibrationList << std::endl;
-      throw;
-  }
+/** ============================
+ CONSTRUCTOR
+ =================================*/
+PSIFileReader::PSIFileReader (string const CalibrationList, string const AlignmentFileName,
+    int const nrocs, bool const useGainInterpolator, bool const useExternalCalibrationFunction):
+        PLTTracking(nrocs), NMAXROCS(nrocs), fGainCal(nrocs, useExternalCalibrationFunction),
+        fUseGainInterpolator(useGainInterpolator){
 
-  fCL >> fBaseCalDir;
-  
-  for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
-    fCL >> fCalibrationFile[i_roc];    
-
-  // Only look for additional files if we want to use the GainInterpolator
-  if (useGainInterpolator){
-    for (int i_roc=0; i_roc != NMAXROCS; i_roc++){
-      fCL >> fRawCalibrationFile[i_roc];
+   /** Initialize fCalibrationFile and fRawCalibrationFile with empty strings */
+    for (int i_roc=0; i_roc != NMAXROCS; i_roc++) {
+        fCalibrationFile.push_back("");
+        fRawCalibrationFile.push_back("");
     }
-  }
-
-  for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
-    fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[i_roc], i_roc);
-
-  // Only read-in additional files if we want to use the GainInterpolator
-  if (useGainInterpolator){
-    for (int i_roc=0; i_roc != NMAXROCS; i_roc++){
-      fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[i_roc], i_roc);
+    std::ifstream fCL(CalibrationList.c_str());
+    if (!fCL.is_open()) {
+        std::cerr << "ERROR: cannot open calibration list file: " << CalibrationList << std::endl;
+        throw;
     }
-  }
+    fCL >> fBaseCalDir;
+    for (int i_roc=0; i_roc != NMAXROCS; i_roc++) fCL >> fCalibrationFile[i_roc];
 
-  fAlignment.ReadAlignmentFile(AlignmentFileName);
-  SetTrackingAlignment(&fAlignment);
-  
-  SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
+    /** look for additional files if we want to use the GainInterpolator */
+    if (useGainInterpolator) {
+        for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
+            fCL >> fRawCalibrationFile[i_roc];
+    }
 
+    for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
+        fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[i_roc], i_roc);
+
+    /** read-in additional files if we want to use the GainInterpolator */
+    if (useGainInterpolator) {
+        for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
+            fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[i_roc], i_roc);
+    }
+
+    fAlignment.ReadAlignmentFile(AlignmentFileName);
+    SetTrackingAlignment(&fAlignment);
+
+    SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
 }
 
 

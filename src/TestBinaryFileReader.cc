@@ -3,28 +3,20 @@
 
 using namespace std;
 
-/** RUN DEFAULT ANALYSIS */
+/** ============================
+ RUN DEFAULT ANALYSIS
+ =================================*/
 int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString const RunNumber,
                              int telescopeID)
 {
+
+    /** ============================
+     Constants
+     =================================*/
     const uint16_t NROC = GetNumberOfROCS(telescopeID);
     const uint32_t ph_threshold(300000);
     bool do_slope;
-
-
-    /** single plane studies for Telescopes from May (which May?) testbeam*/
-    if ((telescopeID == 1) || (telescopeID == 2)){
-
-        int n_events = TestPlaneEfficiencySilicon(InFileName, out_f, RunNumber, telescopeID);
-
-        for (int iplane = 1; iplane != 5; iplane++){
-            cout << "Going to call TestPlaneEfficiency " << iplane << endl;
-
-            TestPlaneEfficiency(InFileName, out_f, RunNumber, iplane, n_events, telescopeID);
-        }
-    }
-
-    /** Setup Output Directory and gStyle */
+    /** set output directory and gStyle */
     TString const PlotsDir = "plots/";
     TString const OutDir = PlotsDir + RunNumber + "/";
     cout << OutDir << endl;
@@ -32,62 +24,45 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
 
     /** ============================
-     Initialize Reader
+     Single Plane Studies
+     =================================*/
+    if ((telescopeID == 1) || (telescopeID == 2)){
+        int n_events = TestPlaneEfficiencySilicon(InFileName, out_f, RunNumber, telescopeID);
+        for (int iplane = 1; iplane != 5; iplane++){
+            cout << "Going to call TestPlaneEfficiency " << iplane << endl;
+            TestPlaneEfficiency(InFileName, out_f, RunNumber, iplane, n_events, telescopeID);
+        }
+    }
+
+
+    /** ============================
+     Initialize File Reader
      =================================*/
     PSIFileReader * FR;
 
     if (GetUseRootInput(telescopeID)){
-        FR = new PSIRootFileReader(InFileName,
-                       GetCalibrationFilename(telescopeID),
-                       GetAlignmentFilename(telescopeID),
-                       GetNumberOfROCS(telescopeID),
-                       GetUseGainInterpolator(telescopeID),
-                       GetUseExternalCalibrationFunction(telescopeID)
-                       );
+        FR = new PSIRootFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
+            GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID));
     }
-    else{
-        FR = new PSIBinaryFileReader(InFileName,
-                     GetCalibrationFilename(telescopeID),
-                     GetAlignmentFilename(telescopeID),
-                     GetNumberOfROCS(telescopeID),
-                     GetUseGainInterpolator(telescopeID),
-                     GetUseExternalCalibrationFunction(telescopeID)
-                     );
+    else {
+        FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
+            GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID));
         ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
     }
 
     FR->GetAlignment()->SetErrors(telescopeID);
-    FILE* f = fopen("MyGainCal.dat", "w");
+    FILE * f = fopen("MyGainCal.dat", "w");
     FR->GetGainCal()->PrintGainCal(f);
     fclose(f);
 
-
-    /** Apply Masking */
+    /** apply masking */
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
 
 
-    /** Track slope plots */
-    RootItems RootItems;
-
     /** ============================
-     Prepare Occupancy histograms: x == columns, y == rows
+     Prepare Root Items
      =================================*/
-    vector< TH2F > hOccupancy;
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
-        hOccupancy.push_back( TH2F(Form("Occupancy_ROC%i", iroc),
-                                   Form("Occupancy_ROC%i", iroc), 52, 0, 52, 80, 0, 80));
-    }
-
-    vector<TH2F> hOccupancyLowPH;
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
-        hOccupancyLowPH.push_back( TH2F( Form("OccupancyLowPH_ROC%i",iroc),
-                                         Form("OccupancyLowPH_ROC%i",iroc), 52, 0, 52, 80, 0, 80));
-    }
-    vector<TH2F> hOccupancyHighPH;
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
-        hOccupancyHighPH.push_back( TH2F( Form("OccupancyHighPH_ROC%i",iroc),
-                                          Form("OccupancyHighPH_ROC%i",iroc), 52, 0, 52, 80, 0, 80));
-    }
+    RootItems RootItems(telescopeID);
 
     vector<TH1F> hNHitsPerCluster;
     for (uint16_t iroc = 0; iroc != NROC; ++iroc){
@@ -466,19 +441,20 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                 /** fill high occupancy high */
                 if (Cluster->Charge() > 50000)
                     for (size_t ihit = 0; ihit != Cluster->NHits(); ++ihit)
-                        hOccupancyHighPH[Cluster->ROC()].Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
+//                        hOccupancyHighPH[Cluster->ROC()].Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
+                        RootItems.OccupancyHighPH()[Cluster->ROC()]->Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
 
                 /** fill low occupancy */
                 else if (Cluster->Charge() > 10000 && Cluster->Charge() < 40000)
                     for (size_t ihit = 0; ihit != Cluster->NHits(); ++ihit)
-                        hOccupancyLowPH[Cluster->ROC()].Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
+//                        hOccupancyLowPH[Cluster->ROC()].Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
+                        RootItems.OccupancyLowPH()[Cluster->ROC()]->Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
             }
-
             /** fill occupancy histo */
             for (size_t ihit = 0; ihit != Plane->NHits(); ++ihit) {
                 PLTHit* Hit = Plane->Hit(ihit);
 
-                if (Hit->ROC() < NROC) hOccupancy[Hit->ROC()].Fill(Hit->Column(), Hit->Row());
+                if (Hit->ROC() < NROC) RootItems.Occupancy()[Hit->ROC()]->Fill(Hit->Column(), Hit->Row());
                 else cerr << "Oops, ROC >= NROC?" << endl;
             }
         }
@@ -567,15 +543,15 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
   for (int iroc = 0; iroc != NROC; ++iroc) {
 
-    // Draw Occupancy histograms
-    hOccupancy[iroc].SetMinimum(0);
-    //hOccupancy[iroc].SetAxisRange(12,38,"X");
-    //hOccupancy[iroc].SetAxisRange(39,80,"Y");
-    hOccupancy[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hOccupancy[iroc].GetName()) + ".gif");
-    hOccupancy[iroc].Write();
+    /** Draw Occupancy histograms */
+    RootItems.Occupancy()[iroc]->SetMinimum(0);
+    //RootItems.Occupancy()[iroc].SetAxisRange(12,38,"X");
+    //RootItems.Occupancy()[iroc].SetAxisRange(39,80,"Y");
+    RootItems.Occupancy()[iroc]->Draw("colz");
+    Can.SaveAs( OutDir+TString(RootItems.Occupancy()[iroc]->GetName()) + ".gif");
+    RootItems.Occupancy()[iroc]->Write();
 
-    TH1F* hOccupancy1DZ = PLTU::HistFrom2D(&hOccupancy[iroc]);
+    TH1F* hOccupancy1DZ = PLTU::HistFrom2D(RootItems.Occupancy()[iroc]);
     Can.cd();
     hOccupancy1DZ->Draw("hist");
     if (hOccupancy1DZ->GetEntries() > 0) {
@@ -589,23 +565,23 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     Double_t QProbability[1] = { 0.95 }; // Quantile positions in [0, 1]
     Double_t QValue[1];                  // Quantile values
     hOccupancy1DZ->GetQuantiles(1, QValue, QProbability);
-    if(QValue[0] > 1 && hOccupancy[iroc].GetMaximum() > QValue[0]) {
-      hOccupancy[iroc].SetMaximum(QValue[0]);
+    if(QValue[0] > 1 && RootItems.Occupancy()[iroc]->GetMaximum() > QValue[0]) {
+      RootItems.Occupancy()[iroc]->SetMaximum(QValue[0]);
     }
     Can.cd();
-    hOccupancy[iroc].Draw("colz");
+    RootItems.Occupancy()[iroc]->Draw("colz");
     Can.SaveAs( OutDir+Form("Occupancy_ROC%i_Quantile.gif", iroc) );
     delete hOccupancy1DZ;
 
     Can.cd();
-    hOccupancy1DZ = PLTU::HistFrom2D(&hOccupancy[iroc], 0, QValue[0], TString::Format("Occupancy1DZ_ROC%i_Quantile", iroc), 20);
+    hOccupancy1DZ = PLTU::HistFrom2D(RootItems.Occupancy()[iroc], 0, QValue[0], TString::Format("Occupancy1DZ_ROC%i_Quantile", iroc), 20);
     hOccupancy1DZ->Draw("hist");
     Can.SaveAs(OutDir+TString(hOccupancy1DZ->GetName()) + ".gif");
     delete hOccupancy1DZ;
 
 
     // Get 3x3 efficiency hists and draw
-    TH2F* h3x3 = PLTU::Get3x3EfficiencyHist(hOccupancy[iroc], 0, 51, 0, 79);
+    TH2F* h3x3 = PLTU::Get3x3EfficiencyHist(*RootItems.Occupancy()[iroc], 0, 51, 0, 79);
     h3x3->SetTitle( TString::Format("Occupancy Efficiency 3x3 ROC%i", iroc) );
     Can.cd();
     h3x3->SetMinimum(0);
@@ -635,13 +611,13 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     Can.SaveAs( OutDir+TString(hNHitsPerCluster[iroc].GetName()) + ".gif");
 
     Can.cd();
-    hOccupancyHighPH[iroc].SetMinimum(0);
-    hOccupancyHighPH[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hOccupancyHighPH[iroc].GetName()) + ".gif");
+    RootItems.OccupancyHighPH()[iroc]->SetMinimum(0);
+    RootItems.OccupancyHighPH()[iroc]->Draw("colz");
+    Can.SaveAs( OutDir+TString(RootItems.OccupancyHighPH()[iroc]->GetName()) + ".gif");
 
-    hOccupancyLowPH[iroc].SetMinimum(0);
-    hOccupancyLowPH[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hOccupancyLowPH[iroc].GetName()) + ".gif");
+    RootItems.OccupancyLowPH()[iroc]->SetMinimum(0);
+    RootItems.OccupancyLowPH()[iroc]->Draw("colz");
+    Can.SaveAs( OutDir+TString(RootItems.OccupancyLowPH()[iroc]->GetName()) + ".gif");
 
 //    float_t oneovertwo[iroc],oneoverthree[iroc],twooverthree[iroc];  //unused?
 //
