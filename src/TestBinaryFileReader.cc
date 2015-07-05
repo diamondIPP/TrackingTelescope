@@ -70,65 +70,8 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
      =================================*/
     RootItems RootItems(telescopeID, RunNumber);
 
-
-    /** ============================
-     Prepare PulseHeight histograms
-     ================================= */
-    int const phMin = 0;
-    int const phNBins = 50;
-    /** standard */
-    TH1F * hPulseHeight[NROC][4];
-    int const phMax = 50000;
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc) {
-        TString Name = TString::Format("PulseHeight_ROC%i_All", iroc);
-        hPulseHeight[iroc][0] = new TH1F(Name, Name, phNBins, phMin, phMax);
-        Name = TString::Format("PulseHeight_ROC%i_NPix1", iroc);
-        hPulseHeight[iroc][1] = new TH1F(Name, Name, phNBins, phMin, phMax);
-        Name = TString::Format("PulseHeight_ROC%i_NPix2", iroc);
-        hPulseHeight[iroc][2] = new TH1F(Name, Name, phNBins, phMin, phMax);
-        Name = TString::Format("PulseHeight_ROC%i_NPix3Plus", iroc);
-        hPulseHeight[iroc][3] = new TH1F(Name, Name, phNBins, phMin, phMax);
-    }
-    /** long histogram (see the protons) */
-    TH1F * hPulseHeightLong[NROC][4];
-    int const phLongMax = 300000;
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc) {
-        TString Name = TString::Format("PulseHeightLong_ROC%i_All", iroc);
-        hPulseHeightLong[iroc][0] = new TH1F(Name, Name, phNBins, phMin, phLongMax);
-        Name = TString::Format("PulseHeightLong_ROC%i_NPix1", iroc);
-        hPulseHeightLong[iroc][1] = new TH1F(Name, Name, phNBins, phMin, phLongMax);
-        Name = TString::Format("PulseHeightLong_ROC%i_NPix2", iroc);
-        hPulseHeightLong[iroc][2] = new TH1F(Name, Name, phNBins, phMin, phLongMax);
-        Name = TString::Format("PulseHeightLong_ROC%i_NPix3Plus", iroc);
-        hPulseHeightLong[iroc][3] = new TH1F(Name, Name, phNBins, phMin, phLongMax);
-    }
-    /** For Tracks, using additional selections*/
-    TH1F* hPulseHeightOffline[NROC][4];
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc) {
-        TString Name = TString::Format("PulseHeightOffline_ROC%i_All", iroc);
-        hPulseHeightOffline[iroc][0] = new TH1F(Name, Name, phNBins, phMin, phMax);
-        Name = TString::Format("PulseHeightOffline_ROC%i_NPix1", iroc);
-        hPulseHeightOffline[iroc][1] = new TH1F(Name, Name, phNBins, phMin, phMax);
-        Name = TString::Format("PulseHeightOffline_ROC%i_NPix2", iroc);
-        hPulseHeightOffline[iroc][2] = new TH1F(Name, Name, phNBins, phMin, phMax);
-        Name = TString::Format("PulseHeightOffline_ROC%i_NPix3Plus", iroc);
-        hPulseHeightOffline[iroc][3] = new TH1F(Name, Name, phNBins, phMin, phMax);
-    }
-    /** formatting histos */
     int const HistColors[4] = { 1, 4, 28, 2 };
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc) {
-        for (uint16_t inpix = 0; inpix != 4; ++inpix) {
-            hPulseHeight[iroc][inpix]->SetXTitle("Charge (electrons)");
-            hPulseHeight[iroc][inpix]->SetYTitle("Number of Clusters");
-            hPulseHeight[iroc][inpix]->SetLineColor(HistColors[inpix]);
-            hPulseHeightLong[iroc][inpix]->SetXTitle("Charge (electrons)");
-            hPulseHeightLong[iroc][inpix]->SetYTitle("Number of Clusters");
-            hPulseHeightLong[iroc][inpix]->SetLineColor(HistColors[inpix]);
-            hPulseHeightOffline[iroc][inpix]->SetXTitle("Charge (electrons)");
-            hPulseHeightOffline[iroc][inpix]->SetYTitle("Number of Clusters");
-            hPulseHeightOffline[iroc][inpix]->SetLineColor(HistColors[inpix]);
-        }
-    }
+
 
     /** ============================
      2D Pulse Height maps for All and Track6
@@ -269,7 +212,9 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     getTime(now1, startProg);
     now1 = clock();
     /** ============================
-     Event Loop
+================================================
+     EVENT LOOP
+================================================
      ================================= */
     uint64_t indexi = -1;
     float now = clock();
@@ -363,8 +308,8 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
                 if (iplane < NROC) {
                     /** fill pulse height histo for all*/
-                    hPulseHeight[iplane][0]->Fill(Cluster->Charge());
-                    hPulseHeightLong[iplane][0]->Fill(Cluster->Charge());
+                    RootItems.PulseHeight()[iplane][0]->Fill(Cluster->Charge());
+                    RootItems.PulseHeightLong()[iplane][0]->Fill(Cluster->Charge());
                     br_charge_all = Cluster->Charge();
 
                     /** ignore charges above a certain threshold */
@@ -376,26 +321,26 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
                     /** fill pulse height histo one pix */
                     if (Cluster->NHits() == 1) {
-                        hPulseHeight[iplane][1]->Fill(Cluster->Charge());
+                        RootItems.PulseHeight()[iplane][1]->Fill(Cluster->Charge());
                         onepc[iplane]++;
-                        hPulseHeightLong[iplane][1]->Fill(Cluster->Charge());
+                        RootItems.PulseHeightLong()[iplane][1]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(AvgPH[iplane][1], NAvgPH[iplane][1], Cluster->Charge());
                         br_charge_1pix = Cluster->Charge();
                     }
 
                     /** fill pulse height histo two pix */
                     else if (Cluster->NHits() == 2) {
-                        hPulseHeight[iplane][2]->Fill(Cluster->Charge());
+                        RootItems.PulseHeight()[iplane][2]->Fill(Cluster->Charge());
                         twopc[iplane]++;
-                        hPulseHeightLong[iplane][2]->Fill(Cluster->Charge());
+                        RootItems.PulseHeightLong()[iplane][2]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(AvgPH[iplane][2], NAvgPH[iplane][2], Cluster->Charge());
                         br_charge_2pix = Cluster->Charge();
                     }
                     /** fill pulse height histo >3 pix */
                     else if (Cluster->NHits() >= 3) {
-                        hPulseHeight[iplane][3]->Fill(Cluster->Charge());
+                        RootItems.PulseHeight()[iplane][3]->Fill(Cluster->Charge());
                         threepc[iplane]++;
-                        hPulseHeightLong[iplane][3]->Fill(Cluster->Charge());
+                        RootItems.PulseHeightLong()[iplane][3]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(AvgPH[iplane][3], NAvgPH[iplane][3], Cluster->Charge());
                         br_charge_3pixplus = Cluster->Charge();
                     }
@@ -466,14 +411,14 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
 					/** fill the offline pulse heights (Track6+|Slope| < 0.01 in x and y ) */
 					if ((fabs(Track->fSlopeX) < 0.01) && (fabs(Track->fSlopeY) < 0.01)){
-						hPulseHeightOffline[Cluster->ROC()][0]->Fill(Cluster->Charge());
+						RootItems.PulseHeightOffline()[Cluster->ROC()][0]->Fill(Cluster->Charge());
 
 						if (Cluster->NHits() == 1)
-							hPulseHeightOffline[Cluster->ROC()][1]->Fill(Cluster->Charge());
+							RootItems.PulseHeightOffline()[Cluster->ROC()][1]->Fill(Cluster->Charge());
 						else if (Cluster->NHits() == 2)
-							hPulseHeightOffline[Cluster->ROC()][2]->Fill(Cluster->Charge());
+							RootItems.PulseHeightOffline()[Cluster->ROC()][2]->Fill(Cluster->Charge());
 						else if (Cluster->NHits() >= 3)
-							hPulseHeightOffline[Cluster->ROC()][3]->Fill(Cluster->Charge());
+							RootItems.PulseHeightOffline()[Cluster->ROC()][3]->Fill(Cluster->Charge());
 					}
 				}
             }
@@ -508,6 +453,11 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
   Can.cd();
 
   out_f->cd();
+
+    RootItems.FormatPHHisto(RootItems.PulseHeight());
+    RootItems.FormatPHHisto(RootItems.PulseHeightLong());
+    RootItems.FormatPHHisto(RootItems.PulseHeightOffline());
+    RootItems.FormatLegendPH();
 
   for (int iroc = 0; iroc != NROC; ++iroc) {
 
@@ -589,32 +539,10 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
      ================================= */
     gStyle->SetOptStat(0);
 
-    /** legends */
-    TLegend leg_histo(0.77, 0.7, 0.9, 0.88, "");
-    leg_histo.SetFillColor(4000);
-    leg_histo.SetFillStyle(4000);
-    leg_histo.SetBorderSize(0);
-    leg_histo.SetTextAlign(11);
-    leg_histo.AddEntry(hPulseHeight[iroc][0], "All", "l");
-    leg_histo.AddEntry(hPulseHeight[iroc][1], "1 Pix", "l");
-    leg_histo.AddEntry(hPulseHeight[iroc][2], "2 Pix", "l");
-    leg_histo.AddEntry(hPulseHeight[iroc][3], "3+ Pix", "l");
-    TLegend leg_mean(0.77, 0.45, 0.9, 0.66, "Mean values:");
-    leg_mean.SetTextAlign(11);
-    leg_mean.SetFillStyle(0);
-    leg_mean.SetBorderSize(0);
-
     /** standard */
-    Can.cd();
-    hPulseHeight[iroc][0]->SetTitle( TString::Format("Pulse Height ROC%i", iroc) );
-    hPulseHeight[iroc][0]->Draw("hist");
-    hPulseHeight[iroc][1]->Draw("samehist");
-    hPulseHeight[iroc][2]->Draw("samehist");
-    hPulseHeight[iroc][3]->Draw("samehist");
-    leg_mean.AddEntry( "PH0PMean", TString::Format("%8.0f", hPulseHeight[iroc][0]->GetMean()), "")->SetTextColor(HistColors[0]);
-    leg_mean.AddEntry( "PH1PMean", TString::Format("%8.0f", hPulseHeight[iroc][1]->GetMean()), "")->SetTextColor(HistColors[1]);
-    leg_mean.AddEntry( "PH2PMean", TString::Format("%8.0f", hPulseHeight[iroc][2]->GetMean()), "")->SetTextColor(HistColors[2]);
-    leg_mean.AddEntry( "PH3PMean", TString::Format("%8.0f", hPulseHeight[iroc][3]->GetMean()), "")->SetTextColor(HistColors[3]);
+    RootItems.ClearLegendsPH();
+    RootItems.FillLegendsPH(iroc, RootItems.PulseHeight());
+    RootItems.DrawSavePH(iroc, RootItems.PulseHeight(), "Pulse Height ROC%i", "PulseHeight_ROC%i.gif");
 //    TLegend lRatio(0.75, 0.1, 0.90, 0.4, "Ratio:");
 //    lRatio.SetTextAlign(11);
 //    lRatio.SetFillStyle(0);
@@ -623,52 +551,15 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 //    lRatio.AddEntry( "oneoverthree", TString::Format("%8.0f", oneoverthree, "")+" 1 over 3");
 //    lRatio.AddEntry( "twooverthree", TString::Format("%8.0f", twooverthree, "")+" 2 over 3");
 //    lRatio.Draw("same");
-    leg_mean.Draw("same");
-    leg_histo.Draw("same");
-    Can.SaveAs(OutDir+TString::Format("PulseHeight_ROC%i.gif", iroc));
-
-    for (uint8_t i(0); i != 4; i++)
-        hPulseHeight[iroc][i]->Write();
-
     /** offline */
-    Can.cd();
-    hPulseHeightOffline[iroc][0]->SetTitle( TString::Format("Pulse Height Offline ROC%i", iroc) );
-    hPulseHeightOffline[iroc][0]->Draw("hist");
-    hPulseHeightOffline[iroc][1]->Draw("samehist");
-    hPulseHeightOffline[iroc][2]->Draw("samehist");
-    hPulseHeightOffline[iroc][3]->Draw("samehist");
-    leg_mean.Clear();
-    leg_mean.SetHeader("Mean:");
-    leg_mean.AddEntry( "PH0PMean", TString::Format("%8.0f", hPulseHeightOffline[iroc][0]->GetMean()), "")->SetTextColor(HistColors[0]);
-    leg_mean.AddEntry( "PH1PMean", TString::Format("%8.0f", hPulseHeightOffline[iroc][1]->GetMean()), "")->SetTextColor(HistColors[1]);
-    leg_mean.AddEntry( "PH2PMean", TString::Format("%8.0f", hPulseHeightOffline[iroc][2]->GetMean()), "")->SetTextColor(HistColors[2]);
-    leg_mean.AddEntry( "PH3PMean", TString::Format("%8.0f", hPulseHeightOffline[iroc][3]->GetMean()), "")->SetTextColor(HistColors[3]);
-    leg_mean.Draw("same");
-    leg_histo.Draw("same");
-    Can.SaveAs(OutDir+TString::Format("PulseHeightOffline_ROC%i.gif", iroc));
-
-    for (uint8_t i(0); i != 4; i++)
-        hPulseHeightOffline[iroc][i]->Write();
+    RootItems.ClearLegendsPH();
+    RootItems.FillLegendsPH(iroc, RootItems.PulseHeightOffline());
+    RootItems.DrawSavePH(iroc, RootItems.PulseHeightOffline(), "Pulse Height Offline ROC%i", "PulseHeightOffline_ROC%i.gif");
 
     /** long */
-    Can.cd();
-    hPulseHeightLong[iroc][0]->SetTitle( TString::Format("Pulse Height Long ROC%i", iroc) );
-    hPulseHeightLong[iroc][0]->Draw("hist");
-    hPulseHeightLong[iroc][1]->Draw("samehist");
-    hPulseHeightLong[iroc][2]->Draw("samehist");
-    hPulseHeightLong[iroc][3]->Draw("samehist");
-    leg_mean.Clear();
-    leg_mean.SetHeader("Mean:");
-    leg_mean.AddEntry( "PH0PMean", TString::Format("%8.0f", hPulseHeightLong[iroc][0]->GetMean()), "")->SetTextColor(HistColors[0]);
-    leg_mean.AddEntry( "PH1PMean", TString::Format("%8.0f", hPulseHeightLong[iroc][1]->GetMean()), "")->SetTextColor(HistColors[1]);
-    leg_mean.AddEntry( "PH2PMean", TString::Format("%8.0f", hPulseHeightLong[iroc][2]->GetMean()), "")->SetTextColor(HistColors[2]);
-    leg_mean.AddEntry( "PH3PMean", TString::Format("%8.0f", hPulseHeightLong[iroc][3]->GetMean()), "")->SetTextColor(HistColors[3]);
-    leg_mean.Draw("same");
-    leg_histo.Draw("same");
-    Can.SaveAs(OutDir+TString::Format("PulseHeightLong_ROC%i.gif", iroc));
-
-    for (uint8_t i(0); i != 4; i++)
-        hPulseHeightLong[iroc][i]->Write();
+    RootItems.ClearLegendsPH();
+    RootItems.FillLegendsPH(iroc, RootItems.PulseHeightLong());
+    RootItems.DrawSavePH(iroc, RootItems.PulseHeightLong(), "Pulse Height Long ROC%i", "PulseHeightLong_ROC%i.gif");
 
     /** average pulse height */
     Can.cd();
@@ -677,7 +568,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     gAvgPH[iroc][1].Draw("samepe");
     gAvgPH[iroc][2].Draw("samepe");
     gAvgPH[iroc][3].Draw("samepe");
-    leg_histo.Draw("same");
+    RootItems.legPH()->Draw("same");
     Can.SaveAs(OutDir+TString::Format("PulseHeightTime_ROC%i.gif", iroc));
 
     // Use AvgPH2D to draw PH 2D maps

@@ -38,9 +38,10 @@ private:
     uint16_t const nRoc;
     TString const PlotsDir;
     TString const OutDir;
+    const uint8_t HistColors[4];
 
     /** canvases */
-    TCanvas * c2;
+    TCanvas * c1, * c2;
 
     /** tracking */
     TH1F * hTrackSlopeX;
@@ -56,6 +57,13 @@ private:
     /** cluster hits */
     std::vector<TH1F*> hNHitsPerCluster;
     std::vector<TH1F*> hNClusters;
+
+    /** pulse height */
+    std::vector<vector<TH1F*> > hPulseHeight;
+    std::vector<vector<TH1F*> > hPulseHeightLong;
+    std::vector<vector<TH1F*> > hPulseHeightOffline;
+    TLegend * lPulseHeight;
+    TLegend * lPHMean;
 
     /** coincidence map */
     TH1F * hCoincidenceMap;
@@ -81,6 +89,11 @@ public:
     std::vector<TH2F*> OccupancyHighPH() { return hOccupancyHighPH; }
     std::vector<TH1F*> nHitsPerCluster() { return hNHitsPerCluster; }
     std::vector<TH1F*> nClusters() { return hNClusters; }
+    std::vector<vector<TH1F*> > PulseHeight() { return hPulseHeight; }
+    std::vector<vector<TH1F*> > PulseHeightLong() { return hPulseHeightLong; }
+    std::vector<vector<TH1F*> > PulseHeightOffline() { return hPulseHeightOffline; }
+    TLegend * legPH() { return lPulseHeight; }
+    TLegend * legPHMean() { return lPHMean; }
 
     /** ============================
      AUXILIARY FUNCTIONS
@@ -89,11 +102,15 @@ public:
     void LegendSlope(TH1F * histo);
     std::vector<TH2F*> FillVectorTH2F(std::vector<TH2F*> histo, const char * name);
     std::vector<TH1F*> FillVectorTH1F(std::vector<TH1F*> histo, const char * name);
+    std::vector<vector<TH1F*> > FillVectorPH(std::vector<vector<TH1F*> >, TString name, uint32_t maxPH);
     void DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, TCanvas & c, const char * xTit, const char * yTit);
     void PrepCoincidenceHisto();
     void DrawSaveCoincidence();
-
-
+    void FormatPHHisto(std::vector<vector<TH1F*> >);
+    void FormatLegendPH();
+    void FillLegendsPH(uint8_t iroc, std::vector<vector<TH1F*> > histVec);
+    void DrawSavePH(uint8_t iroc, std::vector<vector<TH1F*> > histVec, TString title, TString saveName);
+    void ClearLegendsPH();
 
  };
 

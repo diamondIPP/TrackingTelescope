@@ -8,9 +8,11 @@ using namespace std;
 RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     nRoc(GetNumberOfROCS(telescopeID)),
     PlotsDir("plots/"),
-    OutDir(PlotsDir + RunNumber + "/") {
+    OutDir(PlotsDir + RunNumber + "/"),
+    HistColors {1, 4, 28, 2 } {
 
     /** canvases */
+    c1 = new TCanvas;
     c2 = new TCanvas("CoincidenceMap", "CoincidenceMap", 1200, 400);
 
     /** tracking */
@@ -27,6 +29,13 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     /** cluster */
     hNHitsPerCluster = FillVectorTH1F(hNHitsPerCluster, "NHitsPerCluster_ROC%i");
     hNClusters = FillVectorTH1F(hNClusters, "NClusters_ROC%i");
+
+    /** pulse height */
+    hPulseHeight = FillVectorPH(hPulseHeight, "", 50000);
+    hPulseHeightLong = FillVectorPH(hPulseHeightLong, "Long", 300000);
+    hPulseHeightOffline = FillVectorPH(hPulseHeightOffline, "Offline", 50000);
+    lPulseHeight = new TLegend(0.77, 0.7, 0.9, 0.88, "");
+    lPHMean = new TLegend(0.77, 0.45, 0.9, 0.66, "Mean:");
 
     /** coincidence map */
     hCoincidenceMap = new TH1F("CoincidenceMap", "CoincidenceMap", pow(2, nRoc), 0, pow(2, nRoc));
@@ -69,6 +78,64 @@ vector<TH1F*> RootItems::FillVectorTH1F(vector<TH1F*> histo, const char * name) 
         histo.push_back(hist);
     }
     return histo;
+}
+std::vector<vector<TH1F*> > RootItems::FillVectorPH(std::vector<vector<TH1F*> > histVec, TString name, uint32_t maxPH){
+    const uint8_t minPH(0), nBins(50);
+    TString base = "PulseHeight" + name + "_ROC%i_";
+    TString names[4] = {base + "All", base + "NPix1", base + "NPix2", base + "NPix3Plus"};
+    for (uint8_t iroc(0); iroc != nRoc; ++iroc){
+        histVec.resize(iroc + 1);
+        for (uint8_t iMode(0); iMode != 4; iMode++){
+            TString Name = TString::Format(names[iMode], iroc);
+            TH1F * hist = new TH1F(Name, Name, nBins, minPH, maxPH);
+            histVec[iroc].push_back(hist);
+        }
+    }
+    return histVec;
+}
+void RootItems::FormatPHHisto(std::vector<vector<TH1F*> > histVec){
+
+    for (uint8_t iroc(0); iroc != nRoc; ++iroc)
+        for (uint8_t iMode(0); iMode != 4; iMode++){
+            histVec[iroc][iMode]->SetXTitle("Charge (electrons)");
+            histVec[iroc][iMode]->SetYTitle("Number of Clusters");
+            histVec[iroc][iMode]->SetLineColor(HistColors[iMode]);
+    }
+}
+void RootItems::FormatLegendPH(){
+
+    lPulseHeight->SetFillColor(4000);
+    lPulseHeight->SetFillStyle(4000);
+    lPulseHeight->SetBorderSize(0);
+    lPulseHeight->SetTextAlign(11);
+    lPHMean->SetTextAlign(11);
+    lPHMean->SetFillStyle(0);
+    lPHMean->SetBorderSize(0);
+}
+void RootItems::FillLegendsPH(uint8_t iroc, std::vector<vector<TH1F*> > histVec){
+
+    TString names1[4] = {"All", "1 Pix", "2 Pix", "3+ Pix"};
+    TString names2[4] = {"PH0PMean", "PH1PMean", "PH2PMean", "PH3PMean"};
+    for (uint8_t iMode(0); iMode != 4; iMode++){
+        lPulseHeight->AddEntry(histVec[iroc][iMode], names1[iMode], "l");
+        lPHMean->AddEntry(names2[iMode], TString::Format("%8.0f", histVec[iroc][iMode]->GetMean()), "")->SetTextColor(HistColors[iMode]);
+    }
+}
+void RootItems::DrawSavePH(uint8_t iroc, std::vector<vector<TH1F*> > histVec, TString title, TString saveName){
+
+    c1->cd();
+    histVec[iroc][0]->SetTitle( TString::Format(title, iroc));
+    histVec[iroc][0]->Draw("hist");
+    for (uint8_t i(1); i != 4; i++) histVec[iroc][i]->Draw("samehist");
+    lPulseHeight->Draw("same");
+    lPHMean->Draw("same");
+    c1->SaveAs(OutDir+TString::Format(saveName, iroc));
+    for (uint8_t i(0); i != 4; i++) histVec[iroc][i]->Write();
+}
+void RootItems::ClearLegendsPH(){
+    lPulseHeight->Clear();
+    lPHMean->Clear();
+    lPHMean->SetHeader("Mean:");
 }
 void RootItems::DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, TCanvas & c, const char * xTit, const char * yTit){
     c.cd();

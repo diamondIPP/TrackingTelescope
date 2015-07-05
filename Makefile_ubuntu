@@ -1,5 +1,5 @@
-CC = g++
-LD = g++
+CC = g++ -std=gnu++11
+LD = g++ -std=gnu++11
 CFLAGS = -fPIC -Wall `root-config --cflags`
 LIBS =  `root-config --libs` -Llib -lMinuit -lSpectrum -lGeom
 INCLUDE = -Iinterface -Idict
