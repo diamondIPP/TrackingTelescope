@@ -6,6 +6,12 @@ using namespace std;
 /** ============================
  RUN DEFAULT ANALYSIS
  =================================*/
+
+float getTime(float now, float & time){
+    time += (clock() - now) / CLOCKS_PER_SEC;
+    return time;
+}
+
 int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString const RunNumber,
                              int telescopeID)
 {
@@ -13,6 +19,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     /** ============================
      Constants
      =================================*/
+    float now1(clock()), now3(clock()), loop(0), startProg(0), endProg(0), allProg(0);
     const uint16_t NROC = GetNumberOfROCS(telescopeID);
     const uint32_t ph_threshold(300000);
     bool do_slope;
@@ -63,47 +70,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
      =================================*/
     RootItems RootItems(telescopeID, RunNumber);
 
-
-//    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
-//        hNHitsPerCluster.push_back( TH1F( Form("NHitsPerCluster_ROC%i",iroc),
-//                                          Form("NHitsPerCluster_ROC%i",iroc), 10, 0, 10));
-//    }
-//
-//    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
-//        hNClusters.push_back( TH1F( Form("NClusters_ROC%i",iroc),
-//                                    Form("NClusters_ROC%i",iroc), 10, 0, 10));
-//    }
-
-    /** ============================
-     Prepare Coincidence Histogram
-     =================================*/
-    uint16_t n_bins = pow(2, NROC);
-    TH1F hCoincidenceMap("CoincidenceMap", "CoincidenceMap", n_bins, 0, n_bins);
-    vector<string> bin;
-    for (uint16_t i(0); i < n_bins; i++){
-        bin.push_back("");
-        int z = i;
-        for (int16_t j(NROC - 1); j>=0; j--){
-            int x = pow(2,j);
-            int y = z/x;
-            if (y == 1) z -= x;
-            bin[i].push_back(y+'0');
-        }
-    }
-    hCoincidenceMap.LabelsDeflate();
-    hCoincidenceMap.SetFillColor(40);
-    hCoincidenceMap.GetYaxis()->SetTitle("Number of Hits");
-    hCoincidenceMap.GetYaxis()->SetTitleOffset(0.5);
-    hCoincidenceMap.GetYaxis()->SetTitleSize(0.04);
-    hCoincidenceMap.GetXaxis()->SetTitle("Coincidences");
-    hCoincidenceMap.GetXaxis()->SetTitleSize(0.04);
-    hCoincidenceMap.GetXaxis()->SetLabelOffset(99);
-    Float_t x, y;
-    TText t;
-    t.SetTextAngle(0);
-    t.SetTextSize(0.04);
-    t.SetTextAlign(22);
-    cout << endl;
 
     /** ============================
      Prepare PulseHeight histograms
@@ -300,12 +266,14 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     newtree->Branch("charge_3pixplus", &br_charge_3pixplus);
     }
 
+    getTime(now1, startProg);
+    now1 = clock();
     /** ============================
      Event Loop
      ================================= */
     uint64_t indexi = -1;
-    uint64_t start = clock(), now = clock();
-    for (int ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
+    float now = clock();
+    for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
         indexi++;
         ThisTime = ievent;
@@ -313,7 +281,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         /** print progress */
         if (ievent % 10000 == 0){
             cout << "Processing event: " << ievent << endl;
-            cout << "elapsed time: " << float((clock() - now)) / CLOCKS_PER_SEC << endl;
+            cout << "elapsed time: " << setprecision(2) << fixed << float((clock() - now)) / CLOCKS_PER_SEC << endl;
             now = clock();
         }
 
@@ -357,7 +325,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         }
 
         /** fill coincidence map */
-        hCoincidenceMap.Fill(FR->HitPlaneBits());
+        RootItems.CoincidenceMap()->Fill(FR->HitPlaneBits());
 
         /** make average pulseheight maps*/
         if (ThisTime - (StartTime + NGraphPoints * TimeWidth) > TimeWidth) {
@@ -432,6 +400,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                         br_charge_3pixplus = Cluster->Charge();
                     }
                 }
+
 
                 /** fill hits per cluster histo */
                 RootItems.nHitsPerCluster()[Cluster->ROC()]->Fill(Cluster->NHits());
@@ -509,8 +478,9 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 				}
             }
 		}
-
 	} /** END OF EVENT LOOP */
+    getTime(now1, loop);
+    now1 = clock();
 
     delete FR;
 
@@ -754,18 +724,9 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
   } // end of loop over ROCs
 
-  TCanvas Can2("CoincidenceMap", "CoincidenceMap", 1200, 400);
-  Can2.cd();
-  Can2.SetLogy(1);
-  hCoincidenceMap.Draw("");
-//    y = 0.1 * (gPad->GetUymin() - 0.5*hCoincidenceMap.GetYaxis()->GetBinWidth(1);
-//    y = 0.2 * (gPad->GetUymin() - gPad->GetUymax());
-    y = 0;
-    for (int i=0;i<n_bins;i++) {
-        x = hCoincidenceMap.GetXaxis()->GetBinCenter(i+1);
-        t.DrawText(x,y,bin[i].c_str());}
-    Can2.SaveAs(OutDir+"Occupancy_Coincidence.gif");
-    Can2.SetLogy(0);
+    /** draw and save coincidence map */
+    RootItems.PrepCoincidenceHisto();
+    RootItems.DrawSaveCoincidence();
 
     /** draw tracking slopes and chi2 */
     gStyle->SetOptFit();
@@ -798,13 +759,19 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     Can.SaveAs(OutDir+"Chi2Y.gif");
     gStyle->SetOptStat(0);
 
+
     /** make index.html as overview */
 	WriteHTML(PlotsDir + RunNumber, GetCalibrationFilename(telescopeID), telescopeID);
 
+    getTime(now1, endProg);
+    getTime(now3, allProg);
     /** print total events */
     cout << "=======================\n";
     cout << "Total events: " << indexi + 1 << endl;
-    cout << "Elapsed time: " << float((clock() - start)) / CLOCKS_PER_SEC << endl;
+    cout << "Start       : " << setprecision(2) << fixed << startProg << " seconds\n";
+    cout << "Loop        : " << setprecision(2) << fixed << loop << " seconds\n";
+    cout << "End         : " << setprecision(2) << fixed << endProg << " seconds\n";
+    cout << "All         : " << setprecision(2) << fixed << allProg << " seconds\n";
     cout <<"=======================\n";
 
 	return 0;

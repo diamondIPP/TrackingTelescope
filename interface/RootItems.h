@@ -39,6 +39,9 @@ private:
     TString const PlotsDir;
     TString const OutDir;
 
+    /** canvases */
+    TCanvas * c2;
+
     /** tracking */
     TH1F * hTrackSlopeX;
     TH1F * hTrackSlopeY;
@@ -54,6 +57,9 @@ private:
     std::vector<TH1F*> hNHitsPerCluster;
     std::vector<TH1F*> hNClusters;
 
+    /** coincidence map */
+    TH1F * hCoincidenceMap;
+
 public:
 
     /** ============================
@@ -68,6 +74,7 @@ public:
      =================================*/
     TH1F * TrackSlopeX() { return hTrackSlopeX; }
     TH1F * TrackSlopeY() { return hTrackSlopeY; }
+    TH1F * CoincidenceMap() { return hCoincidenceMap; }
     TLegend * FitGauss() { return lFitGauss; }
     std::vector<TH2F*> Occupancy() { return hOccupancy; }
     std::vector<TH2F*> OccupancyLowPH() { return hOccupancyLowPH; }
@@ -83,6 +90,8 @@ public:
     std::vector<TH2F*> FillVectorTH2F(std::vector<TH2F*> histo, const char * name);
     std::vector<TH1F*> FillVectorTH1F(std::vector<TH1F*> histo, const char * name);
     void DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, TCanvas & c, const char * xTit, const char * yTit);
+    void PrepCoincidenceHisto();
+    void DrawSaveCoincidence();
 
 
 

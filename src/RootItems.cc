@@ -10,6 +10,9 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     PlotsDir("plots/"),
     OutDir(PlotsDir + RunNumber + "/") {
 
+    /** canvases */
+    c2 = new TCanvas("CoincidenceMap", "CoincidenceMap", 1200, 400);
+
     /** tracking */
     hTrackSlopeX = new TH1F("TrackSlopeX", "TrackSlopeX", 50, -0.05, 0.05);
     hTrackSlopeY = new TH1F("TrackSlopeY", "TrackSlopeY", 50, -0.05, 0.05);
@@ -24,6 +27,9 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     /** cluster */
     hNHitsPerCluster = FillVectorTH1F(hNHitsPerCluster, "NHitsPerCluster_ROC%i");
     hNClusters = FillVectorTH1F(hNClusters, "NClusters_ROC%i");
+
+    /** coincidence map */
+    hCoincidenceMap = new TH1F("CoincidenceMap", "CoincidenceMap", pow(2, nRoc), 0, pow(2, nRoc));
 }
 RootItems::~RootItems() { }
 
@@ -34,7 +40,7 @@ RootItems::~RootItems() { }
 void RootItems::FitSlope(TH1F * histo){
 
     fGauss->SetLineWidth(2);
-    histo->Fit(fGauss);
+    histo->Fit(fGauss, "Q");
 }
 void RootItems::LegendSlope(TH1F * histo) {
 
@@ -72,4 +78,37 @@ void RootItems::DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, TCanvas & c
     histo[iroc]->Draw("hist");
     c.SaveAs(OutDir+TString(histo[iroc]->GetName()) + ".gif");
 }
-
+void RootItems::PrepCoincidenceHisto(){
+    hCoincidenceMap->SetFillColor(40);
+    hCoincidenceMap->GetYaxis()->SetTitle("Number of Hits");
+    hCoincidenceMap->GetYaxis()->SetTitleOffset(0.5);
+    hCoincidenceMap->GetYaxis()->SetTitleSize(0.05);
+    hCoincidenceMap->GetXaxis()->SetTitle("Coincidences");
+    hCoincidenceMap->GetXaxis()->SetTitleSize(0.05);
+    hCoincidenceMap->GetXaxis()->SetLabelOffset(99);
+}
+void RootItems::DrawSaveCoincidence(){
+    c2->cd();
+    c2->SetLogy(1);
+    hCoincidenceMap->Draw("");
+    vector<string> bin;
+    for (uint16_t i(0); i < pow(2, nRoc); i++){
+        bin.push_back("");
+        int z = i;
+        for (int16_t j(nRoc - 1); j >= 0; j--){
+            int x = pow(2, j);
+            int y = z / x;
+            if (y == 1) z -= x;
+            bin[i].push_back(y +'0');
+        }
+    }
+    TText Labels;
+    Labels.SetTextAngle(0);
+    Labels.SetTextSize(0.04);
+    Labels.SetTextAlign(22);
+    Float_t x, y(0);
+    for (uint8_t iBins(0); iBins < pow(2, nRoc); iBins++) {
+        x = hCoincidenceMap->GetXaxis()->GetBinCenter(iBins + 1);
+        Labels.DrawText(x, y, bin[iBins].c_str());}
+    c2->SaveAs(OutDir+"Occupancy_Coincidence.gif");
+}
