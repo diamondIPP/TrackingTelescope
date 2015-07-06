@@ -543,7 +543,7 @@ void TestPlaneEfficiency (std::string const InFileName,
 
       std::vector<float> delta_rs;
 
-      for (int icl = 0; icl != Plane->NClusters(); icl++){
+      for (uint16_t icl = 0; icl != Plane->NClusters(); icl++){
 
         float cl_px = Plane->Cluster(icl)->PX();
         float cl_py = Plane->Cluster(icl)->PY();
@@ -596,7 +596,7 @@ void TestPlaneEfficiency (std::string const InFileName,
             std::cout << "TestPlaneEfficiency. Before Loop over hits" << std::endl;
 
           // loop over all hits in the cluster and check distance to intersection
-          for (int ih = 0; ih != Plane->Cluster(closest_cluster_index)->NHits(); ih++){
+          for (uint16_t ih = 0; ih != Plane->Cluster(closest_cluster_index)->NHits(); ih++){
 
                  if (DEBUG)
                    std::cout << "TestPlaneEfficiency. ih = " << ih << std::endl;
@@ -1172,7 +1172,7 @@ int DoAlignment (std::string const InFileName,
       float h_LX = -9999;
       float h_LY = -9999;
 
-      for (int i=0; i != FR->Plane(iroc_align)->Cluster(0)->NHits(); ++i){
+      for (uint16_t i=0; i != FR->Plane(iroc_align)->Cluster(0)->NHits(); ++i){
 
           PLTHit * Hit = FR->Plane(iroc_align)->Cluster(0)->Hit(i);
 
@@ -1318,7 +1318,7 @@ for (int ialign=1; ialign!=15;ialign++){
       float cl_LX = -999;
       float cl_LY = -999;
 
-      for (int icl=0; icl != Track->NClusters(); icl++){
+      for (uint16_t icl=0; icl != Track->NClusters(); icl++){
         if (Track->Cluster(icl)->ROC() == iroc){
 
           cl_LX = Track->Cluster(icl)->LX();
@@ -1608,7 +1608,7 @@ int FindResiduals(std::string const InFileName,
           std::cout << "X ROC: " << ic << " " << chi2_5_x[ic] <<std::endl;
           std::cout << "Y ROC: " << ic << " " << chi2_5_y[ic] <<std::endl;
 
-          if (fabs(1-(chi2_6_x-chi2_5_x[ic])) > max_dchi2_y ){
+          if (fabs(1-(chi2_6_x-chi2_5_x[ic])) > max_dchi2_x ){
             imax_x      = ic;
             max_dchi2_x = fabs(1-(chi2_6_x-chi2_5_x[ic]));
           }

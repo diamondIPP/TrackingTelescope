@@ -70,61 +70,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
      =================================*/
     RootItems RootItems(telescopeID, RunNumber);
 
-    int const HistColors[4] = { 1, 4, 28, 2 };
-
-
-    /** ============================
-     2D Pulse Height maps for All and Track6
-     =================================*/
-    double AvgPH2D[NROC][PLTU::NCOL][PLTU::NROW];
-    int NAvgPH2D[NROC][PLTU::NCOL][PLTU::NROW];
-    for (uint16_t i = 0; i != NROC; ++i)
-        for (uint16_t icol = 0; icol != PLTU::NCOL; ++icol)
-            for (uint16_t irow = 0; irow != PLTU::NROW; ++irow) {
-                AvgPH2D[i][icol][irow] = 0;
-                NAvgPH2D[i][icol][irow] = 0;
-            }
-
-
-    /** ============================
-     Pulse height average counts and averages, define TGraphErrors
-     =================================*/
-    int NAvgPH[NROC][4];
-    double AvgPH[NROC][4];
-    vector<vector<TGraphErrors> > gAvgPH;
-    /** formatting graphs */
-    for (int i = 0; i != NROC; ++i) {
-        vector<TGraphErrors> tmp_gr_vector;
-        for (uint16_t j = 0; j != 4; ++j) {
-            NAvgPH[i][j] = 0;
-            AvgPH[i][j] = 0;
-            TGraphErrors gr;
-            gr.SetName( Form("PulseHeightTime_ROC%i_NPix%i", i, j) );
-            gr.SetTitle( Form("Average Pulse Height ROC %i NPix %i", i, j) );
-            gr.GetXaxis()->SetTitle("Event Number");
-            gr.GetYaxis()->SetTitle("Average Pulse Height (electrons)");
-            gr.SetLineColor(HistColors[j]);
-            gr.SetMarkerColor(HistColors[j]);
-            gr.SetMinimum(0);
-            gr.SetMaximum(60000);
-            gr.GetXaxis()->SetTitle("Event Number");
-            gr.GetYaxis()->SetTitle("Average Pulse Height (electrons)");
-            tmp_gr_vector.push_back(gr);
-        }
-        gAvgPH.push_back(tmp_gr_vector);
-    }
-
-    /** Track Chi2 Distribution */
-    TH1F hChi2("Chi2", "Chi2", 240, 0., 20.);
-
-    /** Track Chi2 Distribution */
-    TH1F hChi2X("Chi2X", "Chi2X", 240, 0., 20.);
-
-    /** Track Chi2 Distribution */
-    TH1F hChi2Y("Chi2Y", "Chi2Y", 240, 0., 20.);
-
-
-
     /** ============================
      Residual histograms
      =================================
@@ -212,9 +157,9 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     getTime(now1, startProg);
     now1 = clock();
     /** ============================
-================================================
+     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
      EVENT LOOP
-================================================
+     xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
      ================================= */
     uint64_t indexi = -1;
     float now = clock();
@@ -276,12 +221,12 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         if (ThisTime - (StartTime + NGraphPoints * TimeWidth) > TimeWidth) {
             for (uint16_t i = 0; i != NROC; ++i) {
                 for (uint16_t j = 0; j != 4; ++j) {
-                    gAvgPH[i][j].Set(NGraphPoints+1);
-                    gAvgPH[i][j].SetPoint(NGraphPoints, ThisTime - TimeWidth/2, AvgPH[i][j]);
-                    gAvgPH[i][j].SetPointError(NGraphPoints, TimeWidth/2, AvgPH[i][j]/sqrt((float) NAvgPH[i][j]));
-                    printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, NAvgPH[i][j], AvgPH[i][j]);
-                    NAvgPH[i][j] = 0;
-                    AvgPH[i][j] = 0;
+                    RootItems.AveragePH()[i][j]->Set(NGraphPoints+1);
+                    RootItems.AveragePH()[i][j]->SetPoint(NGraphPoints, ThisTime - TimeWidth/2, RootItems.dAveragePH()[i][j]);
+                    RootItems.AveragePH()[i][j]->SetPointError(NGraphPoints, TimeWidth/2, RootItems.dAveragePH()[i][j]/sqrt((float) RootItems.nAveragePH()[i][j]));
+                    printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, RootItems.nAveragePH()[i][j], RootItems.dAveragePH()[i][j]);
+                    RootItems.dAveragePH()[i][j] = 0;
+                    RootItems.nAveragePH()[i][j] = 0;
                 }
             }
           ++NGraphPoints;
@@ -316,15 +261,15 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                     if (Cluster->Charge() > ph_threshold) continue;
 
                     /** average pulse heights */
-                    PLTU::AddToRunningAverage(AvgPH2D[iplane][Cluster->SeedHit()->Column()][ Cluster->SeedHit()->Row()], NAvgPH2D[iplane][Cluster->SeedHit()->Column()][ Cluster->SeedHit()->Row()], Cluster->Charge());
-                    PLTU::AddToRunningAverage(AvgPH[iplane][0], NAvgPH[iplane][0], Cluster->Charge());
+                    PLTU::AddToRunningAverage(RootItems.dAveragePH2D()[iplane][Cluster->SeedHit()->Column()][ Cluster->SeedHit()->Row()], RootItems.nAveragePH2D()[iplane][Cluster->SeedHit()->Column()][ Cluster->SeedHit()->Row()], Cluster->Charge());
+                    PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][0], RootItems.nAveragePH()[iplane][0], Cluster->Charge());
 
                     /** fill pulse height histo one pix */
                     if (Cluster->NHits() == 1) {
                         RootItems.PulseHeight()[iplane][1]->Fill(Cluster->Charge());
                         onepc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][1]->Fill(Cluster->Charge());
-                        PLTU::AddToRunningAverage(AvgPH[iplane][1], NAvgPH[iplane][1], Cluster->Charge());
+                        PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][1], RootItems.nAveragePH()[iplane][1], Cluster->Charge());
                         br_charge_1pix = Cluster->Charge();
                     }
 
@@ -333,7 +278,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                         RootItems.PulseHeight()[iplane][2]->Fill(Cluster->Charge());
                         twopc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][2]->Fill(Cluster->Charge());
-                        PLTU::AddToRunningAverage(AvgPH[iplane][2], NAvgPH[iplane][2], Cluster->Charge());
+                        PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][2], RootItems.nAveragePH()[iplane][2], Cluster->Charge());
                         br_charge_2pix = Cluster->Charge();
                     }
                     /** fill pulse height histo >3 pix */
@@ -341,7 +286,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                         RootItems.PulseHeight()[iplane][3]->Fill(Cluster->Charge());
                         threepc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][3]->Fill(Cluster->Charge());
-                        PLTU::AddToRunningAverage(AvgPH[iplane][3], NAvgPH[iplane][3], Cluster->Charge());
+                        PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][3], RootItems.nAveragePH()[iplane][3], Cluster->Charge());
                         br_charge_3pixplus = Cluster->Charge();
                     }
                 }
@@ -353,13 +298,11 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                 /** fill high occupancy high */
                 if (Cluster->Charge() > 50000)
                     for (size_t ihit = 0; ihit != Cluster->NHits(); ++ihit)
-//                        hOccupancyHighPH[Cluster->ROC()].Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
                         RootItems.OccupancyHighPH()[Cluster->ROC()]->Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
 
                 /** fill low occupancy */
                 else if (Cluster->Charge() > 10000 && Cluster->Charge() < 40000)
                     for (size_t ihit = 0; ihit != Cluster->NHits(); ++ihit)
-//                        hOccupancyLowPH[Cluster->ROC()].Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
                         RootItems.OccupancyLowPH()[Cluster->ROC()]->Fill( Cluster->Hit(ihit)->Column(), Cluster->Hit(ihit)->Row() );
             }
             /** fill occupancy histo */
@@ -385,9 +328,9 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 				PLTTrack * Track = FR->Track(0);
 
                 /** fill chi2 histos */
-				hChi2X.Fill(Track->Chi2X() );
-				hChi2Y.Fill(Track->Chi2Y() );
-				hChi2.Fill(Track->Chi2() );
+                RootItems.Chi2()->Fill(Track->Chi2());
+                RootItems.Chi2X()->Fill(Track->Chi2X());
+                RootItems.Chi2Y()->Fill(Track->Chi2Y());
 
                 /** fill slope histos */
                 RootItems.TrackSlopeX()->Fill(Track->fSlopeX);
@@ -429,18 +372,15 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
     delete FR;
 
-  // Catch up on PH by time graph
-  for (int i = 0; i != NROC; ++i) {
-    for (int j = 0; j != 4; ++j) {
-      gAvgPH[i][j].Set(NGraphPoints+1);
-      gAvgPH[i][j].SetPoint(NGraphPoints, NGraphPoints*TimeWidth + TimeWidth/2, AvgPH[i][j]);
-      gAvgPH[i][j].SetPointError(NGraphPoints, TimeWidth/2, AvgPH[i][j]/sqrt((float) NAvgPH[i][j]));
-      printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, NAvgPH[i][j], AvgPH[i][j]);
-      NAvgPH[i][j] = 0;
-      AvgPH[i][j] = 0;
+    /** add the last point to the average pulse height graph */
+    for (int i = 0; i != NROC; ++i) {
+        for (int j = 0; j != 4; ++j) {
+            RootItems.AveragePH()[i][j]->Set(NGraphPoints+1);
+            RootItems.AveragePH()[i][j]->SetPoint(NGraphPoints, NGraphPoints*TimeWidth + TimeWidth/2, RootItems.dAveragePH()[i][j]);
+            RootItems.AveragePH()[i][j]->SetPointError(NGraphPoints, TimeWidth/2, RootItems.dAveragePH()[i][j]/sqrt((float) RootItems.nAveragePH()[i][j]));
+            printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, RootItems.nAveragePH()[i][j], RootItems.dAveragePH()[i][j]);
+        }
     }
-  }
-  ++NGraphPoints;
 
 
   // Store root file with added tracking info
@@ -562,21 +502,23 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     RootItems.DrawSavePH(iroc, RootItems.PulseHeightLong(), "Pulse Height Long ROC%i", "PulseHeightLong_ROC%i.gif");
 
     /** average pulse height */
-    Can.cd();
-    gAvgPH[iroc][0].SetTitle( TString::Format("Average Pulse Height ROC%i", iroc) );
-    gAvgPH[iroc][0].Draw("Ape");
-    gAvgPH[iroc][1].Draw("samepe");
-    gAvgPH[iroc][2].Draw("samepe");
-    gAvgPH[iroc][3].Draw("samepe");
-    RootItems.legPH()->Draw("same");
-    Can.SaveAs(OutDir+TString::Format("PulseHeightTime_ROC%i.gif", iroc));
+//    Can.cd();
+//    gAvgPH[iroc][0].SetTitle( TString::Format("Average Pulse Height ROC%i", iroc) );
+//    gAvgPH[iroc][0].Draw("Ape");
+//    gAvgPH[iroc][1].Draw("samepe");
+//    gAvgPH[iroc][2].Draw("samepe");
+//    gAvgPH[iroc][3].Draw("samepe");
+//    RootItems.legPH()->Draw("same");
+//    Can.SaveAs(OutDir+TString::Format("PulseHeightTime_ROC%i.gif", iroc));
+    RootItems.DrawSaveAvPH(iroc);
 
     // Use AvgPH2D to draw PH 2D maps
     TString Name = TString::Format("PulseHeightAvg2D_ROC%i", iroc);
     TH2F hPulseHeightAvg2D(Name, Name, PLTU::NCOL, PLTU::FIRSTCOL, PLTU::LASTCOL, PLTU::NROW, PLTU::FIRSTROW, PLTU::LASTROW);
     for (int icol = 0; icol != PLTU::NCOL; ++icol) {
       for (int irow = 0; irow != PLTU::NROW; ++irow) {
-        hPulseHeightAvg2D.SetBinContent(icol+1, irow+1, AvgPH2D[iroc][icol][irow]);
+        hPulseHeightAvg2D.SetBinContent(icol+1, irow+1, RootItems.dAveragePH2D()[iroc][icol][irow]);
+//        hPulseHeightAvg2D.SetBinContent(icol+1, irow+1, AvgPH2D[iroc][icol][irow]);
       }
     }
     Can.cd();
@@ -620,7 +562,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     RootItems.DrawSaveCoincidence();
 
     /** draw tracking slopes and chi2 */
-    gStyle->SetOptFit();
+    gStyle->SetOptFit(101);
     Can.cd();
     RootItems.FitSlope(RootItems.TrackSlopeX() );
     RootItems.TrackSlopeX()->Draw();
@@ -635,21 +577,22 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     Can.SaveAs(OutDir+"TrackSlopeY.gif");
     RootItems.TrackSlopeY()->Write();
 
-    Can.cd();
-    gStyle->SetOptStat(000001111);
-    hChi2.Draw("hist");
-    Can.SaveAs(OutDir+"Chi2.gif");
-
-    gStyle->SetOptStat(0);
-//    hChi2X.Scale( 1/hChi2X.Integral());
-    hChi2X.Draw("hist");
-    Can.SaveAs(OutDir+"Chi2X.gif");
-
-    gStyle->SetOptStat(0);
-    hChi2Y.Draw("hist");
-    Can.SaveAs(OutDir+"Chi2Y.gif");
-    gStyle->SetOptStat(0);
-
+//    Can.cd();
+//    gStyle->SetOptStat(000001111);
+//    hChi2.Draw("hist");
+//    Can.SaveAs(OutDir+"Chi2.gif");
+//
+//    gStyle->SetOptStat(0);
+//    hChi2X.Draw("hist");
+//    Can.SaveAs(OutDir+"Chi2X.gif");
+//
+//    gStyle->SetOptStat(0);
+//    hChi2Y.Draw("hist");
+//    Can.SaveAs(OutDir+"Chi2Y.gif");
+//    gStyle->SetOptStat(0);
+    RootItems.DrawSaveChi2(RootItems.Chi2(), "Chi2");
+    RootItems.DrawSaveChi2(RootItems.Chi2X(), "Chi2X");
+    RootItems.DrawSaveChi2(RootItems.Chi2Y(), "Chi2Y");
 
     /** make index.html as overview */
 	WriteHTML(PlotsDir + RunNumber, GetCalibrationFilename(telescopeID), telescopeID);

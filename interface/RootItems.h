@@ -24,6 +24,7 @@
 #include "PSIRootFileReader.h"
 #include "PSIBinaryFileReader.h"
 #include "GetNames.h"
+#include "PLTU.h"
 
 /** ============================
  ROOTITEMS CLASS
@@ -39,6 +40,7 @@ private:
     TString const PlotsDir;
     TString const OutDir;
     const uint8_t HistColors[4];
+    const uint8_t maxChi2;
 
     /** canvases */
     TCanvas * c1, * c2;
@@ -59,16 +61,31 @@ private:
     std::vector<TH1F*> hNClusters;
 
     /** pulse height */
-    std::vector<vector<TH1F*> > hPulseHeight;
-    std::vector<vector<TH1F*> > hPulseHeightLong;
-    std::vector<vector<TH1F*> > hPulseHeightOffline;
+    std::vector<std::vector<TH1F*> > hPulseHeight;
+    std::vector<std::vector<TH1F*> > hPulseHeightLong;
+    std::vector<std::vector<TH1F*> > hPulseHeightOffline;
     TLegend * lPulseHeight;
     TLegend * lPHMean;
+    std::vector<std::vector<TGraphErrors*> > gAvgPH;
+    double *** dAvgPH2D;
+    int *** nAvgPH2D;
+    double ** dAvgPH;
+    int ** nAvgPH;
+
 
     /** coincidence map */
     TH1F * hCoincidenceMap;
 
+    /** chi2 */
+    TH1F * hChi2;
+    TH1F * hChi2X;
+    TH1F * hChi2Y;
+
+
+
+
 public:
+
 
     /** ============================
      CONSTRUCTOR
@@ -89,11 +106,19 @@ public:
     std::vector<TH2F*> OccupancyHighPH() { return hOccupancyHighPH; }
     std::vector<TH1F*> nHitsPerCluster() { return hNHitsPerCluster; }
     std::vector<TH1F*> nClusters() { return hNClusters; }
-    std::vector<vector<TH1F*> > PulseHeight() { return hPulseHeight; }
-    std::vector<vector<TH1F*> > PulseHeightLong() { return hPulseHeightLong; }
-    std::vector<vector<TH1F*> > PulseHeightOffline() { return hPulseHeightOffline; }
+    std::vector<std::vector<TH1F*> > PulseHeight() { return hPulseHeight; }
+    std::vector<std::vector<TH1F*> > PulseHeightLong() { return hPulseHeightLong; }
+    std::vector<std::vector<TH1F*> > PulseHeightOffline() { return hPulseHeightOffline; }
     TLegend * legPH() { return lPulseHeight; }
     TLegend * legPHMean() { return lPHMean; }
+    TH1F * Chi2() { return hChi2; }
+    TH1F * Chi2X() { return hChi2X; }
+    TH1F * Chi2Y() { return hChi2Y; }
+    std::vector<std::vector<TGraphErrors*> > AveragePH() { return gAvgPH; }
+    double *** dAveragePH2D() { return dAvgPH2D; }
+    int *** nAveragePH2D() { return nAvgPH2D; }
+    double ** dAveragePH() { return dAvgPH; }
+    int ** nAveragePH() { return nAvgPH; }
 
     /** ============================
      AUXILIARY FUNCTIONS
@@ -102,15 +127,20 @@ public:
     void LegendSlope(TH1F * histo);
     std::vector<TH2F*> FillVectorTH2F(std::vector<TH2F*> histo, const char * name);
     std::vector<TH1F*> FillVectorTH1F(std::vector<TH1F*> histo, const char * name);
-    std::vector<vector<TH1F*> > FillVectorPH(std::vector<vector<TH1F*> >, TString name, uint32_t maxPH);
+    std::vector<std::vector<TH1F*> > FillVectorPH(std::vector<std::vector<TH1F*> >, TString name, uint32_t maxPH);
     void DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, TCanvas & c, const char * xTit, const char * yTit);
     void PrepCoincidenceHisto();
     void DrawSaveCoincidence();
-    void FormatPHHisto(std::vector<vector<TH1F*> >);
+    void FormatPHHisto(std::vector<std::vector<TH1F*> >);
     void FormatLegendPH();
-    void FillLegendsPH(uint8_t iroc, std::vector<vector<TH1F*> > histVec);
-    void DrawSavePH(uint8_t iroc, std::vector<vector<TH1F*> > histVec, TString title, TString saveName);
+    void FillLegendsPH(uint8_t iroc, std::vector<std::vector<TH1F*> > histVec);
+    void DrawSavePH(uint8_t iroc, std::vector<std::vector<TH1F*> > histVec, TString title, TString saveName);
     void ClearLegendsPH();
+    void DrawSaveChi2(TH1F*, TString);
+//    void FillVecAvPH();
+    std::vector<std::vector<TGraphErrors*> > FillVecAvPH(std::vector<std::vector<TGraphErrors*> >);
+    void DrawSaveAvPH(uint8_t);
+    void AllocateArrAvPH();
 
  };
 

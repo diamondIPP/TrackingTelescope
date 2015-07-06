@@ -9,7 +9,8 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     nRoc(GetNumberOfROCS(telescopeID)),
     PlotsDir("plots/"),
     OutDir(PlotsDir + RunNumber + "/"),
-    HistColors {1, 4, 28, 2 } {
+    HistColors {1, 4, 28, 2 },
+    maxChi2(20) {
 
     /** canvases */
     c1 = new TCanvas;
@@ -36,11 +37,24 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     hPulseHeightOffline = FillVectorPH(hPulseHeightOffline, "Offline", 50000);
     lPulseHeight = new TLegend(0.77, 0.7, 0.9, 0.88, "");
     lPHMean = new TLegend(0.77, 0.45, 0.9, 0.66, "Mean:");
+    AllocateArrAvPH();
+    gAvgPH = FillVecAvPH(gAvgPH);
 
     /** coincidence map */
     hCoincidenceMap = new TH1F("CoincidenceMap", "CoincidenceMap", pow(2, nRoc), 0, pow(2, nRoc));
+
+    /** chi2 */
+    hChi2 = new TH1F("Chi2", "Chi2", 240, 0., maxChi2);
+    hChi2X = new TH1F("Chi2X", "Chi2X", 240, 0., maxChi2);
+    hChi2Y = new TH1F("Chi2Y", "Chi2Y", 240, 0., maxChi2);
+
+
 }
-RootItems::~RootItems() { }
+RootItems::~RootItems() {
+
+    delete c1; delete c2;
+    delete hTrackSlopeX; delete hTrackSlopeY; delete fGauss; delete lFitGauss;
+}
 
 
 /** ============================
@@ -50,6 +64,7 @@ void RootItems::FitSlope(TH1F * histo){
 
     fGauss->SetLineWidth(2);
     histo->Fit(fGauss, "Q");
+    histo->SetStats(true);
 }
 void RootItems::LegendSlope(TH1F * histo) {
 
@@ -79,7 +94,7 @@ vector<TH1F*> RootItems::FillVectorTH1F(vector<TH1F*> histo, const char * name) 
     }
     return histo;
 }
-std::vector<vector<TH1F*> > RootItems::FillVectorPH(std::vector<vector<TH1F*> > histVec, TString name, uint32_t maxPH){
+vector<vector<TH1F*> > RootItems::FillVectorPH(vector<vector<TH1F*> > histVec, TString name, uint32_t maxPH){
     const uint8_t minPH(0), nBins(50);
     TString base = "PulseHeight" + name + "_ROC%i_";
     TString names[4] = {base + "All", base + "NPix1", base + "NPix2", base + "NPix3Plus"};
@@ -177,5 +192,51 @@ void RootItems::DrawSaveCoincidence(){
     for (uint8_t iBins(0); iBins < pow(2, nRoc); iBins++) {
         x = hCoincidenceMap->GetXaxis()->GetBinCenter(iBins + 1);
         Labels.DrawText(x, y, bin[iBins].c_str());}
-    c2->SaveAs(OutDir+"Occupancy_Coincidence.gif");
+    c2->SaveAs(OutDir + "Occupancy_Coincidence.gif");
+}
+void RootItems::DrawSaveChi2(TH1F * histo, TString saveName){
+    c2->cd();
+//    hChi2X.Scale( 1/hChi2X.Integral());
+    gStyle->SetOptStat(0);
+    histo->Draw("hist");
+    c2->SaveAs(OutDir + saveName + ".gif");
+}
+std::vector<std::vector<TGraphErrors*> > RootItems::FillVecAvPH(std::vector<std::vector<TGraphErrors*> > graphVec){
+
+    graphVec.resize(nRoc);
+    for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++) {
+        for (uint8_t iMode = 0; iMode != 4; iMode++) {
+            TGraphErrors * gr = new TGraphErrors;
+            gr->SetName( Form("PulseHeightTime_ROC%i_NPix%i", iRoc, iMode) );
+            gr->SetTitle( Form("Average Pulse Height ROC %i NPix %i", iRoc, iMode) );
+            gr->GetXaxis()->SetTitle("Event Number");
+            gr->GetYaxis()->SetTitle("Average Pulse Height (electrons)");
+            gr->SetLineColor(HistColors[iMode]);
+            gr->SetMarkerColor(HistColors[iMode]);
+            gr->SetMinimum(0);
+            gr->SetMaximum(70000);
+            graphVec[iRoc].push_back(gr);
+        }
+    }
+    return graphVec;
+}
+void RootItems::DrawSaveAvPH(uint8_t iroc){
+    c1->cd();
+    gAvgPH[iroc][0]->SetTitle(TString::Format("Average Pulse Height ROC%i", iroc));
+    gAvgPH[iroc][0]->Draw("Ape");
+    for (uint8_t iMode = 1; iMode != 4; iMode++)
+        gAvgPH[iroc][iMode]->Draw("samepe");
+    lPulseHeight->Draw("same");
+    c1->SaveAs(OutDir + TString::Format("PulseHeightTime_ROC%i.gif", iroc));
+}
+void RootItems::AllocateArrAvPH(){
+    dAvgPH2D = new double**[nRoc]; nAvgPH2D = new int**[nRoc];
+    dAvgPH = new double*[nRoc]; nAvgPH = new int*[nRoc];
+    for (uint8_t iRoc = 0; iRoc < nRoc; iRoc++){
+        dAvgPH2D[iRoc] = new double*[PLTU::NCOL]; nAvgPH2D[iRoc] = new int*[PLTU::NCOL];
+        dAvgPH[iRoc] = new double[4]; nAvgPH[iRoc] = new int[4];
+        for (uint8_t iCol = 0; iCol < PLTU::NCOL; iCol++){
+            dAvgPH2D[iRoc][iCol] = new double[PLTU::NROW]; nAvgPH2D[iRoc][iCol] = new int[PLTU::NROW];
+        }
+    }
 }

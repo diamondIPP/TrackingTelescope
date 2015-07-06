@@ -13,7 +13,7 @@ LINKDEFOBJ  = $(patsubst dict/%_linkdef.h,lib/%_dict.o,$(wildcard dict/*_linkdef
 
 all: $(LINKDEFCC) $(LINKDEFOBJ) $(OBJS) $(EXEOBJS) $(SCRIPTS) $(EXECS)
 
-lib/%.o : src/%.cc
+lib/%.o : src/%.cc interface/%.h
 	$(CC) -Wall $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 lib/%.o : bin/%.cc
