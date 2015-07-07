@@ -48,6 +48,11 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     hChi2X = new TH1F("Chi2X", "Chi2X", 240, 0., maxChi2);
     hChi2Y = new TH1F("Chi2Y", "Chi2Y", 240, 0., maxChi2);
 
+    /** residuals */
+    hResidual = FillVecResidual(hResidual, "Residual_ROC%i",  100, -.15, .15, 100, -.15, .15);
+    hResidualXdY = FillVecResidual(hResidualXdY, "ResidualXdY_ROC%i", 200, -1, 1, 100, -.5, .5);
+    hResidualYdX = FillVecResidual(hResidualYdX, "ResidualYdX_ROC%i", 200, -1, 1, 100, -.5, .5);
+
 
 }
 RootItems::~RootItems() {
@@ -64,7 +69,7 @@ void RootItems::FitSlope(TH1F * histo){
 
     fGauss->SetLineWidth(2);
     histo->Fit(fGauss, "Q");
-    histo->SetStats(true);
+//    histo->SetStats(true);
 }
 void RootItems::LegendSlope(TH1F * histo) {
 
@@ -181,7 +186,7 @@ void RootItems::DrawSaveCoincidence(){
             int x = pow(2, j);
             int y = z / x;
             if (y == 1) z -= x;
-            bin[i].push_back(y +'0');
+            bin[i].push_back(y + '0');
         }
     }
     TText Labels;
@@ -195,11 +200,11 @@ void RootItems::DrawSaveCoincidence(){
     c2->SaveAs(OutDir + "Occupancy_Coincidence.gif");
 }
 void RootItems::DrawSaveChi2(TH1F * histo, TString saveName){
-    c2->cd();
+    c1->cd();
 //    hChi2X.Scale( 1/hChi2X.Integral());
     gStyle->SetOptStat(0);
     histo->Draw("hist");
-    c2->SaveAs(OutDir + saveName + ".gif");
+    c1->SaveAs(OutDir + saveName + ".gif");
 }
 std::vector<std::vector<TGraphErrors*> > RootItems::FillVecAvPH(std::vector<std::vector<TGraphErrors*> > graphVec){
 
@@ -238,5 +243,29 @@ void RootItems::AllocateArrAvPH(){
         for (uint8_t iCol = 0; iCol < PLTU::NCOL; iCol++){
             dAvgPH2D[iRoc][iCol] = new double[PLTU::NROW]; nAvgPH2D[iRoc][iCol] = new int[PLTU::NROW];
         }
+    }
+}
+vector<TH2F*> RootItems::FillVecResidual(vector<TH2F*> histVec, TString name, uint16_t xbin, float xmin, float xmax, uint16_t ybin, float ymin, float ymax){
+    for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
+        TH2F * hist = new TH2F(Form(name, iRoc), Form(name, iRoc), xbin, xmin, xmax, ybin, ymin, ymax);
+        histVec.push_back(hist);
+    }
+    return histVec;
+}
+void RootItems::DrawSaveResidual(uint8_t iroc, vector<TH2F*> histVec){
+    c1->cd();
+    gStyle->SetOptStat(1111);
+    histVec[iroc]->Draw("colz");
+    c1->SaveAs(OutDir+TString(histVec[iroc]->GetName()) + ".gif");
+}
+void RootItems::DrawSaveResidualProj(uint8_t iroc, vector<TH2F*> histVec, TString proj){
+    c1->cd();
+    if (proj == "X" or proj == "x"){
+        histVec[iroc]->ProjectionX()->Draw();
+        c1->SaveAs(OutDir+TString(hResidual[iroc]->GetName()) + "_X.gif");
+    }
+    else if (proj == "Y" or proj == "y"){
+        histVec[iroc]->ProjectionY()->Draw();
+        c1->SaveAs(OutDir+TString(hResidual[iroc]->GetName()) + "_Y.gif");
     }
 }

@@ -72,7 +72,6 @@ private:
     double ** dAvgPH;
     int ** nAvgPH;
 
-
     /** coincidence map */
     TH1F * hCoincidenceMap;
 
@@ -81,6 +80,11 @@ private:
     TH1F * hChi2X;
     TH1F * hChi2Y;
 
+    /**residuals */
+
+    std::vector<TH2F*> hResidual;
+    std::vector<TH2F*> hResidualXdY;
+    std::vector<TH2F*> hResidualYdX;
 
 
 
@@ -119,6 +123,9 @@ public:
     int *** nAveragePH2D() { return nAvgPH2D; }
     double ** dAveragePH() { return dAvgPH; }
     int ** nAveragePH() { return nAvgPH; }
+    std::vector<TH2F*> Residual() { return hResidual; }
+    std::vector<TH2F*> ResidualXdY() { return hResidualXdY; }
+    std::vector<TH2F*> ResidualYdX() { return hResidualYdX; }
 
     /** ============================
      AUXILIARY FUNCTIONS
@@ -137,10 +144,12 @@ public:
     void DrawSavePH(uint8_t iroc, std::vector<std::vector<TH1F*> > histVec, TString title, TString saveName);
     void ClearLegendsPH();
     void DrawSaveChi2(TH1F*, TString);
-//    void FillVecAvPH();
     std::vector<std::vector<TGraphErrors*> > FillVecAvPH(std::vector<std::vector<TGraphErrors*> >);
     void DrawSaveAvPH(uint8_t);
     void AllocateArrAvPH();
+    std::vector<TH2F*> FillVecResidual(std::vector<TH2F*>, TString name, uint16_t, float, float, uint16_t, float, float);
+    void DrawSaveResidual(uint8_t, vector<TH2F*>);
+    void DrawSaveResidualProj(uint8_t, vector<TH2F*>, TString);
 
  };
 

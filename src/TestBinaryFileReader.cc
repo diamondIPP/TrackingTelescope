@@ -70,25 +70,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
      =================================*/
     RootItems RootItems(telescopeID, RunNumber);
 
-    /** ============================
-     Residual histograms
-     =================================
-     -> hResidual:    x=dX / y=dY
-     -> hResidualXdY: x=X  / y=dY
-     -> hResidualYdX: x=Y  / y=dX */
-    vector<TH2F> hResidual;
-    vector<TH2F> hResidualXdY;
-    vector<TH2F> hResidualYdX;
-
-    for (uint16_t iroc = 0; iroc != NROC; ++iroc){
-        hResidual.push_back(TH2F(Form("Residual_ROC%i",iroc),
-                                 Form("Residual_ROC%i",iroc), 100, -.15, .15, 100, -.15, .15));
-        hResidualXdY.push_back(TH2F(Form("ResidualXdY_ROC%i",iroc),
-                                    Form("ResidualXdY_ROC%i",iroc), 200, -1, 1, 100, -.5, .5));
-        hResidualYdX.push_back(TH2F(Form("ResidualYdX_ROC%i",iroc),
-                                    Form("ResidualYdX_ROC%i",iroc), 200, -1, 1, 100, -.5, .5));
-    }
-
     float_t  onepc[NROC];
     float_t  twopc[NROC];
     float_t threepc[NROC];
@@ -117,10 +98,11 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     float br_chi2_x,br_chi2_y;
     float br_slope_x, br_slope_y;
     uint8_t br_n_tracks, br_n_clusters;
-    float br_charge_all;
-    float br_charge_1pix;
-    float br_charge_2pix;
-    float br_charge_3pixplus;
+    vector<vector<float>* > br_charge_all;
+    br_charge_all.resize(NROC);
+//    float br_charge_1pix;
+//    float br_charge_2pix;
+//    float br_charge_3pixplus;
 
     /** Pointer to the actual input root tree. Only works for the
         root-file producer. Ugly hack to avoid opening the same ROOT file twice */
@@ -148,10 +130,14 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     newtree->Branch("slope_y", &br_slope_y);
     newtree->Branch("n_tracks", &br_n_tracks);
     newtree->Branch("n_clusters", &br_n_clusters);
-    newtree->Branch("charge_all", &br_charge_all);
-    newtree->Branch("charge_1pix", &br_charge_1pix);
-    newtree->Branch("charge_2pix", &br_charge_2pix);
-    newtree->Branch("charge_3pixplus", &br_charge_3pixplus);
+    for (uint8_t iRoc = 0; iRoc != NROC; iRoc++){
+        TString branch_name = TString::Format("charge_all_ROC%d", iRoc);
+        newtree->Branch(branch_name, &(br_charge_all[iRoc]));
+    }
+//    newtree->Branch("charge_1pix", &br_charge_1pix);
+//    newtree->Branch("charge_2pix", &br_charge_2pix);
+//    newtree->Branch("charge_3pixplus", &br_charge_3pixplus);
+
     }
 
     getTime(now1, startProg);
@@ -209,7 +195,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                 br_diam1_track_y = -999.;
                 br_diam2_track_x = -999.;
                 br_diam2_track_y = -999.;
-                br_slope_x = -999.;
+//                br_slope_x = -999.;
             }
             newtree->Fill();
         }
@@ -240,6 +226,10 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                 FR->DrawTracksAndHits(TString::Format(OutDir + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
         }
 
+		/** clear all vectors */
+		for (uint8_t iRoc = 0; iRoc !=NROC; iRoc++)
+            br_charge_all[iRoc]->clear();
+
         /** loop over the planes */
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
 
@@ -255,7 +245,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                     /** fill pulse height histo for all*/
                     RootItems.PulseHeight()[iplane][0]->Fill(Cluster->Charge());
                     RootItems.PulseHeightLong()[iplane][0]->Fill(Cluster->Charge());
-                    br_charge_all = Cluster->Charge();
+                    br_charge_all[iplane]->push_back(Cluster->Charge());
 
                     /** ignore charges above a certain threshold */
                     if (Cluster->Charge() > ph_threshold) continue;
@@ -270,7 +260,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                         onepc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][1]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][1], RootItems.nAveragePH()[iplane][1], Cluster->Charge());
-                        br_charge_1pix = Cluster->Charge();
+//                        br_charge_1pix = Cluster->Charge();
                     }
 
                     /** fill pulse height histo two pix */
@@ -279,7 +269,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                         twopc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][2]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][2], RootItems.nAveragePH()[iplane][2], Cluster->Charge());
-                        br_charge_2pix = Cluster->Charge();
+//                        br_charge_2pix = Cluster->Charge();
                     }
                     /** fill pulse height histo >3 pix */
                     else if (Cluster->NHits() >= 3) {
@@ -287,7 +277,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                         threepc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][3]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][3], RootItems.nAveragePH()[iplane][3], Cluster->Charge());
-                        br_charge_3pixplus = Cluster->Charge();
+//                        br_charge_3pixplus = Cluster->Charge();
                     }
                 }
 
@@ -344,9 +334,9 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 					PLTCluster * Cluster = Track->Cluster(icluster);
 
                     /** fill residuals */
-					hResidual[ROC].Fill(Track->LResidualX(ROC), Track->LResidualY(ROC)); // dX vs dY
-					hResidualXdY[ROC].Fill(Cluster->LX(), Track->LResidualY(ROC));// X vs dY
-					hResidualYdX[ROC].Fill(Cluster->LY(), Track->LResidualX(ROC)); // Y vs dX
+					RootItems.Residual()[ROC]->Fill(Track->LResidualX(ROC), Track->LResidualY(ROC)); // dX vs dY
+					RootItems.ResidualXdY()[ROC]->Fill(Cluster->LX(), Track->LResidualY(ROC));// X vs dY
+					RootItems.ResidualYdX()[ROC]->Fill(Cluster->LY(), Track->LResidualX(ROC)); // Y vs dX
 
                     /** ignore events above a certain threshold */
 					if (Cluster->Charge() > ph_threshold) continue;
@@ -366,6 +356,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 				}
             }
 		}
+
 	} /** END OF EVENT LOOP */
     getTime(now1, loop);
     now1 = clock();
@@ -502,14 +493,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     RootItems.DrawSavePH(iroc, RootItems.PulseHeightLong(), "Pulse Height Long ROC%i", "PulseHeightLong_ROC%i.gif");
 
     /** average pulse height */
-//    Can.cd();
-//    gAvgPH[iroc][0].SetTitle( TString::Format("Average Pulse Height ROC%i", iroc) );
-//    gAvgPH[iroc][0].Draw("Ape");
-//    gAvgPH[iroc][1].Draw("samepe");
-//    gAvgPH[iroc][2].Draw("samepe");
-//    gAvgPH[iroc][3].Draw("samepe");
-//    RootItems.legPH()->Draw("same");
-//    Can.SaveAs(OutDir+TString::Format("PulseHeightTime_ROC%i.gif", iroc));
     RootItems.DrawSaveAvPH(iroc);
 
     // Use AvgPH2D to draw PH 2D maps
@@ -527,33 +510,13 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     hPulseHeightAvg2D.Draw("colz");
     Can.SaveAs(OutDir+hPulseHeightAvg2D.GetName() + ".gif");
 
-    // 2D Residuals
-    Can.cd();
-    hResidual[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hResidual[iroc].GetName()) + ".gif");
 
-    // 2D Residuals X/dY
-    gStyle->SetOptStat(1111);
-    hResidualXdY[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hResidualXdY[iroc].GetName()) + ".gif");
-
-    // 2D Residuals Y/dX
-    gStyle->SetOptStat(1111);
-    hResidualYdX[iroc].Draw("colz");
-    Can.SaveAs( OutDir+TString(hResidualYdX[iroc].GetName()) + ".gif");
-
-    // Residual X-Projection
-    Can.cd();
-    hResidual[iroc].ProjectionX()->Draw();
-    Can.SaveAs( OutDir+TString(hResidual[iroc].GetName()) + "_X.gif");
-
-    // Residual Y-Projection
-    Can.cd();
-    hResidual[iroc].ProjectionY()->Draw();
-    Can.SaveAs( OutDir+TString(hResidual[iroc].GetName()) + "_Y.gif");
-
-    gStyle->SetOptStat(0);
-
+    /** residuals */
+    RootItems.DrawSaveResidual(iroc, RootItems.Residual());
+    RootItems.DrawSaveResidual(iroc, RootItems.ResidualXdY());
+    RootItems.DrawSaveResidual(iroc, RootItems.ResidualYdX());
+    RootItems.DrawSaveResidualProj(iroc, RootItems.Residual(), "X");
+    RootItems.DrawSaveResidualProj(iroc, RootItems.Residual(), "Y");
 
   } // end of loop over ROCs
 
@@ -577,19 +540,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     Can.SaveAs(OutDir+"TrackSlopeY.gif");
     RootItems.TrackSlopeY()->Write();
 
-//    Can.cd();
-//    gStyle->SetOptStat(000001111);
-//    hChi2.Draw("hist");
-//    Can.SaveAs(OutDir+"Chi2.gif");
-//
-//    gStyle->SetOptStat(0);
-//    hChi2X.Draw("hist");
-//    Can.SaveAs(OutDir+"Chi2X.gif");
-//
-//    gStyle->SetOptStat(0);
-//    hChi2Y.Draw("hist");
-//    Can.SaveAs(OutDir+"Chi2Y.gif");
-//    gStyle->SetOptStat(0);
     RootItems.DrawSaveChi2(RootItems.Chi2(), "Chi2");
     RootItems.DrawSaveChi2(RootItems.Chi2X(), "Chi2X");
     RootItems.DrawSaveChi2(RootItems.Chi2Y(), "Chi2Y");
