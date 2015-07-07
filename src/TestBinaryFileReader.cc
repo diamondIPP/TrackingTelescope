@@ -1,5 +1,8 @@
 #include "TestBinaryFileReader.h"
 #include "RootItems.h"
+#include "FileWriterTracking.h"
+
+#define verbose 0
 
 using namespace std;
 
@@ -92,6 +95,8 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     TFile * newfile;
     TTree * newtree;
 
+    FileWriterTracking FW(InFileName, telescopeID, FR);
+
     int br_hit_plane_bits;
     float br_diam1_track_x, br_diam1_track_y;
     float br_diam2_track_x, br_diam2_track_y;
@@ -100,23 +105,23 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     uint8_t br_n_tracks, br_n_clusters;
     vector<vector<float>* > br_charge_all;
     br_charge_all.resize(NROC);
-//    float br_charge_1pix;
-//    float br_charge_2pix;
-//    float br_charge_3pixplus;
 
     /** Pointer to the actual input root tree. Only works for the
         root-file producer. Ugly hack to avoid opening the same ROOT file twice */
     if (GetUseRootInput(telescopeID) && (telescopeID==7)){
 
     /** Extract filename if a full path is given */
-    stringstream ss(InFileName);
-    string newfile_name;
-    while (getline(ss, newfile_name, '/')){}
-
-    newfile_name.insert(int(newfile_name.length()-5), "_withTracks");
-
-    intree = ((PSIRootFileReader*) FR)->fTree;
-    newfile = new TFile(newfile_name.c_str(), "RECREATE");
+//    stringstream ss(InFileName);
+//    string newfile_name;
+//    while (getline(ss, newfile_name, '/')){}
+//
+//    newfile_name.insert(int(newfile_name.length()-5), "_withTracks");
+//
+//    intree = ((PSIRootFileReader*) FR)->fTree;
+    intree = FW.InTree();
+//    intree = FR->fTree;
+//    newfile = new TFile(newfile_name.c_str(), "RECREATE");
+    newfile = new TFile(FW.FileName().c_str(), "RECREATE");
     newtree = intree->CloneTree(0); // Do no copy the data yet
 
     newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
@@ -210,7 +215,8 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                     RootItems.AveragePH()[i][j]->Set(NGraphPoints+1);
                     RootItems.AveragePH()[i][j]->SetPoint(NGraphPoints, ThisTime - TimeWidth/2, RootItems.dAveragePH()[i][j]);
                     RootItems.AveragePH()[i][j]->SetPointError(NGraphPoints, TimeWidth/2, RootItems.dAveragePH()[i][j]/sqrt((float) RootItems.nAveragePH()[i][j]));
-                    printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, RootItems.nAveragePH()[i][j], RootItems.dAveragePH()[i][j]);
+                    if (verbose == 1)
+                        printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, RootItems.nAveragePH()[i][j], RootItems.dAveragePH()[i][j]);
                     RootItems.dAveragePH()[i][j] = 0;
                     RootItems.nAveragePH()[i][j] = 0;
                 }
@@ -369,7 +375,8 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
             RootItems.AveragePH()[i][j]->Set(NGraphPoints+1);
             RootItems.AveragePH()[i][j]->SetPoint(NGraphPoints, NGraphPoints*TimeWidth + TimeWidth/2, RootItems.dAveragePH()[i][j]);
             RootItems.AveragePH()[i][j]->SetPointError(NGraphPoints, TimeWidth/2, RootItems.dAveragePH()[i][j]/sqrt((float) RootItems.nAveragePH()[i][j]));
-            printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, RootItems.nAveragePH()[i][j], RootItems.dAveragePH()[i][j]);
+            if (verbose == 1)
+                printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, RootItems.nAveragePH()[i][j], RootItems.dAveragePH()[i][j]);
         }
     }
 
