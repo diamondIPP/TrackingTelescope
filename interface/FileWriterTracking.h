@@ -50,11 +50,50 @@ public:
     ~FileWriterTracking();
 
 
+    /** ============================
+     GET-FUNCTIONS
+     =================================*/
     string FileName() {return NewFileName; }
     TTree * InTree() { return intree; }
+    uint8_t HitPlaneBits() { return br_hit_plane_bits; }
+    uint8_t nTracks() { return br_n_tracks; }
+    uint8_t nClusters() { return br_n_clusters; }
+    float   Dia1TrackX() { return br_diam1_track_x; }
+    float   Dia1TrackY() { return br_diam1_track_y; }
+    float   Dia2TrackX() { return br_diam2_track_x; }
+    float   Dia2TrackY() { return br_diam2_track_y; }
+    float   SlopeX() { return br_slope_x; }
+    float   SlopeY() { return br_slope_y; }
+    float   Chi2() { return br_chi2; }
+    float   Chi2X() { return br_chi2_x; }
+    float   Chi2Y() { return br_chi2_y; }
+    vector<vector<float>* > ChargeAll() { return br_charge_all; }
+
+    /** ============================
+     SET-FUNCTIONS
+     =================================*/
+    void setHitPlaneBits(uint8_t value) { br_hit_plane_bits = value; }
+    void setNTracks(uint8_t value) { br_n_tracks = value; }
+    void setNClusters(uint8_t value) { br_n_clusters = value; }
+    void setDia1TrackX(float value) { br_diam1_track_x = value; }
+    void setDia1TrackY(float value) { br_diam1_track_y = value; }
+    void setDia2TrackX(float value) { br_diam2_track_x = value; }
+    void setDia2TrackY(float value) { br_diam2_track_y = value; }
+    void setSlopeX(float value) { br_slope_x = value; }
+    void setSlopeY(float value) { br_slope_y = value; }
+    void setChi2(float value) { br_chi2 = value; }
+    void setChi2X(float value) { br_chi2_x = value; }
+    void setChi2Y(float value) { br_chi2_y = value; }
+    void setChargeAll(uint8_t iRoc, float value) { br_charge_all[iRoc]->push_back(value); }
 
 
-
+    /** ============================
+     AUXILIARY FUNCTIONS
+     =================================*/
+    void addBranches();
+    void saveTree();
+    void fillTree();
+    void clearVectors();
 
 
 };

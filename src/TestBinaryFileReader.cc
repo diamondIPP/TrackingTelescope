@@ -88,62 +88,12 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
 
     /** ============================
-     Stuff for root input
-     =================================
-    Create a couple of pointers, input to add the tracks to the output */
-    TTree * intree;
-    TFile * newfile;
-    TTree * newtree;
+     Initialize File Writer
+     =================================*/
+    FileWriterTracking * FW;
+    if (GetUseRootInput(telescopeID) && (telescopeID==7))
+        FW = new FileWriterTracking(InFileName, telescopeID, FR);
 
-    FileWriterTracking FW(InFileName, telescopeID, FR);
-
-    int br_hit_plane_bits;
-    float br_diam1_track_x, br_diam1_track_y;
-    float br_diam2_track_x, br_diam2_track_y;
-    float br_chi2_x,br_chi2_y;
-    float br_slope_x, br_slope_y;
-    uint8_t br_n_tracks, br_n_clusters;
-    vector<vector<float>* > br_charge_all;
-    br_charge_all.resize(NROC);
-
-    /** Pointer to the actual input root tree. Only works for the
-        root-file producer. Ugly hack to avoid opening the same ROOT file twice */
-    if (GetUseRootInput(telescopeID) && (telescopeID==7)){
-
-    /** Extract filename if a full path is given */
-//    stringstream ss(InFileName);
-//    string newfile_name;
-//    while (getline(ss, newfile_name, '/')){}
-//
-//    newfile_name.insert(int(newfile_name.length()-5), "_withTracks");
-//
-//    intree = ((PSIRootFileReader*) FR)->fTree;
-    intree = FW.InTree();
-//    intree = FR->fTree;
-//    newfile = new TFile(newfile_name.c_str(), "RECREATE");
-    newfile = new TFile(FW.FileName().c_str(), "RECREATE");
-    newtree = intree->CloneTree(0); // Do no copy the data yet
-
-    newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
-    newtree->Branch("diam1_track_x", &br_diam1_track_x);
-    newtree->Branch("diam1_track_y", &br_diam1_track_y);
-    newtree->Branch("diam2_track_x", &br_diam2_track_x);
-    newtree->Branch("diam2_track_y", &br_diam2_track_y);
-    newtree->Branch("chi2_x", &br_chi2_x);
-    newtree->Branch("chi2_y", &br_chi2_y);
-    newtree->Branch("slope_x", &br_slope_x);
-    newtree->Branch("slope_y", &br_slope_y);
-    newtree->Branch("n_tracks", &br_n_tracks);
-    newtree->Branch("n_clusters", &br_n_clusters);
-    for (uint8_t iRoc = 0; iRoc != NROC; iRoc++){
-        TString branch_name = TString::Format("charge_all_ROC%d", iRoc);
-        newtree->Branch(branch_name, &(br_charge_all[iRoc]));
-    }
-//    newtree->Branch("charge_1pix", &br_charge_1pix);
-//    newtree->Branch("charge_2pix", &br_charge_2pix);
-//    newtree->Branch("charge_3pixplus", &br_charge_3pixplus);
-
-    }
 
     getTime(now1, startProg);
     now1 = clock();
@@ -166,43 +116,28 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
             now = clock();
         }
 
-        /** Write out information for PAD studies */
+        /** file writer */
         if (GetUseRootInput(telescopeID)){
 
-            br_hit_plane_bits = FR->HitPlaneBits();
+            FW->clearVectors();
 
-            br_n_tracks = FR->NTracks();
-            br_n_clusters = FR->NClusters();
+            FW->setHitPlaneBits(FR->HitPlaneBits() );
+            FW->setNTracks(FR->NTracks() );
+            FW->setNClusters(FR->NClusters() );
 
             if (FR->NTracks() > 0){
                 PLTTrack * Track = FR->Track(0);
+                FW->setChi2(Track->Chi2() );
+                FW->setChi2X(Track->Chi2X() );
+                FW->setChi2Y(Track->Chi2Y() );
+                FW->setSlopeX(Track->fSlopeX);
+                FW->setSlopeY(Track->fSlopeY);
+            }
+            for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane)
+                for (size_t icluster = 0; icluster != FR->Plane(iplane)->NClusters(); ++icluster)
+                    FW->setChargeAll(iplane, FR->Plane(iplane)->Cluster(icluster)->Charge() );
 
-                /** fill branches */
-                br_chi2_x = Track->Chi2X();
-                br_chi2_y = Track->Chi2Y();
-                br_slope_x = Track->fSlopeX;
-                br_slope_y = Track->fSlopeY;
-            }
-
-            /** z-coordinate of the diamonds */
-            float diam1_z = 3.5; // cm from front (front diamond)
-            float diam2_z = 5.5;
-            /** add track info */
-            if (FR->NTracks()==1){
-                PLTTrack * Track = FR->Track(0);
-                br_diam1_track_x = Track->ExtrapolateX(diam1_z);
-                br_diam1_track_y = Track->ExtrapolateY(diam1_z);
-                br_diam2_track_x = Track->ExtrapolateX(diam2_z);
-                br_diam2_track_y = Track->ExtrapolateY(diam2_z);
-            }
-            else {
-                br_diam1_track_x = -999.;
-                br_diam1_track_y = -999.;
-                br_diam2_track_x = -999.;
-                br_diam2_track_y = -999.;
-//                br_slope_x = -999.;
-            }
-            newtree->Fill();
+            FW->fillTree();
         }
 
         /** fill coincidence map */
@@ -232,10 +167,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                 FR->DrawTracksAndHits(TString::Format(OutDir + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
         }
 
-		/** clear all vectors */
-		for (uint8_t iRoc = 0; iRoc !=NROC; iRoc++)
-            br_charge_all[iRoc]->clear();
-
         /** loop over the planes */
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
 
@@ -251,7 +182,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                     /** fill pulse height histo for all*/
                     RootItems.PulseHeight()[iplane][0]->Fill(Cluster->Charge());
                     RootItems.PulseHeightLong()[iplane][0]->Fill(Cluster->Charge());
-                    br_charge_all[iplane]->push_back(Cluster->Charge());
 
                     /** ignore charges above a certain threshold */
                     if (Cluster->Charge() > ph_threshold) continue;
@@ -266,7 +196,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                         onepc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][1]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][1], RootItems.nAveragePH()[iplane][1], Cluster->Charge());
-//                        br_charge_1pix = Cluster->Charge();
                     }
 
                     /** fill pulse height histo two pix */
@@ -275,7 +204,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                         twopc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][2]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][2], RootItems.nAveragePH()[iplane][2], Cluster->Charge());
-//                        br_charge_2pix = Cluster->Charge();
                     }
                     /** fill pulse height histo >3 pix */
                     else if (Cluster->NHits() >= 3) {
@@ -283,7 +211,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                         threepc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][3]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][3], RootItems.nAveragePH()[iplane][3], Cluster->Charge());
-//                        br_charge_3pixplus = Cluster->Charge();
                     }
                 }
 
@@ -367,7 +294,10 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     getTime(now1, loop);
     now1 = clock();
 
+    if (GetUseRootInput(telescopeID)) FW->saveTree();
+
     delete FR;
+    delete FW;
 
     /** add the last point to the average pulse height graph */
     for (int i = 0; i != NROC; ++i) {
@@ -379,13 +309,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                 printf("AvgCharge: %i %i N:%9i : %13.3E\n", i, j, RootItems.nAveragePH()[i][j], RootItems.dAveragePH()[i][j]);
         }
     }
-
-
-  // Store root file with added tracking info
-  if (GetUseRootInput(telescopeID)){
-    newfile->cd();
-    newtree->Write();
-  }
 
   TCanvas Can;
   Can.cd();
