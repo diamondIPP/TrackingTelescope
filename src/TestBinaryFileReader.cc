@@ -22,7 +22,14 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     /** ============================
      Constants
      =================================*/
-    float now1(clock()), now3(clock()), loop(0), startProg(0), endProg(0), allProg(0);
+    /** measure elapsed time */
+    float now1(clock()), now3(clock()), loop(0), startProg(0), endProg(0), allProg(0), averTime(0), speed;
+    /** times for counting */
+    int const TimeWidth = 20000;
+    int NGraphPoints = 0;
+    int const StartTime = 0;
+    int ThisTime;
+    /** miscellaneous */
     const uint16_t NROC = GetNumberOfROCS(telescopeID);
     const uint32_t ph_threshold(300000);
     bool do_slope;
@@ -63,6 +70,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     FILE * f = fopen("MyGainCal.dat", "w");
     FR->GetGainCal()->PrintGainCal(f);
     fclose(f);
+    uint32_t nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
 
     /** apply masking */
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
@@ -76,15 +84,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     float_t  onepc[NROC];
     float_t  twopc[NROC];
     float_t threepc[NROC];
-
-
-    /** ============================
-     Times for Counting
-     ================================= */
-    int const TimeWidth = 20000;
-    int NGraphPoints = 0;
-    int const StartTime = 0;
-    int ThisTime;
 
 
     /** ============================
@@ -109,10 +108,17 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         indexi++;
         ThisTime = ievent;
 
-        /** print progress */
+        /** print process */
+        if (ievent % 10 == 0){
+            if (ievent != 0) cout << "\e[A\r";
+            cout << "Processing event: " << setw(7) << setfill('0') << ievent << endl;
+            if (speed) cout << "time left: " << setprecision(2) << fixed << (nEntries - ievent) / speed;
+            else cout << "time left: ???";
+        }
+
+        /** measure speed */
         if (ievent % 10000 == 0){
-            cout << "Processing event: " << ievent << endl;
-            cout << "elapsed time: " << setprecision(2) << fixed << float((clock() - now)) / CLOCKS_PER_SEC << endl;
+            speed = ievent / getTime(now, averTime);
             now = clock();
         }
 
@@ -127,11 +133,16 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 
             if (FR->NTracks() > 0){
                 PLTTrack * Track = FR->Track(0);
+
                 FW->setChi2(Track->Chi2() );
                 FW->setChi2X(Track->Chi2X() );
                 FW->setChi2Y(Track->Chi2Y() );
                 FW->setSlopeX(Track->fSlopeX);
                 FW->setSlopeY(Track->fSlopeY);
+//                br_diam1_track_x = Track->ExtrapolateX(diam1_z);
+//                br_diam1_track_y = Track->ExtrapolateY(diam1_z);
+//                br_diam2_track_x = Track->ExtrapolateX(diam2_z);
+//                br_diam2_track_y = Track->ExtrapolateY(diam2_z);
             }
             for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane)
                 for (size_t icluster = 0; icluster != FR->Plane(iplane)->NClusters(); ++icluster)
@@ -163,8 +174,10 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         static int ieventdraw = 0;
         if (ieventdraw < 20) {
             uint16_t hp = FR->HitPlaneBits();
-            if (hp != 0 && hp != 1 && hp != 2 && hp != 4 && hp != 8)
+            if (hp != 0 && hp != 1 && hp != 2 && hp != 4 && hp != 8){
                 FR->DrawTracksAndHits(TString::Format(OutDir + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
+                cout << endl;
+            }
         }
 
         /** loop over the planes */

@@ -205,6 +205,7 @@ void RootItems::DrawSaveChi2(TH1F * histo, TString saveName){
     gStyle->SetOptStat(0);
     histo->Draw("hist");
     c1->SaveAs(OutDir + saveName + ".gif");
+    histo->Write();
 }
 std::vector<std::vector<TGraphErrors*> > RootItems::FillVecAvPH(std::vector<std::vector<TGraphErrors*> > graphVec){
 

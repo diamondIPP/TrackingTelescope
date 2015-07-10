@@ -24,16 +24,19 @@ namespace PLTU
   int const NCOL     = LASTCOL - FIRSTCOL + 1;
   int const NROW     = LASTROW - FIRSTROW + 1;
 
-  int const FIRSTCOL_DIAMOND = 13;
-  int const LASTCOL_DIAMOND  = 38;
-  int const FIRSTROW_DIAMOND = 40;
-  int const LASTROW_DIAMOND  = 79;
+  int const FIRSTCOL_DIAMOND = 16;   //13;
+  int const LASTCOL_DIAMOND  = 31;   //38;
+  int const FIRSTROW_DIAMOND = 8;    //40;
+  int const LASTROW_DIAMOND  = 34;   //79;
   int const NCOL_DIAMOND     = LASTCOL_DIAMOND - FIRSTCOL_DIAMOND + 1;
   int const NROW_DIAMOND     = LASTROW_DIAMOND - FIRSTROW_DIAMOND + 1;
 
   // Width and height in centimeters
   float const PIXELWIDTH  = 0.0150;
   float const PIXELHEIGHT = 0.0100;
+
+  float const DIACENTERX = (LASTCOL_DIAMOND - FIRSTCOL_DIAMOND) / 2;
+  float const DIACENTERY = (LASTROW_DIAMOND - FIRSTROW_DIAMOND) / 2;
 
   Double_t PoissonFit(Double_t* x, Double_t* par);
   void SetStyle ();
