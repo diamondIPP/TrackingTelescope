@@ -31,6 +31,7 @@ private:
     uint8_t br_hit_plane_bits;
     float   br_diam1_track_x, br_diam1_track_y;
     float   br_diam2_track_x, br_diam2_track_y;
+    float   br_dist_to_dia1, br_dist_to_dia2;
     float   br_chi2;
     float   br_chi2_x, br_chi2_y;
     float   br_slope_x, br_slope_y;
@@ -79,6 +80,8 @@ public:
     void setDia1TrackY(float value) { br_diam1_track_y = value; }
     void setDia2TrackX(float value) { br_diam2_track_x = value; }
     void setDia2TrackY(float value) { br_diam2_track_y = value; }
+    void setDistDia1(float xVal, float yVal) { br_dist_to_dia1 = sqrt(xVal*xVal + yVal*yVal); }
+    void setDistDia2(float xVal, float yVal) { br_dist_to_dia2 = sqrt(xVal*xVal + yVal*yVal); }
     void setSlopeX(float value) { br_slope_x = value; }
     void setSlopeY(float value) { br_slope_y = value; }
     void setChi2(float value) { br_chi2 = value; }

@@ -150,22 +150,22 @@ bool PLTAlignment::IsGood ()
 
 float PLTAlignment::PXtoLX (int const px)
 {
-  return PLTU::PIXELWIDTH * (PLTU::DIACENTERX - (px + 0.00001));
+  return PLTU::PIXELWIDTH * ((px + 0.00001) - PLTU::DIACENTERX);
 }
 
 float PLTAlignment::PYtoLY (int const py)
 {
-  return PLTU::PIXELHEIGHT * (PLTU::DIACENTERY - (py + 0.00001));
+  return PLTU::PIXELHEIGHT * ((py + 0.00001) - PLTU::DIACENTERY);
 }
 
 int PLTAlignment::PXfromLX (float const lx)
 {
-  return (int) (PLTU::DIACENTERX - lx / PLTU::PIXELWIDTH);
+  return (int) (lx / PLTU::PIXELWIDTH - PLTU::DIACENTERX);
 }
 
 int PLTAlignment::PYfromLY (float const ly)
 {
-  return (int) (PLTU::DIACENTERY - ly /  PLTU::PIXELHEIGHT);
+  return (int) (ly /  PLTU::PIXELHEIGHT - PLTU::DIACENTERY);
 }
 
 std::pair<int, int> PLTAlignment::PXYfromLXY (std::pair<float, float> const& LXY)

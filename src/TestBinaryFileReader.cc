@@ -38,6 +38,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     TString const OutDir = PlotsDir + RunNumber + "/";
     cout << OutDir << endl;
     gStyle->SetOptStat(0);
+    gErrorIgnoreLevel = kWarning;
 
 
     /** ============================
@@ -109,7 +110,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         ThisTime = ievent;
 
         /** print process */
-        if (ievent % 10 == 0){
+        if (ievent % 10 == 0 && ievent >= 20000){
             if (ievent != 0) cout << "\e[A\r";
             cout << "Processing event: " << setw(7) << setfill('0') << ievent << endl;
             if (speed) cout << "time left: " << setprecision(2) << fixed << (nEntries - ievent) / speed;
@@ -117,7 +118,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         }
 
         /** measure speed */
-        if (ievent % 10000 == 0){
+        if (ievent % 10000 == 0 && ievent >= 20000){
             speed = ievent / getTime(now, averTime);
             now = clock();
         }
@@ -125,6 +126,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         /** file writer */
         if (GetUseRootInput(telescopeID)){
 
+            /** first clear all vectors */
             FW->clearVectors();
 
             FW->setHitPlaneBits(FR->HitPlaneBits() );
@@ -139,10 +141,25 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                 FW->setChi2Y(Track->Chi2Y() );
                 FW->setSlopeX(Track->fSlopeX);
                 FW->setSlopeY(Track->fSlopeY);
-//                br_diam1_track_x = Track->ExtrapolateX(diam1_z);
-//                br_diam1_track_y = Track->ExtrapolateY(diam1_z);
-//                br_diam2_track_x = Track->ExtrapolateX(diam2_z);
-//                br_diam2_track_y = Track->ExtrapolateY(diam2_z);
+                FW->setDia1TrackX(Track->ExtrapolateX(PLTU::DIA1Z));
+                FW->setDia1TrackY(Track->ExtrapolateY(PLTU::DIA1Z));
+                FW->setDia2TrackX(Track->ExtrapolateX(PLTU::DIA2Z));
+                FW->setDia2TrackY(Track->ExtrapolateY(PLTU::DIA2Z));
+                FW->setDistDia1(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z));
+                FW->setDistDia2(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z));
+
+//                if (Track->NClusters() == 4 && ievent < 1000){
+//
+//                    cout << "====================================" <<endl;
+//                    for (uint8_t i = 0; i < FR->NHits(); i++)
+//                        if (FR->Hit(i)->ROC() == 0 || FR->Hit(i)->ROC() == 3)
+//                            cout << FR->Hit(i)->Column() << " " << FR->Hit(i)->Row() << ", ";
+//                    cout << endl;
+//                    cout << Track->Cluster(0)->TX() << " " << Track->Cluster(0)->TY() << " " << Track->Cluster(0)->TZ() << endl;
+//                    cout << Track->Cluster(3)->TX() << " " << Track->Cluster(3)->TY() << " " << Track->Cluster(3)->TZ() << endl;
+//                    cout << Track->ExtrapolateX(PLTU::DIA1Z) << " " << Track->ExtrapolateY(PLTU::DIA1Z) << endl;
+//                    cout << Track->ExtrapolateX(PLTU::DIA2Z) << " " << Track->ExtrapolateY(PLTU::DIA2Z) << endl;
+//                }
             }
             for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane)
                 for (size_t icluster = 0; icluster != FR->Plane(iplane)->NClusters(); ++icluster)
@@ -176,7 +193,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
             uint16_t hp = FR->HitPlaneBits();
             if (hp != 0 && hp != 1 && hp != 2 && hp != 4 && hp != 8){
                 FR->DrawTracksAndHits(TString::Format(OutDir + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
-                cout << endl;
+                if (ieventdraw == 20) cout << endl;
             }
         }
 
