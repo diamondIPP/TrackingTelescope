@@ -39,6 +39,7 @@ private:
     uint16_t const nRoc;
     TString const PlotsDir;
     TString const OutDir;
+    TString const FileType;
     const uint8_t HistColors[4];
     const uint8_t maxChi2;
 
@@ -53,6 +54,10 @@ private:
 
     /** occupancy */
     std::vector<TH2F*> hOccupancy;
+    std::vector<TH1F*> hOccupancy1DZ;
+    Double_t QValue[1];
+    std::vector<TH2F*> h3x3;
+    std::vector<TH1F*> h3x31DZ;
     std::vector<TH2F*> hOccupancyLowPH;
     std::vector<TH2F*> hOccupancyHighPH;
 
@@ -66,11 +71,13 @@ private:
     std::vector<std::vector<TH1F*> > hPulseHeightOffline;
     TLegend * lPulseHeight;
     TLegend * lPHMean;
+    TLegend * lRatio;
     std::vector<std::vector<TGraphErrors*> > gAvgPH;
     double *** dAvgPH2D;
     int *** nAvgPH2D;
     double ** dAvgPH;
     int ** nAvgPH;
+    std::vector<TH2F*> hPulseHeightAvg2D;
 
     /** coincidence map */
     TH1F * hCoincidenceMap;
@@ -87,9 +94,7 @@ private:
     std::vector<TH2F*> hResidualYdX;
 
 
-
 public:
-
 
     /** ============================
      CONSTRUCTOR
@@ -126,6 +131,25 @@ public:
     std::vector<TH2F*> Residual() { return hResidual; }
     std::vector<TH2F*> ResidualXdY() { return hResidualXdY; }
     std::vector<TH2F*> ResidualYdX() { return hResidualYdX; }
+    std::vector<TH1F*> Occupancy1DZ() {return hOccupancy1DZ; }
+    Double_t * QuantileValue() { return QValue; }
+    std::vector<TH2F*> Eff3x3() { return h3x3; }
+    std::vector<TH2F*> PulseHeightAv2D() { return hPulseHeightAvg2D; }
+
+
+    /** ============================
+     SET-FUNCTIONS
+     =================================*/
+     void setOccupancy1DZ(TH1F * histo, uint8_t iroc) {hOccupancy1DZ[iroc] = histo; }
+     void set3x3(TH2F * histo, uint8_t iroc) {h3x3[iroc] = histo; }
+     void set3x31DZ(TH1F * histo, uint8_t iroc) {h3x31DZ[iroc] = histo; }
+
+
+     /** ============================
+     MAIN FUNCTIONS
+     =================================*/
+     void SaveAllHistos();
+
 
     /** ============================
      AUXILIARY FUNCTIONS
@@ -135,11 +159,12 @@ public:
     std::vector<TH2F*> FillVectorTH2F(std::vector<TH2F*> histo, const char * name);
     std::vector<TH1F*> FillVectorTH1F(std::vector<TH1F*> histo, const char * name);
     std::vector<std::vector<TH1F*> > FillVectorPH(std::vector<std::vector<TH1F*> >, TString name, uint32_t maxPH);
-    void DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, TCanvas & c, const char * xTit, const char * yTit);
+    void FillAvPH2D(uint8_t);
+    void DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, const char * xTit, const char * yTit);
     void PrepCoincidenceHisto();
     void DrawSaveCoincidence();
     void FormatPHHisto(std::vector<std::vector<TH1F*> >);
-    void FormatLegendPH();
+    void FormatLegendsPH();
     void FillLegendsPH(uint8_t iroc, std::vector<std::vector<TH1F*> > histVec);
     void DrawSavePH(uint8_t iroc, std::vector<std::vector<TH1F*> > histVec, TString title, TString saveName);
     void ClearLegendsPH();
@@ -150,7 +175,13 @@ public:
     std::vector<TH2F*> FillVecResidual(std::vector<TH2F*>, TString name, uint16_t, float, float, uint16_t, float, float);
     void DrawSaveResidual(uint8_t, vector<TH2F*>);
     void DrawSaveResidualProj(uint8_t, vector<TH2F*>, TString);
-
+    void DrawSaveOccupancy(uint8_t, vector<TH2F*>);
+    void DrawSaveOccupancy1DZ(uint8_t);
+    void DrawSaveOccupancyQuantile(uint8_t);
+    void DrawSave3x3(uint8_t);
+    void DrawSave3x31DZ(uint8_t);
+    void DrawSaveAvPH2D(uint8_t);
+    void DrawSaveTrackSlope(TH1F*);
  };
 
 

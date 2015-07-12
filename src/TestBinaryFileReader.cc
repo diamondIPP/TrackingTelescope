@@ -82,10 +82,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
      =================================*/
     RootItems RootItems(telescopeID, RunNumber);
 
-    float_t  onepc[NROC];
-    float_t  twopc[NROC];
-    float_t threepc[NROC];
-
 
     /** ============================
      Initialize File Writer
@@ -113,7 +109,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         if (ievent % 10 == 0 && ievent >= 20000){
             if (ievent != 0) cout << "\e[A\r";
             cout << "Processing event: " << setw(7) << setfill('0') << ievent << endl;
-            if (speed) cout << "time left: " << setprecision(2) << fixed << (nEntries - ievent) / speed;
+            if (speed) cout << "time left: " << setprecision(2) << fixed << (nEntries - ievent) / speed << "      ";
             else cout << "time left: ???";
         }
 
@@ -147,19 +143,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                 FW->setDia2TrackY(Track->ExtrapolateY(PLTU::DIA2Z));
                 FW->setDistDia1(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z));
                 FW->setDistDia2(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z));
-
-//                if (Track->NClusters() == 4 && ievent < 1000){
-//
-//                    cout << "====================================" <<endl;
-//                    for (uint8_t i = 0; i < FR->NHits(); i++)
-//                        if (FR->Hit(i)->ROC() == 0 || FR->Hit(i)->ROC() == 3)
-//                            cout << FR->Hit(i)->Column() << " " << FR->Hit(i)->Row() << ", ";
-//                    cout << endl;
-//                    cout << Track->Cluster(0)->TX() << " " << Track->Cluster(0)->TY() << " " << Track->Cluster(0)->TZ() << endl;
-//                    cout << Track->Cluster(3)->TX() << " " << Track->Cluster(3)->TY() << " " << Track->Cluster(3)->TZ() << endl;
-//                    cout << Track->ExtrapolateX(PLTU::DIA1Z) << " " << Track->ExtrapolateY(PLTU::DIA1Z) << endl;
-//                    cout << Track->ExtrapolateX(PLTU::DIA2Z) << " " << Track->ExtrapolateY(PLTU::DIA2Z) << endl;
-//                }
             }
             for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane)
                 for (size_t icluster = 0; icluster != FR->Plane(iplane)->NClusters(); ++icluster)
@@ -223,7 +206,6 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                     /** fill pulse height histo one pix */
                     if (Cluster->NHits() == 1) {
                         RootItems.PulseHeight()[iplane][1]->Fill(Cluster->Charge());
-                        onepc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][1]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][1], RootItems.nAveragePH()[iplane][1], Cluster->Charge());
                     }
@@ -231,14 +213,12 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
                     /** fill pulse height histo two pix */
                     else if (Cluster->NHits() == 2) {
                         RootItems.PulseHeight()[iplane][2]->Fill(Cluster->Charge());
-                        twopc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][2]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][2], RootItems.nAveragePH()[iplane][2], Cluster->Charge());
                     }
                     /** fill pulse height histo >3 pix */
                     else if (Cluster->NHits() >= 3) {
                         RootItems.PulseHeight()[iplane][3]->Fill(Cluster->Charge());
-                        threepc[iplane]++;
                         RootItems.PulseHeightLong()[iplane][3]->Fill(Cluster->Charge());
                         PLTU::AddToRunningAverage(RootItems.dAveragePH()[iplane][3], RootItems.nAveragePH()[iplane][3], Cluster->Charge());
                     }
@@ -321,6 +301,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
 		}
 
 	} /** END OF EVENT LOOP */
+	cout << endl;
     getTime(now1, loop);
     now1 = clock();
 
@@ -340,169 +321,9 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
         }
     }
 
-  TCanvas Can;
-  Can.cd();
+    out_f->cd();
 
-  out_f->cd();
-
-    RootItems.FormatPHHisto(RootItems.PulseHeight());
-    RootItems.FormatPHHisto(RootItems.PulseHeightLong());
-    RootItems.FormatPHHisto(RootItems.PulseHeightOffline());
-    RootItems.FormatLegendPH();
-
-  for (int iroc = 0; iroc != NROC; ++iroc) {
-
-    /** Draw Occupancy histograms */
-    RootItems.Occupancy()[iroc]->SetMinimum(0);
-    //RootItems.Occupancy()[iroc].SetAxisRange(12,38,"X");
-    //RootItems.Occupancy()[iroc].SetAxisRange(39,80,"Y");
-    RootItems.Occupancy()[iroc]->Draw("colz");
-    Can.SaveAs( OutDir+TString(RootItems.Occupancy()[iroc]->GetName()) + ".gif");
-    RootItems.Occupancy()[iroc]->Write();
-
-    TH1F* hOccupancy1DZ = PLTU::HistFrom2D(RootItems.Occupancy()[iroc]);
-    Can.cd();
-    hOccupancy1DZ->Draw("hist");
-    if (hOccupancy1DZ->GetEntries() > 0) {
-      Can.SetLogy(1);
-    }
-    Can.SaveAs(OutDir+TString(hOccupancy1DZ->GetName()) + ".gif");
-    hOccupancy1DZ->Write();
-    Can.SetLogy(0);
-
-    // Grab the quantile you're interested in here
-    Double_t QProbability[1] = { 0.95 }; // Quantile positions in [0, 1]
-    Double_t QValue[1];                  // Quantile values
-    hOccupancy1DZ->GetQuantiles(1, QValue, QProbability);
-    if(QValue[0] > 1 && RootItems.Occupancy()[iroc]->GetMaximum() > QValue[0]) {
-      RootItems.Occupancy()[iroc]->SetMaximum(QValue[0]);
-    }
-    Can.cd();
-    RootItems.Occupancy()[iroc]->Draw("colz");
-    Can.SaveAs( OutDir+Form("Occupancy_ROC%i_Quantile.gif", iroc) );
-    delete hOccupancy1DZ;
-
-    Can.cd();
-    hOccupancy1DZ = PLTU::HistFrom2D(RootItems.Occupancy()[iroc], 0, QValue[0], TString::Format("Occupancy1DZ_ROC%i_Quantile", iroc), 20);
-    hOccupancy1DZ->Draw("hist");
-    Can.SaveAs(OutDir+TString(hOccupancy1DZ->GetName()) + ".gif");
-    delete hOccupancy1DZ;
-
-
-    // Get 3x3 efficiency hists and draw
-    TH2F* h3x3 = PLTU::Get3x3EfficiencyHist(*RootItems.Occupancy()[iroc], 0, 51, 0, 79);
-    h3x3->SetTitle( TString::Format("Occupancy Efficiency 3x3 ROC%i", iroc) );
-    Can.cd();
-    h3x3->SetMinimum(0);
-    h3x3->SetMaximum(3);
-    h3x3->Draw("colz");
-    Can.SaveAs(OutDir+TString(h3x3->GetName()) + ".gif");
-
-    Can.cd();
-    TH1F* h3x3_1DZ = PLTU::HistFrom2D(h3x3, "", 50);
-    h3x3_1DZ->Draw("hist");
-    Can.SaveAs(OutDir+TString(h3x3_1DZ->GetName()) + ".gif");
-    delete h3x3;
-
-    /** clusters per event */
-    RootItems.DrawSaveTH1F(RootItems.nClusters(), iroc, Can, "Number of clusters per event", "Events");
-
-    /** hits per cluster */
-    RootItems.DrawSaveTH1F(RootItems.nHitsPerCluster(), iroc, Can, "Number of hits per cluster", "Number of Clusters");
-
-    Can.cd();
-    RootItems.OccupancyHighPH()[iroc]->SetMinimum(0);
-    RootItems.OccupancyHighPH()[iroc]->Draw("colz");
-    Can.SaveAs( OutDir+TString(RootItems.OccupancyHighPH()[iroc]->GetName()) + ".gif");
-
-    RootItems.OccupancyLowPH()[iroc]->SetMinimum(0);
-    RootItems.OccupancyLowPH()[iroc]->Draw("colz");
-    Can.SaveAs( OutDir+TString(RootItems.OccupancyLowPH()[iroc]->GetName()) + ".gif");
-
-//    float_t oneovertwo[iroc],oneoverthree[iroc],twooverthree[iroc];  //unused?
-//
-//    oneovertwo[iroc] = onepc[iroc]/twopc[iroc];
-//    oneoverthree[iroc] = onepc[iroc]/threepc[iroc];
-//    twooverthree[iroc] = twopc[iroc]/threepc[iroc]; //unused?
-
-    /** ============================
-     Draw the Pulse Heights
-     ================================= */
-    gStyle->SetOptStat(0);
-
-    /** standard */
-    RootItems.ClearLegendsPH();
-    RootItems.FillLegendsPH(iroc, RootItems.PulseHeight());
-    RootItems.DrawSavePH(iroc, RootItems.PulseHeight(), "Pulse Height ROC%i", "PulseHeight_ROC%i.gif");
-//    TLegend lRatio(0.75, 0.1, 0.90, 0.4, "Ratio:");
-//    lRatio.SetTextAlign(11);
-//    lRatio.SetFillStyle(0);
-//    lRatio.SetBorderSize(0);
-//	  leg_mean.AddEntry( "oneovertwo", TString::Format("%8.0f", oneovertwo[iroc])+" 1pix/2pix");
-//    lRatio.AddEntry( "oneoverthree", TString::Format("%8.0f", oneoverthree, "")+" 1 over 3");
-//    lRatio.AddEntry( "twooverthree", TString::Format("%8.0f", twooverthree, "")+" 2 over 3");
-//    lRatio.Draw("same");
-    /** offline */
-    RootItems.ClearLegendsPH();
-    RootItems.FillLegendsPH(iroc, RootItems.PulseHeightOffline());
-    RootItems.DrawSavePH(iroc, RootItems.PulseHeightOffline(), "Pulse Height Offline ROC%i", "PulseHeightOffline_ROC%i.gif");
-
-    /** long */
-    RootItems.ClearLegendsPH();
-    RootItems.FillLegendsPH(iroc, RootItems.PulseHeightLong());
-    RootItems.DrawSavePH(iroc, RootItems.PulseHeightLong(), "Pulse Height Long ROC%i", "PulseHeightLong_ROC%i.gif");
-
-    /** average pulse height */
-    RootItems.DrawSaveAvPH(iroc);
-
-    // Use AvgPH2D to draw PH 2D maps
-    TString Name = TString::Format("PulseHeightAvg2D_ROC%i", iroc);
-    TH2F hPulseHeightAvg2D(Name, Name, PLTU::NCOL, PLTU::FIRSTCOL, PLTU::LASTCOL, PLTU::NROW, PLTU::FIRSTROW, PLTU::LASTROW);
-    for (int icol = 0; icol != PLTU::NCOL; ++icol) {
-      for (int irow = 0; irow != PLTU::NROW; ++irow) {
-        hPulseHeightAvg2D.SetBinContent(icol+1, irow+1, RootItems.dAveragePH2D()[iroc][icol][irow]);
-//        hPulseHeightAvg2D.SetBinContent(icol+1, irow+1, AvgPH2D[iroc][icol][irow]);
-      }
-    }
-    Can.cd();
-    hPulseHeightAvg2D.SetMinimum(0);
-    hPulseHeightAvg2D.SetMaximum(100000);
-    hPulseHeightAvg2D.Draw("colz");
-    Can.SaveAs(OutDir+hPulseHeightAvg2D.GetName() + ".gif");
-
-
-    /** residuals */
-    RootItems.DrawSaveResidual(iroc, RootItems.Residual());
-    RootItems.DrawSaveResidual(iroc, RootItems.ResidualXdY());
-    RootItems.DrawSaveResidual(iroc, RootItems.ResidualYdX());
-    RootItems.DrawSaveResidualProj(iroc, RootItems.Residual(), "X");
-    RootItems.DrawSaveResidualProj(iroc, RootItems.Residual(), "Y");
-
-  } // end of loop over ROCs
-
-    /** draw and save coincidence map */
-    RootItems.PrepCoincidenceHisto();
-    RootItems.DrawSaveCoincidence();
-
-    /** draw tracking slopes and chi2 */
-    gStyle->SetOptFit(101);
-    Can.cd();
-    RootItems.FitSlope(RootItems.TrackSlopeX() );
-    RootItems.TrackSlopeX()->Draw();
-    RootItems.LegendSlope(RootItems.TrackSlopeX() );
-    Can.SaveAs(OutDir + "TrackSlopeX.gif");
-    RootItems.TrackSlopeX()->Write();
-
-    Can.cd();
-    RootItems.FitSlope(RootItems.TrackSlopeY() );
-    RootItems.TrackSlopeY()->Draw();
-    RootItems.LegendSlope(RootItems.TrackSlopeY() );
-    Can.SaveAs(OutDir+"TrackSlopeY.gif");
-    RootItems.TrackSlopeY()->Write();
-
-    RootItems.DrawSaveChi2(RootItems.Chi2(), "Chi2");
-    RootItems.DrawSaveChi2(RootItems.Chi2X(), "Chi2X");
-    RootItems.DrawSaveChi2(RootItems.Chi2Y(), "Chi2Y");
+    RootItems.SaveAllHistos();
 
     /** make index.html as overview */
 	WriteHTML(PlotsDir + RunNumber, GetCalibrationFilename(telescopeID), telescopeID);
