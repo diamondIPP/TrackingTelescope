@@ -135,6 +135,9 @@ public:
     Double_t * QuantileValue() { return QValue; }
     std::vector<TH2F*> Eff3x3() { return h3x3; }
     std::vector<TH2F*> PulseHeightAv2D() { return hPulseHeightAvg2D; }
+    uint8_t NRoc() { return nRoc; }
+    TString getOutDir() { return OutDir; }
+    TString getPlotsDir() { return PlotsDir; }
 
 
     /** ============================

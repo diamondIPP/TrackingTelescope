@@ -54,6 +54,10 @@ void FileWriterTracking::fillTree(){
 void FileWriterTracking::saveTree(){
     newfile->cd();
     newtree->Write();
+    newfile->Write();
+    newfile->Close();
+    delete newfile;
+
 }
 void FileWriterTracking::clearVectors(){
     for (uint8_t iRoc = 0; iRoc !=nRoc; iRoc++)

@@ -98,11 +98,9 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
      EVENT LOOP
      xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
      ================================= */
-    uint64_t indexi = -1;
     float now = clock();
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
-        indexi++;
         ThisTime = ievent;
 
         /** print process */
@@ -332,7 +330,7 @@ int TestPSIBinaryFileReader (string const InFileName, TFile * out_f,  TString co
     getTime(now3, allProg);
     /** print total events */
     cout << "=======================\n";
-    cout << "Total events: " << indexi + 1 << endl;
+    cout << "Total events: " << nEntries << endl;
     cout << "Start       : " << setprecision(2) << fixed << startProg << " seconds\n";
     cout << "Loop        : " << setprecision(2) << fixed << loop << " seconds\n";
     cout << "End         : " << setprecision(2) << fixed << endProg << " seconds\n";

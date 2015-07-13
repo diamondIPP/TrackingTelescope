@@ -35,6 +35,7 @@
 
 #include "PLTPlane.h"
 #include "PLTAlignment.h"
+#include "PLTAnalysis.h"
 
 #define DEBUG false
 
@@ -1978,25 +1979,18 @@ int main (int argc, char* argv[])
 
     /** ALIGNMENT */
     if (action==1)
-    DoAlignment(InFileName,
-                &out_f,
-                RunNumber,
-                telescopeID);
+        DoAlignment(InFileName, &out_f, RunNumber, telescopeID);
 
     /** RESIDUAL CALCULATION */
     else if (action==2)
-    FindResiduals(InFileName,
-                  &out_f,
-                  RunNumber,
-                  telescopeID);
+        FindResiduals(InFileName,  &out_f, RunNumber, telescopeID);
 
     /** ANALYSIS */
-    else
-    TestPSIBinaryFileReader(InFileName,
-                            &out_f,
-                            RunNumber,
-                            telescopeID);
-
+    else {
+        PLTAnalysis Analysis(InFileName,  &out_f, RunNumber, telescopeID);
+        Analysis.EventLoop();
+        Analysis.FinishAnalysis();
+    }
 
     return 0;
 }
