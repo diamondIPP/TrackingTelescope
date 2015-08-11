@@ -63,6 +63,7 @@ bool PSIRootFileReader::OpenFile ()
   fTree->SetBranchAddress("row", &f_row);
   fTree->SetBranchAddress("adc", &f_adc);
   fTree->SetBranchAddress("charge", &f_charge);
+//  fTree->SetBranchAddress("signal", &f_signal);
 
   return true;
 }
@@ -111,7 +112,8 @@ int PSIRootFileReader::GetNextEvent (){
       //std::cout << roc << " " << col << " " << row <<
       fGainCal.SetCharge(*Hit);
       //std::cout << "  " << Hit->Charge() << std::endl;
-
+      /** FIXME: add correct number here*/
+//      if (roc < 4) { }
       fAlignment.AlignHit(*Hit);
       fHits.push_back(Hit);
       fPlaneMap[Hit->ROC()].AddHit(Hit);

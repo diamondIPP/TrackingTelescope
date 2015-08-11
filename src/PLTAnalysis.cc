@@ -16,14 +16,17 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     SinglePlaneStudies();
     /** init file reader */
     InitFileReader();
-    nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
+    cout << "test" << FR << endl;
+    cout << "Hallo" << endl;
+    if (GetUseRootInput(telescopeID)) nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
+    cout << "Hallo again" << endl;
     /** apply masking */
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
     /** init histos */
     Histos = new RootItems(telescopeID, RunNumber);
     cout << "Output directory: " << Histos->getOutDir() << endl;
     /** init file writer */
-    if (telescopeID == 7) FW = new FileWriterTracking(InFileName, telescopeID, FR);
+    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9) FW = new FileWriterTracking(InFileName, telescopeID, FR);
 }
 
 PLTAnalysis::~PLTAnalysis()
@@ -89,7 +92,8 @@ PLTAnalysis::~PLTAnalysis()
             FillOccupancy(Plane);
         }
 
-		if (telescopeID == 7 && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc()) {
+//        cout << "Number of Tracks: " << FR->NTracks() << endl;
+		if ((telescopeID == 7 || telescopeID == 8 || telescopeID == 9) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
 
             do_slope = true;
             for (uint8_t i_rocs(0); i_rocs != Histos->NRoc(); i_rocs++)
@@ -228,7 +232,6 @@ void PLTAnalysis::WriteTrackingTree(){
 
     if (FR->NTracks() > 0){
         PLTTrack * Track = FR->Track(0);
-
         FW->setChi2(Track->Chi2() );
         FW->setChi2X(Track->Chi2X() );
         FW->setChi2Y(Track->Chi2Y() );

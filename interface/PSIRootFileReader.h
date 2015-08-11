@@ -9,8 +9,8 @@
 class PSIRootFileReader : public PSIFileReader
 {
   public:
-    PSIRootFileReader (std::string const, 
-		       std::string const, 
+    PSIRootFileReader (std::string const,
+		       std::string const,
 		       std::string const,
 		       int const,
 		       bool const,
@@ -33,17 +33,18 @@ class PSIRootFileReader : public PSIFileReader
     //  Current entry and total number of entries
     int fAtEntry;
     int fNEntries;
-  
-    // Scalar Branches     
+
+    // Scalar Branches
     int f_event_number;
     float f_time;
 
-    // Vector Branches     
+    // Vector Branches
     std::vector<int> * f_plane;
     std::vector<int> * f_col;
     std::vector<int> * f_row;
     std::vector<int> * f_adc;
-    std::vector<int> * f_charge;  
+    std::vector<int> * f_charge;
+//    std::vector<float> * f_signal;
 };
 
 #endif

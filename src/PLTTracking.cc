@@ -17,8 +17,8 @@ typedef std::vector<Digits> Vd;
 
 
 PLTTracking::PLTTracking (int nplanes) : fNPlanes(nplanes)
-{     
-  SetAllPlanes();  
+{
+  SetAllPlanes();
 }
 
 PLTTracking::~PLTTracking ()
@@ -52,8 +52,8 @@ int PLTTracking::GetTrackingAlgorithm ()
 
 
 void PLTTracking::SetAllPlanes(){
-  
-  fUsePlanesForTracking.resize(0);  
+
+  fUsePlanesForTracking.resize(0);
   for (int i=0;i!=fNPlanes;i++) {
     fUsePlanesForTracking.push_back(2);
   }
@@ -71,7 +71,7 @@ void PLTTracking::SetPlaneUnderTest(int put){
     //  requires exactly 6 hits)
 
     // For single-plane efficiency we want (for example): 333033
-    for (int i=0;i!=fUsePlanesForTracking.size();i++){
+    for (uint8_t i=0;i!=fUsePlanesForTracking.size();i++){
       if (i==put){
         fUsePlanesForTracking[i] = 0;
       }
@@ -156,6 +156,9 @@ void PLTTracking::RunTracking (PLTTelescope& Telescope)
       break;
     case kTrackingAlgorithm_6PlanesHit:
       TrackFinder_6PlanesHit(Telescope);
+      break;
+    case kTrackingAlgorithm_ETH:
+      TrackFinder_ETH(Telescope);
       break;
     default:
       std::cerr << "ERROR: PLTTracking::RunTracking() has no idea what tracking algorithm you want to use" << std::endl;
@@ -278,7 +281,7 @@ void PLTTracking::TrackFinder_6PlanesHit (PLTTelescope& Telescope)
   }
 
   // Check if all the planes with mandatory clusters also have a cluster
-  for (int iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
+  for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
     if ( (fUsePlanesForTracking[iPlane]==2)
       && (Telescope.Plane(iPlane)->NClusters()==0)){
         return;
@@ -287,7 +290,7 @@ void PLTTracking::TrackFinder_6PlanesHit (PLTTelescope& Telescope)
 
 
   // Check if all the planes which require exactly one cluster have that
-  for (int iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
+  for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
     if ((fUsePlanesForTracking[iPlane]==3) &&
         (Telescope.Plane(iPlane)->NClusters() != 1 )){
         return;
@@ -299,7 +302,7 @@ void PLTTracking::TrackFinder_6PlanesHit (PLTTelescope& Telescope)
   // Need to have fUsePlanesForTracking of either 1 or 2
   //  and > 0 hits
   std::vector< std::vector< PLTCluster* > > ClustersForTracking;
-  for (int iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
+  for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
     if ( (fUsePlanesForTracking[iPlane]>0)
       && (Telescope.Plane(iPlane)->NClusters()>0)){
 
@@ -388,7 +391,147 @@ void PLTTracking::TrackFinder_6PlanesHit (PLTTelescope& Telescope)
   return;
 }
 
+void PLTTracking::TrackFinder_ETH (PLTTelescope& Telescope)
+{
+  // Find tracks in this telescope which are more or less parallel to beam
+  // Beamspot assumed to be at 0,0,0.
 
+  // Check that tracks haven't already been filled
+  if (Telescope.NTracks() != 0) {
+    std::cerr << "ERROR: It looks like tracks have already been filled here: PLTTelescope::TrackFinderParallelTracks()" << std::endl;
+    return;
+  }
+
+  // Check if the first four planes with mandatory clusters also have a cluster
+  for (uint8_t iPlane=0; iPlane < 4; iPlane++){
+    if ( (fUsePlanesForTracking[iPlane]==2)
+      && (Telescope.Plane(iPlane)->NClusters()==0)){
+        return;
+    }
+  }
+//  /** just for hte moment only one hit */
+//    for (uint8_t iPlane=0; iPlane < 4; iPlane++){
+//    if ( (fUsePlanesForTracking[iPlane]==2)
+//      && (Telescope.Plane(iPlane)->NHits() !=1)){
+//        return;
+//    }
+//  }
+
+///** take out weird tracks */
+//    if ( (fUsePlanesForTracking[0]==2) && (Telescope.Plane(0)->Hit(0)->Column() - Telescope.Plane(1)->Hit(0)->Column() > 20) ){
+//        return;
+//    }
+
+  // Check if all the planes which require exactly one cluster have that
+  for (uint8_t iPlane=0; iPlane < 4; iPlane++){
+    if ((fUsePlanesForTracking[iPlane]==3) &&
+        (Telescope.Plane(iPlane)->NClusters() != 1 )){
+        return;
+    }
+  }
+
+  // Put all the clusters we actually use for
+  // tracking into a matrix.
+  // Need to have fUsePlanesForTracking of either 1 or 2
+  //  and > 0 hits
+  std::vector< std::vector< PLTCluster* > > ClustersForTracking;
+  for (uint8_t iPlane=0; iPlane < 4; iPlane++){
+    if ( (fUsePlanesForTracking[iPlane]>0)
+      && (Telescope.Plane(iPlane)->NClusters()>0)){
+
+        std::vector< PLTCluster* > VClusters;
+        for (size_t iCluster = 0;
+            iCluster != Telescope.Plane(iPlane)->NClusters();
+            ++iCluster) {
+              VClusters.push_back( Telescope.Plane(iPlane)->Cluster(iCluster) );
+        } // end: loop over clusters
+
+        ClustersForTracking.push_back( VClusters );
+
+    } // end: use plane and plane has clusters
+  } // end: loop over planes
+
+  // Vector to keep track of tracks that we're interested in
+  std::vector<PLTTrack*> MyTracks;
+
+  // Code adapted from:
+  // http://stackoverflow.com/questions/5279051/how-can-i-create-cartesian-product-of-vector-of-vectors
+  // Idea is to have a vector of "Digit" objects that store the information to
+  // loop over a vector<cluster*>.
+  // Start all of the iterators at the beginning.
+  Vd vd;
+  for(Vvc::const_iterator it = ClustersForTracking.begin();
+    it != ClustersForTracking.end();
+    ++it) {
+    Digits d = {(*it).begin(), (*it).end(), (*it).begin()};
+    vd.push_back(d);
+  } // end of initializing the digits
+
+  // Make sure we have at least two planes with hits
+  // otherwise it will be hard to make tracks
+  if (vd.size() < 2)
+    return;
+
+  // Actual track creation
+  bool keepRunning = true;
+  while(keepRunning) {
+
+    PLTTrack* Track = new PLTTrack();
+    // Construct the firsr track track by accessing
+    // the iterators in the Vd object
+    for(Vd::const_iterator it = vd.begin(); it != vd.end(); it++)
+        Track->AddCluster(*(it->me));
+
+    Track->MakeTrack(*fAlignment, 4 );
+    MyTracks.push_back(Track);
+
+
+    // Increment the Digits
+    for(Vd::iterator it = vd.begin(); ; ) {
+        // Start with the left one
+        ++(it->me);
+        // If it hits its end:
+        if(it->me == it->end) {
+          // test if we are at the right end
+          if(it+1 == vd.end()) {
+            keepRunning = false;
+            break;
+          // Otherwise cascade (set to zero, increment next one on the right)
+          } else {
+              it->me = it->begin;
+              ++it;
+            }
+        // Normal increase - no cascading necessary
+        } else {
+            break;
+          }
+    } // end of incrementing the digits
+  } // end track creation
+
+  int const NTracksBefore = (int) MyTracks.size();
+
+  // Grab the best tracks first and don't let there be overlap..
+  SortOutTracksNoOverlapBestD2(MyTracks);
+
+  if (DEBUG) {
+    printf("Found NTracks possible: %4i   Kept NTracks: %4i\n", NTracksBefore, (int) MyTracks.size());
+  }
+
+  for (size_t i = 0; i != MyTracks.size(); ++i) {
+    Telescope.AddTrack(MyTracks[i]);
+  }
+//  std::cout << "TRACK:" << std::endl;
+//  for (uint8_t i = 0; i != Telescope.Track(0)->NClusters(); i++ ){
+//    if (Telescope.Track(0)->Cluster(0)->TX() - Telescope.Track(0)->Cluster(1)->TX() > 0.2){
+//        std::cout.precision(3);
+//        std::cout << Telescope.Track(0)->Cluster(i)->LX() << "\t" << Telescope.Track(0)->Cluster(i)->TX() << "\t" << Telescope.Track(0)->Cluster(i)->Hit(0)->Column();
+//        std::cout << "\t" << Telescope.Track(0)->Cluster(i)->Hit(0)->ROC() << std::endl;
+//        std::cout << Telescope.Track(0)->Cluster(i)->LY() << "\t" << Telescope.Track(0)->Cluster(i)->TY() << "\t" << Telescope.Track(0)->Cluster(i)->Hit(0)->Row() << std::endl;
+//    }
+//  }
+//  std::cout << std::endl;
+  return;
+}
 
 
 
@@ -444,3 +587,4 @@ void PLTTracking::SortOutTracksNoOverlapBestD2 (std::vector<PLTTrack*>& MyTracks
 
   return;
 }
+

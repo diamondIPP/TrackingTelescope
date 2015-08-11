@@ -158,6 +158,7 @@ public:
      AUXILIARY FUNCTIONS
      =================================*/
     void FitSlope(TH1F * histo);
+    TH1F * FormatSlopeHisto(TString, uint16_t, float);
     void LegendSlope(TH1F * histo);
     std::vector<TH2F*> FillVectorTH2F(std::vector<TH2F*> histo, const char * name);
     std::vector<TH1F*> FillVectorTH1F(std::vector<TH1F*> histo, const char * name);

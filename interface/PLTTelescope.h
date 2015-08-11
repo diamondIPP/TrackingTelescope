@@ -32,11 +32,14 @@ class PLTTelescope
     int       NHitPlanes ();
     void      AddTrack (PLTTrack*);
     void      FillAndOrderTelescope ();
+//    void      AddSignal (std::vector<float>);
+//    float     SignalDiamond(uint8_t);
 
 
   protected:
     std::vector<PLTPlane*> fPlanes;
     std::vector<PLTTrack*> fTracks;
+//    std::vector<float> Signal;
     int fChannel;
 
 

@@ -8,8 +8,8 @@ PLTAlignment::PLTAlignment ()
   fIsGood = false;
 
   for (int i=0; i != 6; i++){
-    fErrorsX.push_back( 0.015);
-    fErrorsY.push_back( 0.015);
+    fErrorsX.push_back(0.015);
+    fErrorsY.push_back(0.015);
   }
 }
 
@@ -195,6 +195,8 @@ void PLTAlignment::AlignHit (PLTHit& Hit)
   float LX = PXtoLX(PX);
   float LY = PYtoLY(PY);
 
+//  std::cout << LX << " " << LY << std::endl;
+
   std::vector<float> TXYZ;
   LtoTXYZ(TXYZ, LX, LY, Hit.Channel(), Hit.ROC());
 
@@ -317,6 +319,7 @@ void PLTAlignment::LtoTXYZ (std::vector<float>& VOUT, float const LX, float cons
 {
   std::pair<int, int> CHROC = std::make_pair(Channel, ROC);
   CP* C = fConstantMap.count(CHROC) == 1 ? &fConstantMap[CHROC] : (CP*) 0x0;
+//  std::cout << C->LR << std::endl;
 
   if (!C) {
     std::cerr << "ERROR: cannot grab the constant map for this CH ROC: " << CHROC.first << " " << CHROC.second << std::endl;
@@ -656,7 +659,7 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
       SetErrorY( 3, 0.01);
 
     }
-    else if (telescopeID == 7){
+    else if (telescopeID == 7 || telescopeID == 9){
       SetErrorX( 0, 0.01);
       SetErrorX( 1, 0.01);
       SetErrorX( 2, 0.01);
@@ -667,6 +670,21 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
       SetErrorY( 2, 0.01);
       SetErrorY( 3, 0.01);
 
+    }
+    else if (telescopeID == 8){
+      SetErrorX( 0, 0.01);
+      SetErrorX( 1, 0.01);
+      SetErrorX( 2, 0.01);
+      SetErrorX( 3, 0.01);
+      SetErrorX( 4, 0.01);
+      SetErrorX( 5, 0.01);
+
+      SetErrorY( 0, 0.01);
+      SetErrorY( 1, 0.01);
+      SetErrorY( 2, 0.01);
+      SetErrorY( 3, 0.01);
+      SetErrorY( 4, 0.01);
+      SetErrorY( 5, 0.01);
     }
     else if (telescopeID == -1){
       SetErrorX( 0, 0.01);

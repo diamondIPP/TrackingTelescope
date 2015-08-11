@@ -94,24 +94,24 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
   }
   else if (NClusters() == 3) {
 
-    float const SumX = fClusters[0]->TX() + fClusters[1]->TX() + fClusters[2]->TX();
-    float const SumY = fClusters[0]->TY() + fClusters[1]->TY() + fClusters[2]->TY();
-    float const SumZ = fClusters[0]->TZ() + fClusters[1]->TZ() + fClusters[2]->TZ();
+//    float const SumX = fClusters[0]->TX() + fClusters[1]->TX() + fClusters[2]->TX();
+//    float const SumY = fClusters[0]->TY() + fClusters[1]->TY() + fClusters[2]->TY();
+//    float const SumZ = fClusters[0]->TZ() + fClusters[1]->TZ() + fClusters[2]->TZ();
+//
+//    float const SumZ2 = fClusters[0]->TZ() * fClusters[0]->TZ()
+//                      + fClusters[1]->TZ() * fClusters[1]->TZ()
+//                      + fClusters[2]->TZ() * fClusters[2]->TZ();
+//
+//    float const SumXZ = fClusters[0]->TX() * fClusters[0]->TZ()
+//                      + fClusters[1]->TX() * fClusters[1]->TZ()
+//                      + fClusters[2]->TX() * fClusters[2]->TZ();
+//
+//    float const SumYZ = fClusters[0]->TY() * fClusters[0]->TZ()
+//                      + fClusters[1]->TY() * fClusters[1]->TZ()
+//                      + fClusters[2]->TY() * fClusters[2]->TZ();
 
-    float const SumZ2 = fClusters[0]->TZ() * fClusters[0]->TZ()
-                      + fClusters[1]->TZ() * fClusters[1]->TZ()
-                      + fClusters[2]->TZ() * fClusters[2]->TZ();
-
-    float const SumXZ = fClusters[0]->TX() * fClusters[0]->TZ()
-                      + fClusters[1]->TX() * fClusters[1]->TZ()
-                      + fClusters[2]->TX() * fClusters[2]->TZ();
-
-    float const SumYZ = fClusters[0]->TY() * fClusters[0]->TZ()
-                      + fClusters[1]->TY() * fClusters[1]->TZ()
-                      + fClusters[2]->TY() * fClusters[2]->TZ();
-
-    float const MySlopeX = (3 * SumXZ - SumX * SumZ) / (3 * SumZ2 - SumZ * SumZ);
-    float const MySlopeY = (3 * SumYZ - SumY * SumZ) / (3 * SumZ2 - SumZ * SumZ);
+//    float const MySlopeX = (3 * SumXZ - SumX * SumZ) / (3 * SumZ2 - SumZ * SumZ);
+//    float const MySlopeY = (3 * SumYZ - SumY * SumZ) / (3 * SumZ2 - SumZ * SumZ);
 
     float const SlopeX = (fClusters[2]->TX() - fClusters[0]->TX()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
     float const SlopeY = (fClusters[2]->TY() - fClusters[0]->TY()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
@@ -157,7 +157,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     TGraphErrors gY( NClusters() );
 
     // Fill the graph with telescope coordinates
-    for (int iCl=0; iCl < NClusters(); iCl++){
+    for (uint8_t iCl=0; iCl < NClusters(); iCl++){
       gX.SetPoint( iCl, fClusters[iCl]->TZ(), fClusters[iCl]->TX());
       gY.SetPoint( iCl, fClusters[iCl]->TZ(), fClusters[iCl]->TY());
 
@@ -172,8 +172,8 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     gY.Fit( &funY, "Q" );
 
     // Store fit results
-    fSlopeX = funX.GetParameter(0);
-    fSlopeY = funY.GetParameter(0);
+    fSlopeX = atan(funX.GetParameter(0)) * 180 / 3.14;
+    fSlopeY = atan(funY.GetParameter(0)) * 180 / 3.14;
     fOffsetX = funX.GetParameter(1);
     fOffsetY = funY.GetParameter(1);
 
@@ -386,7 +386,7 @@ std::pair<float, float> PLTTrack::GXYatGZ (float const GZ, PLTAlignment& Alignme
 
   std::vector<float> G;
   Alignment.TtoGXYZ(G, TX(T[2]), TY(T[2]), T[2], fClusters[0]->Channel(), 0);
-  return std::make_pair<float, float>(G[0], G[1]);
+  return std::make_pair(G[0], G[1]);
 }
 
 

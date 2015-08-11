@@ -54,6 +54,7 @@ PSIFileReader::PSIFileReader (string const CalibrationList, string const Alignme
     fAlignment.ReadAlignmentFile(AlignmentFileName);
     SetTrackingAlignment(&fAlignment);
 
+//    SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_ETH);
     SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
 }
 

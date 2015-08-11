@@ -18,8 +18,11 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     c2 = new TCanvas("CoincidenceMap", "CoincidenceMap", 1200, 400);
 
     /** tracking */
-    hTrackSlopeX = new TH1F("TrackSlopeX", "TrackSlopeX", 50, -0.05, 0.05);
-    hTrackSlopeY = new TH1F("TrackSlopeY", "TrackSlopeY", 50, -0.05, 0.05);
+//    hTrackSlopeX = new TH1F("TrackSlopeX", "TrackSlopeX", 50, -4, 4);
+//    hTrackSlopeY = new TH1F("TrackSlopeY", "TrackSlopeY", 50, -4, 4);
+    hTrackSlopeX = FormatSlopeHisto("TrackSlopeX", 50, 4);
+    hTrackSlopeY = FormatSlopeHisto("TrackSlopeY", 50, 4);
+
     fGauss = new TF1("fGauss", "gaus", -0.05, 0.05);
     lFitGauss = new TLegend(0.7,0.65,0.88,0.85);
 
@@ -438,4 +441,11 @@ void RootItems::DrawSaveTrackSlope(TH1F * slope){
     slope->Draw();
     LegendSlope(slope);
     c1->SaveAs(OutDir + slope->GetName() + FileType);
+}
+TH1F * RootItems::FormatSlopeHisto(TString name, uint16_t bins, float margin){
+
+    TH1F * hist = new TH1F(name, name, bins, -margin, margin);
+    hist->SetXTitle("slope [degrees]");
+    hist->SetYTitle("number of tracks");
+    return hist;
 }

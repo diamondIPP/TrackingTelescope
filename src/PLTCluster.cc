@@ -182,7 +182,7 @@ std::pair<float, float> PLTCluster::LCenterOfMass ()
 
   // If charge sum is zero return average
   if (ChargeSum <= 0.0) {
-    std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::LCenterOfMass()" << std::endl;
+    //std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::LCenterOfMass()" << std::endl;
     std::make_pair<float, float>(X / (float) NHits(), Y / (float) NHits());
   }
 
@@ -209,7 +209,7 @@ std::pair<float, float> PLTCluster::GCenterOfMass ()
 
   // If charge sum is zero or less return average
   if (ChargeSum <= 0.0) {
-    std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::GCenterOfMass()" << std::endl;
+    //std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::GCenterOfMass()" << std::endl;
     std::make_pair<float, float>(X / (float) NHits(), Y / (float) NHits());
   }
 
@@ -241,7 +241,7 @@ std::pair<float, float> PLTCluster::TCenterOfMass ()
 
   // If charge sum is zero or less return average
   if (ChargeSum <= 0.0) {
-    std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::GCenterOfMass()" << std::endl;
+    //std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::GCenterOfMass()" << std::endl;
     std::make_pair<float, float>(X / (float) NHits(), Y / (float) NHits());
   }
 

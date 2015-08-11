@@ -43,13 +43,13 @@ PLTPlane* PLTTelescope::Plane(size_t i)
 
 void PLTTelescope::DrawTracksAndHits (std::string const Name)
 {
-  int const NH = NHits();
+//  int const NH = NHits();
   int const NC = NClusters();
   int const NT = NTracks();
 
-  float X[NH];
-  float Y[NH];
-  float Z[NH];
+//  float X[NH];
+//  float Y[NH];
+//  float Z[NH];
 
   float CX[NC];
   float CY[NC];
@@ -89,9 +89,9 @@ void PLTTelescope::DrawTracksAndHits (std::string const Name)
     PLTPlane* P = Plane(ip);
     for (size_t ih = 0; ih != P->NHits(); ++ih) {
       PLTHit* H = P->Hit(ih);
-      X[j] = H->TX();
-      Y[j] = H->TY();
-      Z[j] = H->TZ();
+//      X[j] = H->TX();
+//      Y[j] = H->TY();
+//      Z[j] = H->TZ();
       ++j;
 
       HistCharge[ip]->SetBinContent(H->Column() + 1 - PLTU::FIRSTCOL, H->Row() + 1 - PLTU::FIRSTROW, H->Charge());
@@ -363,3 +363,19 @@ void PLTTelescope::FillAndOrderTelescope ()
   fPlanes = Ordered;
   return;
 }
+
+//void PLTTelescope::AddSignal(std::vector<float> sig){
+//
+//    for (uint8_t iSig = 0; iSig < sig.size(); iSig++)
+//        Signal.push_back(sig[iSig]);
+//}
+//
+//float PLTTelescope::SignalDiamond(uint8_t number){
+//
+//    if (number < Signal.size())
+//        return Signal[number];
+//    else {
+//        std::cerr << "ERROR: That diamond does not exist!" << std::endl;
+//        return -1;
+//    }
+//}
