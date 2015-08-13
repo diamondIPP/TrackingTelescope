@@ -47,13 +47,14 @@ PLTAnalysis::~PLTAnalysis()
     now1 = clock();
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
+        if (ievent > 1e6) break;
         ThisTime = ievent;
 
         MeasureSpeed(ievent);
         PrintProcess(ievent);
 
         /** file writer */
-        if (GetUseRootInput(telescopeID)) WriteTrackingTree();
+//        if (GetUseRootInput(telescopeID)) WriteTrackingTree();
 
         /** fill coincidence map */
         Histos->CoincidenceMap()->Fill(FR->HitPlaneBits() );
@@ -105,6 +106,20 @@ PLTAnalysis::~PLTAnalysis()
             if (do_slope) {
 
 				PLTTrack * Track = FR->Track(0);
+
+//                if (Track->NHits() == 4){
+//                    for (uint16_t i = 0; i < Track->NClusters(); i++){
+//                        cout << "Plane: " << i << ":\t" << setprecision(2) << setw(4) << Track->Cluster(i)->TX()*100 << "\t" << Track->Cluster(i)->TY()*100;
+//                        cout << "\t" << Track->Cluster(i)->Hit(0)->Column() << "\t"<< Track->Cluster(i)->Hit(0)->Row() << endl;
+//                    }
+//                    cout << Track->fChi2X << " " << Track->fChi2Y << " " << Track->fChi2 << endl;
+////                    float y1 = Track->Cluster(2)->TY() - Track->Cluster(1)->TY();
+////                    float y2 = Track->Cluster(1)->TY() - Track->Cluster(0)->TY();
+////                    cout << y1*100 << " " << y2*100 << endl;
+////                    cout << (Track->Cluster(2)->TX() - Track->Cluster(1)->TX()) / (Track->Cluster(1)->TX() - Track->Cluster(0)->TX()) * 2.032 << " ";
+////                    cout << (Track->Cluster(2)->TY() - Track->Cluster(1)->TY()) / (Track->Cluster(1)->TY() - Track->Cluster(0)->TY()) * 2.032 << endl<<endl;
+//
+//                }
 
                 /** fill chi2 histos */
                 Histos->Chi2()->Fill(Track->Chi2());
@@ -208,8 +223,8 @@ void PLTAnalysis::PrintProcess(uint32_t ievent){
 
     if (ievent % 10 == 0 && ievent >= 20000){
         if (ievent != 0) cout << "\e[A\r";
-        cout << "Processing event: " << setw(7) << setfill('0') << ievent << endl;
-        if (speed) cout << "time left: " << setprecision(2) << fixed << (nEntries - ievent) / speed << "      ";
+        cout << "Processing event:\t" << setw(7) << setfill('0') << ievent << endl;
+        if (speed) cout << "time left:\t\t" << setprecision(2) << fixed << (nEntries - ievent) / speed << " seconds     ";
         else cout << "time left: ???";
     }
 }

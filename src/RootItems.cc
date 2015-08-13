@@ -11,7 +11,7 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     OutDir(PlotsDir + RunNumber + "/"),
     FileType(".gif"),
     HistColors {1, 4, 28, 2 },
-    maxChi2(20) {
+    maxChi2(50) {
 
     /** canvases */
     c1 = new TCanvas;
