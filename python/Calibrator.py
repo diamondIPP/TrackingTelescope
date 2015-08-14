@@ -17,6 +17,7 @@ import ROOT
 # Configuration
 ###############################
 
+ROOT.gErrorIgnoreLevel = ROOT.kWarning
 infile_name = sys.argv[1] #"../Calibrations/phCalibration_C1.dat"
 outfile_name = infile_name.replace("phCalibration","phCalibrationGErfFit")
 
@@ -88,12 +89,17 @@ in_f.readline()
 
 c1 = ROOT.TCanvas("","", 800, 800)
 
+counter = 1
 for line in in_f:
     
     # Format of line should be:
     # -128 -104 -78 -53 -24 -123 -95 -72 -50  32 104 150 166 169    Pix  0  0
     # So we get the index of the "Pix" position
     # and make sure we have as many data entries as vcal values
+    
+    # print process
+    print "\rProcessing line", "{0:04d}".format(counter),
+    sys.stdout.flush()
     
     # get the line and split using spaces, remove empty fields
     line = line.strip()    
@@ -118,7 +124,7 @@ for line in in_f:
     fun.SetParameter(2,-0.5)
     fun.SetParameter(3, 150)
     
-    gr.Fit(fun)
+    gr.Fit(fun, 'Q')
     
     if produce_debugplots:
         gr.Draw("APL*")    
@@ -131,3 +137,4 @@ for line in in_f:
                                                           atoms[pix_index+1], 
                                                           atoms[pix_index+2])
     out_f.write(out_string + "\n")
+    counter += 1
