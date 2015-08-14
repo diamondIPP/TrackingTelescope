@@ -47,7 +47,7 @@ PLTAnalysis::~PLTAnalysis()
     now1 = clock();
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
-        if (ievent > 1e6) break;
+        //if (ievent > 1e6) break;
         ThisTime = ievent;
 
         MeasureSpeed(ievent);
