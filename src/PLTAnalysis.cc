@@ -26,7 +26,7 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     Histos = new RootItems(telescopeID, RunNumber);
     cout << "Output directory: " << Histos->getOutDir() << endl;
     /** init file writer */
-    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9) FW = new FileWriterTracking(InFileName, telescopeID, FR);
+    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10) FW = new FileWriterTracking(InFileName, telescopeID, FR);
 }
 
 PLTAnalysis::~PLTAnalysis()
@@ -94,7 +94,7 @@ PLTAnalysis::~PLTAnalysis()
         }
 
 //        cout << "Number of Tracks: " << FR->NTracks() << endl;
-		if ((telescopeID == 7 || telescopeID == 8 || telescopeID == 9) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
+		if ((telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
 
             do_slope = true;
             for (uint8_t i_rocs(0); i_rocs != Histos->NRoc(); i_rocs++)
