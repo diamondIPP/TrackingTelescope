@@ -1688,12 +1688,12 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
   int nplanes = GetNumberOfROCS(telescopeID);
 
   // LEVELS
-  f << "<hr />\n";
-  f << "<h2>Levels</h2>" << std::endl;
-  for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"Levels_ROC%i.gif\"><img width=\"150\" src=\"Levels_ROC%i.gif\"></a>\n", i, i);
-  }
-  f << "<br>" << std::endl;
+  //f << "<hr />\n";
+  //f << "<h2>Levels</h2>" << std::endl;
+  //for (int i = 0; i != nplanes; ++i) {
+  //  f << Form("<a href=\"Levels_ROC%i.gif\"><img width=\"150\" src=\"Levels_ROC%i.gif\"></a>\n", i, i);
+  //}
+  //f << "<br>" << std::endl;
 
   // OCCUPANCY
   f << "<hr />\n";
@@ -1965,7 +1965,9 @@ int main (int argc, char* argv[])
      4: Two-Plane Silicon Telescope (July Testbeam)
      5: Four-Plane Silicon Telescope (September Testbeam at PSI)
      6: Four-Plane Silicon Telescope (October Testbeam at CERN)
-     7: Four-Plane Silicon Telescope (May 2015 Testbeam at PSI) */
+     7: Four-Plane Silicon Telescope (May 2015 Testbeam at PSI) 
+     9: Four-Plane Silicon Telescope (August 2015 Testbeam at PSI) 
+     10: Seven-Plane (4 Silicon analog ROC planes and 3 digital 1 Silicon and 2 diamond planes) Telescope (August 2015 Testbeam at PSI) */
     int telescopeID = atoi(argv[3]);
 
     /** Open a ROOT file to store histograms in

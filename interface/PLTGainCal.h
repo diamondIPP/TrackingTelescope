@@ -28,8 +28,8 @@ class PLTGainCal
 
     static int const DEBUGLEVEL = 0;
 
-    void  SetCharge (PLTHit&);
-    float GetCharge(int const ch, int const roc, int const col, int const row, int adc);
+    void  SetCharge ( PLTHit&, int telescopeID=10);
+    float GetCharge(int const ch, int const telescopeID, int const roc, int const col, int const row, int adc);
     void  ReadGainCalFile (std::string const GainCalFileName, int roc);
     void  ReadGainCalFile3 (std::string const GainCalFileName);
     void  ReadGainCalFile5 (std::string const GainCalFileName);

@@ -535,7 +535,7 @@ std::pair<int, int> PSIBinaryFileReader::fill_pixel_info(int* evt , int ctr, int
 
 
 
-  return std::make_pair<int, int>(finalcol, finalrow);
+  return std::make_pair(finalcol, finalrow);
 }
 
 
