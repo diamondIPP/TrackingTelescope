@@ -16,10 +16,7 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     SinglePlaneStudies();
     /** init file reader */
     InitFileReader();
-    cout << "test" << FR << endl;
-    cout << "Hallo" << endl;
     if (GetUseRootInput(telescopeID)) nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
-    cout << "Hallo again" << endl;
     /** apply masking */
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
     /** init histos */
@@ -141,7 +138,7 @@ PLTAnalysis::~PLTAnalysis()
 //                        std::cout << Track->fSlopeRadX << " " << Track->fSlopeRadY << " " << Track->fOffsetX<< " " << Track->fOffsetY << std::endl;
 //                    std::cout << std::endl;
 //                }
-                if (ievent > 0){
+                if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
                     for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
                         if (iSig < 2)
                             Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z), FR->SignalDiamond(iSig) );

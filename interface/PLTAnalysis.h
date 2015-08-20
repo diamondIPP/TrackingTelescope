@@ -18,7 +18,7 @@ class PLTAnalysis
 
 private:
     uint8_t const telescopeID;
-    std::string const InFileName;
+    std::string const InFileName, SignalBranchName;
     TString const RunNumber;
     TFile * out_f;
     /** measure elapsed time */

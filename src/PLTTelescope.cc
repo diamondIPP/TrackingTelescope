@@ -377,6 +377,7 @@ float PLTTelescope::SignalDiamond(uint8_t number){
     if (number < fSignal.size())
         return fSignal[number];
     else {
+        throw "Branch nonexisting";
         std::cerr << "ERROR: That diamond does not exist!" << fSignal.size() << std::endl;
         return -999;
     }

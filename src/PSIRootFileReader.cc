@@ -41,45 +41,46 @@ PSIRootFileReader::~PSIRootFileReader ()
 bool PSIRootFileReader::OpenFile ()
 {
 
-  fRootFile = new TFile(fFileName.c_str(), "READ");
+    fRootFile = new TFile(fFileName.c_str(), "READ");
 
-  if (!fRootFile->IsOpen())
-    return false;
+    if (!fRootFile->IsOpen()) return false;
 
-  fTree = (TTree*)fRootFile->Get("tree");
+    fTree = (TTree*)fRootFile->Get("tree");
 
-  fAtEntry = 0;
-  fNEntries = fTree->GetEntries();
+    fAtEntry = 0;
+    fNEntries = fTree->GetEntries();
 
-  if (!(fNEntries>0))
-    return false;
+    if (!(fNEntries>0)) return false;
 
-  // Set Branch Addresses
-  fTree->SetBranchAddress("event_number",&f_event_number);
-  fTree->SetBranchAddress("time",&f_time);
+    // Set Branch Addresses
+    fTree->SetBranchAddress("event_number",&f_event_number);
+    fTree->SetBranchAddress("time",&f_time);
 
-  fTree->SetBranchAddress("plane", &f_plane);
-  fTree->SetBranchAddress("col", &f_col);
-  fTree->SetBranchAddress("row", &f_row);
-  fTree->SetBranchAddress("adc", &f_adc);
-  fTree->SetBranchAddress("charge", &f_charge);
-  fTree->SetBranchAddress("sig", &f_signal);
+    fTree->SetBranchAddress("plane", &f_plane);
+    fTree->SetBranchAddress("col", &f_col);
+    fTree->SetBranchAddress("row", &f_row);
+    fTree->SetBranchAddress("adc", &f_adc);
+    fTree->SetBranchAddress("charge", &f_charge);
+    if (fTree->GetBranch(GetSignalBranchName() ))
+        fTree->SetBranchAddress(GetSignalBranchName(), &f_signal);
 
-  return true;
+    return true;
 }
 
 void PSIRootFileReader::ResetFile ()
 {
-  delete fTree;
-  delete fRootFile;
-  OpenFile();
+    delete fTree;
+    delete fRootFile;
+    OpenFile();
 }
 
 int PSIRootFileReader::GetNextEvent (){
 
     Clear();
-    ClearSignal();
-    AddSignal(*f_signal);
+    if (fTree->GetBranch(GetSignalBranchName() )){
+        ClearSignal();
+        AddSignal(*f_signal);
+    }
 
     for (int i = 0; i != NMAXROCS; ++i)
         fPlaneMap[i].SetROC(i);

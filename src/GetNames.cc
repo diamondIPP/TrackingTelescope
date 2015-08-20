@@ -122,3 +122,8 @@ int GetNumberOfSignals(int telescopeID){
     }
 }
 
+const char * GetSignalBranchName(){
+
+    return "sig";
+}
+
