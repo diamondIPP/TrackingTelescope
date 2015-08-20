@@ -448,5 +448,5 @@ std::pair<int, int> PLTTesterReader::fill_pixel_info(int* evt , int ctr)
 
 
 
-  return std::make_pair<int, int>(finalcol, finalrow);
+  return std::make_pair(finalcol, finalrow);
 }

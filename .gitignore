@@ -92,3 +92,5 @@ tracking.layout*
 get_rootfile.sh
 TrackingTelescope
 nohup.out
+massif.out
+*.bak

@@ -44,7 +44,7 @@ class PSIRootFileReader : public PSIFileReader
     std::vector<int> * f_row;
     std::vector<int> * f_adc;
     std::vector<int> * f_charge;
-//    std::vector<float> * f_signal;
+    std::vector<float> * f_signal;
 };
 
 #endif

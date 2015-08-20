@@ -63,7 +63,7 @@ bool PSIRootFileReader::OpenFile ()
   fTree->SetBranchAddress("row", &f_row);
   fTree->SetBranchAddress("adc", &f_adc);
   fTree->SetBranchAddress("charge", &f_charge);
-//  fTree->SetBranchAddress("signal", &f_signal);
+  fTree->SetBranchAddress("sig", &f_signal);
 
   return true;
 }
@@ -77,18 +77,20 @@ void PSIRootFileReader::ResetFile ()
 
 int PSIRootFileReader::GetNextEvent (){
 
-  Clear();
+    Clear();
+    ClearSignal();
+    AddSignal(*f_signal);
 
-  for (int i = 0; i != NMAXROCS; ++i) {
-    fPlaneMap[i].SetROC(i);;
-  }
+    for (int i = 0; i != NMAXROCS; ++i)
+        fPlaneMap[i].SetROC(i);
+
+    if (fAtEntry == fNEntries)
+        return -1;
+
+    fTree->GetEntry(fAtEntry);
+    fAtEntry++;
 
 
-  if (fAtEntry == fNEntries)
-    return -1;
-
-  fTree->GetEntry(fAtEntry);
-  fAtEntry++;
 
   for (uint8_t iHit = 0; iHit != f_plane->size(); iHit++){
 

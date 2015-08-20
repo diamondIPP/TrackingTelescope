@@ -51,8 +51,8 @@ class PLTTrack
 
     float Chi2Y(){return fChi2Y;}
 
-    float ExtrapolateX(float Z){return (Z * fSlopeX) + fOffsetX;}
-    float ExtrapolateY(float Z){return (Z * fSlopeY) + fOffsetY;}
+    float ExtrapolateX(float Z){return (Z * fSlopeRadX) + fOffsetX;}
+    float ExtrapolateY(float Z){return (Z * fSlopeRadY) + fOffsetY;}
 
   private:
     std::vector<PLTCluster*> fClusters;
@@ -78,7 +78,7 @@ class PLTTrack
     float fGOZ;
 
     // Track Fit result for slope (use to get telescope coordinates for any point in z-direction)
-    float fSlopeX, fSlopeY, fOffsetX, fOffsetY;
+    float fSlopeX, fSlopeY, fOffsetX, fOffsetY, fSlopeRadX, fSlopeRadY;
 
     // Where the track passes through the X=0(=0), Y=0(=1), and Z=0 planes
     // Three corrds just because that's easy enough

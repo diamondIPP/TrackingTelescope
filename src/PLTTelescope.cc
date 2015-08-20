@@ -9,12 +9,14 @@ PLTTelescope::PLTTelescope ()
 
 PLTTelescope::~PLTTelescope ()
 {
-  // Telescopes own Tracks in them.
-  for (size_t itrack = 0; itrack != fTracks.size(); ++itrack) {
-    delete fTracks[itrack];
-  }
+    /** delete the constructed pointers*/
+    for (size_t itrack = 0; itrack != fTracks.size(); ++itrack)
+        delete fTracks[itrack];
+    for (size_t iplane = 0; iplane != fPlanes.size(); ++iplane)
+        delete fPlanes[iplane];
+    fSignal.clear();
 
-  // Byebye
+    /**Byebye*/
 }
 
 
@@ -364,18 +366,18 @@ void PLTTelescope::FillAndOrderTelescope ()
   return;
 }
 
-//void PLTTelescope::AddSignal(std::vector<float> sig){
-//
-//    for (uint8_t iSig = 0; iSig < sig.size(); iSig++)
-//        Signal.push_back(sig[iSig]);
-//}
-//
-//float PLTTelescope::SignalDiamond(uint8_t number){
-//
-//    if (number < Signal.size())
-//        return Signal[number];
-//    else {
-//        std::cerr << "ERROR: That diamond does not exist!" << std::endl;
-//        return -1;
-//    }
-//}
+void PLTTelescope::AddSignal(std::vector<float> sig){
+
+    for (uint8_t iSig = 0; iSig < sig.size(); iSig++)
+        fSignal.push_back((sig[iSig]));
+}
+
+float PLTTelescope::SignalDiamond(uint8_t number){
+
+    if (number < fSignal.size())
+        return fSignal[number];
+    else {
+        std::cerr << "ERROR: That diamond does not exist!" << fSignal.size() << std::endl;
+        return -999;
+    }
+}

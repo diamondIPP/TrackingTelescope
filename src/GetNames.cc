@@ -110,4 +110,15 @@ int GetUseRootInput(int telescopeID){
   else  return false;
 }
 
+int GetNumberOfSignals(int telescopeID){
+
+    uint8_t id = telescopeID;
+    if ((id == 7) || (id == 8) || (id == 9) || (id == 10))
+        return 4;
+    else {
+        cerr << "ERROR: Number of Signals is not defined for telescopeID=" << telescopeID << endl;
+        cout << "Exiting.." << endl;
+        exit(0);
+    }
+}
 

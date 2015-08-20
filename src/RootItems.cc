@@ -7,6 +7,7 @@ using namespace std;
  =================================*/
 RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     nRoc(GetNumberOfROCS(telescopeID)),
+    nSig(GetNumberOfSignals(telescopeID)),
     PlotsDir("plots/"),
     OutDir(PlotsDir + RunNumber + "/"),
     FileType(".gif"),
@@ -24,7 +25,7 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     hTrackSlopeY = FormatSlopeHisto("TrackSlopeY", 50, 4);
 
     fGauss = new TF1("fGauss", "gaus", -0.05, 0.05);
-    lFitGauss = new TLegend(0.7,0.65,0.88,0.85);
+    lFitGauss = new TLegend(0.7, 0.65, 0.88, 0.85);
 
     /** occupancy */
     hOccupancy = FillVectorTH2F(hOccupancy, "Occupancy_ROC%i");
@@ -65,6 +66,9 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     hResidual = FillVecResidual(hResidual, "Residual_ROC%i",  100, -.15, .15, 100, -.15, .15);
     hResidualXdY = FillVecResidual(hResidualXdY, "ResidualXdY_ROC%i", 200, -1, 1, 100, -.5, .5);
     hResidualYdX = FillVecResidual(hResidualYdX, "ResidualYdX_ROC%i", 200, -1, 1, 100, -.5, .5);
+
+    /** Signal distribution*/
+    hSignalDistribution = FillSignalDisto();
 
 
 }
@@ -135,6 +139,9 @@ RootItems::~RootItems() {
     DrawSaveResidual(iRoc, ResidualYdX());
     DrawSaveResidualProj(iRoc, Residual(), "X");
     DrawSaveResidualProj(iRoc, Residual(), "Y");
+
+    /** signal */
+    DrawSaveSignalDisto();
 
   } // end of loop over ROCs
 
@@ -448,4 +455,22 @@ TH1F * RootItems::FormatSlopeHisto(TString name, uint16_t bins, float margin){
     hist->SetXTitle("slope [degrees]");
     hist->SetYTitle("number of tracks");
     return hist;
+}
+vector<TProfile2D*> RootItems::FillSignalDisto(){
+
+    TString prefix = "Signal", name;
+    for (uint8_t iSig; iSig < nSig; iSig++){
+        name = TString::Format(prefix + "_%i", iSig);
+        TProfile2D * profile = new TProfile2D(name, name, PLTU::NCOL, -.2, .3, PLTU::NROW, -.1, .4);
+        hSignalDistribution.push_back(profile);
+    }
+    return hSignalDistribution;
+}
+void RootItems::DrawSaveSignalDisto(){
+
+    c1->cd();
+    for (uint8_t iSig; iSig < nSig; iSig++){
+        hSignalDistribution[iSig]->Draw("colz");
+        c1->SaveAs(OutDir + hSignalDistribution[iSig]->GetName() + FileType);
+    }
 }

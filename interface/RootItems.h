@@ -36,7 +36,7 @@ class RootItems {
 private:
 
     /** constants */
-    uint16_t const nRoc;
+    uint16_t const nRoc, nSig;
     TString const PlotsDir;
     TString const OutDir;
     TString const FileType;
@@ -87,11 +87,13 @@ private:
     TH1F * hChi2X;
     TH1F * hChi2Y;
 
-    /**residuals */
-
+    /** residuals */
     std::vector<TH2F*> hResidual;
     std::vector<TH2F*> hResidualXdY;
     std::vector<TH2F*> hResidualYdX;
+
+    /** signal distribution */
+    std::vector<TProfile2D*> hSignalDistribution;
 
 
 public:
@@ -118,6 +120,7 @@ public:
     std::vector<std::vector<TH1F*> > PulseHeight() { return hPulseHeight; }
     std::vector<std::vector<TH1F*> > PulseHeightLong() { return hPulseHeightLong; }
     std::vector<std::vector<TH1F*> > PulseHeightOffline() { return hPulseHeightOffline; }
+    std::vector<TProfile2D*> SignalDisto() { return hSignalDistribution; }
     TLegend * legPH() { return lPulseHeight; }
     TLegend * legPHMean() { return lPHMean; }
     TH1F * Chi2() { return hChi2; }
@@ -136,6 +139,7 @@ public:
     std::vector<TH2F*> Eff3x3() { return h3x3; }
     std::vector<TH2F*> PulseHeightAv2D() { return hPulseHeightAvg2D; }
     uint8_t NRoc() { return nRoc; }
+    uint8_t NSig() { return nSig; }
     TString getOutDir() { return OutDir; }
     TString getPlotsDir() { return PlotsDir; }
 
@@ -157,6 +161,8 @@ public:
     /** ============================
      AUXILIARY FUNCTIONS
      =================================*/
+    /** Fill vectors */
+    std::vector<TProfile2D*> FillSignalDisto();
     void FitSlope(TH1F * histo);
     TH1F * FormatSlopeHisto(TString, uint16_t, float);
     void LegendSlope(TH1F * histo);
@@ -164,19 +170,20 @@ public:
     std::vector<TH1F*> FillVectorTH1F(std::vector<TH1F*> histo, const char * name);
     std::vector<std::vector<TH1F*> > FillVectorPH(std::vector<std::vector<TH1F*> >, TString name, uint32_t maxPH);
     void FillAvPH2D(uint8_t);
-    void DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, const char * xTit, const char * yTit);
     void PrepCoincidenceHisto();
-    void DrawSaveCoincidence();
     void FormatPHHisto(std::vector<std::vector<TH1F*> >);
     void FormatLegendsPH();
     void FillLegendsPH(uint8_t iroc, std::vector<std::vector<TH1F*> > histVec);
-    void DrawSavePH(uint8_t iroc, std::vector<std::vector<TH1F*> > histVec, TString title, TString saveName);
     void ClearLegendsPH();
     void DrawSaveChi2(TH1F*, TString);
     std::vector<std::vector<TGraphErrors*> > FillVecAvPH(std::vector<std::vector<TGraphErrors*> >);
-    void DrawSaveAvPH(uint8_t);
     void AllocateArrAvPH();
     std::vector<TH2F*> FillVecResidual(std::vector<TH2F*>, TString name, uint16_t, float, float, uint16_t, float, float);
+    /** Draw & Save */
+    void DrawSaveCoincidence();
+    void DrawSavePH(uint8_t iroc, std::vector<std::vector<TH1F*> > histVec, TString title, TString saveName);
+    void DrawSaveAvPH(uint8_t);
+    void DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, const char * xTit, const char * yTit);
     void DrawSaveResidual(uint8_t, vector<TH2F*>);
     void DrawSaveResidualProj(uint8_t, vector<TH2F*>, TString);
     void DrawSaveOccupancy(uint8_t, vector<TH2F*>);
@@ -186,6 +193,7 @@ public:
     void DrawSave3x31DZ(uint8_t);
     void DrawSaveAvPH2D(uint8_t);
     void DrawSaveTrackSlope(TH1F*);
+    void DrawSaveSignalDisto();
  };
 
 

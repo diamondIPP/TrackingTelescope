@@ -106,6 +106,9 @@ PLTAnalysis::~PLTAnalysis()
             if (do_slope) {
 
 				PLTTrack * Track = FR->Track(0);
+//				for (uint8_t i=0; i != FR->Signal().size(); i++)
+//                    std::cout << FR->SignalDiamond(i) << " ";
+//                std::cout << std::endl;
 
 //                if (Track->NHits() == 4){
 //                    for (uint16_t i = 0; i < Track->NClusters(); i++){
@@ -129,6 +132,23 @@ PLTAnalysis::~PLTAnalysis()
                 /** fill slope histos */
                 Histos->TrackSlopeX()->Fill(Track->fSlopeX);
                 Histos->TrackSlopeY()->Fill(Track->fSlopeY);
+
+                /** fill signal histos */
+//                if (ievent < 100){
+//                    std::cout<< Track->ExtrapolateX(PLTU::DIA1Z) << " " << Track->ExtrapolateY(PLTU::DIA1Z) << std::endl;
+//                    for (uint8_t iSig = 0; iSig != Track->NClusters(); iSig++)
+//                        std::cout<< Track->Cluster(iSig)->TX() << " " << Track->Cluster(iSig)->TY() << " " << Track->Cluster(iSig)->TZ() << std::endl;
+//                        std::cout << Track->fSlopeRadX << " " << Track->fSlopeRadY << " " << Track->fOffsetX<< " " << Track->fOffsetY << std::endl;
+//                    std::cout << std::endl;
+//                }
+                if (ievent > 0){
+                    for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
+                        if (iSig < 2)
+                            Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z), FR->SignalDiamond(iSig) );
+                        else
+                            Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z), FR->SignalDiamond(iSig) );
+                    }
+                }
 
 				/** loop over the clusters */
 				for (size_t icluster = 0; icluster < Track->NClusters(); icluster++){
@@ -221,10 +241,19 @@ float PLTAnalysis::getTime(float now, float & time){
 }
 void PLTAnalysis::PrintProcess(uint32_t ievent){
 
-    if (ievent % 10 == 0 && ievent >= 20000){
+    if (ievent % 10 == 0 && ievent > 1000){
         if (ievent != 0) cout << "\e[A\r";
         cout << "Processing event:\t" << setw(7) << setfill('0') << ievent << endl;
-        if (speed) cout << "time left:\t\t" << setprecision(2) << fixed << (nEntries - ievent) / speed << " seconds     ";
+        float all_seconds = (nEntries - ievent) / speed;
+        uint16_t minutes = all_seconds / 60;
+        uint16_t seconds = all_seconds - int(all_seconds) / 60 * 60;
+        uint16_t miliseconds =  (all_seconds - int(all_seconds)) * 1000;
+//        if (speed) cout << "time left:\t\t" << setprecision(2) << fixed << (nEntries - ievent) / speed <<  " seconds     " << minutes;
+        if (speed) {
+            cout << "time left:\t\t" << setw(2) << setfill('0') << minutes;
+            cout << ":" << setw(2) << setfill('0') << seconds;
+            cout << ":" << setw(3) << setfill('0') << miliseconds << "      ";
+        }
         else cout << "time left: ???";
     }
 }

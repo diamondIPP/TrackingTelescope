@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 #include <stdint.h>
-#include <stdlib.h>  
+#include <stdlib.h>
 
 #include "TGraph.h"
 #include "TString.h"
@@ -26,7 +26,7 @@ PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
 							    useExternalCalibrationFunction
 							    )
 {
- 
+
  // constructor
   fEOF = 0;
   fBinaryFileName = InFileName;
@@ -34,22 +34,22 @@ PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
     std::cerr << "ERROR: cannot open input file: " << InFileName << std::endl;
     throw;
   }
-  
+
   // Initialize fLevelsROC with zeros
-  for (int i_roc=0; i_roc != NMAXROCS; i_roc++){    
+  for (int i_roc=0; i_roc != NMAXROCS; i_roc++){
     std::vector<float> tmp;
     for (int i_lev=0; i_lev != 6; i_lev++){
       tmp.push_back(0.);
     }
-    fLevelsROC.push_back(tmp);    
+    fLevelsROC.push_back(tmp);
   }
 
 }
 
 
 PSIBinaryFileReader::~PSIBinaryFileReader ()
-{ 
-  Clear(); 
+{
+  Clear();
 }
 
 
@@ -218,7 +218,7 @@ int PSIBinaryFileReader::decodeBinaryData()
 
 int PSIBinaryFileReader::GetNextEvent ()
 {
-  
+
   Clear();
 
   for (int i = 0; i != NMAXROCS; ++i) {
@@ -391,7 +391,7 @@ int PSIBinaryFileReader::CalculateLevels (int const NMaxEvents,TString const Out
   Can.SaveAs(OutDir + "LevelsTBM.gif");
 
   ResetFile();
-  
+
   return 0;
 }
 
@@ -411,7 +411,7 @@ void PSIBinaryFileReader::DecodeHits ()
   }
 
   int const NROCs = UBCount - 5;
-  
+
   //std::cout << "fBufferSize: " << fBufferSize << std::endl;
   //std::cout << "NROCs: " << NROCs << std::endl;
   //static int iBadData = 0;
@@ -455,7 +455,7 @@ void PSIBinaryFileReader::DecodeHits ()
 	if (fUseGainInterpolator)
 	  fGainInterpolator.SetCharge(*Hit);
 	else
-	  fGainCal.SetCharge(*Hit);	
+	  fGainCal.SetCharge(*Hit);
 
         fAlignment.AlignHit(*Hit);
         fHits.push_back(Hit);
@@ -535,7 +535,7 @@ std::pair<int, int> PSIBinaryFileReader::fill_pixel_info(int* evt , int ctr, int
 
 
 
-  return std::make_pair<int, int>(finalcol, finalrow);
+  return std::make_pair(finalcol, finalrow);
 }
 
 
