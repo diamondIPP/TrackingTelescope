@@ -78,15 +78,15 @@ float PLTGainCal::GetCoef(int const i, int const ch, int const roc, int const co
 }
 
 
-void PLTGainCal::SetCharge (PLTHit& Hit)
+void PLTGainCal::SetCharge (PLTHit& Hit, int telescopeID)
 {
-  Hit.SetCharge( GetCharge(Hit.Channel(), Hit.ROC(), Hit.Column(), Hit.Row(), Hit.ADC()) );
+  Hit.SetCharge( GetCharge(Hit.Channel(), telescopeID, Hit.ROC(), Hit.Column(), Hit.Row(), Hit.ADC()) );
   return;
 }
 
 
 
-float PLTGainCal::GetCharge(int const ch, int const roc, int const col, int const row, int INadc)
+float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int const col, int const row, int INadc)
 {
   // Get charge, note roc number is 0, 1, 2
   int const adc = INadc;
@@ -108,7 +108,10 @@ float PLTGainCal::GetCharge(int const ch, int const roc, int const col, int cons
     for (int ipar = 0; ipar < fNParams; ++ipar) {
       fFitFunction.SetParameter(ipar, GC[ich][iroc][icol][irow][ipar]);
     }
-    charge = 65. * fFitFunction.GetX(adc);
+    if (telescopeID == 10 && (iroc == 4 || iroc == 5))  charge = 47 * fFitFunction.GetX(adc);
+    else if (telescopeID == 10 && iroc == 6)  charge = 43.13 * fFitFunction.GetX(adc) +333.0;
+    else    charge = 65. * fFitFunction.GetX(adc);
+
   } else {
     if (fNParams == 3) {
       charge = 65. * (float(adc * adc) * GC[ich][iroc][icol][irow][2] + float(adc) * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][0]);

@@ -7,7 +7,7 @@ PLTAlignment::PLTAlignment ()
 {
   fIsGood = false;
 
-  for (int i=0; i != 6; i++){
+  for (int i=0; i != 7; i++){
     fErrorsX.push_back(0.015);
     fErrorsY.push_back(0.015);
   }
@@ -69,7 +69,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
       fTelescopeMap[Channel].GX  = X;
       fTelescopeMap[Channel].GY  = Y;
       fTelescopeMap[Channel].GZ  = Z;
-    } else if (ROC < 6) {
+    } else if (ROC < 7) {
       if (fTelescopeMap.count(Channel) == 0) {
         std::cerr << "ERROR: Telescope coords not defined which must be defined before ROCs in alignment file" << std::endl;
         throw;
@@ -695,6 +695,23 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
       SetErrorY( 3, 0.01);
       SetErrorY( 4, 0.01);
       SetErrorY( 5, 0.01);
+    }
+    else if (telescopeID == 10){
+      SetErrorX( 0, 0.015);
+      SetErrorX( 1, 0.015);
+      SetErrorX( 2, 0.015);
+      SetErrorX( 3, 0.015);
+      SetErrorX( 4, 0.015);
+      SetErrorX( 5, 0.015);
+      SetErrorX( 6, 0.015);
+
+      SetErrorY( 0, 0.01);
+      SetErrorY( 1, 0.01);
+      SetErrorY( 2, 0.01);
+      SetErrorY( 3, 0.01);
+      SetErrorY( 4, 0.01);
+      SetErrorY( 5, 0.01);
+      SetErrorY( 6, 0.01);
     }
     else if (telescopeID == -1){
       SetErrorX( 0, 0.01);
