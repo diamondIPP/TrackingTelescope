@@ -131,13 +131,6 @@ PLTAnalysis::~PLTAnalysis()
                 Histos->TrackSlopeY()->Fill(Track->fSlopeY);
 
                 /** fill signal histos */
-//                if (ievent < 100){
-//                    std::cout<< Track->ExtrapolateX(PLTU::DIA1Z) << " " << Track->ExtrapolateY(PLTU::DIA1Z) << std::endl;
-//                    for (uint8_t iSig = 0; iSig != Track->NClusters(); iSig++)
-//                        std::cout<< Track->Cluster(iSig)->TX() << " " << Track->Cluster(iSig)->TY() << " " << Track->Cluster(iSig)->TZ() << std::endl;
-//                        std::cout << Track->fSlopeRadX << " " << Track->fSlopeRadY << " " << Track->fOffsetX<< " " << Track->fOffsetY << std::endl;
-//                    std::cout << std::endl;
-//                }
                 if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
                     for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
                         if (iSig < 2)
