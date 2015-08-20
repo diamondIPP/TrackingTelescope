@@ -141,13 +141,13 @@ bool PSIFileReader::IsPixelMasked (int const ChannelPixel)
 
 void PSIFileReader::DrawTracksAndHits (std::string const Name)
 {
-  int const NH = NHits();
+//  int const NH = NHits();
   int const NC = NClusters();
   int const NT = NTracks();
 
-  float X[NH];
-  float Y[NH];
-  float Z[NH];
+//  float X[NH]; //unused
+//  float Y[NH]; //unused
+//  float Z[NH]; //unused
 
   float CX[NC];
   float CY[NC];
@@ -185,9 +185,9 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
     PLTPlane* P = Plane(ip);
     for (size_t ih = 0; ih != P->NHits(); ++ih) {
       PLTHit* H = P->Hit(ih);
-      X[j] = H->TX();
-      Y[j] = H->TY();
-      Z[j] = H->TZ();
+//      X[j] = H->TX();
+//      Y[j] = H->TY();
+//      Z[j] = H->TZ();
       ++j;
 
       HistCharge[ip]->SetBinContent(H->Column() + 1 - PLTU::FIRSTCOL, H->Row() + 1 - PLTU::FIRSTROW, H->Charge());

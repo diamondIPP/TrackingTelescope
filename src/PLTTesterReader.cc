@@ -235,8 +235,9 @@ int PLTTesterReader::CalculateLevels (std::string const& InFileName, int const N
   TH1I hCLTBMLevels("CL_TBMLevels", "CL TBM Levels", 210, 1400, 3500);
 
 
-  std::map<int, float> GainAvg[120][120];
-  std::map<int, int>   GainN[120][120];
+//  std::map<int, float> GainAvg[120][120];  //unused
+//  std::map<int, int>   GainN[120][120];    //unused
+
 
   TH1I hUBPosition[5];
   for (int i = 0; i != 5; ++i) {

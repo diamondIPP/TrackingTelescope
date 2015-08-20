@@ -31,7 +31,6 @@
 #include "PSIRootFileReader.h"
 #include "GetNames.h"
 #include "TestPlaneEfficiencySilicon.h"
-#include "TestBinaryFileReader.h"
 
 #include "PLTPlane.h"
 #include "PLTAlignment.h"
