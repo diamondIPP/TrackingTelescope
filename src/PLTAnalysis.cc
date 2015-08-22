@@ -100,7 +100,7 @@ PLTAnalysis::~PLTAnalysis()
                     break;
                 }
 
-            if (do_slope) {
+            if (do_slope && FR->Track(0)->NHits() == 4 ) {
 
 				PLTTrack * Track = FR->Track(0);
 //				for (uint8_t i=0; i != FR->Signal().size(); i++)
@@ -129,6 +129,14 @@ PLTAnalysis::~PLTAnalysis()
                 /** fill slope histos */
                 Histos->TrackSlopeX()->Fill(Track->fSlopeX);
                 Histos->TrackSlopeY()->Fill(Track->fSlopeY);
+
+                if (ievent < 100){
+                    for (uint8_t iSig = 0; iSig != Track->NClusters(); iSig++)
+                        std::cout<< Track->Cluster(iSig)->TX() << " " << Track->Cluster(iSig)->TY() << " " << Track->Cluster(iSig)->TZ() << std::endl;
+                        std::cout << Track->fChi2X << " " << Track->fChi2Y << " " << Track->fChi2 << std::endl;
+                        std::cout << Track->fSlopeRadX << " " << Track->fOffsetX << Track->fSlopeRadY << " " << Track->fOffsetY << std::endl;
+                    std::cout << std::endl;
+                }
 
                 /** fill signal histos */
                 if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){

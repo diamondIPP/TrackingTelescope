@@ -671,15 +671,15 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
       SetErrorY( 3, 0.01);
     }
     else if (telescopeID == 9){
-      SetErrorX( 0, 0.01);
-      SetErrorX( 1, 0.01);
-      SetErrorX( 2, 0.01);
-      SetErrorX( 3, 0.01);
+      SetErrorX( 0, 2*0.015/sqrt(12));
+      SetErrorX( 1, 0.015/sqrt(12));
+      SetErrorX( 2, 0.015/sqrt(12));
+      SetErrorX( 3, 2*0.015/sqrt(12));
 
-      SetErrorY( 0, 0.015);
-      SetErrorY( 1, 0.015);
-      SetErrorY( 2, 0.015);
-      SetErrorY( 3, 0.015);
+      SetErrorY( 0, 2*0.01/sqrt(12));
+      SetErrorY( 1, 0.01/sqrt(12));
+      SetErrorY( 2, 0.01/sqrt(12));
+      SetErrorY( 3, 2*0.01/sqrt(12));
     }
     else if (telescopeID == 8){
       SetErrorX( 0, 0.01);
