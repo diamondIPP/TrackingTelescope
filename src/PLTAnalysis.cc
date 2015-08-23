@@ -44,14 +44,14 @@ PLTAnalysis::~PLTAnalysis()
     now1 = clock();
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
-        //if (ievent > 1e6) break;
+        if (ievent > 5e5) break;
         ThisTime = ievent;
 
         MeasureSpeed(ievent);
-        //PrintProcess(ievent);
+        PrintProcess(ievent);
 
         /** file writer */
-//        if (GetUseRootInput(telescopeID)) WriteTrackingTree();
+        if (GetUseRootInput(telescopeID)) WriteTrackingTree();
 
         /** fill coincidence map */
         Histos->CoincidenceMap()->Fill(FR->HitPlaneBits() );
@@ -100,7 +100,7 @@ PLTAnalysis::~PLTAnalysis()
                     break;
                 }
 
-            if (do_slope && FR->Track(0)->NHits() == 4 ) {
+            if (do_slope) {
 
 				PLTTrack * Track = FR->Track(0);
 //				for (uint8_t i=0; i != FR->Signal().size(); i++)
@@ -130,21 +130,23 @@ PLTAnalysis::~PLTAnalysis()
                 Histos->TrackSlopeX()->Fill(Track->fSlopeX);
                 Histos->TrackSlopeY()->Fill(Track->fSlopeY);
 
-                if (ievent < 100){
-                    for (uint8_t iSig = 0; iSig != Track->NClusters(); iSig++)
-                        std::cout<< Track->Cluster(iSig)->TX() << " " << Track->Cluster(iSig)->TY() << " " << Track->Cluster(iSig)->TZ() << std::endl;
-                        std::cout << Track->fChi2X << " " << Track->fChi2Y << " " << Track->fChi2 << std::endl;
-                        std::cout << Track->fSlopeRadX << " " << Track->fOffsetX << Track->fSlopeRadY << " " << Track->fOffsetY << std::endl;
-                    std::cout << std::endl;
-                }
+//                if (ievent < 100){
+//                    for (uint8_t iSig = 0; iSig != Track->NClusters(); iSig++)
+//                        std::cout<< Track->Cluster(iSig)->TX() << " " << Track->Cluster(iSig)->TY() << " " << Track->Cluster(iSig)->TZ() << std::endl;
+//                        std::cout << Track->fChi2X << " " << Track->fChi2Y << " " << Track->fChi2 << std::endl;
+//                        std::cout << Track->fSlopeRadX << " " << Track->fOffsetX << Track->fSlopeRadY << " " << Track->fOffsetY << std::endl;
+//                    std::cout << std::endl;
+//                }
 
                 /** fill signal histos */
-                if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
-                    for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
-                        if (iSig < 2)
-                            Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z), FR->SignalDiamond(iSig) );
-                        else
-                            Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z), FR->SignalDiamond(iSig) );
+                if (telescopeID == 9 || telescopeID == 8 || telescopeID ==7) {
+                    if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
+                        for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
+                            if (iSig < 2)
+                                Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z), FR->SignalDiamond(iSig) );
+                            else
+                                Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z), FR->SignalDiamond(iSig) );
+                        }
                     }
                 }
 
@@ -313,7 +315,7 @@ void PLTAnalysis::DrawTracks(){
     static int ieventdraw = 0;
     if (ieventdraw < 20) {
         uint16_t hp = FR->HitPlaneBits();
-        if (hp != 0 && hp != 1 && hp != 2 && hp != 4 && hp != 8){
+        if (hp == pow(2, FR->NPlanes() ) -1){
             FR->DrawTracksAndHits(TString::Format(Histos->getOutDir() + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
             if (ieventdraw == 20) cout << endl;
         }

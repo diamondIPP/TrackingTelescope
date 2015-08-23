@@ -281,8 +281,6 @@ void PLTTracking::TrackFinder_AllPlanesHit (PLTTelescope& Telescope)
     }
 
     /** Check if all the planes with mandatory clusters also have a cluster */
-    for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++)
-        std::cout << int(iPlane )<< " " << Telescope.Plane(iPlane)->NClusters() << std::endl;
     for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
         if ( (fUsePlanesForTracking[iPlane]==2) && (Telescope.Plane(iPlane)->NClusters()==0) ){
             return;

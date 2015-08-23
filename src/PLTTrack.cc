@@ -172,8 +172,8 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     gY.Fit( &funY, "Q" );
 
     // Store fit results
-    fSlopeX = funX.GetParameter(0);
-    fSlopeY = funY.GetParameter(0);
+    fSlopeX = atan(funX.GetParameter(0)) * 180 / 3.14159;
+    fSlopeY = atan(funY.GetParameter(0)) * 180 / 3.14159;
     fSlopeRadX = funX.GetParameter(0);
     fSlopeRadY = funY.GetParameter(0);
     fOffsetX = funX.GetParameter(1);

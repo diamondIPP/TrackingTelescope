@@ -93,35 +93,25 @@ int PSIRootFileReader::GetNextEvent (){
 
 
 
-  for (uint8_t iHit = 0; iHit != f_plane->size(); iHit++){
+    for (uint8_t iHit = 0; iHit != f_plane->size(); iHit++){
 
-    int roc = (*f_plane)[iHit];
-    int col = (*f_col)[iHit];
-    int row = (*f_row)[iHit];
-    int adc = (*f_adc)[iHit];
+        int roc = (*f_plane)[iHit];
+        int col = (*f_col)[iHit];
+        int row = (*f_row)[iHit];
+        int adc = (*f_adc)[iHit];
 
-    if (!IsPixelMasked( 1*100000 + roc*10000 + col*100 + row)){
-      PLTHit* Hit = new PLTHit(1, roc, col, row, adc);
+        if (!IsPixelMasked( 1*100000 + roc*10000 + col*100 + row)){
+            PLTHit* Hit = new PLTHit(1, roc, col, row, adc);
 
-      // TODO: Either use calibration or read charge from root file
-      //if (fUseGainInterpolator)
-      //  fGainInterpolator.SetCharge(*Hit);
-      //else
-      //  fGainCal.SetCharge(*Hit);
+        /** Gain calibration */
+        fGainCal.SetCharge(*Hit);
 
-      // Dummy calibration for now
-      //Hit->SetCharge((*f_adc)[iHit] * 65);
-
-      //std::cout << roc << " " << col << " " << row <<
-      fGainCal.SetCharge(*Hit);
-      //std::cout << "  " << Hit->Charge() << std::endl;
-      /** FIXME: add correct number here*/
-//      if (roc < 4) { }
-      fAlignment.AlignHit(*Hit);
-      fHits.push_back(Hit);
-      fPlaneMap[Hit->ROC()].AddHit(Hit);
+        /** Alignment */
+            fAlignment.AlignHit(*Hit);
+            fHits.push_back(Hit);
+            fPlaneMap[Hit->ROC()].AddHit(Hit);
+        }
     }
-  }
 
     /** Loop over all planes and clusterize each one, then add each plane to the correct telescope (by channel number) */
     for (std::map< int, PLTPlane>::iterator it = fPlaneMap.begin(); it != fPlaneMap.end(); ++it) {
@@ -129,20 +119,17 @@ int PSIRootFileReader::GetNextEvent (){
         AddPlane( &(it->second) );
     }
 
+    /** If we are doing single plane-efficiencies:
+        Just send all events to the tracking and sort it out there */
+        if (DoingSinglePlaneEfficiency()){
+            RunTracking( *((PLTTelescope*) this));
+        }
 
-  // If we are doing single plane-efficiencies:
-  // Just send all events to the tracking and sort it out there
-  if (DoingSinglePlaneEfficiency()){
-    RunTracking( *((PLTTelescope*) this));
-  }
-  // Otherwise require exactly one hit per plane
-  else {
-    // 6 AND 3F FOR 6PLANES: TODO -> make dynamic!!!
-    if (NClusters() == 4 && HitPlaneBits() == 0xf) {
-      RunTracking( *((PLTTelescope*) this));
+    /** Otherwise require exactly one cluster per plane */
+    else {
+        if (NClusters() == NPlanes() && HitPlaneBits() == pow(2, NPlanes() ) - 1) {
+            RunTracking( *((PLTTelescope*) this));
+        }
     }
-  }
-
-  return 0;
-
+    return 0;
 }

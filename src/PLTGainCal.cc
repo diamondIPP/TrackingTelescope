@@ -88,31 +88,35 @@ void PLTGainCal::SetCharge (PLTHit& Hit, int telescopeID)
 
 float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int const col, int const row, int INadc)
 {
-  // Get charge, note roc number is 0, 1, 2
-  int const adc = INadc;
-  if (ChIndex(ch)   >= MAXCHNS) { printf("ERROR: over MAXCHNS: %i\n", ch); };
-  if (RowIndex(row) >= MAXROWS) { printf("ERROR: over MAXROWS: %i\n", row); };
-  if (ColIndex(col) >= MAXCOLS) { printf("ERROR: over MAXCOLS: %i\n", col); };
+    std::cout << "ONE" << std::endl;
+    /** Get charge, note roc number is 0, 1, 2... */
+    int const adc = INadc;
+    if (ChIndex(ch)   >= MAXCHNS) { printf("ERROR: over MAXCHNS: %i\n", ch); };
+    if (RowIndex(row) >= MAXROWS) { printf("ERROR: over MAXROWS: %i\n", row); };
+    if (ColIndex(col) >= MAXCOLS) { printf("ERROR: over MAXCOLS: %i\n", col); };
 
-  int irow = RowIndex(row);
-  int icol = ColIndex(col);
-  int ich  = ChIndex(ch);
-  int iroc = RocIndex(roc);
+    uint8_t irow = RowIndex(row);
+    uint8_t icol = ColIndex(col);
+    uint8_t ich  = ChIndex(ch);
+    uint8_t iroc = RocIndex(roc);
 
-  if (irow < 0 || icol < 0 || ich < 0 || iroc < 0) {
-    return -9999;
-  }
-
-  float charge = -9999;
-  if (fIsExternalFunction) {
-    for (int ipar = 0; ipar < fNParams; ++ipar) {
-      fFitFunction.SetParameter(ipar, GC[ich][iroc][icol][irow][ipar]);
+    if (irow < 0 || icol < 0 || ich < 0 || iroc < 0) {
+        return -9999;
     }
-    if (telescopeID == 10 && (iroc == 4 || iroc == 5))  charge = 47 * fFitFunction.GetX(adc);
-    else if (telescopeID == 10 && iroc == 6)  charge = 43.13 * fFitFunction.GetX(adc) +333.0;
-    else    charge = 65. * fFitFunction.GetX(adc);
 
-  } else {
+    float charge = -9999;
+    if (fIsExternalFunction) {
+        std::cout << "TWO" << std::endl;
+        for (int ipar = 0; ipar < fNParams; ++ipar) {
+            fFitFunction.SetParameter(ipar, GC[ich][iroc][icol][irow][ipar]);
+        }
+
+        /** change calibration factor for digital planes*/
+        if (telescopeID == 10 && (iroc == 4 || iroc == 5))  charge = 47 * fFitFunction.GetX(adc);
+        else if (telescopeID == 10 && iroc == 6)            charge = 43.13 * fFitFunction.GetX(adc) +333.0;
+        else                                                charge = 65. * fFitFunction.GetX(adc);
+    }
+    else {
     if (fNParams == 3) {
       charge = 65. * (float(adc * adc) * GC[ich][iroc][icol][irow][2] + float(adc) * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][0]);
 
