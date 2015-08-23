@@ -155,7 +155,7 @@ void PLTTracking::RunTracking (PLTTelescope& Telescope)
       TrackFinder_01to2_All(Telescope);
       break;
     case kTrackingAlgorithm_6PlanesHit:
-      TrackFinder_6PlanesHit(Telescope);
+      TrackFinder_AllPlanesHit(Telescope);
       break;
     case kTrackingAlgorithm_ETH:
       TrackFinder_ETH(Telescope);
@@ -269,33 +269,34 @@ void PLTTracking::TrackFinder_01to2_All (PLTTelescope& Telescope)
 }
 
 
-void PLTTracking::TrackFinder_6PlanesHit (PLTTelescope& Telescope)
+void PLTTracking::TrackFinder_AllPlanesHit (PLTTelescope& Telescope)
 {
-  // Find tracks in this telescope which are more or less parallel to beam
-  // Beamspot assumed to be at 0,0,0.
+    /** Find tracks in this telescope which are more or less parallel to beam
+        Beamspot assumed to be at 0,0,0.
 
-  // Check that tracks haven't already been filled
-  if (Telescope.NTracks() != 0) {
-    std::cerr << "ERROR: It looks like tracks have already been filled here: PLTTelescope::TrackFinderParallelTracks()" << std::endl;
-    return;
-  }
-
-  // Check if all the planes with mandatory clusters also have a cluster
-  for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
-    if ( (fUsePlanesForTracking[iPlane]==2)
-      && (Telescope.Plane(iPlane)->NClusters()==0)){
+        Check that tracks haven't already been filled */
+    if (Telescope.NTracks() != 0){
+        std::cerr << "ERROR: It looks like tracks have already been filled here: PLTTelescope::TrackFinderParallelTracks()" << std::endl;
         return;
     }
-  }
 
-
-  // Check if all the planes which require exactly one cluster have that
-  for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
-    if ((fUsePlanesForTracking[iPlane]==3) &&
-        (Telescope.Plane(iPlane)->NClusters() != 1 )){
-        return;
+    /** Check if all the planes with mandatory clusters also have a cluster */
+    for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++)
+        std::cout << int(iPlane )<< " " << Telescope.Plane(iPlane)->NClusters() << std::endl;
+    for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
+        if ( (fUsePlanesForTracking[iPlane]==2) && (Telescope.Plane(iPlane)->NClusters()==0) ){
+            return;
+        }
     }
-  }
+
+    // Check if all the planes which require exactly one cluster have that
+    for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
+        if ((fUsePlanesForTracking[iPlane]==3) &&
+                (Telescope.Plane(iPlane)->NClusters() != 1 ))
+        {
+            return;
+        }
+    }
 
   // Put all the clusters we actually use for
   // tracking into a matrix.

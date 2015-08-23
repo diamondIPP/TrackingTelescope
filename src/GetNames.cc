@@ -35,7 +35,7 @@ string GetAlignmentFilename(int telescopeID, bool useInitial){
         else if (telescopeID==7)    return "ALIGNMENT/Alignment_ETHTelescope_telescope7.dat";
         else if (telescopeID==8)    return "ALIGNMENT/Alignment_ETHTelescope_telescope8.dat";
         else if (telescopeID==9)    return "ALIGNMENT/Alignment_ETHTelescope_telescope9.dat";
-        else if (telescopeID==10)    return "ALIGNMENT/Alignment_ETHTelescope_telescope10.dat";
+        else if (telescopeID==10)    return "ALIGNMENT/telescope10.dat";
         else if (telescopeID==-1)   return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
 
         else{

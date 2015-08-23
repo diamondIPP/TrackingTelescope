@@ -38,7 +38,7 @@ class PLTTracking
     void RunTracking (PLTTelescope&);
 
     void TrackFinder_01to2_All (PLTTelescope&);
-    void TrackFinder_6PlanesHit (PLTTelescope&);
+    void TrackFinder_AllPlanesHit (PLTTelescope&);
     void TrackFinder_ETH (PLTTelescope&);
 
     void SortOutTracksNoOverlapBestD2(std::vector<PLTTrack*>&);

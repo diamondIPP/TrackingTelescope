@@ -48,7 +48,7 @@ PLTAnalysis::~PLTAnalysis()
         ThisTime = ievent;
 
         MeasureSpeed(ievent);
-        PrintProcess(ievent);
+        //PrintProcess(ievent);
 
         /** file writer */
 //        if (GetUseRootInput(telescopeID)) WriteTrackingTree();
@@ -241,7 +241,7 @@ void PLTAnalysis::PrintProcess(uint32_t ievent){
 
     if (ievent % 10 == 0 && ievent > 1000){
         if (ievent != 0) cout << "\e[A\r";
-        cout << "Processing event:\t" << setw(7) << setfill('0') << ievent << endl;
+        cout << "Processing event:\t" << setw(7) << setfill('0') << ievent << "     " << endl;
         float all_seconds = (nEntries - ievent) / speed;
         uint16_t minutes = all_seconds / 60;
         uint16_t seconds = all_seconds - int(all_seconds) / 60 * 60;
