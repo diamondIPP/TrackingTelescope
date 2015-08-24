@@ -204,12 +204,6 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
 
     std::vector<PLTHit*> UsedHits;
 
-        for (int i = 0; i != 7; i++)
-            cout << CX[i] << " " <<  CY[i] << " " << CZ[i] << endl;
-        cout << fTracks[0]->TX(0) << " " << fTracks[0]->TX(zMax) << endl;
-        cout << fTracks[0]->TY(0) << " " << fTracks[0]->TY(zMax) << endl;
-        cout << fTracks[0]->fOffsetX << " " << fTracks[0]->fSlopeRadX << endl;
-
     for (uint8_t i = 0; i != NT; ++i) {
         PLTTrack* T = fTracks[i];
 
