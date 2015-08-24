@@ -34,6 +34,7 @@ private:
     uint32_t nEntries;
     RootItems * Histos;
     FileWriterTracking * FW;
+    uint32_t stopAt;
 
 public:
 

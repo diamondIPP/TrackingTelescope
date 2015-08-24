@@ -140,102 +140,100 @@ bool PSIFileReader::IsPixelMasked (int const ChannelPixel)
 
 void PSIFileReader::DrawTracksAndHits (std::string const Name)
 {
-//  int const NH = NHits();
-  int const NC = NClusters();
-  int const NT = NTracks();
+    int const NC = NClusters();
+    int const NT = NTracks();
 
-//  float X[NH]; //unused
-//  float Y[NH]; //unused
-//  float Z[NH]; //unused
-
-  float CX[NC];
-  float CY[NC];
-  float CZ[NC];
+    float CX[NC];
+    float CY[NC];
+    float CZ[NC];
 
   // Workaround for:
   //  TLine Line[3][NT];
   // which does not work in CLANG
-  std::vector< std::vector< TLine > > Line;
-  for (int i=0; i<3; i++){
-    std::vector <TLine> tmp(NT);
-    Line.push_back( tmp );
-  }
-
-  TH2F* HistCharge[6];
-  for (int i = 0; i != 6; ++i) {
-    TString Name;
-    Name.Form("ChargeMap_ROC%i", i);
-    HistCharge[i] = new TH2F(Name, Name, PLTU::NCOL, PLTU::FIRSTCOL, PLTU::LASTCOL+1, PLTU::NROW, PLTU::FIRSTROW, PLTU::LASTROW);
-    HistCharge[i]->GetZaxis()->SetRangeUser(0, 50000);
-  }
-
-  TH2F* HistChargeUnclustered[6];
-  for (int i = 0; i != 6; ++i) {
-    TString Name;
-    Name.Form("ChargeMapUnclustered_ROC%i", i);
-    HistChargeUnclustered[i] = new TH2F(Name, Name, PLTU::NCOL, PLTU::FIRSTCOL, PLTU::LASTCOL+1, PLTU::NROW, PLTU::FIRSTROW, PLTU::LASTROW);
-    HistChargeUnclustered[i]->GetZaxis()->SetRangeUser(0, 50000);
-  }
-
-
-
-  int j = 0;
-  for (size_t ip = 0; ip != NPlanes(); ++ip) {
-    PLTPlane* P = Plane(ip);
-    for (size_t ih = 0; ih != P->NHits(); ++ih) {
-      PLTHit* H = P->Hit(ih);
-//      X[j] = H->TX();
-//      Y[j] = H->TY();
-//      Z[j] = H->TZ();
-      ++j;
-
-      HistCharge[ip]->SetBinContent(H->Column() + 1 - PLTU::FIRSTCOL, H->Row() + 1 - PLTU::FIRSTROW, H->Charge());
-    }
-    for (size_t ih = 0; ih != P->NUnclusteredHits(); ++ih) {
-      PLTHit* H = P->UnclusteredHit(ih);
-      HistChargeUnclustered[ip]->SetBinContent(H->Column() + 1 - PLTU::FIRSTCOL, H->Row() + 1 - PLTU::FIRSTROW, H->Charge());
+    std::vector< std::vector< TLine > > Line;
+    for (int i=0; i<3; i++){
+        std::vector <TLine> tmp(NT);
+        Line.push_back( tmp );
     }
 
-
-
-  }
-  int jc = 0;
-  for (size_t ip = 0; ip != NPlanes(); ++ip) {
-    PLTPlane* P = Plane(ip);
-    for (size_t ic = 0; ic != P->NClusters(); ++ic) {
-      PLTCluster* C = P->Cluster(ic);
-      CX[jc] = C->TX();
-      CY[jc] = C->TY();
-      CZ[jc] = C->TZ();
-      ++jc;
+    TH2F * HistCharge[NPlanes()];
+    for (uint8_t i = 0; i != NPlanes() ; ++i) {
+        TString Name;
+        Name.Form("ChargeMap_ROC%i", i);
+        HistCharge[i] = new TH2F(Name, Name, PLTU::NCOL, PLTU::FIRSTCOL, PLTU::LASTCOL+1, PLTU::NROW, PLTU::FIRSTROW, PLTU::LASTROW);
+        HistCharge[i]->GetZaxis()->SetRangeUser(0, 50000);
     }
-  }
 
-  std::vector<PLTHit*> UsedHits;
+    TH2F * HistChargeUnclustered[NPlanes()];
+    for (uint8_t i = 0; i != NPlanes(); ++i) {
+        TString Name;
+        Name.Form("ChargeMapUnclustered_ROC%i", i);
+        HistChargeUnclustered[i] = new TH2F(Name, Name, PLTU::NCOL, PLTU::FIRSTCOL, PLTU::LASTCOL+1, PLTU::NROW, PLTU::FIRSTROW, PLTU::LASTROW);
+        HistChargeUnclustered[i]->GetZaxis()->SetRangeUser(0, 50000);
+    }
 
-  for (int i = 0; i != NT; ++i) {
-    PLTTrack* T = fTracks[i];
+    int j = 0;
+    for (size_t ip = 0; ip != NPlanes(); ++ip) {
+        PLTPlane* P = Plane(ip);
+        for (size_t ih = 0; ih != P->NHits(); ++ih) {
+            PLTHit* H = P->Hit(ih);
+            ++j;
 
-    // XZ
-    Line[0][i].SetX1(0);
-    Line[0][i].SetX2(10.16);
-    Line[0][i].SetY1(T->TX(0));
-    Line[0][i].SetY2(T->TX(10.16));
-    Line[0][i].SetLineColor(i+1);
+            HistCharge[ip]->SetBinContent(H->Column() + 1 - PLTU::FIRSTCOL, H->Row() + 1 - PLTU::FIRSTROW, H->Charge());
+        }
+        for (size_t ih = 0; ih != P->NUnclusteredHits(); ++ih) {
+            PLTHit* H = P->UnclusteredHit(ih);
+            HistChargeUnclustered[ip]->SetBinContent(H->Column() + 1 - PLTU::FIRSTCOL, H->Row() + 1 - PLTU::FIRSTROW, H->Charge());
+        }
+    }
 
-    // YZ
-    Line[1][i].SetX1(0);
-    Line[1][i].SetX2(10.16);
-    Line[1][i].SetY1(T->TY(0));
-    Line[1][i].SetY2(T->TY(10.16));
-    Line[1][i].SetLineColor(i+1);
+    float zMax(0), zMin(20);
+    int jc = 0;
+    for (size_t ip = 0; ip != NPlanes(); ++ip) {
+        PLTPlane* P = Plane(ip);
+        for (size_t ic = 0; ic != P->NClusters(); ++ic) {
+            PLTCluster* C = P->Cluster(ic);
+            CX[jc] = C->TX();
+            CY[jc] = C->TY();
+            CZ[jc] = C->TZ();
+            if (C->TZ() > zMax) zMax = C->TZ();
+            if (C->TZ() < zMin) zMin = C->TZ();
+            ++jc;
+        }
+    }
 
-    // XY
-    Line[2][i].SetX1(T->TX(0));
-    Line[2][i].SetX2(T->TX(10.16));
-    Line[2][i].SetY1(T->TY(0));
-    Line[2][i].SetY2(T->TY(10.16));
-    Line[2][i].SetLineColor(i+1);
+    std::vector<PLTHit*> UsedHits;
+
+        for (int i = 0; i != 7; i++)
+            cout << CX[i] << " " <<  CY[i] << " " << CZ[i] << endl;
+        cout << fTracks[0]->TX(0) << " " << fTracks[0]->TX(zMax) << endl;
+        cout << fTracks[0]->TY(0) << " " << fTracks[0]->TY(zMax) << endl;
+        cout << fTracks[0]->fOffsetX << " " << fTracks[0]->fSlopeRadX << endl;
+
+    for (uint8_t i = 0; i != NT; ++i) {
+        PLTTrack* T = fTracks[i];
+
+
+        // XZ
+        Line[0][i].SetX1(zMin);
+        Line[0][i].SetX2(zMax);
+        Line[0][i].SetY1(T->TX(zMin));
+        Line[0][i].SetY2(T->TX(zMax));
+        Line[0][i].SetLineColor(i+1);
+
+        // YZ
+        Line[1][i].SetX1(zMin);
+        Line[1][i].SetX2(zMax);
+        Line[1][i].SetY1(T->TY(zMin));
+        Line[1][i].SetY2(T->TY(zMax));
+        Line[1][i].SetLineColor(i+1);
+
+        // XY
+        Line[2][i].SetX1(T->TX(zMin));
+        Line[2][i].SetX2(T->TX(zMax));
+        Line[2][i].SetY1(T->TY(zMin));
+        Line[2][i].SetY2(T->TY(zMax));
+        Line[2][i].SetLineColor(i+1);
 
     //printf("XY 0 7: %9.3f %9.3f   %9.3f %9.3f\n", T->TX(0), T->TY(0), T->TX(7), T->TY(7));
   }
@@ -247,7 +245,7 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
   //}
 
   TCanvas C("TelescopeTrack", "TelescopeTrack", 800, 800);;
-  C.Divide(3, 3);
+  C.Divide(3, 4);
 
   C.cd(1);
   TGraph gXZ(NC, CZ, CX);
@@ -259,7 +257,7 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
   gXZ.GetXaxis()->SetTitleOffset(0.7);
   gXZ.GetYaxis()->SetTitleOffset(0.5);
   gXZ.SetMarkerColor(40);
-  gXZ.GetXaxis()->SetLimits(-0.5, 11.0);
+  gXZ.GetXaxis()->SetLimits(zMin - 0.5, zMax + 1);
   gXZ.SetMinimum(-0.5);
   gXZ.SetMaximum( 0.5);
   if (NC) {
@@ -269,7 +267,7 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
     Line[0][i].Draw();
   }
 
-  C.cd(4);
+  C.cd(2);
   TGraph gYZ(NC, CZ, CY);
   gYZ.SetTitle("");
   gYZ.GetXaxis()->SetTitle("Z (cm)");
@@ -279,7 +277,7 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
   gYZ.GetXaxis()->SetTitleOffset(0.7);
   gYZ.GetYaxis()->SetTitleOffset(0.5);
   gYZ.SetMarkerColor(40);
-  gYZ.GetXaxis()->SetLimits(-0.5, 11.0);
+  gYZ.GetXaxis()->SetLimits(zMin - 0.5, zMax + 1);
   gYZ.SetMinimum(-0.5);
   gYZ.SetMaximum( 0.5);
   if (NC) {
@@ -291,7 +289,7 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
 
   //TVirtualPad* Pad = C.cd(3);
   //Pad->DrawFrame(-30, -30, 30, 30);
-  C.cd(7);
+  C.cd(3);
   TGraph gXY(NC, CX, CY);
   gXY.SetTitle("");
   gXY.GetXaxis()->SetTitle("X (cm)");
@@ -311,19 +309,10 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
     Line[2][i].Draw();
   }
 
-  C.cd(2);
-  HistCharge[0]->Draw("colz");
-  C.cd(3);
-  HistCharge[1]->Draw("colz");
-  C.cd(5);
-  HistCharge[2]->Draw("colz");
-  C.cd(6);
-  HistCharge[3]->Draw("colz");
-  C.cd(8);
-  HistCharge[4]->Draw("colz");
-  C.cd(9);
-  HistCharge[5]->Draw("colz");
-
+    for (uint8_t iHist = 0; iHist != NPlanes(); iHist++){
+        C.cd(iHist + 4);
+        HistCharge[iHist]->Draw("colz");
+    }
   //C.cd(3);
   //HistChargeUnclustered[0]->Draw("colz");
   //C.cd(6);
@@ -333,10 +322,10 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
 
   C.SaveAs(Name.c_str());
 
-  for (int i = 0; i != 6; ++i) {
-    delete HistCharge[i];
-    delete HistChargeUnclustered[i];
-  }
+    for (uint8_t i = 0; i != NPlanes(); ++i) {
+        delete HistCharge[i];
+        delete HistChargeUnclustered[i];
+    }
 
   return;
 }

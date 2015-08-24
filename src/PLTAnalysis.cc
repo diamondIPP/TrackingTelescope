@@ -17,6 +17,7 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     /** init file reader */
     InitFileReader();
     if (GetUseRootInput(telescopeID)) nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
+    stopAt = nEntries;
     /** apply masking */
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
     /** init histos */
@@ -42,9 +43,10 @@ PLTAnalysis::~PLTAnalysis()
 
     getTime(now1, startProg);
     now1 = clock();
+    stopAt = 1e5;
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
-        if (ievent > 5e5) break;
+        if (ievent > stopAt) break;
         ThisTime = ievent;
 
         MeasureSpeed(ievent);
@@ -243,8 +245,12 @@ void PLTAnalysis::PrintProcess(uint32_t ievent){
 
     if (ievent % 10 == 0 && ievent > 1000){
         if (ievent != 0) cout << "\e[A\r";
-        cout << "Processing event:\t" << setw(7) << setfill('0') << ievent << "     " << endl;
-        float all_seconds = (nEntries - ievent) / speed;
+        cout << "Processed events:\t"  << setprecision(2) << setw(5) << setfill('0') << fixed << float(ievent) / stopAt * 100 << "% ";
+        if ( stopAt - ievent < 10 ) cout << "|" <<string( 50 , '=') << ">";
+        else cout << "|" <<string(int(float(ievent) / stopAt * 100) / 2, '=') << ">";
+        if ( stopAt - ievent < 10 ) cout << "| 100%    ";
+        else cout << string(50 - int(float(ievent) / stopAt * 100) / 2, ' ') << "| 100%    " << endl;
+        float all_seconds = (stopAt - ievent) / speed;
         uint16_t minutes = all_seconds / 60;
         uint16_t seconds = all_seconds - int(all_seconds) / 60 * 60;
         uint16_t miliseconds =  (all_seconds - int(all_seconds)) * 1000;

@@ -6,6 +6,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "GetNames.h"
+#include <iomanip>
 
 class PSIRootFileReader : public PSIFileReader
 {
@@ -15,7 +16,8 @@ class PSIRootFileReader : public PSIFileReader
 		       std::string const,
 		       int const,
 		       bool const,
-		       bool const);
+		       bool const,
+		       bool const onlyAlign = false);
     ~PSIRootFileReader ();
 
     bool OpenFile ();
@@ -29,7 +31,7 @@ class PSIRootFileReader : public PSIFileReader
   private:
     std::string fFileName;
 
-
+    const bool fOnlyAlign;
 
     //  Current entry and total number of entries
     int fAtEntry;

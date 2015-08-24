@@ -88,7 +88,6 @@ void PLTGainCal::SetCharge (PLTHit& Hit, int telescopeID)
 
 float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int const col, int const row, int INadc)
 {
-    std::cout << "ONE" << std::endl;
     /** Get charge, note roc number is 0, 1, 2... */
     int const adc = INadc;
     if (ChIndex(ch)   >= MAXCHNS) { printf("ERROR: over MAXCHNS: %i\n", ch); };
@@ -105,8 +104,9 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
     }
 
     float charge = -9999;
+
+    /** external calibration */
     if (fIsExternalFunction) {
-        std::cout << "TWO" << std::endl;
         for (int ipar = 0; ipar < fNParams; ++ipar) {
             fFitFunction.SetParameter(ipar, GC[ich][iroc][icol][irow][ipar]);
         }
@@ -116,24 +116,29 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
         else if (telescopeID == 10 && iroc == 6)            charge = 43.13 * fFitFunction.GetX(adc) +333.0;
         else                                                charge = 65. * fFitFunction.GetX(adc);
     }
+    /** old calibration */
     else {
-    if (fNParams == 3) {
-      charge = 65. * (float(adc * adc) * GC[ich][iroc][icol][irow][2] + float(adc) * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][0]);
+        if (fNParams == 3) {
+            charge = 65. * (float(adc * adc) * GC[ich][iroc][icol][irow][2] + float(adc) * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][0]);
 
-    } else if (fNParams == 5) {
-      charge = 65. * (TMath::Power( (float) adc, 2) * GC[ich][iroc][icol][irow][0] + (float) adc * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][2]
-          + (GC[ich][iroc][icol][irow][4] != 0 ? TMath::Exp( (adc - GC[ich][iroc][icol][irow][3]) / GC[ich][iroc][icol][irow][4] ) : 0)
-          );
-    } else {
-      std::cerr << "ERROR: PLTGainCal::GetCharge() I do not know of that number of fNParams: " << fNParams << std::endl;
-      exit(1);
+        }
+        else if (fNParams == 5) {
+            charge = 65. * (TMath::Power( (float) adc, 2) * GC[ich][iroc][icol][irow][0] + (float) adc * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][2]
+              + (GC[ich][iroc][icol][irow][4] != 0 ? TMath::Exp( (adc - GC[ich][iroc][icol][irow][3]) / GC[ich][iroc][icol][irow][4] ) : 0)
+              );
+        }
+        else {
+            std::cerr << "ERROR: PLTGainCal::GetCharge() I do not know of that number of fNParams: " << fNParams << std::endl;
+            exit(1);
+        }
     }
-  }
-  if (PLTGainCal::DEBUGLEVEL) {
-    printf("%2i %1i %2i %2i %4i %10.1f\n", ch, roc, col, row, adc, charge);
-  }
 
-  return charge;
+    /** Printing */
+    if (PLTGainCal::DEBUGLEVEL) {
+            printf("%2i %1i %2i %2i %4i %10.1f\n", ch, roc, col, row, adc, charge);
+    }
+
+    return charge;
 }
 
 void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)

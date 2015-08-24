@@ -5,26 +5,27 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-
+using namespace std;
 
 PSIRootFileReader::PSIRootFileReader (std::string const InFileName,
 				      std::string const CalibrationList,
 				      std::string const AlignmentFileName,
 				      int const nrocs,
 				      bool const useGainInterpolator,
-				      bool const useExternalCalibrationFunction
+				      bool const useExternalCalibrationFunction,
+				      bool const onlyAlign
 				      ) : PSIFileReader(CalibrationList,
 							AlignmentFileName,
 							nrocs,
 							useGainInterpolator,
-							useExternalCalibrationFunction)
+							useExternalCalibrationFunction),
+							fOnlyAlign(onlyAlign)
 {
-
-  fFileName = InFileName;
-  if (!OpenFile()) {
-    std::cerr << "ERROR: cannot open input file: " << fFileName << std::endl;
+    fFileName = InFileName;
+    if (!OpenFile()) {
+        std::cerr << "ERROR: cannot open input file: " << fFileName << std::endl;
     throw;
-  }
+    }
 }
 
 
@@ -77,9 +78,11 @@ void PSIRootFileReader::ResetFile ()
 int PSIRootFileReader::GetNextEvent (){
 
     Clear();
-    if (fTree->GetBranch(GetSignalBranchName() )){
-        ClearSignal();
-        AddSignal(*f_signal);
+    if ( !fOnlyAlign ){
+        if (fTree->GetBranch(GetSignalBranchName() )){
+            ClearSignal();
+            AddSignal(*f_signal);
+        }
     }
 
     for (int i = 0; i != NMAXROCS; ++i)
@@ -91,14 +94,12 @@ int PSIRootFileReader::GetNextEvent (){
     fTree->GetEntry(fAtEntry);
     fAtEntry++;
 
-
-
     for (uint8_t iHit = 0; iHit != f_plane->size(); iHit++){
 
-        int roc = (*f_plane)[iHit];
-        int col = (*f_col)[iHit];
-        int row = (*f_row)[iHit];
-        int adc = (*f_adc)[iHit];
+        uint8_t roc = (*f_plane)[iHit];
+        uint8_t col = (*f_col)[iHit];
+        uint8_t row = (*f_row)[iHit];
+        uint8_t adc = (*f_adc)[iHit];
 
         if (!IsPixelMasked( 1*100000 + roc*10000 + col*100 + row)){
             PLTHit* Hit = new PLTHit(1, roc, col, row, adc);
@@ -110,6 +111,9 @@ int PSIRootFileReader::GetNextEvent (){
             fAlignment.AlignHit(*Hit);
             fHits.push_back(Hit);
             fPlaneMap[Hit->ROC()].AddHit(Hit);
+            if ( fOnlyAlign )
+                for (uint8_t i = 0; i !=roc+1; i++)
+                    if (fPlaneMap[i].NHits() == 0) return 0;
         }
     }
 
