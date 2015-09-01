@@ -99,7 +99,7 @@ int PSIRootFileReader::GetNextEvent (){
         uint8_t roc = (*f_plane)[iHit];
         uint8_t col = (*f_col)[iHit];
         uint8_t row = (*f_row)[iHit];
-        uint8_t adc = (*f_adc)[iHit];
+        int16_t adc = (*f_adc)[iHit];
 
         if (!IsPixelMasked( 1*100000 + roc*10000 + col*100 + row)){
             PLTHit* Hit = new PLTHit(1, roc, col, row, adc);

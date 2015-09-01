@@ -1410,6 +1410,16 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
     f << Form("<a href=\"Residual_ROC%i_Y.gif\"><img width=\"150\" src=\"Residual_ROC%i_Y.gif\"></a>\n", i, i);
   f << "<br>\n";
 
+    /** Signal Distribution */
+    if (GetNumberOfSignals(telescopeID) > 0){
+
+        uint8_t nSig = GetNumberOfSignals(telescopeID);
+        f << "<hr />\n";
+        f << "<h2>Signal Distribution</h2>\n";
+        for (uint8_t iSig = 0; iSig != nSig; iSig++)
+            f << Form("<a href=\"Signal_%i.gif\"><img width=\"150\" src=\"Signal_%i.gif\"></a>\n", iSig, iSig);
+        f << "<br>\n";
+    }
 
   // Single Plane Studies
   if ( (telescopeID==1) || (telescopeID==2)){
@@ -1540,21 +1550,6 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 }
 
 
-std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
-
-
-std::vector<std::string> split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, elems);
-    return elems;
-}
 
 int main (int argc, char* argv[])
 {

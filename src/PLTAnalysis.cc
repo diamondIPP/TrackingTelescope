@@ -43,7 +43,7 @@ PLTAnalysis::~PLTAnalysis()
 
     getTime(now1, startProg);
     now1 = clock();
-    stopAt = 1e5;
+//    stopAt = 1e5;
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
         if (ievent > stopAt) break;

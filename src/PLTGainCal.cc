@@ -19,18 +19,18 @@ PLTGainCal::PLTGainCal (int nrocs,
 
 PLTGainCal::PLTGainCal (std::string const GainCalFileName, int const NParams): NROCS(6)
 {
-  ResetGC();
-  fIsGood = false;
-  fIsExternalFunction = false;
-  fNParams = NParams;
-  if (NParams == 5) {
-    ReadGainCalFile5(GainCalFileName);
-  } else if (NParams == 3) {
-    ReadGainCalFile3(GainCalFileName);
-  } else {
-    std::cerr << "ERROR: I have no idea how many params you have" << std::endl;
-    throw;
-  }
+    ResetGC();
+    fIsGood = false;
+    fIsExternalFunction = false;
+    fNParams = NParams;
+    if (NParams == 5)
+        ReadGainCalFile5(GainCalFileName);
+    else if (NParams == 3)
+        ReadGainCalFile3(GainCalFileName);
+    else {
+        std::cerr << "ERROR: I have no idea how many params you have" << std::endl;
+        throw;
+    }
 }
 
 

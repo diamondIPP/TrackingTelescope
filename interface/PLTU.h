@@ -24,10 +24,10 @@ namespace PLTU
     int const NCOL     = LASTCOL - FIRSTCOL + 1;
     int const NROW     = LASTROW - FIRSTROW + 1;
 
-    int const FIRSTCOL_DIAMOND = 16;   //13;
-    int const LASTCOL_DIAMOND  = 31;   //38;
-    int const FIRSTROW_DIAMOND = 8;    //40;
-    int const LASTROW_DIAMOND  = 34;   //79;
+    int const FIRSTCOL_DIAMOND = 0;  //14;   //13;
+    int const LASTCOL_DIAMOND  = 51;  //34;   //38;
+    int const FIRSTROW_DIAMOND = 0;   //23;    //40;
+    int const LASTROW_DIAMOND  = 79;   //53;   //79;
     int const NCOL_DIAMOND     = LASTCOL_DIAMOND - FIRSTCOL_DIAMOND + 1;
     int const NROW_DIAMOND     = LASTROW_DIAMOND - FIRSTROW_DIAMOND + 1;
 

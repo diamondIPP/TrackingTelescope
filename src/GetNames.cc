@@ -121,8 +121,10 @@ int GetUseRootInput(int telescopeID){
 int GetNumberOfSignals(int telescopeID){
 
     uint8_t id = telescopeID;
-    if ((id == 7) || (id == 8) || (id == 9) || (id == 10))
+    if ((id == 7) || (id == 8) || (id == 9))
         return 4;
+    else if (id == 10)
+        return 0;
     else {
         cerr << "ERROR: Number of Signals is not defined for telescopeID=" << telescopeID << endl;
         cout << "Exiting.." << endl;
@@ -135,3 +137,17 @@ const char * GetSignalBranchName(){
     return "sig";
 }
 
+vector<string> & split(const string &s, char delim, vector<string> &elems) {
+    stringstream ss(s);
+    string item;
+    while (getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+vector<string> split(const string &s, char delim) {
+    vector<string> elems;
+    split(s, delim, elems);
+    return elems;
+}
