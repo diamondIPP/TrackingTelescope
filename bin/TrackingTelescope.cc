@@ -1620,9 +1620,9 @@ int main (int argc, char* argv[])
 
     /** ANALYSIS */
     else {
-        PLTAnalysis Analysis(InFileName,  &out_f, RunNumber, telescopeID);
-        Analysis.EventLoop();
-        Analysis.FinishAnalysis();
+      PLTAnalysis Analysis(InFileName,  &out_f, RunNumber, telescopeID);
+      Analysis.EventLoop();
+      Analysis.FinishAnalysis();
     }
 
     return 0;

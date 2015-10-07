@@ -14,6 +14,7 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     newfile = new TFile(NewFileName.c_str(), "RECREATE");
     newtree = intree->CloneTree(0);
     br_charge_all.resize(nRoc);
+    br_clusters_per_plane.resize(nRoc);
     addBranches();
 
 }
@@ -43,6 +44,7 @@ void FileWriterTracking::addBranches(){
     newtree->Branch("slope_y", &br_slope_y);
     newtree->Branch("n_tracks", &br_n_tracks);
     newtree->Branch("n_clusters", &br_n_clusters);
+    newtree->Branch("clusters_per_plane", &br_clusters_per_plane);
     for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
         TString branch_name = TString::Format("charge_all_ROC%d", iRoc);
         newtree->Branch(branch_name, &(br_charge_all[iRoc]));

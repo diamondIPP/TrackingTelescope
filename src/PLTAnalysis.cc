@@ -43,15 +43,14 @@ PLTAnalysis::~PLTAnalysis()
 
     getTime(now1, startProg);
     now1 = clock();
-//    stopAt = 1e5;
+    //cout << "stopAt = " << stopAt << endl;
+    //    stopAt = 1e5;
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
-
         if (ievent > stopAt) break;
         ThisTime = ievent;
 
         MeasureSpeed(ievent);
         PrintProcess(ievent);
-
         /** file writer */
         if (GetUseRootInput(telescopeID)) WriteTrackingTree();
 
@@ -66,6 +65,7 @@ PLTAnalysis::~PLTAnalysis()
         DrawTracks();
 
         /** loop over the planes */
+
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
 
             PLTPlane * Plane = FR->Plane(iplane);
@@ -92,96 +92,98 @@ PLTAnalysis::~PLTAnalysis()
             FillOccupancy(Plane);
         }
 
+
 //        cout << "Number of Tracks: " << FR->NTracks() << endl;
 		if ((telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
 
-            do_slope = true;
-            for (uint8_t i_rocs(0); i_rocs != Histos->NRoc(); i_rocs++)
-                if (FR->Track(0)->Cluster(i_rocs)->Charge() > PHThreshold){
-                    do_slope = false;
-                    break;
-                }
+		  do_slope = true;
+		  for (uint8_t i_rocs(0); i_rocs != Histos->NRoc(); i_rocs++)
+		    if (FR->Track(0)->Cluster(i_rocs)->Charge() > PHThreshold){
+		      do_slope = false;
+		      break;
+		    }
 
-            if (do_slope) {
+		  if (do_slope) {
 
-				PLTTrack * Track = FR->Track(0);
-//				for (uint8_t i=0; i != FR->Signal().size(); i++)
-//                    std::cout << FR->SignalDiamond(i) << " ";
-//                std::cout << std::endl;
+		    PLTTrack * Track = FR->Track(0);
+		    //				for (uint8_t i=0; i != FR->Signal().size(); i++)
+		    //                    std::cout << FR->SignalDiamond(i) << " ";
+		    //                std::cout << std::endl;
 
-//                if (Track->NHits() == 4){
-//                    for (uint16_t i = 0; i < Track->NClusters(); i++){
-//                        cout << "Plane: " << i << ":\t" << setprecision(2) << setw(4) << Track->Cluster(i)->TX()*100 << "\t" << Track->Cluster(i)->TY()*100;
-//                        cout << "\t" << Track->Cluster(i)->Hit(0)->Column() << "\t"<< Track->Cluster(i)->Hit(0)->Row() << endl;
-//                    }
-//                    cout << Track->fChi2X << " " << Track->fChi2Y << " " << Track->fChi2 << endl;
-////                    float y1 = Track->Cluster(2)->TY() - Track->Cluster(1)->TY();
-////                    float y2 = Track->Cluster(1)->TY() - Track->Cluster(0)->TY();
-////                    cout << y1*100 << " " << y2*100 << endl;
-////                    cout << (Track->Cluster(2)->TX() - Track->Cluster(1)->TX()) / (Track->Cluster(1)->TX() - Track->Cluster(0)->TX()) * 2.032 << " ";
-////                    cout << (Track->Cluster(2)->TY() - Track->Cluster(1)->TY()) / (Track->Cluster(1)->TY() - Track->Cluster(0)->TY()) * 2.032 << endl<<endl;
-//
-//                }
+		    //                if (Track->NHits() == 4){
+		    //                    for (uint16_t i = 0; i < Track->NClusters(); i++){
+		    //                        cout << "Plane: " << i << ":\t" << setprecision(2) << setw(4) << Track->Cluster(i)->TX()*100 << "\t" << Track->Cluster(i)->TY()*100;
+		    //                        cout << "\t" << Track->Cluster(i)->Hit(0)->Column() << "\t"<< Track->Cluster(i)->Hit(0)->Row() << endl;
+		    //                    }
+		    //                    cout << Track->fChi2X << " " << Track->fChi2Y << " " << Track->fChi2 << endl;
+		    ////                    float y1 = Track->Cluster(2)->TY() - Track->Cluster(1)->TY();
+		    ////                    float y2 = Track->Cluster(1)->TY() - Track->Cluster(0)->TY();
+		    ////                    cout << y1*100 << " " << y2*100 << endl;
+		    ////                    cout << (Track->Cluster(2)->TX() - Track->Cluster(1)->TX()) / (Track->Cluster(1)->TX() - Track->Cluster(0)->TX()) * 2.032 << " ";
+		    ////                    cout << (Track->Cluster(2)->TY() - Track->Cluster(1)->TY()) / (Track->Cluster(1)->TY() - Track->Cluster(0)->TY()) * 2.032 << endl<<endl;
+		    //
+		    //                }
 
-                /** fill chi2 histos */
-                Histos->Chi2()->Fill(Track->Chi2());
-                Histos->Chi2X()->Fill(Track->Chi2X());
-                Histos->Chi2Y()->Fill(Track->Chi2Y());
+		    /** fill chi2 histos */
+		    Histos->Chi2()->Fill(Track->Chi2());
+		    Histos->Chi2X()->Fill(Track->Chi2X());
+		    Histos->Chi2Y()->Fill(Track->Chi2Y());
 
-                /** fill slope histos */
-                Histos->TrackSlopeX()->Fill(Track->fSlopeX);
-                Histos->TrackSlopeY()->Fill(Track->fSlopeY);
+		    /** fill slope histos */
+		    Histos->TrackSlopeX()->Fill(Track->fSlopeX);
+		    Histos->TrackSlopeY()->Fill(Track->fSlopeY);
 
-//                if (ievent < 100){
-//                    for (uint8_t iSig = 0; iSig != Track->NClusters(); iSig++)
-//                        std::cout<< Track->Cluster(iSig)->TX() << " " << Track->Cluster(iSig)->TY() << " " << Track->Cluster(iSig)->TZ() << std::endl;
-//                        std::cout << Track->fChi2X << " " << Track->fChi2Y << " " << Track->fChi2 << std::endl;
-//                        std::cout << Track->fSlopeRadX << " " << Track->fOffsetX << Track->fSlopeRadY << " " << Track->fOffsetY << std::endl;
-//                    std::cout << std::endl;
-//                }
+		    //                if (ievent < 100){
+		    //                    for (uint8_t iSig = 0; iSig != Track->NClusters(); iSig++)
+		    //                        std::cout<< Track->Cluster(iSig)->TX() << " " << Track->Cluster(iSig)->TY() << " " << Track->Cluster(iSig)->TZ() << std::endl;
+		    //                        std::cout << Track->fChi2X << " " << Track->fChi2Y << " " << Track->fChi2 << std::endl;
+		    //                        std::cout << Track->fSlopeRadX << " " << Track->fOffsetX << Track->fSlopeRadY << " " << Track->fOffsetY << std::endl;
+		    //                    std::cout << std::endl;
+		    //                }
 
-                /** fill signal histos */
-                if (telescopeID == 9 || telescopeID == 8 || telescopeID ==7) {
-                    if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
+		    /** fill signal histos */
+		    if (telescopeID == 9 || telescopeID == 8 || telescopeID ==7) {
+		      if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
                         for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
-                            if (iSig < 2)
-                                Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z), FR->SignalDiamond(iSig) );
-                            else
-                                Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z), FR->SignalDiamond(iSig) );
+			  if (iSig < 2)
+			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z), FR->SignalDiamond(iSig) );
+			  else
+			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z), FR->SignalDiamond(iSig) );
                         }
-                    }
-                }
+		      }
+		    }
 
-				/** loop over the clusters */
-				for (size_t icluster = 0; icluster < Track->NClusters(); icluster++){
+		    /** loop over the clusters */
+		    for (size_t icluster = 0; icluster < Track->NClusters(); icluster++){
 
 					/** get the ROC in of the cluster and fill the corresponding residual */
-					uint8_t ROC = Track->Cluster(icluster)->ROC();
-					PLTCluster * Cluster = Track->Cluster(icluster);
+		      uint8_t ROC = Track->Cluster(icluster)->ROC();
+		      PLTCluster * Cluster = Track->Cluster(icluster);
 
-                    /** fill residuals */
-					Histos->Residual()[ROC]->Fill(Track->LResidualX(ROC), Track->LResidualY(ROC)); // dX vs dY
+		      /** fill residuals */
+		      Histos->Residual()[ROC]->Fill(Track->LResidualX(ROC), Track->LResidualY(ROC)); // dX vs dY
 					Histos->ResidualXdY()[ROC]->Fill(Cluster->LX(), Track->LResidualY(ROC));// X vs dY
 					Histos->ResidualYdX()[ROC]->Fill(Cluster->LY(), Track->LResidualX(ROC)); // Y vs dX
 
-                    /** ignore events above a certain threshold */
+					/** ignore events above a certain threshold */
 					if (Cluster->Charge() > PHThreshold) continue;
 					//printf("High Charge: %13.3E\n", Cluster->Charge());
 
 					/** fill the offline pulse heights (Track6+|Slope| < 0.01 in x and y ) */
-                    FillOfflinePH(Track, Cluster);
-				}
-            }
+					FillOfflinePH(Track, Cluster);
+		    }
+		  }
 		}
 
-	} /** END OF EVENT LOOP */
-	/** add the last point to the average pulse height graph */
-	MakeAvgPH();
 
-	cout << endl;
+    } /** END OF EVENT LOOP */
+    /** add the last point to the average pulse height graph */
+    MakeAvgPH();
+
+    cout << endl;
     getTime(now1, loop);
     now1 = clock();
-}
+ }
 /** ============================
  AFTER LOOP -> FINISH
  =================================*/
@@ -279,6 +281,10 @@ void PLTAnalysis::WriteTrackingTree(){
     FW->setHitPlaneBits(FR->HitPlaneBits() );
     FW->setNTracks(FR->NTracks() );
     FW->setNClusters(FR->NClusters() );
+    for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+        PLTPlane * Plane = FR->Plane(iplane);
+        FW->setClusters(iplane, Plane->NClusters() );
+    }
 
     if (FR->NTracks() > 0){
         PLTTrack * Track = FR->Track(0);
@@ -294,6 +300,19 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setDistDia1(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z));
         FW->setDistDia2(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z));
     }
+    else
+        FW->setChi2(-999);
+        FW->setChi2X(-999);
+        FW->setChi2Y(-999);
+        FW->setSlopeX(-999);
+        FW->setSlopeY(-999);
+        FW->setDia1TrackX(-999);
+        FW->setDia1TrackY(-999);
+        FW->setDia2TrackX(-999);
+        FW->setDia2TrackY(-999);
+        FW->setDistDia1(-999, -999);
+        FW->setDistDia2(-999, -999);
+
     for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane)
         for (size_t icluster = 0; icluster != FR->Plane(iplane)->NClusters(); ++icluster)
             FW->setChargeAll(iplane, FR->Plane(iplane)->Cluster(icluster)->Charge() );
