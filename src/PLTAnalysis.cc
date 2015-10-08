@@ -293,6 +293,7 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2Y(Track->Chi2Y() );
         FW->setSlopeX(Track->fSlopeX);
         FW->setSlopeY(Track->fSlopeY);
+//        cout << FR->NTracks() << " " << Track->ExtrapolateX(PLTU::DIA1Z) << endl;
         FW->setDia1TrackX(Track->ExtrapolateX(PLTU::DIA1Z));
         FW->setDia1TrackY(Track->ExtrapolateY(PLTU::DIA1Z));
         FW->setDia2TrackX(Track->ExtrapolateX(PLTU::DIA2Z));
@@ -300,7 +301,7 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setDistDia1(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z));
         FW->setDistDia2(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z));
     }
-    else
+    else {
         FW->setChi2(-999);
         FW->setChi2X(-999);
         FW->setChi2Y(-999);
@@ -312,6 +313,7 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setDia2TrackY(-999);
         FW->setDistDia1(-999, -999);
         FW->setDistDia2(-999, -999);
+    }
 
     for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane)
         for (size_t icluster = 0; icluster != FR->Plane(iplane)->NClusters(); ++icluster)
