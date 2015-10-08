@@ -293,7 +293,6 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2Y(Track->Chi2Y() );
         FW->setSlopeX(Track->fSlopeX);
         FW->setSlopeY(Track->fSlopeY);
-//        cout << FR->NTracks() << " " << Track->ExtrapolateX(PLTU::DIA1Z) << endl;
         FW->setDia1TrackX(Track->ExtrapolateX(PLTU::DIA1Z));
         FW->setDia1TrackY(Track->ExtrapolateY(PLTU::DIA1Z));
         FW->setDia2TrackX(Track->ExtrapolateX(PLTU::DIA2Z));
