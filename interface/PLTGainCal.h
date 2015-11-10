@@ -68,7 +68,7 @@ class PLTGainCal
     static int const MAXCOLS =  52;
     static int const MAXROCS =   6;
 
-    static int const NCHNS =   MAXCHNS;
+    static int const NCHNS =   1;
     static int const NROWS =  PLTU::NROW;
     static int const NCOLS =  PLTU::NCOL;
 
@@ -79,10 +79,10 @@ class PLTGainCal
     static int const ICOLMIN = PLTU::FIRSTROW;
     static int const ICOLMAX = PLTU::LASTROW;
 
-    // Switched from 
+    // Switched from
     // float GC[NCHNS][NROCS][NCOLS][NROWS][6]
     std::vector<std::vector<std::vector<std::vector<std::vector<float > > > > > GC;
-    
+
 
     // Map for hardware locations by fed channel
     std::map<int, int> fHardwareMap;

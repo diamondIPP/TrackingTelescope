@@ -37,6 +37,7 @@ string GetAlignmentFilename(int telescopeID, bool useInitial){
         else if (telescopeID==9)    return "ALIGNMENT/Alignment_ETHTelescope_telescope9.dat";
         else if (telescopeID==10)    return "ALIGNMENT/telescope10.dat";
         else if (telescopeID==11)    return "ALIGNMENT/telescope11.dat";
+        else if (telescopeID==12)    return "ALIGNMENT/telescope12.dat";
         else if (telescopeID==-1)   return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
 
         else{
@@ -58,6 +59,7 @@ string GetMaskingFilename(int telescopeID){
     else if (telescopeID == 9)  return "outer_pixel_masks/outerPixelMask_Telescope9.txt";
     else if (telescopeID == 10)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == 11)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
+    else if (telescopeID == 12)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == -1) return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
     else {
         cout << "ERROR: No Masking file for telescopeID=" << telescopeID << endl;
@@ -77,6 +79,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 9)  return "calibration_lists/GKCalibrationList_Telescope9.txt";
     else if (telescopeID == 10)  return "calibration_lists/GKCalibrationList_Telescope10.txt";
     else if (telescopeID == 11)  return "calibration_lists/GKCalibrationList_Telescope9.txt";
+    else if (telescopeID == 12)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
         cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << endl;
@@ -93,7 +96,7 @@ int GetNumberOfROCS(int telescopeID){
         return 2;
     else if (telescopeID == 10)
         return 7;
-    else if ((telescopeID == 5) || (telescopeID == 6) || (telescopeID == 7) || (telescopeID == -1) || (telescopeID == 9) || (telescopeID == 11))
+    else if ((telescopeID == 5) || (telescopeID == 6) || (telescopeID == 7) || (telescopeID == -1) || (telescopeID >= 9))
         return 4;
     else {
         cout << "ERROR: Number of ROCs not defined for telescopeID=" << telescopeID << endl;
@@ -110,21 +113,41 @@ int GetUseGainInterpolator(int telescopeID){
 
 int GetUseExternalCalibrationFunction(int telescopeID){
 
-    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID == 11)   return true;
+    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11)   return true;
     else                    return false;
 }
 
 int GetUseRootInput(int telescopeID){
 
-  if ((telescopeID == -1) || (telescopeID == 7) || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID == 11)
+  if ((telescopeID == -1) || (telescopeID == 7) || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11)
         return true;
   else  return false;
+}
+
+bool UseFileWriter(uint8_t telescopeID){
+
+    uint8_t id = telescopeID;
+    vector<uint8_t> ids = {7, 8, 9, 10, 11, 12};
+    if (find(ids.begin(), ids.end(), id ) != ids.end())
+        return true;
+    else
+        return false;
+}
+
+bool FillSignalHistos(uint8_t telescopeID){
+
+    uint8_t id = telescopeID;
+    vector<uint8_t> ids = {7, 8, 9};
+    if (find(ids.begin(), ids.end(), id ) != ids.end())
+        return true;
+    else
+        return false;
 }
 
 int GetNumberOfSignals(int telescopeID){
 
     uint8_t id = telescopeID;
-    if ((id == 7) || (id == 8) || (id == 9) || id == 11)
+    if ((id == 7) || (id == 8) || (id == 9) || id >= 11)
         return 4;
     else if (id == 10)
         return 0;
@@ -137,7 +160,7 @@ int GetNumberOfSignals(int telescopeID){
 
 const char * GetSignalBranchName(){
 
-    return "sig";
+    return "blub";
 }
 
 vector<string> & split(const string &s, char delim, vector<string> &elems) {

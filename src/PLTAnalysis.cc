@@ -24,7 +24,8 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     Histos = new RootItems(telescopeID, RunNumber);
     cout << "Output directory: " << Histos->getOutDir() << endl;
     /** init file writer */
-    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10) FW = new FileWriterTracking(InFileName, telescopeID, FR);
+    if (UseFileWriter(telescopeID)) FW = new FileWriterTracking(InFileName, telescopeID, FR);
+//    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11) FW = new FileWriterTracking(InFileName, telescopeID, FR);
 }
 
 PLTAnalysis::~PLTAnalysis()
@@ -43,8 +44,8 @@ PLTAnalysis::~PLTAnalysis()
 
     getTime(now1, startProg);
     now1 = clock();
-    //cout << "stopAt = " << stopAt << endl;
-    //    stopAt = 1e5;
+//    cout << "stopAt = " << stopAt << endl;
+//        stopAt = 1e5;
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
         if (ievent > stopAt) break;
         ThisTime = ievent;
@@ -52,7 +53,7 @@ PLTAnalysis::~PLTAnalysis()
         MeasureSpeed(ievent);
         PrintProcess(ievent);
         /** file writer */
-        if (GetUseRootInput(telescopeID)) WriteTrackingTree();
+        if (GetUseRootInput(telescopeID)) WriteTrackingTree(ievent);
 
         /** fill coincidence map */
         Histos->CoincidenceMap()->Fill(FR->HitPlaneBits() );
@@ -94,7 +95,8 @@ PLTAnalysis::~PLTAnalysis()
 
 
 //        cout << "Number of Tracks: " << FR->NTracks() << endl;
-		if ((telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
+        if (UseFileWriter(telescopeID) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
+//		if ((telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID >= 10) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
 
 		  do_slope = true;
 		  for (uint8_t i_rocs(0); i_rocs != Histos->NRoc(); i_rocs++)
@@ -142,7 +144,8 @@ PLTAnalysis::~PLTAnalysis()
 		    //                }
 
 		    /** fill signal histos */
-		    if (telescopeID == 9 || telescopeID == 8 || telescopeID ==7) {
+		    if (FillSignalHistos(telescopeID)) {
+//		    if (telescopeID == 9 || telescopeID == 8 || telescopeID ==7) {
 		      if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
                         for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
 			  if (iSig < 2)
@@ -245,8 +248,9 @@ float PLTAnalysis::getTime(float now, float & time){
 }
 void PLTAnalysis::PrintProcess(uint32_t ievent){
 
-    if (ievent % 10 == 0 && ievent > 1000){
-        if (ievent != 0) cout << "\e[A\r";
+    if (ievent == 0) cout << endl;
+    if (ievent % 10 == 0 && ievent >= 1000){
+        if (ievent != 1000) cout << "\e[A\r";
         cout << "Processed events:\t"  << setprecision(2) << setw(5) << setfill('0') << fixed << float(ievent) / stopAt * 100 << "% ";
         if ( stopAt - ievent < 10 ) cout << "|" <<string( 50 , '=') << ">";
         else cout << "|" <<string(int(float(ievent) / stopAt * 100) / 2, '=') << ">";
@@ -273,17 +277,20 @@ void PLTAnalysis::MeasureSpeed(uint32_t ievent){
         now = clock();
     }
 }
-void PLTAnalysis::WriteTrackingTree(){
+void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
 
     /** first clear all vectors */
     FW->clearVectors();
-
     FW->setHitPlaneBits(FR->HitPlaneBits() );
     FW->setNTracks(FR->NTracks() );
     FW->setNClusters(FR->NClusters() );
     for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
         PLTPlane * Plane = FR->Plane(iplane);
         FW->setClusters(iplane, Plane->NClusters() );
+//        for (uint8_t iCluster; iCluster != Plane->NClusters(); iCluster++){
+//            FW->setClusterPositionX(iplane, Plane->Cluster(iCluster)->TX() );
+//            FW->setClusterPositionY(iplane, Plane->Cluster(iCluster)->TY() );
+//        }
     }
 
     if (FR->NTracks() > 0){

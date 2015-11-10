@@ -62,9 +62,9 @@ bool PSIRootFileReader::OpenFile ()
     fTree->SetBranchAddress("row", &f_row);
     fTree->SetBranchAddress("adc", &f_adc);
     fTree->SetBranchAddress("charge", &f_charge);
+//    fTree->GetBranch("bla");
     if (fTree->GetBranch(GetSignalBranchName() ))
         fTree->SetBranchAddress(GetSignalBranchName(), &f_signal);
-
     return true;
 }
 
@@ -79,21 +79,22 @@ int PSIRootFileReader::GetNextEvent (){
   Clear();
   if ( !fOnlyAlign ){
     if (fTree->GetBranch(GetSignalBranchName() )){
+      cout << "blub" << endl;
       ClearSignal();
       AddSignal(*f_signal);
     }
   }
-  
+
   for (int i = 0; i != NMAXROCS; ++i)
     fPlaneMap[i].SetROC(i);
-  
+
   if (fAtEntry == fNEntries)
     return -1;
 
   fTree->GetEntry(fAtEntry);
-  
+
   fAtEntry++;
-  if(f_plane->size()>255) { 
+  if(f_plane->size()>255) {
     cout << endl;
     cout << "f_plane->size() = " << f_plane->size() << endl;
   }
@@ -103,13 +104,13 @@ int PSIRootFileReader::GetNextEvent (){
     uint8_t col = (*f_col)[iHit];
     uint8_t row = (*f_row)[iHit];
     int16_t adc = (*f_adc)[iHit];
-    
+
     if (!IsPixelMasked( 1*100000 + roc*10000 + col*100 + row)){
       PLTHit* Hit = new PLTHit(1, roc, col, row, adc);
 
       /** Gain calibration */
       fGainCal.SetCharge(*Hit);
-      
+
       /** Alignment */
       fAlignment.AlignHit(*Hit);
       fHits.push_back(Hit);
@@ -125,13 +126,13 @@ int PSIRootFileReader::GetNextEvent (){
     it->second.Clusterize(PLTPlane::kClustering_AllTouching, PLTPlane::kFiducialRegion_All);
     AddPlane( &(it->second) );
   }
-  
+
   /** If we are doing single plane-efficiencies:
       Just send all events to the tracking and sort it out there */
   if (DoingSinglePlaneEfficiency()){
     RunTracking( *((PLTTelescope*) this));
   }
-  
+
     /** Otherwise require exactly one cluster per plane */
   else {
     if (NClusters() == NPlanes() && HitPlaneBits() == pow(2, NPlanes() ) - 1) {
