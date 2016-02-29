@@ -1,5 +1,6 @@
 #include "PLTGainCal.h"
 
+using namespace std;
 
 
 PLTGainCal::PLTGainCal (): NROCS(6)
@@ -78,7 +79,7 @@ float PLTGainCal::GetCoef(int const i, int const ch, int const roc, int const co
 }
 
 
-void PLTGainCal::SetCharge (PLTHit& Hit, int telescopeID)
+void PLTGainCal::SetCharge (PLTHit& Hit, uint8_t telescopeID)
 {
   Hit.SetCharge( GetCharge(Hit.Channel(), telescopeID, Hit.ROC(), Hit.Column(), Hit.Row(), Hit.ADC()) );
   return;
@@ -112,9 +113,16 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
         }
 
         /** change calibration factor for digital planes*/
-        if (telescopeID == 10 && (iroc == 4 || iroc == 5))  charge = 47 * fFitFunction.GetX(adc);
-        else if (telescopeID == 10 && iroc == 6)            charge = 43.13 * fFitFunction.GetX(adc) + 333.0;
-        else                                                charge = 65. * fFitFunction.GetX(adc);
+        if (UseDigitalCalibration(telescopeID)){
+            if (iroc == 4 || iroc == 5){
+                charge = 47 * fFitFunction.GetX(adc);
+//                cout << "iroc: adc/charge: " << int(iroc) <<": " << adc << "/" << charge << endl;
+            }
+            else if (iroc == 6)         charge = 43.13 * fFitFunction.GetX(adc) + 333.0;
+            else                        charge = 65. * fFitFunction.GetX(adc);
+
+        }
+        else                            charge = 65. * fFitFunction.GetX(adc);
     }
     /** old calibration */
     else {

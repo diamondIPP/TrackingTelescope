@@ -601,138 +601,139 @@ void PLTAlignment::AddToGZ (int const ch, float val)
 
 void PLTAlignment::SetErrors(int telescopeID, bool initial){
 
-  if (initial){
-    SetErrorX( 0, 0.004);
-    SetErrorX( 1, 0.004);
-    SetErrorX( 2, 0.004);
-    SetErrorX( 3, 0.004);
-    SetErrorX( 4, 0.004);
-    SetErrorX( 5, 0.004);
+    uint8_t id = telescopeID;
+    if (initial){
+        SetErrorX( 0, 0.004);
+        SetErrorX( 1, 0.004);
+        SetErrorX( 2, 0.004);
+        SetErrorX( 3, 0.004);
+        SetErrorX( 4, 0.004);
+        SetErrorX( 5, 0.004);
 
-    SetErrorY( 0, 0.003);
-    SetErrorY( 1, 0.003);
-    SetErrorY( 2, 0.003);
-    SetErrorY( 3, 0.003);
-    SetErrorY( 4, 0.003);
-    SetErrorY( 5, 0.003);
-  }
-  else{
-    if (telescopeID == 1){
-      SetErrorX( 0, 0.0138452);
-      SetErrorX( 1, 0.0041562);
-      SetErrorX( 2, 0.00850018);
-      SetErrorX( 3, 0.00796671);
-      SetErrorX( 4, 0.00778308);
-      SetErrorX( 5, 0.0142984);
-
-      SetErrorY( 0, 0.013026);
-      SetErrorY( 1, 0.00384812);
-      SetErrorY( 2, 0.00728567);
-      SetErrorY( 3, 0.00688992);
-      SetErrorY( 4, 0.00460671);
-      SetErrorY( 5, 0.0130273);
-    }
-    else if (telescopeID == 2){
-      SetErrorX( 0, 0.0116691);
-      SetErrorX( 1, 0.00476967);
-      SetErrorX( 2, 0.00974399);
-      SetErrorX( 3, 0.00772797);
-      SetErrorX( 4, 0.00423922);
-      SetErrorX( 5, 0.0116691);
-
-      SetErrorY( 0, 0.0135081);
-      SetErrorY( 1, 0.00424304);
-      SetErrorY( 2, 0.00661225);
-      SetErrorY( 3, 0.00689123);
-      SetErrorY( 4, 0.00310896);
-      SetErrorY( 5, 0.0104977);
-    }
-    else if (telescopeID == 5){
-      SetErrorX( 0, 0.01);
-      SetErrorX( 1, 0.01);
-      SetErrorX( 2, 0.01);
-      SetErrorX( 3, 0.01);
-
-      SetErrorY( 0, 0.01);
-      SetErrorY( 1, 0.01);
-      SetErrorY( 2, 0.01);
-      SetErrorY( 3, 0.01);
-
-    }
-    else if (telescopeID == 7){
-      SetErrorX( 0, 0.01);
-      SetErrorX( 1, 0.01);
-      SetErrorX( 2, 0.01);
-      SetErrorX( 3, 0.01);
-
-      SetErrorY( 0, 0.01);
-      SetErrorY( 1, 0.01);
-      SetErrorY( 2, 0.01);
-      SetErrorY( 3, 0.01);
-    }
-    else if (telescopeID == 9 || telescopeID >= 11){
-      SetErrorX( 0, sqrt(5)*0.015/sqrt(12));
-      SetErrorX( 1, 0.015/sqrt(12));
-      SetErrorX( 2, 0.015/sqrt(12));
-      SetErrorX( 3, sqrt(5)*0.015/sqrt(12));
-
-      SetErrorY( 0, sqrt(5)*0.01/sqrt(12));
-      SetErrorY( 1, 0.01/sqrt(12));
-      SetErrorY( 2, 0.01/sqrt(12));
-      SetErrorY( 3, sqrt(5)*0.01/sqrt(12));
-    }
-    else if (telescopeID == 8){
-      SetErrorX( 0, 0.01);
-      SetErrorX( 1, 0.01);
-      SetErrorX( 2, 0.01);
-      SetErrorX( 3, 0.01);
-      SetErrorX( 4, 0.01);
-      SetErrorX( 5, 0.01);
-
-      SetErrorY( 0, 0.01);
-      SetErrorY( 1, 0.01);
-      SetErrorY( 2, 0.01);
-      SetErrorY( 3, 0.01);
-      SetErrorY( 4, 0.01);
-      SetErrorY( 5, 0.01);
-    }
-    else if (telescopeID == 10){
-      SetErrorX( 0, 0.015);
-      SetErrorX( 1, 0.015);
-      SetErrorX( 2, 0.015);
-      SetErrorX( 3, 0.015);
-      SetErrorX( 4, 0.015);
-      SetErrorX( 5, 0.015);
-      SetErrorX( 6, 0.015);
-
-      SetErrorY( 0, 0.01);
-      SetErrorY( 1, 0.01);
-      SetErrorY( 2, 0.01);
-      SetErrorY( 3, 0.01);
-      SetErrorY( 4, 0.01);
-      SetErrorY( 5, 0.01);
-      SetErrorY( 6, 0.01);
-    }
-    else if (telescopeID == -1){
-      SetErrorX( 0, 0.01);
-      SetErrorX( 1, 0.01);
-      SetErrorX( 2, 0.01);
-      SetErrorX( 3, 0.01);
-      SetErrorX( 4, 0.01);
-      SetErrorX( 5, 0.01);
-
-      SetErrorY( 0, 0.01);
-      SetErrorY( 1, 0.01);
-      SetErrorY( 2, 0.01);
-      SetErrorY( 3, 0.01);
-      SetErrorY( 4, 0.01);
-      SetErrorY( 5, 0.01);
+        SetErrorY( 0, 0.003);
+        SetErrorY( 1, 0.003);
+        SetErrorY( 2, 0.003);
+        SetErrorY( 3, 0.003);
+        SetErrorY( 4, 0.003);
+        SetErrorY( 5, 0.003);
     }
     else{
-      std::cout << "ERROR: No Errors defined for telescopeID==" << telescopeID << std::endl;
-      std::cout << "Exiting.." << std::endl;
-      std::exit(0);
+        if (telescopeID == 1){
+            SetErrorX( 0, 0.0138452);
+            SetErrorX( 1, 0.0041562);
+            SetErrorX( 2, 0.00850018);
+            SetErrorX( 3, 0.00796671);
+            SetErrorX( 4, 0.00778308);
+            SetErrorX( 5, 0.0142984);
+
+            SetErrorY( 0, 0.013026);
+            SetErrorY( 1, 0.00384812);
+            SetErrorY( 2, 0.00728567);
+            SetErrorY( 3, 0.00688992);
+            SetErrorY( 4, 0.00460671);
+            SetErrorY( 5, 0.0130273);
+        }
+        else if (telescopeID == 2){
+            SetErrorX( 0, 0.0116691);
+            SetErrorX( 1, 0.00476967);
+            SetErrorX( 2, 0.00974399);
+            SetErrorX( 3, 0.00772797);
+            SetErrorX( 4, 0.00423922);
+            SetErrorX( 5, 0.0116691);
+
+            SetErrorY( 0, 0.0135081);
+            SetErrorY( 1, 0.00424304);
+            SetErrorY( 2, 0.00661225);
+            SetErrorY( 3, 0.00689123);
+            SetErrorY( 4, 0.00310896);
+            SetErrorY( 5, 0.0104977);
+        }
+        else if (telescopeID == 5){
+            SetErrorX( 0, 0.01);
+            SetErrorX( 1, 0.01);
+            SetErrorX( 2, 0.01);
+            SetErrorX( 3, 0.01);
+
+            SetErrorY( 0, 0.01);
+            SetErrorY( 1, 0.01);
+            SetErrorY( 2, 0.01);
+            SetErrorY( 3, 0.01);
+
+        }
+        else if (telescopeID == 7){
+            SetErrorX( 0, 0.01);
+            SetErrorX( 1, 0.01);
+            SetErrorX( 2, 0.01);
+            SetErrorX( 3, 0.01);
+
+            SetErrorY( 0, 0.01);
+            SetErrorY( 1, 0.01);
+            SetErrorY( 2, 0.01);
+            SetErrorY( 3, 0.01);
+        }
+        else if (id == 9 || id == 11 || id == 12 || id==14){
+            SetErrorX( 0, sqrt(5)*0.015/sqrt(12));
+            SetErrorX( 1, 0.015/sqrt(12));
+            SetErrorX( 2, 0.015/sqrt(12));
+            SetErrorX( 3, sqrt(5)*0.015/sqrt(12));
+
+            SetErrorY( 0, sqrt(5)*0.01/sqrt(12));
+            SetErrorY( 1, 0.01/sqrt(12));
+            SetErrorY( 2, 0.01/sqrt(12));
+            SetErrorY( 3, sqrt(5)*0.01/sqrt(12));
+        }
+        else if (telescopeID == 8){
+            SetErrorX( 0, 0.01);
+            SetErrorX( 1, 0.01);
+            SetErrorX( 2, 0.01);
+            SetErrorX( 3, 0.01);
+            SetErrorX( 4, 0.01);
+            SetErrorX( 5, 0.01);
+
+            SetErrorY( 0, 0.01);
+            SetErrorY( 1, 0.01);
+            SetErrorY( 2, 0.01);
+            SetErrorY( 3, 0.01);
+            SetErrorY( 4, 0.01);
+            SetErrorY( 5, 0.01);
+        }
+        else if (id == 10 || id == 13){
+            SetErrorX( 0, 0.015);
+            SetErrorX( 1, 0.015);
+            SetErrorX( 2, 0.015);
+            SetErrorX( 3, 0.015);
+            SetErrorX( 4, 0.015);
+            SetErrorX( 5, 0.015);
+            SetErrorX( 6, 0.015);
+
+            SetErrorY( 0, 0.01);
+            SetErrorY( 1, 0.01);
+            SetErrorY( 2, 0.01);
+            SetErrorY( 3, 0.01);
+            SetErrorY( 4, 0.01);
+            SetErrorY( 5, 0.01);
+            SetErrorY( 6, 0.01);
+        }
+        else if (telescopeID == -1){
+            SetErrorX( 0, 0.01);
+            SetErrorX( 1, 0.01);
+            SetErrorX( 2, 0.01);
+            SetErrorX( 3, 0.01);
+            SetErrorX( 4, 0.01);
+            SetErrorX( 5, 0.01);
+
+            SetErrorY( 0, 0.01);
+            SetErrorY( 1, 0.01);
+            SetErrorY( 2, 0.01);
+            SetErrorY( 3, 0.01);
+            SetErrorY( 4, 0.01);
+            SetErrorY( 5, 0.01);
+        }
+        else{
+            std::cout << "ERROR: No Errors defined for telescopeID==" << telescopeID << std::endl;
+            std::cout << "Exiting.." << std::endl;
+            std::exit(0);
+        }
     }
-  }
 
 }

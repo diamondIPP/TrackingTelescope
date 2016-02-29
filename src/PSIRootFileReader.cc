@@ -13,13 +13,11 @@ PSIRootFileReader::PSIRootFileReader (std::string const InFileName,
 				      int const nrocs,
 				      bool const useGainInterpolator,
 				      bool const useExternalCalibrationFunction,
-				      bool const onlyAlign
-				      ) : PSIFileReader(CalibrationList,
-							AlignmentFileName,
-							nrocs,
-							useGainInterpolator,
-							useExternalCalibrationFunction),
-							fOnlyAlign(onlyAlign)
+				      bool const onlyAlign,
+				      uint8_t const TelescopeID
+				      ) :   PSIFileReader(CalibrationList, AlignmentFileName, nrocs, useGainInterpolator, useExternalCalibrationFunction),
+                            fOnlyAlign(onlyAlign),
+							telescopeID(TelescopeID)
 {
     fFileName = InFileName;
     if (!OpenFile()) {
@@ -75,70 +73,70 @@ void PSIRootFileReader::ResetFile ()
     OpenFile();
 }
 
-int PSIRootFileReader::GetNextEvent (){
-  Clear();
-  if ( !fOnlyAlign ){
-    if (fTree->GetBranch(GetSignalBranchName() )){
-      cout << "blub" << endl;
-      ClearSignal();
-      AddSignal(*f_signal);
+int PSIRootFileReader::GetNextEvent ()
+{
+    Clear();
+    if ( !fOnlyAlign ){
+        if (fTree->GetBranch(GetSignalBranchName() )){
+            ClearSignal();
+            AddSignal(*f_signal);
+        }
     }
-  }
 
-  for (int i = 0; i != NMAXROCS; ++i)
-    fPlaneMap[i].SetROC(i);
+    for (int i = 0; i != NMAXROCS; ++i)
+        fPlaneMap[i].SetROC(i);
 
-  if (fAtEntry == fNEntries)
-    return -1;
+    if (fAtEntry == fNEntries)
+        return -1;
 
-  fTree->GetEntry(fAtEntry);
+    fTree->GetEntry(fAtEntry);
 
-  fAtEntry++;
-  if(f_plane->size()>255) {
-    cout << endl;
-    cout << "f_plane->size() = " << f_plane->size() << endl;
-  }
-
-  for (uint16_t iHit = 0; iHit != f_plane->size(); iHit++){
-    uint8_t roc = (*f_plane)[iHit];
-    uint8_t col = (*f_col)[iHit];
-    uint8_t row = (*f_row)[iHit];
-    int16_t adc = (*f_adc)[iHit];
-
-    if (!IsPixelMasked( 1*100000 + roc*10000 + col*100 + row)){
-      PLTHit* Hit = new PLTHit(1, roc, col, row, adc);
-
-      /** Gain calibration */
-      fGainCal.SetCharge(*Hit);
-
-      /** Alignment */
-      fAlignment.AlignHit(*Hit);
-      fHits.push_back(Hit);
-      fPlaneMap[Hit->ROC()].AddHit(Hit);
-      if ( fOnlyAlign )
-	for (uint8_t i = 0; i !=roc+1; i++)
-	  if (fPlaneMap[i].NHits() == 0) return 0;
+    fAtEntry++;
+    if(f_plane->size()>255){
+        cout << endl;
+        cout << "f_plane->size() = " << f_plane->size() << endl;
     }
-  }
 
-  /** Loop over all planes and clusterize each one, then add each plane to the correct telescope (by channel number) */
-  for (std::map< int, PLTPlane>::iterator it = fPlaneMap.begin(); it != fPlaneMap.end(); ++it) {
-    it->second.Clusterize(PLTPlane::kClustering_AllTouching, PLTPlane::kFiducialRegion_All);
-    AddPlane( &(it->second) );
-  }
+    for (uint16_t iHit = 0; iHit != f_plane->size(); iHit++){
+        uint8_t roc = (*f_plane)[iHit];
+        uint8_t col = (*f_col)[iHit];
+        uint8_t row = (*f_row)[iHit];
+        int16_t adc = (*f_adc)[iHit];
 
-  /** If we are doing single plane-efficiencies:
-      Just send all events to the tracking and sort it out there */
-  if (DoingSinglePlaneEfficiency()){
-    RunTracking( *((PLTTelescope*) this));
-  }
+        if (!IsPixelMasked( 1*100000 + roc*10000 + col*100 + row)){
+            PLTHit* Hit = new PLTHit(1, roc, col, row, adc);
+
+            /** Gain calibration */
+            fGainCal.SetCharge(*Hit, telescopeID);
+
+            /** Alignment */
+            fAlignment.AlignHit(*Hit);
+            fHits.push_back(Hit);
+            fPlaneMap[Hit->ROC()].AddHit(Hit);
+            if ( fOnlyAlign )
+                for (uint8_t i = 0; i !=roc+1; i++)
+                    if (fPlaneMap[i].NHits() == 0) return 0;
+        }
+    }
+
+    /** Loop over all planes and clusterize each one, then add each plane to the correct telescope (by channel number) */
+    for (std::map< int, PLTPlane>::iterator it = fPlaneMap.begin(); it != fPlaneMap.end(); ++it){
+        it->second.Clusterize(PLTPlane::kClustering_AllTouching, PLTPlane::kFiducialRegion_All);
+        AddPlane( &(it->second) );
+    }
+
+    /** If we are doing single plane-efficiencies:
+        Just send all events to the tracking and sort it out there */
+    if (DoingSinglePlaneEfficiency()) {
+        RunTracking( *((PLTTelescope*) this));
+    }
 
     /** Otherwise require exactly one cluster per plane */
-  else {
-    if (NClusters() == NPlanes() && HitPlaneBits() == pow(2, NPlanes() ) - 1) {
-      RunTracking( *((PLTTelescope*) this));
+    else{
+        if (NClusters() == NPlanes() && HitPlaneBits() == pow(2, NPlanes() ) - 1){
+            RunTracking( *((PLTTelescope*) this));
+        }
     }
-  }
-  return 0;
+    return 0;
 
 }

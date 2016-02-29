@@ -18,6 +18,7 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     InitFileReader();
     if (GetUseRootInput(telescopeID)) nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
     stopAt = nEntries;
+//    stopAt = 1e4;
     /** apply masking */
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
     /** init histos */
@@ -229,7 +230,7 @@ void PLTAnalysis::InitFileReader(){
 
     if (GetUseRootInput(telescopeID)){
         FR = new PSIRootFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
-            GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID));
+            GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID), false, telescopeID);
     }
     else {
         FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),

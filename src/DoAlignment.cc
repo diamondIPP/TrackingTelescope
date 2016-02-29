@@ -30,7 +30,7 @@ int DoAlignment (std::string const InFileName,
 
     if (GetUseRootInput(telescopeID)){
         FR = new PSIRootFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
-                                   GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID), true );
+                                   GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID), true);
     }
     else{
         FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID, true),
@@ -38,7 +38,8 @@ int DoAlignment (std::string const InFileName,
         ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
     }
 
-    uint32_t nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
+    uint32_t stopAt = ((PSIRootFileReader*) FR)->fTree->GetEntries();
+//    uint32_t stopAt = 5e4;
 
     /** Apply Masking */
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
@@ -81,17 +82,11 @@ int DoAlignment (std::string const InFileName,
             /** EVENT LOOP */
             for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
+                if (ievent > stopAt)
+                    break;
+
                 /** print progress */
-                if (ievent % 10 == 0 && ievent > 1000){
-                    if (ievent != 0) cout << "\r";
-                    cout << "Processed events: "  << setprecision(2) << setw(5) << setfill('0') << fixed << float(ievent) / nEntries * 100 << "% ";
-                    if ( nEntries - ievent < 10 ) cout << "|" <<string( 50 , '=') << ">";
-                    else cout << "|" <<string(int(float(ievent) / nEntries * 100) / 2, '=') << ">";
-                    if ( nEntries - ievent < 10 ) cout << "| 100%    ";
-                    else cout << string(50 - int(float(ievent) / nEntries * 100) / 2, ' ') << "| 100%    ";
-                    cout.flush();
-                    if ( nEntries - ievent < 10 ) cout << endl;
-                }
+                print_progress(ievent, stopAt);
 
                 /** continue only if we have exactly one track */
                 if ( !(FR->NTracks()==1) ) continue;
@@ -217,45 +212,39 @@ for (int ialign=1; ialign!=15;ialign++){
   }
 
   // Event Loop
-    for (int ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
+    for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
+
+        if (ievent > stopAt)
+            break;
 
         /** print progress */
-                if (ievent % 10 == 0 && ievent > 1000){
-                    if (ievent != 0) cout << "\r";
-                    cout << "Processed events: "  << setprecision(2) << setw(5) << setfill('0') << fixed << float(ievent) / nEntries * 100 << "% ";
-                    if ( nEntries - ievent < 10 ) cout << "|" <<string( 50 , '=') << ">";
-                    else cout << "|" <<string(int(float(ievent) / nEntries * 100) / 2, '=') << ">";
-                    if ( nEntries - ievent < 10 ) cout << "| 100%    ";
-                    else cout << string(50 - int(float(ievent) / nEntries * 100) / 2, ' ') << "| 100%    ";
-                    cout.flush();
-                    if ( nEntries - ievent < 10 ) cout << endl;
-                }
+        print_progress(ievent, stopAt);
 
-    if (! (FR->NTracks()==1))
-      continue;
+        if (! (FR->NTracks()==1))
+            continue;
 
-    PLTTrack * Track = FR->Track(0);
+        PLTTrack * Track = FR->Track(0);
 
-    //if (Track->Chi2()>12)
-    //  continue;
+        //if (Track->Chi2()>12)
+        //  continue;
 
-    for (int iroc=0; iroc!= GetNumberOfROCS(telescopeID); iroc++){
+        for (int iroc=0; iroc!= GetNumberOfROCS(telescopeID); iroc++){
 
-      float d_LX = Track->LResidualX(iroc);
-      float d_LY = Track->LResidualY(iroc);
+            float d_LX = Track->LResidualX(iroc);
+            float d_LY = Track->LResidualY(iroc);
 
-      float cl_LX = -999;
-      float cl_LY = -999;
+            float cl_LX = -999;
+            float cl_LY = -999;
 
-      for (uint16_t icl=0; icl != Track->NClusters(); icl++){
-        if (Track->Cluster(icl)->ROC() == iroc){
+        for (uint16_t icl=0; icl != Track->NClusters(); icl++){
+            if (Track->Cluster(icl)->ROC() == iroc){
 
-          cl_LX = Track->Cluster(icl)->LX();
-          cl_LY = Track->Cluster(icl)->LY();
+                cl_LX = Track->Cluster(icl)->LX();
+                cl_LY = Track->Cluster(icl)->LY();
 
 
+            }
         }
-      }
 
       // Hits instead of Clusters for Alignment
       // float h_LX = -999;
@@ -372,4 +361,18 @@ for (int ialign=1; ialign!=15;ialign++){
   delete FR;
 
   return 0;
+}
+
+void print_progress(uint32_t ievent, uint32_t stopAt){
+
+    if (ievent % 10 == 0 && ievent > 1000){
+        if (ievent != 0) cout << "\r";
+        cout << "Processed events: "  << setprecision(2) << setw(5) << setfill('0') << fixed << float(ievent) / stopAt * 100 << "% ";
+        if ( stopAt - ievent < 10 ) cout << "|" <<string( 50 , '=') << ">";
+        else cout << "|" <<string(int(float(ievent) / stopAt * 100) / 2, '=') << ">";
+        if ( stopAt - ievent < 10 ) cout << "| 100%    ";
+        else cout << string(50 - int(float(ievent) / stopAt * 100) / 2, ' ') << "| 100%    ";
+        cout.flush();
+        if ( stopAt - ievent < 10 ) cout << endl;
+    }
 }

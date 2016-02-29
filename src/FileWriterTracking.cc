@@ -41,7 +41,7 @@ void FileWriterTracking::addBranches(){
     newtree->Branch("diam2_track_y", &br_diam2_track_y);
     newtree->Branch("dist_to_dia1", &br_dist_to_dia1);
     newtree->Branch("dist_to_dia2", &br_dist_to_dia2);
-    newtree->Branch("chi2", &br_chi2);
+    newtree->Branch("chi2_tracks", &br_chi2);
     newtree->Branch("chi2_x", &br_chi2_x);
     newtree->Branch("chi2_y", &br_chi2_y);
     newtree->Branch("slope_x", &br_slope_x);
