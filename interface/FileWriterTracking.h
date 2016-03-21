@@ -38,6 +38,8 @@ private:
     uint8_t br_n_tracks, br_n_clusters;
     vector<uint8_t> br_clusters_per_plane;
     vector<vector<float>* > br_charge_all;
+    // Add vector for pulse height of each event corresponding to each adc - DA
+    std::vector<int> *br_pulse_height;
 //    vector<vector<float> > br_cluster_pos_x;
 //    vector<vector<float> > br_cluster_pos_y;
 //    vector<vector<float> > br_test;
