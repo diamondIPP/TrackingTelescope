@@ -25,6 +25,7 @@ private:
     TTree * intree;
     TFile * newfile;
     TTree * newtree;
+    TMacro * names;
     string NewFileName;
 
     /** branch variables */

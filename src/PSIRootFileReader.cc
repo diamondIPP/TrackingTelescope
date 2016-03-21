@@ -45,6 +45,7 @@ bool PSIRootFileReader::OpenFile ()
     if (!fRootFile->IsOpen()) return false;
 
     fTree = (TTree*)fRootFile->Get("tree");
+    fMacro = (TMacro*)fRootFile->Get("region_information");
 
     fAtEntry = 0;
     fNEntries = fTree->GetEntries();
