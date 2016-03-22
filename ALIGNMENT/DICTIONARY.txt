@@ -1,0 +1,3 @@
+telescope 12 - PSI Oct 15, pad 1
+telescope 13 - PSI Oct 15, pix
+telescope 14 - PSI Oct 15, pad 2

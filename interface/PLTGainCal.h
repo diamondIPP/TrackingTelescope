@@ -15,6 +15,7 @@
 #include "PLTCluster.h"
 #include "PLTPlane.h"
 #include "PLTU.h"
+#include "GetNames.h"
 
 
 class PLTGainCal
@@ -22,18 +23,18 @@ class PLTGainCal
   public:
     PLTGainCal ();
     PLTGainCal (int, bool); // number of ROCs, isExternalFunction
-    PLTGainCal (std::string const, int const NParams = 5);
+    PLTGainCal (std::string const, int const NParams=5);
     ~PLTGainCal ();
 
 
     static int const DEBUGLEVEL = 0;
 
-    void  SetCharge ( PLTHit&, int telescopeID=10);
+    void  SetCharge ( PLTHit&, uint8_t telescopeID=10);
     float GetCharge(int const ch, int const telescopeID, int const roc, int const col, int const row, int adc);
     void  ReadGainCalFile (std::string const GainCalFileName, int roc);
     void  ReadGainCalFile3 (std::string const GainCalFileName);
     void  ReadGainCalFile5 (std::string const GainCalFileName);
-    void  ReadGainCalFileExt (std::string const GainCalFileName, int const roc = 0);
+    void  ReadGainCalFileExt (std::string const GainCalFileName, int const roc=0);
     void  ReadTesterGainCalFile (std::string const GainCalFileName);
 
     void CheckGainCalFile (std::string const GainCalFileName, int const Channel);
@@ -68,7 +69,7 @@ class PLTGainCal
     static int const MAXCOLS =  52;
     static int const MAXROCS =   6;
 
-    static int const NCHNS =   MAXCHNS;
+    static int const NCHNS =   1;
     static int const NROWS =  PLTU::NROW;
     static int const NCOLS =  PLTU::NCOL;
 
@@ -79,10 +80,10 @@ class PLTGainCal
     static int const ICOLMIN = PLTU::FIRSTROW;
     static int const ICOLMAX = PLTU::LASTROW;
 
-    // Switched from 
+    // Switched from
     // float GC[NCHNS][NROCS][NCOLS][NROWS][6]
     std::vector<std::vector<std::vector<std::vector<std::vector<float > > > > > GC;
-    
+
 
     // Map for hardware locations by fed channel
     std::map<int, int> fHardwareMap;

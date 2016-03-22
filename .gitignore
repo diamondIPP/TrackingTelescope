@@ -16,3 +16,5 @@ tracking.layout*
 get_rootfile.sh
 TrackingTelescope
 *.bak
+Vector*
+my*

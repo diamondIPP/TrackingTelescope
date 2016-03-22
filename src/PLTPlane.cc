@@ -223,6 +223,7 @@ void PLTPlane::AddAllHitsTouching (PLTCluster* Cluster, PLTHit* Hit, FiducialReg
 void PLTPlane::ClusterizeAllTouching (FiducialRegion const FidR)
 {
   // Loop over hits and find biggest..then use as seeds..
+//    std::cout << fROC <<" "<< fHits.size() << std::endl;
   for (size_t i = 0; i != fHits.size(); ++i) {
     if (std::find(fClusterizedHits.begin(), fClusterizedHits.end(), fHits[i]) != fClusterizedHits.end()) {
       continue;

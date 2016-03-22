@@ -106,6 +106,7 @@ void PLTTelescope::DrawTracksAndHits (std::string const Name)
 
 
   }
+
   int jc = 0;
   for (size_t ip = 0; ip != NPlanes(); ++ip) {
     PLTPlane* P = Plane(ip);

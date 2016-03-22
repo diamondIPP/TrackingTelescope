@@ -372,12 +372,14 @@ float PLTTrack::LResidualY (size_t const i)
 
 float PLTTrack::TX (float const Z)
 {
-  return fTVX * (Z / fTVZ) + fTOX;
+//  return fTVX * (Z / fTVZ) + fTOX;
+  return fSlopeRadX * Z + fOffsetX;
 }
 
 float PLTTrack::TY (float const Z)
 {
-  return fTVY * (Z / fTVZ) + fTOY;
+//  return fTVY * (Z / fTVZ) + fTOY;
+  return fSlopeRadY * Z + fOffsetY;
 }
 
 

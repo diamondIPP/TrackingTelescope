@@ -19,8 +19,6 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     c2 = new TCanvas("CoincidenceMap", "CoincidenceMap", 1200, 400);
 
     /** tracking */
-//    hTrackSlopeX = new TH1F("TrackSlopeX", "TrackSlopeX", 50, -4, 4);
-//    hTrackSlopeY = new TH1F("TrackSlopeY", "TrackSlopeY", 50, -4, 4);
     hTrackSlopeX = FormatSlopeHisto("TrackSlopeX", 50, 4);
     hTrackSlopeY = FormatSlopeHisto("TrackSlopeY", 50, 4);
 
@@ -90,60 +88,57 @@ RootItems::~RootItems() {
 
     for (int iRoc = 0; iRoc != nRoc; ++iRoc) {
 
-    /** occupancy */
-    DrawSaveOccupancy(iRoc, Occupancy() );
-    Occupancy()[iRoc]->Write();
-    setOccupancy1DZ(PLTU::HistFrom2D(Occupancy()[iRoc]), iRoc);
-    DrawSaveOccupancy1DZ(iRoc);
-    Occupancy1DZ()[iRoc]->Write();
-    DrawSaveOccupancyQuantile(iRoc);
-    setOccupancy1DZ(PLTU::HistFrom2D(Occupancy()[iRoc], 0, QuantileValue()[0],
-        TString::Format("Occupancy1DZ_ROC%i_Quantile", iRoc), 20), iRoc);
-    DrawSaveOccupancy1DZ(iRoc);
-    /** 3x3 efficiency */
-    set3x3(PLTU::Get3x3EfficiencyHist(*Occupancy()[iRoc], 0, 51, 0, 79), iRoc);
-    DrawSave3x3(iRoc);
-    set3x31DZ(PLTU::HistFrom2D(Eff3x3()[iRoc], "", 50), iRoc);
-    DrawSave3x31DZ(iRoc);
-    /** low + high PH */
-    DrawSaveOccupancy(iRoc, OccupancyLowPH() );
-    DrawSaveOccupancy(iRoc, OccupancyHighPH() );
+        /** occupancy */
+        DrawSaveOccupancy(iRoc, Occupancy() );
+        Occupancy()[iRoc]->Write();
+        setOccupancy1DZ(PLTU::HistFrom2D(Occupancy()[iRoc]), iRoc);
+        DrawSaveOccupancy1DZ(iRoc);
+        Occupancy1DZ()[iRoc]->Write();
+        DrawSaveOccupancyQuantile(iRoc);
+        setOccupancy1DZ(PLTU::HistFrom2D(Occupancy()[iRoc], 0, QuantileValue()[0],
+            TString::Format("Occupancy1DZ_ROC%i_Quantile", iRoc), 20), iRoc);
+        DrawSaveOccupancy1DZ(iRoc);
+        /** 3x3 efficiency */
+        set3x3(PLTU::Get3x3EfficiencyHist(*Occupancy()[iRoc], 0, 51, 0, 79), iRoc);
+        DrawSave3x3(iRoc);
+        set3x31DZ(PLTU::HistFrom2D(Eff3x3()[iRoc], "", 50), iRoc);
+        DrawSave3x31DZ(iRoc);
+        /** low + high PH */
+        DrawSaveOccupancy(iRoc, OccupancyLowPH() );
+        DrawSaveOccupancy(iRoc, OccupancyHighPH() );
 
-    /** clusters per event */
-    DrawSaveTH1F(nClusters(), iRoc, "Number of clusters per event", "Events");
+        /** clusters per event */
+        DrawSaveTH1F(nClusters(), iRoc, "Number of clusters per event", "Events");
 
-    /** hits per cluster */
-    DrawSaveTH1F(nHitsPerCluster(), iRoc, "Number of hits per cluster", "Number of Clusters");
+        /** hits per cluster */
+        DrawSaveTH1F(nHitsPerCluster(), iRoc, "Number of hits per cluster", "Number of Clusters");
 
-    /** pulse heights */
-    /** standard */
-    ClearLegendsPH();
-    FillLegendsPH(iRoc, PulseHeight());
-    DrawSavePH(iRoc, PulseHeight(), "Pulse Height ROC%i", "PulseHeight_ROC%i.gif");
-    /** offline */
-    ClearLegendsPH();
-    FillLegendsPH(iRoc, PulseHeightOffline());
-    DrawSavePH(iRoc, PulseHeightOffline(), "Pulse Height Offline ROC%i", "PulseHeightOffline_ROC%i.gif");
-    /** long */
-    ClearLegendsPH();
-    FillLegendsPH(iRoc, PulseHeightLong());
-    DrawSavePH(iRoc, PulseHeightLong(), "Pulse Height Long ROC%i", "PulseHeightLong_ROC%i.gif");
-    /** average pulse height */
-    DrawSaveAvPH(iRoc);
-    FillAvPH2D(iRoc);
-    DrawSaveAvPH2D(iRoc);
+        /** pulse heights */
+        /** standard */
+        ClearLegendsPH();
+        FillLegendsPH(iRoc, PulseHeight());
+        DrawSavePH(iRoc, PulseHeight(), "Pulse Height ROC%i", "PulseHeight_ROC%i.gif");
+        /** offline */
+        ClearLegendsPH();
+        FillLegendsPH(iRoc, PulseHeightOffline());
+        DrawSavePH(iRoc, PulseHeightOffline(), "Pulse Height Offline ROC%i", "PulseHeightOffline_ROC%i.gif");
+        /** long */
+        ClearLegendsPH();
+        FillLegendsPH(iRoc, PulseHeightLong());
+        DrawSavePH(iRoc, PulseHeightLong(), "Pulse Height Long ROC%i", "PulseHeightLong_ROC%i.gif");
+        /** average pulse height */
+        DrawSaveAvPH(iRoc);
+        FillAvPH2D(iRoc);
+        DrawSaveAvPH2D(iRoc);
 
-    /** residuals */
-    DrawSaveResidual(iRoc, Residual());
-    DrawSaveResidual(iRoc, ResidualXdY());
-    DrawSaveResidual(iRoc, ResidualYdX());
-    DrawSaveResidualProj(iRoc, Residual(), "X");
-    DrawSaveResidualProj(iRoc, Residual(), "Y");
+        /** residuals */
+        DrawSaveResidual(iRoc, Residual());
+        DrawSaveResidual(iRoc, ResidualXdY());
+        DrawSaveResidual(iRoc, ResidualYdX());
+        DrawSaveResidualProj(iRoc, Residual(), "X");
+        DrawSaveResidualProj(iRoc, Residual(), "Y");
 
-    /** signal */
-    DrawSaveSignalDisto();
-
-  } // end of loop over ROCs
+    } // end of loop over ROCs
 
     /** draw and save coincidence map */
     PrepCoincidenceHisto();
@@ -157,6 +152,9 @@ RootItems::~RootItems() {
     DrawSaveChi2(Chi2(), "Chi2");
     DrawSaveChi2(Chi2X(), "Chi2X");
     DrawSaveChi2(Chi2Y(), "Chi2Y");
+
+    /** signal */
+    DrawSaveSignalDisto();
  }
 
 
@@ -169,11 +167,13 @@ void RootItems::FitSlope(TH1F * histo){
     histo->Fit(fGauss, "Q");
 //    histo->SetStats(true);
 }
-void RootItems::LegendSlope(TH1F * histo) {
+void RootItems::LegendSlope(TH1F * histo, TString name) {
 
     lFitGauss->Clear();
+    lFitGauss->SetName("Legend_" + name);
+//    lFitGauss->SetTitle("Legend_" + name[-1]);
     lFitGauss->SetTextSize(0.03);
-    lFitGauss->AddEntry(histo,"Track Slope X","l");
+    lFitGauss->AddEntry(histo, name,"l");
     lFitGauss->AddEntry(fGauss,"Global Fit","l");
     TString s1 = "Mean: ";
     TString s2 = "Max: ";
@@ -182,6 +182,7 @@ void RootItems::LegendSlope(TH1F * histo) {
     lFitGauss->AddEntry("const", s2 + TString::Format("%5.1f", fGauss->GetParameter(0)), "");
     lFitGauss->AddEntry("const", s3 + TString::Format("%1.3f", fGauss->GetParameter(2)), "");
     lFitGauss->Draw("same");
+    lFitGauss->Write("Legend_" + name.Index(10));
 }
 vector<TH2F*> RootItems::FillVectorTH2F(vector<TH2F*> histo, const char * name) {
     for (uint16_t iroc = 0; iroc != nRoc; ++iroc){
@@ -446,7 +447,7 @@ void RootItems::DrawSaveTrackSlope(TH1F * slope){
     c1->cd();
     FitSlope(slope);
     slope->Draw();
-    LegendSlope(slope);
+    LegendSlope(slope, slope->GetName() );
     c1->SaveAs(OutDir + slope->GetName() + FileType);
 }
 TH1F * RootItems::FormatSlopeHisto(TString name, uint16_t bins, float margin){
@@ -470,7 +471,11 @@ void RootItems::DrawSaveSignalDisto(){
 
     c1->cd();
     for (uint8_t iSig; iSig < nSig; iSig++){
+        hSignalDistribution[iSig]->SetXTitle("x [cm]");
+        hSignalDistribution[iSig]->SetYTitle("y [cm]");
+        gStyle->SetPalette(53);
         hSignalDistribution[iSig]->Draw("colz");
+        hSignalDistribution[iSig]->Write();
         c1->SaveAs(OutDir + hSignalDistribution[iSig]->GetName() + FileType);
     }
 }

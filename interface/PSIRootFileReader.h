@@ -5,17 +5,21 @@
 
 #include "TFile.h"
 #include "TTree.h"
+#include "TMacro.h"
 #include "GetNames.h"
+#include <iomanip>
 
 class PSIRootFileReader : public PSIFileReader
 {
   public:
-    PSIRootFileReader (std::string const,
-		       std::string const,
-		       std::string const,
-		       int const,
-		       bool const,
-		       bool const);
+    PSIRootFileReader(  std::string const,
+                        std::string const,
+                        std::string const,
+                        int const,
+                        bool const,
+                        bool const,
+                        bool const onlyAlign = false,
+                        uint8_t const TelescopeID=0);
     ~PSIRootFileReader ();
 
     bool OpenFile ();
@@ -24,12 +28,14 @@ class PSIRootFileReader : public PSIFileReader
 
     // Make tree accessible
     TTree * fTree;
+    TMacro * fMacro;
     TFile * fRootFile;
 
   private:
     std::string fFileName;
 
-
+    const bool fOnlyAlign;
+    uint8_t telescopeID;
 
     //  Current entry and total number of entries
     int fAtEntry;

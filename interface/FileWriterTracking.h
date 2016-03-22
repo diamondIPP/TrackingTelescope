@@ -25,6 +25,7 @@ private:
     TTree * intree;
     TFile * newfile;
     TTree * newtree;
+    TMacro * names;
     string NewFileName;
 
     /** branch variables */
@@ -36,8 +37,11 @@ private:
     float   br_chi2_x, br_chi2_y;
     float   br_slope_x, br_slope_y;
     uint8_t br_n_tracks, br_n_clusters;
+    vector<uint8_t> br_clusters_per_plane;
     vector<vector<float>* > br_charge_all;
-//    br_charge_all.resize(NROC);
+//    vector<vector<float> > br_cluster_pos_x;
+//    vector<vector<float> > br_cluster_pos_y;
+//    vector<vector<float> > br_test;
 
     /** some functions*/
     string getFileName(string);
@@ -88,6 +92,9 @@ public:
     void setChi2X(float value) { br_chi2_x = value; }
     void setChi2Y(float value) { br_chi2_y = value; }
     void setChargeAll(uint8_t iRoc, float value) { br_charge_all[iRoc]->push_back(value); }
+    void setClusters(uint8_t iRoc, uint8_t value) { br_clusters_per_plane[iRoc] = value; }
+//    void setClusterPositionX(uint8_t iRoc, float value) { br_cluster_pos_x[iRoc].push_back(value); }
+//    void setClusterPositionY(uint8_t iRoc, float value) { br_cluster_pos_y[iRoc].push_back(value); }
 
 
     /** ============================
