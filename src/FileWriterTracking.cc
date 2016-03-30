@@ -12,9 +12,13 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     NewFileName = getFileName(InFileName);
     intree = ((PSIRootFileReader*) FR)->fTree;
     names = ((PSIRootFileReader*) FR)->fMacro;
-    names->Print();
+    if(names){
+        names->Print();
+    }
     newfile = new TFile(NewFileName.c_str(), "RECREATE");
     newtree = intree->CloneTree(0);
+    // Start vector if declared as a pointer: DA
+    //br_pulse_height = new std::vector<float>;
     br_charge_all.resize(nRoc);
     br_clusters_per_plane.resize(nRoc);
 //    br_cluster_pos_x.resize(nRoc);
@@ -54,6 +58,8 @@ void FileWriterTracking::addBranches(){
 //    newtree->Branch("cluster_pos_x", &br_cluster_pos_x);
 //    newtree->Branch("cluster_pos_y", &br_cluster_pos_y);
 //    newtree->Branch("test", &br_test);
+    // Add branch pulse height to new tree: DA
+    //newtree->Branch("pulse_height",&br_pulse_height);
     for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
         TString branch_name = TString::Format("charge_all_ROC%d", iRoc);
         newtree->Branch(branch_name, &(br_charge_all[iRoc]));
@@ -77,5 +83,7 @@ void FileWriterTracking::clearVectors(){
 //        br_cluster_pos_x[iRoc].clear();
 //        br_cluster_pos_y[iRoc].clear();
     }
+    // Clear vector of pulse height: DA
+    //br_pulse_height.clear();
 }
 

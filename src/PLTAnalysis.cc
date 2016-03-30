@@ -288,10 +288,14 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
     for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
         PLTPlane * Plane = FR->Plane(iplane);
         FW->setClusters(iplane, Plane->NClusters() );
-//        for (uint8_t iCluster; iCluster != Plane->NClusters(); iCluster++){
+        for (uint8_t iCluster; iCluster != Plane->NClusters(); iCluster++){
 //            FW->setClusterPositionX(iplane, Plane->Cluster(iCluster)->TX() );
 //            FW->setClusterPositionY(iplane, Plane->Cluster(iCluster)->TY() );
-//        }
+            // Insert setPulseHeight for one pixel cluster events: DA
+            //if(Plane->Cluster(iCluster)->NHits() == 1){
+            //    FW->setPulseHeight(Plane->Cluster(iCluster)->Charge());
+            //}
+        }
     }
 
     if (FR->NTracks() > 0){
