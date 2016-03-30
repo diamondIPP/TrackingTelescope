@@ -5,6 +5,7 @@
 
 #include "TFile.h"
 #include "TTree.h"
+#include "TMacro.h"
 #include "GetNames.h"
 #include <iomanip>
 
@@ -27,6 +28,7 @@ class PSIRootFileReader : public PSIFileReader
 
     // Make tree accessible
     TTree * fTree;
+    TMacro * fMacro;
     TFile * fRootFile;
 
   private:
