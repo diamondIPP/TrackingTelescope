@@ -267,7 +267,7 @@ void PLTAnalysis::PrintProcess(uint32_t ievent){
             cout << ":" << setw(2) << setfill('0') << seconds;
             cout << ":" << setw(3) << setfill('0') << miliseconds << "      ";
         }
-        else cout << "time left: ???";
+        //else cout << "time left: ???";// Don't know why it is persistent. Commented it :P
     }
 }
 void PLTAnalysis::MeasureSpeed(uint32_t ievent){
