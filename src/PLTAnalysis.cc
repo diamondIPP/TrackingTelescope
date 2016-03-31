@@ -267,7 +267,7 @@ void PLTAnalysis::PrintProcess(uint32_t ievent){
             cout << ":" << setw(2) << setfill('0') << seconds;
             cout << ":" << setw(3) << setfill('0') << miliseconds << "      ";
         }
-        else cout << "time left: ???";
+        //else cout << "time left: ???";// Don't know why it is persistent. Commented it :P
     }
 }
 void PLTAnalysis::MeasureSpeed(uint32_t ievent){
@@ -285,14 +285,6 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
     FW->setHitPlaneBits(FR->HitPlaneBits() );
     FW->setNTracks(FR->NTracks() );
     FW->setNClusters(FR->NClusters() );
-    for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
-        PLTPlane * Plane = FR->Plane(iplane);
-        FW->setClusters(iplane, Plane->NClusters() );
-//        for (uint8_t iCluster; iCluster != Plane->NClusters(); iCluster++){
-//            FW->setClusterPositionX(iplane, Plane->Cluster(iCluster)->TX() );
-//            FW->setClusterPositionY(iplane, Plane->Cluster(iCluster)->TY() );
-//        }
-    }
 
     if (FR->NTracks() > 0){
         PLTTrack * Track = FR->Track(0);
@@ -322,12 +314,25 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setDistDia2(-999, -999);
     }
 
-    for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane)
-        for (size_t icluster = 0; icluster != FR->Plane(iplane)->NClusters(); ++icluster)
-            FW->setChargeAll(iplane, FR->Plane(iplane)->Cluster(icluster)->Charge() );
+    for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+        PLTPlane * Plane = FR->Plane(iplane);
+        FW->setClusters(iplane, Plane->NClusters() );
+        for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
+            FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
+            FW->setClusterPositionX(iplane, Plane->Cluster(icluster)->TX() );
+            FW->setClusterPositionY(iplane, Plane->Cluster(icluster)->TY() );
+            if ((Plane->Cluster(icluster)->NHits() > 0)) {// Temporary: Modify to fill different cluster size pulse height: DA
+                size_t index = Plane->Cluster(icluster)->NHits() - 1;
+                if(index < FW->GetNHits()){
+                    FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
+                }
+                else
+                    FW->setPulseHeightsRoc(iplane,FW->GetNHits(),Plane->Cluster(icluster)->Charge());
+            }
+        }
+    }
 
     FW->fillTree();
-
 }
 void PLTAnalysis::MakeAvgPH(){
 

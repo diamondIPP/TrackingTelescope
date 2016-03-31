@@ -1583,6 +1583,11 @@ int main (int argc, char* argv[])
     std::vector<std::string> x = split(InFileName, '/');
     TString runname = x[x.size() -1 ];
     TString const RunNumber = runname(4,9);
+    // validate existance of directory plots: DA
+    if(!gSystem->OpenDirectory("./plots")){
+      gSystem->mkdir("./plots");
+      gSystem->OpenDirectory("..");
+    }
     gSystem->mkdir("./plots/" + RunNumber);
 
     gROOT->ProcessLine("#include <vector>");
