@@ -20,7 +20,7 @@ class PLTAlignment
     ~PLTAlignment ();
 
     void ReadAlignmentFile (std::string const);
-    void WriteAlignmentFile (std::string const);
+    void WriteAlignmentFile (std::string const, const int numRocs);
     void AlignHit (PLTHit&);
     bool IsGood ();
 
