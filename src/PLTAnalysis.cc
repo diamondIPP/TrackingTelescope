@@ -327,7 +327,7 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
                     FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
                 }
                 else
-                    FW->setPulseHeightsRoc(iplane,FW->GetNHits(),Plane->Cluster(icluster)->Charge());
+                    FW->setPulseHeightsRoc(iplane,FW->GetNHits()-1,Plane->Cluster(icluster)->Charge());
             }
         }
     }

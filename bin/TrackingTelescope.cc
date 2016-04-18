@@ -32,7 +32,7 @@
 #include "GetNames.h"
 #include "TestPlaneEfficiencySilicon.h"
 #include "DoAlignment.h"
-#include "DoAlignment2.h"
+//#include "DoAlignment2.h"
 
 #include "PLTPlane.h"
 #include "PLTAlignment.h"
@@ -1618,7 +1618,7 @@ int main (int argc, char* argv[])
 
     /** ALIGNMENT */
     if (action==1)
-        DoAlignment2(InFileName, &out_f, RunNumber, telescopeID);
+        DoAlignment(InFileName, &out_f, RunNumber, telescopeID);
 
     /** RESIDUAL CALCULATION */
     else if (action==2)
