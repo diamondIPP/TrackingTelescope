@@ -156,7 +156,7 @@ bool UseDigitalCalibration(uint8_t telescopeID){
 int GetNumberOfSignals(int telescopeID){
 
     uint8_t id = telescopeID;
-    if (id == 10 || id == 13)
+    if (id == 10 || id == 13 || id == 15)
         return 0;
     else if ((id == 7) || (id == 8) || (id == 9) || id >= 11)
         return 4;

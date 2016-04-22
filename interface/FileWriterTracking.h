@@ -41,8 +41,10 @@ private:
     vector<uint8_t> br_clusters_per_plane;
     vector<vector<float>* > br_charge_all;
     vector<vector<vector<float>*>> br_pulse_heights_all;
-    vector<vector<float> *> br_cluster_pos_x;
-    vector<vector<float> *> br_cluster_pos_y;
+    vector<vector<float> *> br_cluster_pos_telescope_x;
+    vector<vector<float> *> br_cluster_pos_telescope_y;
+    vector<vector<float> *> br_cluster_pos_local_x;
+    vector<vector<float> *> br_cluster_pos_local_y;
 //    vector<vector<float> > br_test;
 
     /** some functions*/
@@ -75,8 +77,10 @@ public:
     float   Chi2X() { return br_chi2_x; }
     float   Chi2Y() { return br_chi2_y; }
     vector<vector<float>* > ChargeAll() { return br_charge_all; }
-    vector<vector<float>* > ClusterPosX() { return br_cluster_pos_x; }
-    vector<vector<float>* > ClusterPosY() { return br_cluster_pos_y; }
+    vector<vector<float>* > ClusterPosTelescopeX() { return br_cluster_pos_telescope_x; }
+    vector<vector<float>* > ClusterPosTelescopeY() { return br_cluster_pos_telescope_y; }
+    vector<vector<float>* > ClusterPosLocalX() { return br_cluster_pos_local_x; }
+    vector<vector<float>* > ClusterPosLocalY() { return br_cluster_pos_local_y; }
     vector<vector<vector<float>*>> PulseHeightsAll() { return br_pulse_heights_all; }
     size_t GetNHits() { return nHits; }
 
@@ -99,8 +103,10 @@ public:
     void setChi2Y(float value) { br_chi2_y = value; }
     void setChargeAll(uint8_t iRoc, float value) { br_charge_all[iRoc]->push_back(value); }
     void setClusters(uint8_t iRoc, uint8_t value) { br_clusters_per_plane[iRoc] = value; }
-    void setClusterPositionX(uint8_t iRoc, float value) { br_cluster_pos_x[iRoc]->push_back(value); }
-    void setClusterPositionY(uint8_t iRoc, float value) { br_cluster_pos_y[iRoc]->push_back(value); }
+    void setClusterPositionTelescopeX(uint8_t iRoc, float value) { br_cluster_pos_telescope_x[iRoc]->push_back(value); }
+    void setClusterPositionTelescopeY(uint8_t iRoc, float value) { br_cluster_pos_telescope_y[iRoc]->push_back(value); }
+    void setClusterPositionLocalX(uint8_t iRoc, float value) { br_cluster_pos_local_x[iRoc]->push_back(value); }
+    void setClusterPositionLocalY(uint8_t iRoc, float value) { br_cluster_pos_local_y[iRoc]->push_back(value); }
     void setPulseHeightsRoc(uint8_t iRoc, size_t clusterSize, float value) { br_pulse_heights_all[iRoc][clusterSize]->push_back(value); }
 
 

@@ -7,7 +7,7 @@ PLTAlignment::PLTAlignment ()
 {
   fIsGood = false;
 
-  for (int i=0; i != 7; i++){
+  for (int i=0; i != 7; i++){// DA: TODO make error bars equal for all DUTs in X and Y
     fErrorsX.push_back(0.015);
     fErrorsY.push_back(0.015);
   }

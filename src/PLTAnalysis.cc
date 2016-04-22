@@ -319,9 +319,11 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setClusters(iplane, Plane->NClusters() );
         for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
             FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
-            FW->setClusterPositionX(iplane, Plane->Cluster(icluster)->TX() );
-            FW->setClusterPositionY(iplane, Plane->Cluster(icluster)->TY() );
-            if ((Plane->Cluster(icluster)->NHits() > 0)) {// Temporary: Modify to fill different cluster size pulse height: DA
+            FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
+            FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
+            FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
+            FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
+            if ((Plane->Cluster(icluster)->NHits() > 0)) {
                 size_t index = Plane->Cluster(icluster)->NHits() - 1;
                 if(index < FW->GetNHits()){
                     FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());

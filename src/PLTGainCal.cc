@@ -314,7 +314,7 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
   int ich;
 
   //int const mf = 8, mfc = 1, hub = 5;
-  fHardwareMap[ch] = 1000*ch + roc;
+  fHardwareMap[ch] = 1000*ch + roc;// DA: TODO unused?
   printf("Adding ch %i as -> %i\n", ch, fHardwareMap[ch]);
 
   ifstream f(GainCalFileName.c_str());
