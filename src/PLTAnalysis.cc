@@ -313,7 +313,8 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setDistDia1(-999, -999);
         FW->setDistDia2(-999, -999);
     }
-
+    // new Branches: DA
+    FW->setCoincidenceMap(FR->HitPlaneBits());
     for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
         PLTPlane * Plane = FR->Plane(iplane);
         FW->setClusters(iplane, Plane->NClusters() );
@@ -323,6 +324,8 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
             FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
             FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
             FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
+            FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
+            FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
             if ((Plane->Cluster(icluster)->NHits() > 0)) {
                 size_t index = Plane->Cluster(icluster)->NHits() - 1;
                 if(index < FW->GetNHits()){
@@ -357,7 +360,7 @@ void PLTAnalysis::DrawTracks(){
     if (ieventdraw < 20) {
         uint16_t hp = FR->HitPlaneBits();
         if (hp == pow(2, FR->NPlanes() ) -1){
-            FR->DrawTracksAndHits(TString::Format(Histos->getOutDir() + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
+            FR->DrawTracksAndHits(TString::Format(Histos->getOutDir() + "/Tracks_Ev%i.png", ++ieventdraw).Data() );
             if (ieventdraw == 20) cout << endl;
         }
     }

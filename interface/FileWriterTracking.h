@@ -45,6 +45,9 @@ private:
     vector<vector<float> *> br_cluster_pos_telescope_y;
     vector<vector<float> *> br_cluster_pos_local_x;
     vector<vector<float> *> br_cluster_pos_local_y;
+    float br_coincidence_map;
+    vector<vector<int> *> br_cluster_row;
+    vector<vector<int> *> br_cluster_col;
 //    vector<vector<float> > br_test;
 
     /** some functions*/
@@ -83,6 +86,9 @@ public:
     vector<vector<float>* > ClusterPosLocalY() { return br_cluster_pos_local_y; }
     vector<vector<vector<float>*>> PulseHeightsAll() { return br_pulse_heights_all; }
     size_t GetNHits() { return nHits; }
+    float   GetCoincidenceMap() { return br_coincidence_map; }
+    vector<vector<int>* > ClusterRow() { return br_cluster_row; }
+    vector<vector<int>* > ClusterCol() { return br_cluster_col; }
 
     /** ============================
      SET-FUNCTIONS
@@ -108,6 +114,9 @@ public:
     void setClusterPositionLocalX(uint8_t iRoc, float value) { br_cluster_pos_local_x[iRoc]->push_back(value); }
     void setClusterPositionLocalY(uint8_t iRoc, float value) { br_cluster_pos_local_y[iRoc]->push_back(value); }
     void setPulseHeightsRoc(uint8_t iRoc, size_t clusterSize, float value) { br_pulse_heights_all[iRoc][clusterSize]->push_back(value); }
+    void setCoincidenceMap(float value) { br_coincidence_map = value; }
+    void setClusterColumn(uint8_t iRoc, int value) { br_cluster_col[iRoc]->push_back(value); }
+    void setClusterRow(uint8_t iRoc, int value) { br_cluster_row[iRoc]->push_back(value); }
 
 
     /** ============================

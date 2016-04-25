@@ -27,6 +27,8 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     br_cluster_pos_telescope_y.resize(nRoc);
     br_cluster_pos_local_x.resize(nRoc);
     br_cluster_pos_local_y.resize(nRoc);
+    br_cluster_col.resize(nRoc);
+    br_cluster_row.resize(nRoc);
     addBranches();
 
 }
@@ -59,6 +61,8 @@ void FileWriterTracking::addBranches(){
     newtree->Branch("n_tracks", &br_n_tracks);
     newtree->Branch("n_clusters", &br_n_clusters);
     newtree->Branch("clusters_per_plane", &br_clusters_per_plane);
+    // new branches: DA
+    newtree->Branch("coincidence_map", &br_coincidence_map);
 
     for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
         TString branch_name_charge = TString::Format("charge_all_ROC%d", iRoc);
@@ -71,6 +75,10 @@ void FileWriterTracking::addBranches(){
         newtree->Branch(branch_name_cluster_localX, &(br_cluster_pos_local_x[iRoc]));
         TString branch_name_cluster_localY = TString::Format("cluster_pos_ROC%d_Local_Y",iRoc);
         newtree->Branch(branch_name_cluster_localY, &(br_cluster_pos_local_y[iRoc]));
+        TString branch_name_cluster_row = TString::Format("cluster_row_ROC%d",iRoc);
+        newtree->Branch(branch_name_cluster_row, &(br_cluster_row[iRoc]));
+        TString branch_name_cluster_col = TString::Format("cluster_col_ROC%d",iRoc);
+        newtree->Branch(branch_name_cluster_col, &(br_cluster_col[iRoc]));
         for(size_t iHits = 1; iHits < nHits; iHits++){
             TString branch_name_RocPulseHeights = TString::Format("pulse_height_ROC%d_%d_cluster",iRoc,iHits);
             newtree->Branch(branch_name_RocPulseHeights,&(br_pulse_heights_all[iRoc][iHits-1]));
@@ -98,6 +106,8 @@ void FileWriterTracking::clearVectors(){
         br_cluster_pos_telescope_y[iRoc]->clear();
         br_cluster_pos_local_x[iRoc]->clear();
         br_cluster_pos_local_y[iRoc]->clear();
+        br_cluster_col[iRoc]->clear();
+        br_cluster_row[iRoc]->clear();
         for (uint8_t iHits = 0; iHits != nHits; iHits++){
             br_pulse_heights_all[iRoc][iHits]->clear();
         }

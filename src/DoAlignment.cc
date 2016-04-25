@@ -149,24 +149,24 @@ int DoAlignment (std::string const InFileName,
 
             // 2D Residuals
             hResidual[iroc_align].Draw("colz");
-            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc_align].GetName()) + ".gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc_align].GetName()) + ".png");
 
             // Residual X-Projection
             gStyle->SetOptStat(1111);
             hResidual[iroc_align].ProjectionX()->Draw();
-            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc_align].GetName()) + "_X.gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc_align].GetName()) + "_X.png");
 
             // Residual Y-Projection
             hResidual[iroc_align].ProjectionY()->Draw();
-            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc_align].GetName()) + "_Y.gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc_align].GetName()) + "_Y.png");
 
             // 2D Residuals X/dY
             hResidualXdY[iroc_align].Draw("colz");
-            Can.SaveAs( OutDir+"/"+TString(hResidualXdY[iroc_align].GetName()) + ".gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidualXdY[iroc_align].GetName()) + ".png");
 
             // 2D Residuals Y/dX
             hResidualYdX[iroc_align].Draw("colz");
-            Can.SaveAs( OutDir+"/"+TString(hResidualYdX[iroc_align].GetName()) + ".gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidualYdX[iroc_align].GetName()) + ".png");
 
             for (uint8_t i = 0; i != GetNumberOfROCS(telescopeID); i++){
                 std::cout << int(i) << setprecision(7) << " " << x_align[i] << " " << y_align[i] << " " << z_align[i] << " " << r_align[i] <<std::endl;
@@ -327,28 +327,28 @@ int DoAlignment (std::string const InFileName,
             Can.cd();
 
             gResidualXdY[iroc].Draw("AP*");
-            Can.SaveAs( OutDir+"/"+TString::Format("gRes%i",iroc) + ".gif");
+            Can.SaveAs( OutDir+"/"+TString::Format("gRes%i",iroc) + ".png");
 
             // 2D Residuals
             hResidual[iroc].Draw("colz");
-            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc].GetName()) + ".gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc].GetName()) + ".png");
 
             // Residual X-Projection
             gStyle->SetOptStat(1111);
             hResidual[iroc].ProjectionX()->Draw();
-            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc].GetName()) + "_X.gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc].GetName()) + "_X.png");
 
             // Residual Y-Projection
             hResidual[iroc].ProjectionY()->Draw();
-            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc].GetName()) + "_Y.gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidual[iroc].GetName()) + "_Y.png");
 
             // 2D Residuals X/dY
             hResidualXdY[iroc].Draw("colz");
-            Can.SaveAs( OutDir+"/"+TString(hResidualXdY[iroc].GetName()) + ".gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidualXdY[iroc].GetName()) + ".png");
 
             // 2D Residuals Y/dX
             hResidualYdX[iroc].Draw("colz");
-            Can.SaveAs( OutDir+"/"+TString(hResidualYdX[iroc].GetName()) + ".gif");
+            Can.SaveAs( OutDir+"/"+TString(hResidualYdX[iroc].GetName()) + ".png");
 
         }
 

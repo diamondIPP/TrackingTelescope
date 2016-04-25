@@ -382,13 +382,13 @@ int PSIBinaryFileReader::CalculateLevels (int const NMaxEvents,TString const Out
       pPoint[i].Draw("same");
       lLine[i].Draw("same");
     }
-    Can.SaveAs(OutDir + "/" + TString(hROCLevels[iroc]->GetName()) + ".gif");
+    Can.SaveAs(OutDir + "/" + TString(hROCLevels[iroc]->GetName()) + ".png");
   }
 
   TCanvas Can;
   Can.cd();
   hTBMLevels.Draw("hist");
-  Can.SaveAs(OutDir + "LevelsTBM.gif");
+  Can.SaveAs(OutDir + "LevelsTBM.png");
 
   ResetFile();
 
@@ -417,15 +417,15 @@ void PSIBinaryFileReader::DecodeHits ()
   //static int iBadData = 0;
   //static int iGoodData = 0;
   if (NROCs > NMAXROCS) {
-    //DrawWaveform(TString::Format("BadWave_%i.gif", iBadData++));
+    //DrawWaveform(TString::Format("BadWave_%i.png", iBadData++));
     std::cerr << "WARNING: NROCs > NMAXROCS.  Too many UBs.  Skipping this event" << std::endl;
     return;
   } else if (NROCs != NMAXROCS) {
-    //DrawWaveform(TString::Format("BadWave_%i.gif", iBadData++));
+    //DrawWaveform(TString::Format("BadWave_%i.png", iBadData++));
     std::cerr << "WARNING: NROCs != NMAXROCS.  Skipping this event" << std::endl;
     return;
   }
-  //DrawWaveform(TString::Format("GoodWave_%i.gif", iGoodData++));
+  //DrawWaveform(TString::Format("GoodWave_%i.png", iGoodData++));
   if (NROCs <= 0) {
     std::cerr << "WARNING: bad event with NROCs <= 0" << std::endl;
     return;
