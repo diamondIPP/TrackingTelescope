@@ -12,7 +12,6 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     NewFileName = getFileName(InFileName);
     intree = ((PSIRootFileReader*) FR)->fTree;
     names = ((PSIRootFileReader*) FR)->fMacro;
-    names->Print();
     newfile = new TFile(NewFileName.c_str(), "RECREATE");
     newtree = intree->CloneTree(0);
     br_charge_all.resize(nRoc);
