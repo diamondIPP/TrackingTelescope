@@ -86,6 +86,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 12)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 13)  return "calibration_lists/GKCalibrationList_Telescope13.txt";
     else if (telescopeID == 14)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
+    else if (telescopeID == 15)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
         cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << endl;
@@ -133,7 +134,7 @@ int GetUseRootInput(int telescopeID){
 
 bool UseFileWriter(uint8_t telescopeID){
 
-    vector<uint8_t> ids = {7, 8, 9, 10, 11, 12, 13, 14};
+    vector<uint8_t> ids = {7, 8, 9, 10, 11, 12, 13, 14, 15};
     return in(telescopeID, ids);
 }
 
