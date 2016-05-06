@@ -46,11 +46,11 @@ class PSIRootFileReader : public PSIFileReader
     float f_time;
 
     // Vector Branches
-    std::vector<int> * f_plane;
-    std::vector<int> * f_col;
-    std::vector<int> * f_row;
-    std::vector<int> * f_adc;
-    std::vector<int> * f_charge;
+    std::vector<uint16_t> * f_plane;
+    std::vector<uint16_t> * f_col;
+    std::vector<uint16_t> * f_row;
+    std::vector<int16_t> * f_adc;
+    std::vector<uint32_t> * f_charge;
     std::vector<float> * f_signal;
 };
 
