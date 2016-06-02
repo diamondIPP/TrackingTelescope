@@ -10,8 +10,10 @@ int DoAlignment (std::string const InFileName,
 {
     TString const PlotsDir = "plots/";
     TString const OutDir = PlotsDir + RunNumber;
+    float const angle_threshold = 0.01;
 
     gStyle->SetOptStat(0);
+    gStyle->SetPalette(53);
 
     std::vector<float> x_align;
     std::vector<float> y_align;
@@ -100,7 +102,7 @@ int DoAlignment (std::string const InFileName,
                 float h_LX = -9999;
                 float h_LY = -9999;
 
-                /** loop over hits */
+                /** loop over hits in the cluster of the plane under test. Find highest charge hit for residuals*/
                 for (uint8_t i=0; i != FR->Plane(iroc_align)->Cluster(0)->NHits(); ++i){
 
                     PLTHit * Hit = FR->Plane(iroc_align)->Cluster(0)->Hit(i);
@@ -115,15 +117,15 @@ int DoAlignment (std::string const InFileName,
                 float track_TX = Track->TX(iroc_align);
                 float track_TY = Track->TY(iroc_align);
 
-                float track_LX = FR->GetAlignment()->TtoLX( track_TX, track_TY, 1, iroc_align);
+                float track_LX = FR->GetAlignment()->TtoLX( track_TX, track_TY, 1, iroc_align);// Local position of the track in the plane under test
                 float track_LY = FR->GetAlignment()->TtoLY( track_TX, track_TY, 1, iroc_align);
 
-                float d_LX =  (track_LX - h_LX);
+                float d_LX =  (track_LX - h_LX);// residuals of track local position and highes charge hit local position
                 float d_LY =  (track_LY - h_LY);
 
                 //std::cout << "Track LX/LY" << track_LX << " " << track_LY << std::endl;
-
-                if ( !(fabs(d_LX)<2) || !(fabs(d_LY)<2) ) continue;
+                // if the residual of track with biggest charge hit is greater than 2mm in x or y, dont take it into account
+                if ( !(fabs(d_LX)<2000) || !(fabs(d_LY)<2000) ) continue;// DA: before was <2
 
                 hResidual[iroc_align].Fill( d_LX, d_LY); // dX vs dY
 
@@ -148,6 +150,7 @@ int DoAlignment (std::string const InFileName,
             Can.cd();
 
             // 2D Residuals
+            hResidual[iroc_align].SetContour(1024);
             hResidual[iroc_align].Draw("colz");
             Can.SaveAs( OutDir+"/"+TString(hResidual[iroc_align].GetName()) + ".png");
 
@@ -161,10 +164,12 @@ int DoAlignment (std::string const InFileName,
             Can.SaveAs( OutDir+"/"+TString(hResidual[iroc_align].GetName()) + "_Y.png");
 
             // 2D Residuals X/dY
+            hResidualXdY[iroc_align].SetContour(1024);
             hResidualXdY[iroc_align].Draw("colz");
             Can.SaveAs( OutDir+"/"+TString(hResidualXdY[iroc_align].GetName()) + ".png");
 
             // 2D Residuals Y/dX
+            hResidualYdX[iroc_align].SetContour(1024);
             hResidualYdX[iroc_align].Draw("colz");
             Can.SaveAs( OutDir+"/"+TString(hResidualYdX[iroc_align].GetName()) + ".png");
 
@@ -185,6 +190,8 @@ int DoAlignment (std::string const InFileName,
 
     for (int ialign=1; ialign!=15;ialign++){// DA: TODO: use also threshold condition
 
+        std::cout << "BEGIN ITERATION " << ialign << " OUT OF 14" << std::endl;
+
         FR->ResetFile();
         FR->SetAllPlanes();
 
@@ -196,6 +203,7 @@ int DoAlignment (std::string const InFileName,
         std::vector< TH2F > hResidualXdY;
         std::vector< TH2F > hResidualYdX;
         std::vector< TGraph > gResidualXdY;
+        std::vector< TGraph > gResidualYdX;
 
         // Reset residual histograms
         hResidual.clear();
@@ -209,6 +217,7 @@ int DoAlignment (std::string const InFileName,
             hResidualYdX.push_back( TH2F(  Form("ResidualYdX_ROC%i",iroc),
                                            Form("ResidualYdX_ROC%i",iroc), 41, -.2, .2, 100, -.2, .2));
             gResidualXdY.push_back( TGraph() );
+            gResidualYdX.push_back( TGraph() );
         }
 
         // Event Loop
@@ -220,7 +229,7 @@ int DoAlignment (std::string const InFileName,
             /** print progress */
             print_progress(ievent, stopAt);
 
-            if (! (FR->NTracks()==1))
+            if (! (FR->NTracks()==1))// DA: Check that there is one track per event, or skip
                 continue;
 
             PLTTrack * Track = FR->Track(0);
@@ -230,7 +239,7 @@ int DoAlignment (std::string const InFileName,
 
             for (int iroc=0; iroc!= GetNumberOfROCS(telescopeID); iroc++){
 
-                float d_LX = Track->LResidualX(iroc);
+                float d_LX = Track->LResidualX(iroc);// DA: local distance between track predicted position and cluster position.
                 float d_LY = Track->LResidualY(iroc);
 
                 float cl_LX = -999;
@@ -239,7 +248,7 @@ int DoAlignment (std::string const InFileName,
                 for (uint16_t icl=0; icl != Track->NClusters(); icl++){
                     if (Track->Cluster(icl)->ROC() == iroc){
 
-                        cl_LX = Track->Cluster(icl)->LX();
+                        cl_LX = Track->Cluster(icl)->LX();// DA: local cluster position in the roc
                         cl_LY = Track->Cluster(icl)->LY();
 
 
@@ -276,15 +285,16 @@ int DoAlignment (std::string const InFileName,
 
                 // dX vs dY
                 hResidual[iroc].Fill( d_LX, d_LY);
-
-                if ((fabs(d_LX) < 1000) && (fabs(d_LY) < 1000)){
+                // DA: take into account only events whose local residuals are less than 1000mm in x and y
+                if ((fabs(d_LX) < 10000) && (fabs(d_LY) < 10000)){// DA: Before was < 1000
                     // X vs dY
-                    hResidualXdY[iroc].Fill( cl_LX, d_LY);
+                    hResidualXdY[iroc].Fill( cl_LX, d_LY);// DA: fill with cluster local position vs residual
 
                     // Y vs dX
                     hResidualYdX[iroc].Fill( cl_LY, d_LX);
 
                     gResidualXdY[iroc].SetPoint(gResidualXdY[iroc].GetN(), cl_LX, d_LY );
+                    gResidualYdX[iroc].SetPoint(gResidualYdX[iroc].GetN(), cl_LY, d_LX);
                 }
 
 
@@ -293,6 +303,8 @@ int DoAlignment (std::string const InFileName,
 
 
         } // end event loop
+
+        float total_angle = 0;
 
         for (int iroc=1; iroc!=GetNumberOfROCS(telescopeID); iroc++){
             std::cout << "RESIDUALS: " << hResidual[iroc].GetMean(1) << " " << hResidual[iroc].GetMean(2) << std::endl;
@@ -305,14 +317,20 @@ int DoAlignment (std::string const InFileName,
 
 
             TF1 linear_fun = TF1("","[0]+[1]*x");
-            gResidualXdY[iroc].Fit(&linear_fun);
-
+            TF1 linear_fun2 = TF1(" ","[0]+[1]*x");
+//            gResidualXdY[iroc].Fit(&linear_fun);
+//            gResidualYdX[iroc].Fit(&linear_fun2);
+            hResidualXdY[iroc].Fit(&linear_fun);
+            hResidualYdX[iroc].Fit(&linear_fun2);
 
             float other_angle = atan(linear_fun.GetParameter(1));
+            float other_angle2 = atan(linear_fun2.GetParameter(1));
+            total_angle += fabs(other_angle);
+            std::cout << "BLA: ANGLE BEFORE: " << FR->GetAlignment()->GetCP(1,iroc)->LR << std::endl;
+            FR->GetAlignment()->AddToLR(1, iroc, other_angle);// DA: this was ... other_angle/3.
+            std::cout << "BLA: ANGLE AFTER: " << FR->GetAlignment()->GetCP(1,iroc)->LR << std::endl;
 
-            FR->GetAlignment()->AddToLR(1, iroc, other_angle/3.);
-
-            std::cout << "ROC: " << iroc << " Angle: " << angle << " Other Angle:" << other_angle << std::endl;
+            std::cout << "ROC: " << iroc << " Angle: " << angle << " Other Angle:" << other_angle << " Other Angle 2:" << other_angle2 << std::endl;
 
             for (uint8_t i = 0; i != GetNumberOfROCS(telescopeID); i++){
                 printf("%2i   %1i        %15E                       %15E  %15E  %15E\n", 1, i,
@@ -330,6 +348,7 @@ int DoAlignment (std::string const InFileName,
             Can.SaveAs( OutDir+"/"+TString::Format("gRes%i",iroc) + ".png");
 
             // 2D Residuals
+            hResidual[iroc].SetContour(1024);
             hResidual[iroc].Draw("colz");
             Can.SaveAs( OutDir+"/"+TString(hResidual[iroc].GetName()) + ".png");
 
@@ -343,18 +362,30 @@ int DoAlignment (std::string const InFileName,
             Can.SaveAs( OutDir+"/"+TString(hResidual[iroc].GetName()) + "_Y.png");
 
             // 2D Residuals X/dY
+            hResidualXdY[iroc].SetContour(1024);
             hResidualXdY[iroc].Draw("colz");
             Can.SaveAs( OutDir+"/"+TString(hResidualXdY[iroc].GetName()) + ".png");
 
             // 2D Residuals Y/dX
+            hResidualYdX[iroc].SetContour(1024);
             hResidualYdX[iroc].Draw("colz");
             Can.SaveAs( OutDir+"/"+TString(hResidualYdX[iroc].GetName()) + ".png");
 
         }
 
+        std::cout << "END ITERATION " << ialign << " OUT OF 14" << std::endl;
+
+        std::cout << "Sum of magnitude of angle correction per roc: " << total_angle << std::endl;
+
+        if (total_angle <= angle_threshold){
+            std::cout << "total_angle is below " << angle_threshold << ", stopping alignment." << std::endl;
+            break;
+        }
+
 
 
     } // end alignment loop
+
 
     FR->GetAlignment()->WriteAlignmentFile("NewAlignment.dat", FR->NMAXROCS);
 

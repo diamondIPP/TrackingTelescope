@@ -229,7 +229,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
   fGOY = GO[1];
   fGOZ = GO[2];
 
-  // Comput this track passes through each X=0, Y=0, Z=0 planes // DA: TODO this computes the tracks coords in planes x=0, y=0 and z=0
+  // Compute where this track passes through each X=0, Y=0, Z=0 planes // DA: TODO this computes the tracks coords in planes x=0, y=0 and z=0
   fPlaner[0][0] = fGOX - fGOX / fGVX * fGVX;
   fPlaner[0][1] = fGOY - fGOX / fGVX * fGVY;
   fPlaner[0][2] = fGOZ - fGOX / fGVX * fGVZ;
