@@ -303,7 +303,7 @@ void PLTTracking::TrackFinder_AllPlanesHit (PLTTelescope& Telescope)
   std::vector< std::vector< PLTCluster* > > ClustersForTracking;
   for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
     if ( (fUsePlanesForTracking[iPlane]>0)
-      && (Telescope.Plane(iPlane)->NClusters()>0)){cout << "/n bla si /n" << endl;
+      && (Telescope.Plane(iPlane)->NClusters()>0)){ std::cout << "/n bla si /n" << std::endl;
 
         std::vector< PLTCluster* > VClusters;
         for (size_t iCluster = 0;
