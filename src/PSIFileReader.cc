@@ -51,7 +51,7 @@ PSIFileReader::PSIFileReader (string const CalibrationList, string const Alignme
             fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[i_roc], i_roc);
     }
 
-    fAlignment.ReadAlignmentFile(AlignmentFileName);
+    fAlignment.ReadAlignmentFile(AlignmentFileName);// TODO: DA: make condition to skip this in case there is not analysis but only alignment?
     SetTrackingAlignment(&fAlignment);
 
     SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);

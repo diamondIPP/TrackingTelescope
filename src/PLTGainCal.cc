@@ -168,7 +168,7 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
   TString CheckFirstLine;
   CheckFirstLine.ReadLine(InFile);
 
-  if (CheckFirstLine.BeginsWith("Parameters of the vcal vs. pulse height fits")) {
+  if (CheckFirstLine.BeginsWith("Parameters of the vcal vs. pulse height fits")) {// DA: TODO else condition?
     std::cout << "PLTGainCal setting fIsExternalFunction" << std::endl;
     fIsExternalFunction = true;
   }

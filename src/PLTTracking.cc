@@ -298,12 +298,12 @@ void PLTTracking::TrackFinder_AllPlanesHit (PLTTelescope& Telescope)
 
   // Put all the clusters we actually use for
   // tracking into a matrix.
-  // Need to have fUsePlanesForTracking of either 1 or 2
+  // Need to have fUsePlanesForTracking of either 1 or 2 or 3
   //  and > 0 hits
   std::vector< std::vector< PLTCluster* > > ClustersForTracking;
   for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){
     if ( (fUsePlanesForTracking[iPlane]>0)
-      && (Telescope.Plane(iPlane)->NClusters()>0)){
+      && (Telescope.Plane(iPlane)->NClusters()>0)){cout << "/n bla si /n" << endl;
 
         std::vector< PLTCluster* > VClusters;
         for (size_t iCluster = 0;

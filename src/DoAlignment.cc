@@ -30,7 +30,7 @@ int DoAlignment (std::string const InFileName,
 
     if (GetUseRootInput(telescopeID)){
         FR = new PSIRootFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
-                                   GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID), true);
+                                   GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID), true, telescopeID); // DA: Added telescopeID
     }
     else{
         FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID, true),
@@ -46,7 +46,7 @@ int DoAlignment (std::string const InFileName,
 
     for (int ialign=0; ialign!=2; ialign++){
 
-        for (uint8_t iroc=1; iroc!=GetNumberOfROCS(telescopeID) - 1; iroc++){
+        for (uint8_t iroc=1; iroc!=GetNumberOfROCS(telescopeID); iroc++){// DA: changed
             FR->GetAlignment()->AddToLX( 1, iroc, x_align[iroc] );
             FR->GetAlignment()->AddToLY( 1, iroc, y_align[iroc] );
             //FR->GetAlignment()->AddToLR( 1, iroc, r_align[iroc] );
@@ -57,7 +57,7 @@ int DoAlignment (std::string const InFileName,
             std::cout << "GOING TO ALIGN: " << iroc_align << std::endl;
 
             FR->ResetFile();
-            FR->SetPlaneUnderTest( iroc_align );
+            FR->SetPlaneUnderTest( iroc_align );// ignore plane for tracking
 
             /** Prepare Residual histograms
                 hResidual:    x=dX / y=dY
@@ -183,7 +183,7 @@ int DoAlignment (std::string const InFileName,
     std::cout << "PART TWO!!!!!" << std::endl;
 
 
-    for (int ialign=1; ialign!=15;ialign++){
+    for (int ialign=1; ialign!=15;ialign++){// DA: TODO: use also threshold condition
 
         FR->ResetFile();
         FR->SetAllPlanes();
