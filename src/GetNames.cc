@@ -40,6 +40,7 @@ string GetAlignmentFilename(int telescopeID, bool useInitial){
         else if (telescopeID==12)   return "ALIGNMENT/telescope12.dat";
         else if (telescopeID==13)   return "ALIGNMENT/telescope13.dat";
         else if (telescopeID==14)   return "ALIGNMENT/telescope14.dat";
+        else if (telescopeID==15)   return "ALIGNMENT/telescope15.dat";
         else if (telescopeID==-1)   return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
 
         else{
@@ -64,6 +65,7 @@ string GetMaskingFilename(int telescopeID){
     else if (telescopeID == 12)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == 13)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == 14)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
+    else if (telescopeID == 15)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == -1) return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
     else {
         cout << "ERROR: No Masking file for telescopeID=" << telescopeID << endl;
@@ -86,6 +88,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 12)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 13)  return "calibration_lists/GKCalibrationList_Telescope13.txt";
     else if (telescopeID == 14)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
+    else if (telescopeID == 15)  return "calibration_lists/GKCalibrationList_Telescope7.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
         cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << endl;
@@ -133,7 +136,7 @@ int GetUseRootInput(int telescopeID){
 
 bool UseFileWriter(uint8_t telescopeID){
 
-    vector<uint8_t> ids = {7, 8, 9, 10, 11, 12, 13, 14};
+    vector<uint8_t> ids = {7, 8, 9, 10, 11, 12, 13, 14, 15};
     return in(telescopeID, ids);
 }
 
