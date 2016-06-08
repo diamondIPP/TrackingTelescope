@@ -1,5 +1,6 @@
-telescope 12 - PSI Oct 15, pad 1
-telescope 13 - PSI Oct 15, pix
-telescope 14 - PSI Oct 15, pad 2
-telescope 15 - PSI May 15, pad (new) 
-telescope 09 - PSI Aug 15, pad
+telescope 12 - PSI  Oct 15, pad 1
+telescope 13 - PSI  Oct 15, pix
+telescope 14 - PSI  Oct 15, pad 2
+telescope 15 - CERN May 16, pad 
+telescope 16 - PSI  May 15, pad (new) 
+telescope 09 - PSI  Aug 15, pad
