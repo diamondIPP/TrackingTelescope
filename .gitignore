@@ -1,4 +1,5 @@
 Calibrations/
+*.png
 *.gif
 .*
 *.out

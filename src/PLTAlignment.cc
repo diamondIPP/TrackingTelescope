@@ -7,7 +7,7 @@ PLTAlignment::PLTAlignment ()
 {
   fIsGood = false;
 
-  for (int i=0; i != 7; i++){
+  for (int i=0; i != 7; i++){// DA: TODO make error bars equal for all DUTs in X and Y
     fErrorsX.push_back(0.015);
     fErrorsY.push_back(0.015);
   }
@@ -107,7 +107,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
 }
 
 
-void PLTAlignment::WriteAlignmentFile (std::string const OutFileName)
+void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int numRocs)
 {
   // Open output file
   FILE* Out = fopen(OutFileName.c_str(), "w");
@@ -123,7 +123,7 @@ void PLTAlignment::WriteAlignmentFile (std::string const OutFileName)
     fprintf(Out, "\n");
     fprintf(Out, "%2i  -1        %15E      %15E  %15E  %15E  %15E\n", Channel, Tele.GRZ, Tele.GRY, Tele.GX, Tele.GY, Tele.GZ);
     // TODO: make flexible
-    for (int iroc = 0; iroc != 4; ++iroc) {
+    for (int iroc = 0; iroc != numRocs; ++iroc) {
       std::pair<int, int> ChROC = std::make_pair(Channel, iroc);
 
       if (!fConstantMap.count(ChROC)) {
@@ -697,7 +697,7 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
             SetErrorY( 4, 0.01);
             SetErrorY( 5, 0.01);
         }
-        else if (id == 10 || id == 13){
+        else if (id == 10 || id == 13 || id==15){
             SetErrorX( 0, 0.015);
             SetErrorX( 1, 0.015);
             SetErrorX( 2, 0.015);

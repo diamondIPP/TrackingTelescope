@@ -75,14 +75,14 @@ void PLTTesterReader::MakePlots ()
   for (int i = 0; i < 6; ++i) {
     lLine[i].Draw("same");
   }
-  cROCLevels.SaveAs(fOutDir + "/LevelsROC.gif");
+  cROCLevels.SaveAs(fOutDir + "/LevelsROC.png");
   cROCLevels.Write();
 
   TCanvas cROCUBLevels("LevelsROCUB", "LevelsROCUB");;
   cROCUBLevels.cd()->SetLogy(1);
   hROCUBLevels->Draw("hist");
   hROCUBLevels->Write();
-  cROCUBLevels.SaveAs(fOutDir + "/LevelsROCUB.gif");
+  cROCUBLevels.SaveAs(fOutDir + "/LevelsROCUB.png");
   cROCUBLevels.Write();
 
   return;
@@ -322,13 +322,13 @@ int PLTTesterReader::CalculateLevels (std::string const& InFileName, int const N
   TCanvas cCLTBMLevels;
   cCLTBMLevels.cd()->SetLogy(1);
   hCLTBMLevels.Draw("hist");
-  cCLTBMLevels.SaveAs(fOutDir + "/CL_LevelsTBM.gif");
+  cCLTBMLevels.SaveAs(fOutDir + "/CL_LevelsTBM.png");
   hCLTBMLevels.Write();
 
   TCanvas cCLTBMUBLevels;
   cCLTBMUBLevels.cd()->SetLogy(1);
   hCLTBMUBLevels.Draw("hist");
-  cCLTBMUBLevels.SaveAs(fOutDir + "/CL_LevelsTBMUB.gif");
+  cCLTBMUBLevels.SaveAs(fOutDir + "/CL_LevelsTBMUB.png");
   hCLTBMUBLevels.Write();
 
   TSpectrum Spectrum(20);
@@ -384,14 +384,14 @@ int PLTTesterReader::CalculateLevels (std::string const& InFileName, int const N
     pPoint[i].Draw("same");
     lLine[i].Draw("same");
   }
-  cCLROCLevels.SaveAs(fOutDir + "/CL_LevelsROC.gif");
+  cCLROCLevels.SaveAs(fOutDir + "/CL_LevelsROC.png");
   cCLROCLevels.Write();
 
   TCanvas cCLROCUBLevels("CL_LevelsROCUB", "CL_LevelsROCUB");;
   cCLROCUBLevels.cd()->SetLogy(1);
   hCLROCUBLevels.Draw("hist");
   hCLROCUBLevels.Write();
-  cCLROCUBLevels.SaveAs(fOutDir + "/CL_LevelsROCUB.gif");
+  cCLROCUBLevels.SaveAs(fOutDir + "/CL_LevelsROCUB.png");
   cCLROCUBLevels.Write();
 
   if (NPeaks != 6) {

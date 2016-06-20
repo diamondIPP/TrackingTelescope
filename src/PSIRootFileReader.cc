@@ -45,7 +45,7 @@ bool PSIRootFileReader::OpenFile ()
     if (!fRootFile->IsOpen()) return false;
 
     fTree = (TTree*)fRootFile->Get("tree");
-    fMacro = (TMacro*)fRootFile->Get("region_information");
+    fMacro = (TMacro*)fRootFile->Get("region_information");// DA: TODO make validation in case it does not have this
 
     fAtEntry = 0;
     fNEntries = fTree->GetEntries();
@@ -116,7 +116,7 @@ int PSIRootFileReader::GetNextEvent ()
             fPlaneMap[Hit->ROC()].AddHit(Hit);
             if ( fOnlyAlign )
                 for (uint8_t i = 0; i !=roc+1; i++)
-                    if (fPlaneMap[i].NHits() == 0) return 0;
+                    if (fPlaneMap[i].NHits() == 0) return 0; // CHECKS THAT THERE WERE HITS IN THE PREVIOUS ROCS IF NOT RETURN 0
         }
     }
 
@@ -128,7 +128,7 @@ int PSIRootFileReader::GetNextEvent ()
 
     /** If we are doing single plane-efficiencies:
         Just send all events to the tracking and sort it out there */
-    if (DoingSinglePlaneEfficiency()) {
+    if (DoingSinglePlaneEfficiency()) { // TRUE FOR 1ST LOOP ALIGNMENT
         RunTracking( *((PLTTelescope*) this));
     }
 

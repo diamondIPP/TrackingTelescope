@@ -171,7 +171,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     gX.Fit( &funX, "Q" );
     gY.Fit( &funY, "Q" );
 
-    // Store fit results
+    // Store fit results // DA: TODO Refactor variable names to angle not slope
     fSlopeX = atan(funX.GetParameter(0)) * 180 / 3.14159;
     fSlopeY = atan(funY.GetParameter(0)) * 180 / 3.14159;
     fSlopeRadX = funX.GetParameter(0);
@@ -229,7 +229,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
   fGOY = GO[1];
   fGOZ = GO[2];
 
-  // Comput this track passes through each X=0, Y=0, Z=0 planes
+  // Compute where this track passes through each X=0, Y=0, Z=0 planes // DA: TODO this computes the tracks coords in planes x=0, y=0 and z=0
   fPlaner[0][0] = fGOX - fGOX / fGVX * fGVX;
   fPlaner[0][1] = fGOY - fGOX / fGVX * fGVY;
   fPlaner[0][2] = fGOZ - fGOX / fGVX * fGVZ;
@@ -246,7 +246,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
   //}
   //printf("TEST: %f %f %f %f\n", fTOX, fTOY, fTOZ, fGOZ);
 
-  // Compute where the line passes in each planes coords
+  // Compute where the line passes in each planes coords // DA: TODO make it more general with NMAXROC or something like that
   float XL[6];
   float YL[6];
 
