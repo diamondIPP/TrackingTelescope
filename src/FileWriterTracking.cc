@@ -17,10 +17,10 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     }
     newfile = new TFile(NewFileName.c_str(), "RECREATE");
     newtree = intree->CloneTree(0);
-    br_pulse_heights_all.resize(nRoc);
-    for(uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
-        br_pulse_heights_all[iRoc].resize(nHits);
-    }
+//    br_pulse_heights_all.resize(nRoc);
+//    for(uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
+//        br_pulse_heights_all[iRoc].resize(nHits);
+//    }
     br_charge_all.resize(nRoc);
     br_cluster_size.resize(nRoc);
     br_clusters_per_plane.resize(nRoc);
@@ -82,12 +82,12 @@ void FileWriterTracking::addBranches(){
         newtree->Branch(branch_name_cluster_row, &(br_cluster_row[iRoc]));
         TString branch_name_cluster_col = TString::Format("cluster_col_ROC%d",iRoc);
         newtree->Branch(branch_name_cluster_col, &(br_cluster_col[iRoc]));
-        for(size_t iHits = 1; iHits < nHits; iHits++){
-            TString branch_name_RocPulseHeights = TString::Format("pulse_height_ROC%d_%d_cluster",iRoc,iHits);
-            newtree->Branch(branch_name_RocPulseHeights,&(br_pulse_heights_all[iRoc][iHits-1]));
-        }
-        TString branch_name_RocPulseHeightsLast = TString::Format("pulse_height_ROC%d_More%d_cluster",iRoc,nHits);
-        newtree->Branch(branch_name_RocPulseHeightsLast,&(br_pulse_heights_all[iRoc][nHits-1]));
+//        for(size_t iHits = 1; iHits < nHits; iHits++){
+//            TString branch_name_RocPulseHeights = TString::Format("pulse_height_ROC%d_%d_cluster",iRoc,iHits);
+//            newtree->Branch(branch_name_RocPulseHeights,&(br_pulse_heights_all[iRoc][iHits-1]));
+//        }
+//        TString branch_name_RocPulseHeightsLast = TString::Format("pulse_height_ROC%d_More%d_cluster",iRoc,nHits);
+//        newtree->Branch(branch_name_RocPulseHeightsLast,&(br_pulse_heights_all[iRoc][nHits-1]));
     }
 }
 void FileWriterTracking::fillTree(){
@@ -112,9 +112,9 @@ void FileWriterTracking::clearVectors(){
         br_cluster_pos_local_y[iRoc]->clear();
         br_cluster_col[iRoc]->clear();
         br_cluster_row[iRoc]->clear();
-        for (uint8_t iHits = 0; iHits != nHits; iHits++){
-            br_pulse_heights_all[iRoc][iHits]->clear();
-        }
+//        for (uint8_t iHits = 0; iHits != nHits; iHits++){
+//            br_pulse_heights_all[iRoc][iHits]->clear();
+//        }
     }
 }
 

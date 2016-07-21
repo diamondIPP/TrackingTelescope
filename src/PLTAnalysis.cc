@@ -327,14 +327,14 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
             FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
             FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
             FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
-            if ((Plane->Cluster(icluster)->NHits() > 0)) {
-                size_t index = Plane->Cluster(icluster)->NHits() - 1;
-                if(index < FW->GetNHits()){
-                    FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
-                }
-                else
-                    FW->setPulseHeightsRoc(iplane,FW->GetNHits()-1,Plane->Cluster(icluster)->Charge());
-            }
+//            if ((Plane->Cluster(icluster)->NHits() > 0)) {
+//                size_t index = Plane->Cluster(icluster)->NHits() - 1;
+//                if(index < FW->GetNHits()){
+//                    FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
+//                }
+//                else
+//                    FW->setPulseHeightsRoc(iplane,FW->GetNHits()-1,Plane->Cluster(icluster)->Charge());
+//            }
         }
     }
 
