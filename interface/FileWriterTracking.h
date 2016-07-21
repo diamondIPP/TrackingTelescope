@@ -40,6 +40,7 @@ private:
     uint8_t br_n_tracks, br_n_clusters;
     vector<uint8_t> br_clusters_per_plane;
     vector<vector<float>* > br_charge_all;
+    vector<vector<int>* > br_cluster_size;
     vector<vector<vector<float>*>> br_pulse_heights_all;
     vector<vector<float> *> br_cluster_pos_telescope_x;
     vector<vector<float> *> br_cluster_pos_telescope_y;
@@ -80,6 +81,7 @@ public:
     float   Chi2X() { return br_chi2_x; }
     float   Chi2Y() { return br_chi2_y; }
     vector<vector<float>* > ChargeAll() { return br_charge_all; }
+    vector<vector<int>* > ClusterSize() { return br_cluster_size; }
     vector<vector<float>* > ClusterPosTelescopeX() { return br_cluster_pos_telescope_x; }
     vector<vector<float>* > ClusterPosTelescopeY() { return br_cluster_pos_telescope_y; }
     vector<vector<float>* > ClusterPosLocalX() { return br_cluster_pos_local_x; }
@@ -108,6 +110,7 @@ public:
     void setChi2X(float value) { br_chi2_x = value; }
     void setChi2Y(float value) { br_chi2_y = value; }
     void setChargeAll(uint8_t iRoc, float value) { br_charge_all[iRoc]->push_back(value); }
+    void setClusterSize(uint8_t iRoc, int value) { br_cluster_size[iRoc]->push_back(value); }
     void setClusters(uint8_t iRoc, uint8_t value) { br_clusters_per_plane[iRoc] = value; }
     void setClusterPositionTelescopeX(uint8_t iRoc, float value) { br_cluster_pos_telescope_x[iRoc]->push_back(value); }
     void setClusterPositionTelescopeY(uint8_t iRoc, float value) { br_cluster_pos_telescope_y[iRoc]->push_back(value); }
