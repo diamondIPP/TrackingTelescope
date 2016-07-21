@@ -320,6 +320,7 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setClusters(iplane, Plane->NClusters() );
         for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
             FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
+            FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
             FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
             FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
             FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
