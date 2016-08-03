@@ -671,16 +671,29 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
             SetErrorY( 2, 0.01);
             SetErrorY( 3, 0.01);
         }
-        else if (id == 9 || id == 11 || id == 12 || id==14 || id==15 || id==16){
-            SetErrorX( 0, sqrt(5)*0.015/sqrt(12));
-            SetErrorX( 1, 0.015/sqrt(12));
-            SetErrorX( 2, 0.015/sqrt(12));
-            SetErrorX( 3, sqrt(5)*0.015/sqrt(12));
-
-            SetErrorY( 0, sqrt(5)*0.01/sqrt(12));
-            SetErrorY( 1, 0.01/sqrt(12));
-            SetErrorY( 2, 0.01/sqrt(12));
-            SetErrorY( 3, sqrt(5)*0.01/sqrt(12));
+        else if (id == 9 || id == 11 || id == 12 || id==14 || id==15 || id==16 || id==17){
+            float correction = 2.5;
+            bool use_geom_fac = false;
+            float geom_fac = use_geom_fac ? sqrt(5) : 1;
+            for (uint8_t i = 0; i < 4; i++){
+                if (i == 0 or i == 3) {
+                    SetErrorX(i, geom_fac * 0.015 / sqrt(12) * correction);
+                    SetErrorY(i, geom_fac * 0.01 / sqrt(12) * correction);
+                }
+                else {
+                    SetErrorX(i, 0.015/sqrt(12) * correction);
+                    SetErrorY(i, 0.01/sqrt(12) * correction);
+                }
+            }
+//            SetErrorX( 0, sqrt(5)*0.015/sqrt(12));
+//            SetErrorX( 1, 0.015/sqrt(12));
+//            SetErrorX( 2, 0.015/sqrt(12));
+//            SetErrorX( 3, sqrt(5)*0.015/sqrt(12));
+//
+//            SetErrorY( 0, sqrt(5)*0.01/sqrt(12));
+//            SetErrorY( 1, 0.01/sqrt(12));
+//            SetErrorY( 2, 0.01/sqrt(12));
+//            SetErrorY( 3, sqrt(5)*0.01/sqrt(12));
         }
         else if (telescopeID == 8){
             SetErrorX( 0, 0.01);
