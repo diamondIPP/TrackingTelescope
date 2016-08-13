@@ -316,6 +316,7 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
     // new Branches: DA
     FW->setCoincidenceMap(FR->HitPlaneBits());
     for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+        PLTTrack * Track = FR->Track(0);
         PLTPlane * Plane = FR->Plane(iplane);
         FW->setClusters(iplane, Plane->NClusters() );
         for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
@@ -327,6 +328,9 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
             FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
             FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
             FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
+            FW->setTrackX(iplane, Track->ExtrapolateX(Plane->TZ()));
+            FW->setTrackY(iplane, Track->ExtrapolateY(Plane->TZ()));
+
 //            if ((Plane->Cluster(icluster)->NHits() > 0)) {
 //                size_t index = Plane->Cluster(icluster)->NHits() - 1;
 //                if(index < FW->GetNHits()){

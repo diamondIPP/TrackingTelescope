@@ -50,6 +50,8 @@ private:
     vector<vector<int> *> br_cluster_row;
     vector<vector<int> *> br_cluster_col;
 //    vector<vector<float> > br_test;
+    vector<vector<float> *> br_track_x;
+    vector<vector<float> *> br_track_y;
 
     /** some functions*/
     string getFileName(string);
@@ -91,6 +93,8 @@ public:
     float   GetCoincidenceMap() { return br_coincidence_map; }
     vector<vector<int>* > ClusterRow() { return br_cluster_row; }
     vector<vector<int>* > ClusterCol() { return br_cluster_col; }
+    vector<vector<float>* > TrackX() { return br_track_x; }
+    vector<vector<float>* > TrackY() { return br_track_y; }
 
     /** ============================
      SET-FUNCTIONS
@@ -120,6 +124,8 @@ public:
     void setCoincidenceMap(float value) { br_coincidence_map = value; }
     void setClusterColumn(uint8_t iRoc, int value) { br_cluster_col[iRoc]->push_back(value); }
     void setClusterRow(uint8_t iRoc, int value) { br_cluster_row[iRoc]->push_back(value); }
+    void setTrackX(uint8_t iRoc, float value) { br_track_x[iRoc]->push_back(value); }
+    void setTrackY(uint8_t iRoc, float value) { br_track_y[iRoc]->push_back(value); }
 
 
     /** ============================
