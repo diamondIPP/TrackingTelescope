@@ -52,6 +52,12 @@ private:
 //    vector<vector<float> > br_test;
     vector<vector<float> *> br_track_x;
     vector<vector<float> *> br_track_y;
+    vector<vector<float> *> br_smallest_hit_charge;
+    vector<vector<int> *> br_smallest_hit_adc;
+    vector<vector<int> *> br_smallest_hit_pos_col;
+    vector<vector<int> *> br_smallest_hit_pos_row;
+//    vector<vector<float> *> br_smalleest_hit_pos_telescope_x;  // DA: maybe they are necessary. If they are, implement them just as br_smallest_hit_pos_col/row
+//    vector<vector<float> *> br_smalleest_hit_pos_telescope_y;
 
     /** some functions*/
     string getFileName(string);
@@ -95,6 +101,10 @@ public:
     vector<vector<int>* > ClusterCol() { return br_cluster_col; }
     vector<vector<float>* > TrackX() { return br_track_x; }
     vector<vector<float>* > TrackY() { return br_track_y; }
+    vector<vector<float>* > SmallestHitCharge() { return br_smallest_hit_charge; }
+    vector<vector<int>* > SmallestHitADC() { return br_smallest_hit_adc; }
+    vector<vector<int>* > SmallestHitPosCol() { return br_smallest_hit_pos_col; }
+    vector<vector<int>* > SmallestHitPosRow() { return br_smallest_hit_pos_row; }
 
     /** ============================
      SET-FUNCTIONS
@@ -126,6 +136,10 @@ public:
     void setClusterRow(uint8_t iRoc, int value) { br_cluster_row[iRoc]->push_back(value); }
     void setTrackX(uint8_t iRoc, float value) { br_track_x[iRoc]->push_back(value); }
     void setTrackY(uint8_t iRoc, float value) { br_track_y[iRoc]->push_back(value); }
+    void setSmallestHitCharge(uint8_t iRoc, float value) { br_smallest_hit_charge[iRoc]->push_back(value); }
+    void setSmallestHitCharge(uint8_t iRoc, int value) { br_smallest_hit_adc[iRoc]->push_back(value); }
+    void setSmallestHitPosCol(uint8_t iRoc, int value) { br_smallest_hit_pos_col[iRoc]->push_back(value); }
+    void setSmallestHitPosRow(uint8_t iRoc, int value) { br_smallest_hit_pos_row[iRoc]->push_back(value); }
 
 
     /** ============================

@@ -330,6 +330,18 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
             FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
             FW->setTrackX(iplane, Track->ExtrapolateX(Plane->TZ()));
             FW->setTrackY(iplane, Track->ExtrapolateY(Plane->TZ()));
+            float chargeSmall = 1000000000;
+            size_t ihitSmall = 0;
+            for (size_t ihit = 0; ihit < Plane->Cluster(icluster)->NHits(); ihit ++){
+                if (chargeSmall > Plane->Cluster(icluster)->Hit(ihit)->Charge()){
+                    chargeSmall = Plane->Cluster(icluster)->Hit(ihit)->Charge();
+                    ihitSmall = ihit;
+                }
+            }
+            FW->setSmallestHitCharge(iplane, chargeSmall);
+            FW->setSmallestHitCharge(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->ADC());
+            FW->setSmallestHitPosCol(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Column());
+            FW->setSmallestHitPosRow(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Row());
 
 //            if ((Plane->Cluster(icluster)->NHits() > 0)) {
 //                size_t index = Plane->Cluster(icluster)->NHits() - 1;

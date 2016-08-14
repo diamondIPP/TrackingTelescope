@@ -32,6 +32,10 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     br_cluster_row.resize(nRoc);
     br_track_x.resize(nRoc);
     br_track_y.resize(nRoc);
+    br_smallest_hit_charge.resize(nRoc);
+    br_smallest_hit_adc.resize(nRoc);
+    br_smallest_hit_pos_col.resize(nRoc);
+    br_smallest_hit_pos_row.resize(nRoc);
     addBranches();
 
 }
@@ -88,6 +92,15 @@ void FileWriterTracking::addBranches(){
         newtree->Branch(branch_name_track_x, &(br_track_x[iRoc]));
         TString branch_name_track_y = TString::Format("track_y_ROC%d",iRoc);
         newtree->Branch(branch_name_track_y, &(br_track_y[iRoc]));
+        TString branch_name_smallest_charge = TString::Format("smallest_clust_hit_charge_ROC%d",iRoc);
+        newtree->Branch(branch_name_smallest_charge, &(br_smallest_hit_charge));
+        TString branch_name_smallest_adc = TString::Format("smallest_clust_hit_adc_ROC%d",iRoc);
+        newtree->Branch(branch_name_smallest_adc, &(br_smallest_hit_adc));
+        TString branch_name_smallest_col = TString::Format("smallest_clust_hit_col_ROC%d",iRoc);
+        newtree->Branch(branch_name_smallest_col, &(br_smallest_hit_pos_col));
+        TString branch_name_smallest_row = TString::Format("smallest_clust_hit_row_ROC%d",iRoc);
+        newtree->Branch(branch_name_smallest_row, &(br_smallest_hit_pos_row));
+
 //        for(size_t iHits = 1; iHits < nHits; iHits++){
 //            TString branch_name_RocPulseHeights = TString::Format("pulse_height_ROC%d_%d_cluster",iRoc,iHits);
 //            newtree->Branch(branch_name_RocPulseHeights,&(br_pulse_heights_all[iRoc][iHits-1]));
@@ -120,6 +133,10 @@ void FileWriterTracking::clearVectors(){
         br_cluster_row[iRoc]->clear();
         br_track_x[iRoc]->clear();
         br_track_y[iRoc]->clear();
+        br_smallest_hit_charge[iRoc]->clear();
+        br_smallest_hit_adc[iRoc]->clear();
+        br_smallest_hit_pos_col[iRoc]->clear();
+        br_smallest_hit_pos_row[iRoc]->clear();
 //        for (uint8_t iHits = 0; iHits != nHits; iHits++){
 //            br_pulse_heights_all[iRoc][iHits]->clear();
 //        }
