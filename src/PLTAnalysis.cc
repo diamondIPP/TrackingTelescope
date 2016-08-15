@@ -299,6 +299,46 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setDia2TrackY(Track->ExtrapolateY(PLTU::DIA2Z));
         FW->setDistDia1(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z));
         FW->setDistDia2(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z));
+
+        FW->setCoincidenceMap(FR->HitPlaneBits());
+        for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+            PLTTrack * Track2 = FR->Track(0);
+            PLTPlane * Plane = FR->Plane(iplane);
+            FW->setClusters(iplane, Plane->NClusters() );
+            for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
+                FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
+                FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
+                FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
+                FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
+                FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
+                FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
+                FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
+                FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
+                FW->setTrackX(iplane, Track2->ExtrapolateX(Plane->TZ()));
+                FW->setTrackY(iplane, Track2->ExtrapolateY(Plane->TZ()));
+                float chargeSmall = 1000000000;
+                size_t ihitSmall = 0;
+                for (size_t ihit = 0; ihit < Plane->Cluster(icluster)->NHits(); ihit ++){
+                    if (chargeSmall > Plane->Cluster(icluster)->Hit(ihit)->Charge()){
+                        chargeSmall = Plane->Cluster(icluster)->Hit(ihit)->Charge();
+                        ihitSmall = ihit;
+                    }
+                }
+                FW->setSmallestHitCharge(iplane, chargeSmall);
+                FW->setSmallestHitCharge(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->ADC());
+                FW->setSmallestHitPosCol(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Column());
+                FW->setSmallestHitPosRow(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Row());
+
+//            if ((Plane->Cluster(icluster)->NHits() > 0)) {
+//                size_t index = Plane->Cluster(icluster)->NHits() - 1;
+//                if(index < FW->GetNHits()){
+//                    FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
+//                }
+//                else
+//                    FW->setPulseHeightsRoc(iplane,FW->GetNHits()-1,Plane->Cluster(icluster)->Charge());
+//            }
+            }
+        }
     }
     else {
         FW->setChi2(-999);
@@ -314,45 +354,7 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setDistDia2(-999, -999);
     }
     // new Branches: DA
-    FW->setCoincidenceMap(FR->HitPlaneBits());
-    for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
-        PLTTrack * Track = FR->Track(0);
-        PLTPlane * Plane = FR->Plane(iplane);
-        FW->setClusters(iplane, Plane->NClusters() );
-        for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
-            FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
-            FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
-            FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
-            FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
-            FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
-            FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
-            FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
-            FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
-            FW->setTrackX(iplane, Track->ExtrapolateX(Plane->TZ()));
-            FW->setTrackY(iplane, Track->ExtrapolateY(Plane->TZ()));
-            float chargeSmall = 1000000000;
-            size_t ihitSmall = 0;
-            for (size_t ihit = 0; ihit < Plane->Cluster(icluster)->NHits(); ihit ++){
-                if (chargeSmall > Plane->Cluster(icluster)->Hit(ihit)->Charge()){
-                    chargeSmall = Plane->Cluster(icluster)->Hit(ihit)->Charge();
-                    ihitSmall = ihit;
-                }
-            }
-            FW->setSmallestHitCharge(iplane, chargeSmall);
-            FW->setSmallestHitCharge(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->ADC());
-            FW->setSmallestHitPosCol(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Column());
-            FW->setSmallestHitPosRow(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Row());
 
-//            if ((Plane->Cluster(icluster)->NHits() > 0)) {
-//                size_t index = Plane->Cluster(icluster)->NHits() - 1;
-//                if(index < FW->GetNHits()){
-//                    FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
-//                }
-//                else
-//                    FW->setPulseHeightsRoc(iplane,FW->GetNHits()-1,Plane->Cluster(icluster)->Charge());
-//            }
-        }
-    }
 
     FW->fillTree();
 }
