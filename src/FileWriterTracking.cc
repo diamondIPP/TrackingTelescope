@@ -63,8 +63,8 @@ void FileWriterTracking::addBranches(){
     newtree->Branch("chi2_tracks", &br_chi2);
     newtree->Branch("chi2_x", &br_chi2_x);
     newtree->Branch("chi2_y", &br_chi2_y);
-    newtree->Branch("slope_x", &br_slope_x);
-    newtree->Branch("slope_y", &br_slope_y);
+    newtree->Branch("angle_x", &br_angle_x);
+    newtree->Branch("angle_y", &br_angle_y);
     newtree->Branch("n_tracks", &br_n_tracks);
     newtree->Branch("n_clusters", &br_n_clusters);
     newtree->Branch("clusters_per_plane", &br_clusters_per_plane);

@@ -134,14 +134,14 @@ PLTAnalysis::~PLTAnalysis()
 		    Histos->Chi2Y()->Fill(Track->Chi2Y());
 
 		    /** fill slope histos */
-		    Histos->TrackSlopeX()->Fill(Track->fSlopeX);
-		    Histos->TrackSlopeY()->Fill(Track->fSlopeY);
+		    Histos->TrackAngleX()->Fill(Track->fAngleX);
+		    Histos->TrackAngleY()->Fill(Track->fAngleY);
 
 		    //                if (ievent < 100){
 		    //                    for (uint8_t iSig = 0; iSig != Track->NClusters(); iSig++)
 		    //                        std::cout<< Track->Cluster(iSig)->TX() << " " << Track->Cluster(iSig)->TY() << " " << Track->Cluster(iSig)->TZ() << std::endl;
 		    //                        std::cout << Track->fChi2X << " " << Track->fChi2Y << " " << Track->fChi2 << std::endl;
-		    //                        std::cout << Track->fSlopeRadX << " " << Track->fOffsetX << Track->fSlopeRadY << " " << Track->fOffsetY << std::endl;
+		    //                        std::cout << Track->fAngleRadX << " " << Track->fOffsetX << Track->fAngleRadY << " " << Track->fOffsetY << std::endl;
 		    //                    std::cout << std::endl;
 		    //                }
 
@@ -292,8 +292,8 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setChi2(Track->Chi2() );
         FW->setChi2X(Track->Chi2X() );
         FW->setChi2Y(Track->Chi2Y() );
-        FW->setSlopeX(Track->fSlopeX);
-        FW->setSlopeY(Track->fSlopeY);
+        FW->setAngleX(Track->fAngleX);
+        FW->setAngleY(Track->fAngleY);
         FW->setDia1TrackX(Track->ExtrapolateX(PLTU::DIA1Z));
         FW->setDia1TrackY(Track->ExtrapolateY(PLTU::DIA1Z));
         FW->setDia2TrackX(Track->ExtrapolateX(PLTU::DIA2Z));
@@ -345,8 +345,8 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setChi2(-999);
         FW->setChi2X(-999);
         FW->setChi2Y(-999);
-        FW->setSlopeX(-999);
-        FW->setSlopeY(-999);
+        FW->setAngleX(-999);
+        FW->setAngleY(-999);
         FW->setDia1TrackX(-999);
         FW->setDia1TrackY(-999);
         FW->setDia2TrackX(-999);
@@ -479,7 +479,7 @@ void PLTAnalysis::FillOccupancy(PLTPlane * Plane){
 }
 void PLTAnalysis::FillOfflinePH(PLTTrack * Track, PLTCluster * Cluster){
 
-    if ((fabs(Track->fSlopeX) < 0.01) && (fabs(Track->fSlopeY) < 0.01)){
+    if ((fabs(Track->fAngleX) < 0.01) && (fabs(Track->fAngleY) < 0.01)){
 						Histos->PulseHeightOffline()[Cluster->ROC()][0]->Fill(Cluster->Charge());
 
         if (Cluster->NHits() == 1)
