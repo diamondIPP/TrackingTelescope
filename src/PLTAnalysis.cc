@@ -134,8 +134,8 @@ PLTAnalysis::~PLTAnalysis()
 		    Histos->Chi2Y()->Fill(Track->Chi2Y());
 
 		    /** fill slope histos */
-		    Histos->TrackAngleX()->Fill(Track->fAngleX);
-		    Histos->TrackAngleY()->Fill(Track->fAngleY);
+		    Histos->TrackSlopeX()->Fill(Track->fAngleX);
+		    Histos->TrackSlopeY()->Fill(Track->fAngleY);
 
 		    //                if (ievent < 100){
 		    //                    for (uint8_t iSig = 0; iSig != Track->NClusters(); iSig++)
