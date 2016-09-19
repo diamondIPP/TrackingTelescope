@@ -246,7 +246,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
   //}
   //printf("TEST: %f %f %f %f\n", fTOX, fTOY, fTOZ, fGOZ);
 
-  // Compute where the line passes in each planes coords // DA: TODO make it more general with NMAXROC or something like that
+  // Compute where the line passes in each planes coords // DA: TODO make it more general with NMAXROC-1 or something like that
   float XL[6];
   float YL[6];
 

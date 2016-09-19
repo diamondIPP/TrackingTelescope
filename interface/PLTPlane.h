@@ -79,7 +79,7 @@ class PLTPlane
     void SetROC (int const);
 
     void Clear ();
-
+    void CheckDoubleClassification();
 
   protected:
     int fChannel;

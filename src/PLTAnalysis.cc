@@ -2,11 +2,11 @@
 
 using namespace std;
 
-PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const runNumber, uint8_t const TelescopeID):
+PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope):
     telescopeID(TelescopeID), InFileName(inFileName), RunNumber(runNumber),
     now1(clock()), now2(clock()), loop(0), startProg(0), endProg(0), allProg(0), averTime(0),
     TimeWidth(20000), StartTime(0), NGraphPoints(0),
-    PHThreshold(3e5)
+    PHThreshold(3e5), trackOnlyTelescope(TrackOnlyTelescope)
 {
     out_f = Out_f;
     /** set up root */
@@ -71,7 +71,8 @@ PLTAnalysis::~PLTAnalysis()
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
 
             PLTPlane * Plane = FR->Plane(iplane);
-
+            /** Check that the each hit belongs to only one cluster type*/ //todo: DA: comentar
+    	    Plane->CheckDoubleClassification();
             /** fill cluster histo */
             Histos->nClusters()[Plane->ROC()]->Fill(Plane->NClusters());
 
@@ -230,7 +231,7 @@ void PLTAnalysis::InitFileReader(){
 
     if (GetUseRootInput(telescopeID)){
         FR = new PSIRootFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
-            GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID), false, telescopeID);
+            GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID), false, telescopeID, trackOnlyTelescope);
     }
     else {
         FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
@@ -352,6 +353,45 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setDia2TrackY(-999);
         FW->setDistDia1(-999, -999);
         FW->setDistDia2(-999, -999);
+        FW->setCoincidenceMap(0);
+        for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+//            PLTTrack * Track2 = FR->Track(0);
+            PLTPlane * Plane = FR->Plane(iplane);
+            FW->setClusters(iplane, Plane->NClusters() );
+            for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
+                FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
+                FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
+                FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
+                FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
+                FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
+                FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
+                FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
+                FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
+                FW->setTrackX(iplane, -9999);
+                FW->setTrackY(iplane, -9999);
+                float chargeSmall = 1000000000;
+                size_t ihitSmall = 0;
+                for (size_t ihit = 0; ihit < Plane->Cluster(icluster)->NHits(); ihit ++){
+                    if (chargeSmall > Plane->Cluster(icluster)->Hit(ihit)->Charge()){
+                        chargeSmall = Plane->Cluster(icluster)->Hit(ihit)->Charge();
+                        ihitSmall = ihit;
+                    }
+                }
+                FW->setSmallestHitCharge(iplane, chargeSmall);
+                FW->setSmallestHitCharge(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->ADC());
+                FW->setSmallestHitPosCol(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Column());
+                FW->setSmallestHitPosRow(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Row());
+
+//            if ((Plane->Cluster(icluster)->NHits() > 0)) {
+//                size_t index = Plane->Cluster(icluster)->NHits() - 1;
+//                if(index < FW->GetNHits()){
+//                    FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
+//                }
+//                else
+//                    FW->setPulseHeightsRoc(iplane,FW->GetNHits()-1,Plane->Cluster(icluster)->Charge());
+//            }
+            }
+        }
     }
     // new Branches: DA
 
