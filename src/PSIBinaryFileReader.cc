@@ -337,7 +337,7 @@ int PSIBinaryFileReader::CalculateLevels (int const NMaxEvents,TString const Out
     TSpectrum Spectrum(20);
     Spectrum.SetAverageWindow(30);//probably does nothing
     int const NPeaks = Spectrum.Search(hROCLevels[iroc]);
-    float* Peaks = Spectrum.GetPositionX();
+    float * Peaks = Spectrum.GetPositionX();
     std::sort(Peaks, Peaks + NPeaks);
 
     // Workaround for:
