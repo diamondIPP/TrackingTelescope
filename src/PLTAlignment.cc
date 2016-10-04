@@ -671,7 +671,7 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
             SetErrorY( 2, 0.01);
             SetErrorY( 3, 0.01);
         }
-        else if (id == 9 || id == 11 || id == 12 || id==14 || id==15 || id==16 || id==17){
+        else if (id == 9 || id == 11 || id == 12 || id>=14){
             float correction = 2.5;
             bool use_geom_fac = false;
             float geom_fac = use_geom_fac ? sqrt(5) : 1;
