@@ -180,7 +180,7 @@ int DoAlignment (std::string const InFileName,
 //            }
         } // end loop over rocs
 
-        FR->GetAlignment()->WriteAlignmentFile("NewAlignment.dat", FR->NMAXROCS);
+//        FR->GetAlignment()->WriteAlignmentFile("NewAlignment.dat", FR->NMAXROCS);
 
     } // end alignment loop
 

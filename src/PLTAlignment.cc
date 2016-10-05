@@ -109,36 +109,32 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
 
 void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int numRocs)
 {
-  // Open output file
-  FILE* Out = fopen(OutFileName.c_str(), "w");
-  if (!Out) {
-    std::cerr << "ERROR: cannot open file: " << OutFileName << std::endl;
-    throw;
-  }
-
-  for (std::map<int, TelescopeAlignmentStruct>::iterator it = fTelescopeMap.begin(); it != fTelescopeMap.end(); ++it) {
-    int const Channel = it->first;
-    TelescopeAlignmentStruct& Tele = it->second;
-
-    fprintf(Out, "\n");
-    fprintf(Out, "%2i  -1        %15E      %15E  %15E  %15E  %15E\n", Channel, Tele.GRZ, Tele.GRY, Tele.GX, Tele.GY, Tele.GZ);
-    // TODO: make flexible
-    for (int iroc = 0; iroc != numRocs; ++iroc) {
-      std::pair<int, int> ChROC = std::make_pair(Channel, iroc);
-
-      if (!fConstantMap.count(ChROC)) {
-        std::cerr << "ERROR: No entry in fConstantMap for Ch ROC: " << Channel << " " << iroc << std::endl;
-        continue;
-      }
-
-      CP& C = fConstantMap[ChROC];
-      fprintf(Out, "%2i   %1i        %15E                       %15E  %15E  %15E\n", Channel, iroc, C.LR, C.LX, C.LY, C.LZ);
-
+    // Open output file
+    ofstream f;
+    f.open(OutFileName.c_str());
+    if (!f){
+        std::cerr << "ERROR: cannot open file: " << OutFileName << std::endl;
+        throw;
     }
-  }
 
+    // Writing the information
+    for (auto it:fTelescopeMap){
+        int const Channel = it.first;
+        TelescopeAlignmentStruct& Tele = it.second;
+        f << TString::Format("\n%2i  -1        %15E      %15E  %15E  %15E  %15E\n", Channel, Tele.GRZ, Tele.GRY, Tele.GX, Tele.GY, Tele.GZ);
+        for (uint8_t iroc = 0; iroc < numRocs; iroc++){
+            std::pair<int, int> ChROC = std::make_pair(Channel, iroc);
+            if (!fConstantMap.count(ChROC)) {
+                std::cerr << "ERROR: No entry in fConstantMap for Ch ROC: " << Channel << " " << iroc << std::endl;
+                continue;
+            }
+            CP & C = fConstantMap[ChROC];
+            f << TString::Format("%2i   %1i        %15E                       %15E  %15E  %15E\n", Channel, iroc, C.LR, C.LX, C.LY, C.LZ);
+        }
+    }
 
-  return;
+    f.close();
+    return;
 }
 
 
