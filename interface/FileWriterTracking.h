@@ -29,6 +29,8 @@ private:
     TMacro * names;
     string NewFileName;
 
+    int TelescopeID;
+
     /** branch variables */
     uint8_t br_hit_plane_bits;
     float   br_diam1_track_x, br_diam1_track_y;
@@ -37,6 +39,7 @@ private:
     float   br_chi2;
     float   br_chi2_x, br_chi2_y;
     float   br_angle_x, br_angle_y;
+    float   br_slope_x, br_slope_y;
     uint8_t br_n_tracks, br_n_clusters;
     vector<uint8_t> br_clusters_per_plane;
     vector<vector<float>* > br_charge_all;
@@ -85,6 +88,8 @@ public:
     float   Dia2TrackY() { return br_diam2_track_y; }
     float   AngleX() { return br_angle_x; }
     float   AngleY() { return br_angle_y; }
+    float   SlopeX() { return br_slope_x; }
+    float   SlopeY() { return br_slope_y; }
     float   Chi2() { return br_chi2; }
     float   Chi2X() { return br_chi2_x; }
     float   Chi2Y() { return br_chi2_y; }
@@ -120,6 +125,8 @@ public:
     void setDistDia2(float xVal, float yVal) { br_dist_to_dia2 = sqrt(xVal*xVal + yVal*yVal); }
     void setAngleX(float value) { br_angle_x = value; }
     void setAngleY(float value) { br_angle_y = value; }
+    void setSlopeX(float value) { br_slope_x = value; }
+    void setSlopeY(float value) { br_slope_y = value; }
     void setChi2(float value) { br_chi2 = value; }
     void setChi2X(float value) { br_chi2_x = value; }
     void setChi2Y(float value) { br_chi2_y = value; }
