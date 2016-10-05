@@ -8,6 +8,7 @@ int DoAlignment (std::string const InFileName,
                  TString const RunNumber,
                  int telescopeID)
 {
+    gROOT->ProcessLine("gErrorIgnoreLevel = kError;");
     TString const PlotsDir = "plots/";
     TString const OutDir = PlotsDir + RunNumber;
     float const angle_threshold = 0.01;
@@ -174,9 +175,9 @@ int DoAlignment (std::string const InFileName,
             hResidualYdX[iroc_align].Draw("colz");
             Can.SaveAs( OutDir+"/"+TString(hResidualYdX[iroc_align].GetName()) + ".png");
 
-            for (uint8_t i = 0; i != GetNumberOfROCS(telescopeID); i++){
-                std::cout << int(i) << setprecision(7) << " " << x_align[i] << " " << y_align[i] << " " << z_align[i] << " " << r_align[i] <<std::endl;
-            }
+//            for (uint8_t i = 0; i != GetNumberOfROCS(telescopeID); i++){
+//                std::cout << int(i) << setprecision(7) << " " << x_align[i] << " " << y_align[i] << " " << z_align[i] << " " << r_align[i] <<std::endl;
+//            }
         } // end loop over rocs
 
         FR->GetAlignment()->WriteAlignmentFile("NewAlignment.dat", FR->NMAXROCS);
@@ -322,26 +323,26 @@ int DoAlignment (std::string const InFileName,
             TF1 linear_fun2 = TF1(" ","[0]+[1]*x");
 //            gResidualXdY[iroc].Fit(&linear_fun);
 //            gResidualYdX[iroc].Fit(&linear_fun2);
-            hResidualXdY[iroc].Fit(&linear_fun);
-            hResidualYdX[iroc].Fit(&linear_fun2);
+            hResidualXdY[iroc].Fit(&linear_fun, "Q");
+            hResidualYdX[iroc].Fit(&linear_fun2, "Q");
 
             float other_angle = atan(linear_fun.GetParameter(1));
             float other_angle2 = atan(linear_fun2.GetParameter(1));
             total_angle += fabs(other_angle);
             total_res += fabs(hResidualXdY[iroc].GetMean(2)) + fabs(hResidualYdX[iroc].GetMean(2));
-            std::cout << "BLA: ANGLE BEFORE: " << FR->GetAlignment()->GetCP(1,iroc)->LR << std::endl;
+//            std::cout << "BLA: ANGLE BEFORE: " << FR->GetAlignment()->GetCP(1,iroc)->LR << std::endl;
             FR->GetAlignment()->AddToLR(1, iroc, other_angle);// DA: this was ... other_angle/3.
-            std::cout << "BLA: ANGLE AFTER: " << FR->GetAlignment()->GetCP(1,iroc)->LR << std::endl;
+//            std::cout << "BLA: ANGLE AFTER: " << FR->GetAlignment()->GetCP(1,iroc)->LR << std::endl;
 
             std::cout << "ROC: " << iroc << " Angle: " << angle << " Other Angle:" << other_angle << " Other Angle 2:" << other_angle2 << std::endl;
 
-            for (uint8_t i = 0; i != GetNumberOfROCS(telescopeID); i++){
-                printf("%2i   %1i        %15E                       %15E  %15E  %15E\n", 1, i,
-                       FR->GetAlignment()->LR(1,i),
-                       FR->GetAlignment()->LX(1,i),
-                       FR->GetAlignment()->LY(1,i),
-                       FR->GetAlignment()->LZ(1,i) );
-            }
+//            for (uint8_t i = 0; i != GetNumberOfROCS(telescopeID); i++){
+//                printf("%2i   %1i        %15E                       %15E  %15E  %15E\n", 1, i,
+//                       FR->GetAlignment()->LR(1,i),
+//                       FR->GetAlignment()->LX(1,i),
+//                       FR->GetAlignment()->LY(1,i),
+//                       FR->GetAlignment()->LZ(1,i) );
+//            }
 
 
             TCanvas Can;
@@ -404,6 +405,7 @@ int DoAlignment (std::string const InFileName,
 
     delete FR;
 
+    gROOT->ProcessLine("gErrorIgnoreLevel = 0;");
     return 0;
 }
 
