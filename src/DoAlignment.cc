@@ -391,7 +391,8 @@ int DoAlignment (std::string const InFileName,
 
     } // end alignment loop
 
-    std::cout << "saving alignment file with the following parameters:" << std::endl;
+    std::string outFileName = "NewAlignment.dat";
+    std::cout << "saving alignment file \"" << outFileName << "\" with the following parameters:" << std::endl;
 
     for (uint8_t i = 0; i != GetNumberOfROCS(telescopeID); i++){
         printf("%2i   %1i        %15E                       %15E  %15E  %15E\n", 1, i,
@@ -401,7 +402,7 @@ int DoAlignment (std::string const InFileName,
                FR->GetAlignment()->LZ(1,i) );
     }
 
-    FR->GetAlignment()->WriteAlignmentFile("NewAlignment.dat", FR->NMAXROCS);
+    FR->GetAlignment()->WriteAlignmentFile(outFileName, FR->NMAXROCS);
 
     delete FR;
 
