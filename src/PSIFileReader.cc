@@ -19,9 +19,9 @@ using namespace std;
  CONSTRUCTOR
  =================================*/
 PSIFileReader::PSIFileReader (string const CalibrationList, string const AlignmentFileName,
-    int const nrocs, bool const useGainInterpolator, bool const useExternalCalibrationFunction):
-        PLTTracking(nrocs), NMAXROCS(nrocs), fGainCal(nrocs, useExternalCalibrationFunction),
-        fUseGainInterpolator(useGainInterpolator){
+    int const nrocs, bool const useGainInterpolator, bool const useExternalCalibrationFunction, bool TrackOnlyTelescope):
+        PLTTracking(nrocs, TrackOnlyTelescope), NMAXROCS(nrocs), fGainCal(nrocs, useExternalCalibrationFunction),
+        fUseGainInterpolator(useGainInterpolator), trackOnlyTelescope(TrackOnlyTelescope){
 
    /** Initialize fCalibrationFile and fRawCalibrationFile with empty strings */
     for (int i_roc=0; i_roc != NMAXROCS; i_roc++) {
@@ -54,7 +54,14 @@ PSIFileReader::PSIFileReader (string const CalibrationList, string const Alignme
     fAlignment.ReadAlignmentFile(AlignmentFileName);// TODO: DA: make condition to skip this in case there is not analysis but only alignment?
     SetTrackingAlignment(&fAlignment);
 
-    SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
+    if(!trackOnlyTelescope) {
+        std::cout << "Setting reader's tracking altorithm to All plalne algorithm " << std::endl;
+        SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
+    }
+    else {
+        std::cout << "Setting reader's tracking algorithm to ETH algorithm" << std::endl;
+        SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_ETH);
+    }
 }
 
 
