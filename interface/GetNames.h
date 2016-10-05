@@ -24,4 +24,6 @@ std::vector<std::string> &split(const std::string &s, char delim, std::vector<st
 std::vector<std::string> split(const std::string &s, char delim);
 bool in(uint8_t, std::vector<uint8_t>);
 
+bool GetUseSlopeInsteadOfAngle(int telescopeID);
+
 #endif // GetNames_h

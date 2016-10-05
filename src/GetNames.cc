@@ -3,7 +3,7 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 19;
+uint16_t nTelescopes = 20;
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(int telescopeID, bool useInitial){
@@ -86,6 +86,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 17)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 18)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 19)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
+    else if (telescopeID == 20)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
         cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << endl;
@@ -192,4 +193,9 @@ bool in(uint8_t num, vector<uint8_t> ids){
         return true;
     else
         return false;
+}
+
+bool GetUseSlopeInsteadOfAngle(int telescopeID){
+    vector<uint8_t> ids = {13, 15};
+    return bool(!in(telescopeID, ids));
 }
