@@ -66,7 +66,7 @@ public:
     void InitFileReader();
     void PrintProcess(uint32_t);
     void MeasureSpeed(uint32_t);
-    void WriteTrackingTree(uint32_t);
+    void WriteTrackingTree();
     void MakeAvgPH();
     void DrawTracks();
     void FillPHHistos(uint8_t, PLTCluster*);

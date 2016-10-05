@@ -3,10 +3,7 @@
 using namespace std;
 
 /** DoAlignment: Produce alignment constants and save them to NewAlignment.dat */
-int DoAlignment (std::string const InFileName,
-                 TFile * out_f,
-                 TString const RunNumber,
-                 int telescopeID)
+int DoAlignment (std::string const InFileName, TString const RunNumber, int telescopeID)
 {
     gROOT->ProcessLine("gErrorIgnoreLevel = kError;");
     TString const PlotsDir = "plots/";
@@ -39,7 +36,7 @@ int DoAlignment (std::string const InFileName,
     else{
         FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID, true),
                                      GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID) );
-        ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
+        ((PSIBinaryFileReader*) FR)->CalculateLevels(OutDir);
     }
 
     uint32_t stopAt = ((PSIRootFileReader*) FR)->fTree->GetEntries();

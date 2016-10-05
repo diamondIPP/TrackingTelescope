@@ -167,16 +167,14 @@ float PSIGainInterpolator::GetCharge (int const ch, int const roc, int const col
 {
   switch (fInterpoleratorAlgorithm) {
     case kInterpoleratorAlgorithm_Linear:
-      return 65. * GetLinearInterpolation(ch, roc, col, row, adc);
-      break;
+      return float(65) * GetLinearInterpolation(ch, roc, col, row, adc);
     case kInterpoleratorAlgorithm_Other:
-      return 65. * GetInterpolation(ch, roc, col, row, adc);
-      break;
+      return float(0);
+//      return 65. * GetInterpolation(ch, roc, col, row, adc);
     default:
       std::cerr << "ERROR: No fInterpoleratorAlgorithm selected" << std::endl;
       throw;
   }
-  return 0.0;
 }
 
 
@@ -274,7 +272,7 @@ float PSIGainInterpolator::GetLinearInterpolation (int const ch, int const roc, 
 }
 
 
-float PSIGainInterpolator::GetInterpolation (int const ch, int const roc, int const col, int const row, int adc)
-{
-  return 0.0;
-}
+//float PSIGainInterpolator::GetInterpolation (int const ch, int const roc, int const col, int const row, int adc)
+//{
+//  return 0.0;
+//}

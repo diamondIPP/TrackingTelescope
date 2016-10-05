@@ -152,6 +152,9 @@ int PSIRootFileReader::GetNextEvent ()
 //                    cout << "Event has the required conditions: NClusters: " << NClusters() << " and HitPlaneBits (127): " << HitPlaneBits() << endl;
 //                    RunTracking( *((PLTTelescope*) this));
 //                }
+            case kTrackingAlgorithm_NoTracking:break;
+            case kTrackingAlgorithm_01to2_All:break;
+            case kTrackingAlgorithm_2PlaneTracks_All:break;
         }
     }
     return 0;

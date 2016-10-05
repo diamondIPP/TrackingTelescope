@@ -152,7 +152,7 @@ bool PLTBinaryFileReader::DecodeSpyDataFifo (uint32_t  word, std::vector<PLTHit*
 int PLTBinaryFileReader::ReadEventHits (std::vector<PLTHit*>& Hits, unsigned long& Event, uint32_t& Time, uint32_t& BX)
 {
   if (fIsText) {
-    return ReadEventHitsText(fInfile, Hits, Event, Time, BX);
+    return ReadEventHitsText(fInfile, Hits, Event);
   } else {
     return ReadEventHits(fInfile, Hits, Event, Time, BX);
   }
@@ -244,7 +244,7 @@ int PLTBinaryFileReader::ReadEventHits (std::ifstream& InFile, std::vector<PLTHi
 
 
 
-int PLTBinaryFileReader::ReadEventHitsText (std::ifstream& InFile, std::vector<PLTHit*>& Hits, unsigned long& Event, uint32_t& Time, uint32_t& BX)
+int PLTBinaryFileReader::ReadEventHitsText (std::ifstream& InFile, std::vector<PLTHit*>& Hits, unsigned long& Event)
 {
   int LastEventNumber = -1;
   int EventNumber = -1;

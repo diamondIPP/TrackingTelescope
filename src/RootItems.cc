@@ -460,7 +460,7 @@ TH1F * RootItems::FormatSlopeHisto(TString name, uint16_t bins, float margin){
 vector<TProfile2D*> RootItems::FillSignalDisto(){
 
     TString prefix = "Signal", name;
-    for (uint8_t iSig; iSig < nSig; iSig++){
+    for (uint8_t iSig = 0; iSig < nSig; iSig++){
         name = TString::Format(prefix + "_%i", iSig);
         TProfile2D * profile = new TProfile2D(name, name, PLTU::NCOL, -.2, .3, PLTU::NROW, -.1, .4);
         hSignalDistribution.push_back(profile);
@@ -470,7 +470,7 @@ vector<TProfile2D*> RootItems::FillSignalDisto(){
 void RootItems::DrawSaveSignalDisto(){
 
     c1->cd();
-    for (uint8_t iSig; iSig < nSig; iSig++){
+    for (uint8_t iSig = 0; iSig < nSig; iSig++){
         hSignalDistribution[iSig]->SetXTitle("x [cm]");
         hSignalDistribution[iSig]->SetYTitle("y [cm]");
         gStyle->SetPalette(53);

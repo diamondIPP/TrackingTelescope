@@ -12,8 +12,8 @@ std::string GetCalibrationFilename(int telescopeID);
 std::string GetAlignmentFilename(int telescopeID, bool useInitial=0);
 std::string GetMaskingFilename(int telescopeID);
 const char * GetSignalBranchName();
-int GetNumberOfROCS(int telescopeID);
-int GetNumberOfSignals(int);
+int GetNumberOfROCS(int16_t);
+int GetNumberOfSignals(int16_t);
 int GetUseGainInterpolator(int telescopeID);
 int GetUseExternalCalibrationFunction(int telescopeID);
 int GetUseRootInput(int telescopeID);
@@ -22,8 +22,8 @@ bool FillSignalHistos(uint8_t);
 bool UseDigitalCalibration(uint8_t);
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 std::vector<std::string> split(const std::string &s, char delim);
-bool in(uint8_t, std::vector<uint8_t>);
+bool in(int16_t , std::vector<uint8_t>);
 
-bool GetUseSlopeInsteadOfAngle(int telescopeID);
+bool GetUseSlopeInsteadOfAngle(int16_t telescopeID);
 
 #endif // GetNames_h

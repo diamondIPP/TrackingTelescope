@@ -196,20 +196,20 @@ int PSIBinaryFileReader::decodeBinaryData()
 
   fBufferSize -=3;
 
-  if (0)
-  {
-    for (int i = 0; i < fBufferSize; ++i)
-    {
-      std::cout << Form(" %04x ", fData[i]);
-    }
-    std::cout << std::endl;
-
-    for (int i = 0; i < fBufferSize; ++i)
-    {
-      std::cout << Form(" %6i ", fData[i]);
-    }
-    std::cout << std::endl;
-  }
+//  if (0)
+//  {
+//    for (int i = 0; i < fBufferSize; ++i)
+//    {
+//      std::cout << Form(" %04x ", fData[i]);
+//    }
+//    std::cout << std::endl;
+//
+//    for (int i = 0; i < fBufferSize; ++i)
+//    {
+//      std::cout << Form(" %6i ", fData[i]);
+//    }
+//    std::cout << std::endl;
+//  }
 
   return j;
 
@@ -244,7 +244,7 @@ int PSIBinaryFileReader::GetNextEvent ()
 
 
 
-int PSIBinaryFileReader::CalculateLevels (int const NMaxEvents,TString const OutDir)
+int PSIBinaryFileReader::CalculateLevels (TString const OutDir)
 {
 
   // Vector for ROC level histograms
@@ -255,7 +255,6 @@ int PSIBinaryFileReader::CalculateLevels (int const NMaxEvents,TString const Out
   // Hist for TBM Levels
   TH1F hTBMLevels("LevelsTBM", "LevelsTBM", 100, -1000, 1000);
 
-  //for (int ievent = 0; NMaxEvents > 0 ? ievent != NMaxEvents : !fEOF; ++ievent) {
   for (int ievent = 0; !fEOF; ++ievent) {
     while (nextBinaryHeader() >= 0) {
       decodeBinaryData();
@@ -586,11 +585,11 @@ bool PSIBinaryFileReader::ReadAddressesFromFile (std::string const InFileName)
 
 void PSIBinaryFileReader::DrawWaveform (TString const OutFileName)
 {
-  int X[fBufferSize];
+  std::vector<int> X(fBufferSize);
   for (int i = 0; i != fBufferSize; ++i) {
     X[i] = i;
   }
-  TGraph g(fBufferSize, X, fData);
+  TGraph g(fBufferSize, &X[0], fData);
   TCanvas c;
   c.cd();
   g.Draw("AC*");

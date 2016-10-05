@@ -95,9 +95,10 @@ string GetCalibrationFilename(int telescopeID){
     }
 }
 
-int GetNumberOfROCS(int telescopeID){
+int GetNumberOfROCS(int16_t telescopeID){
 
-    uint8_t id = telescopeID;
+
+    int16_t id = telescopeID;
     if ((id == 1) || (id == 2) || (id == 3) || (id == 8))
         return 6;
     else if (id == 4)
@@ -115,21 +116,17 @@ int GetNumberOfROCS(int telescopeID){
 
 int GetUseGainInterpolator(int telescopeID){
 
-    if (telescopeID == 2)   return true;
-    else                    return false;
+    return telescopeID == 2;
 }
 
 int GetUseExternalCalibrationFunction(int telescopeID){
 
-    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11)   return true;
-    else                    return false;
+    return telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11;
 }
 
 int GetUseRootInput(int telescopeID){
 
-  if ((telescopeID == -1) || (telescopeID == 7) || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11)
-        return true;
-  else  return false;
+    return (telescopeID == -1) || (telescopeID == 7) || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11;
 }
 
 bool UseFileWriter(uint8_t telescopeID){
@@ -153,9 +150,9 @@ bool UseDigitalCalibration(uint8_t telescopeID){
 
 }
 
-int GetNumberOfSignals(int telescopeID){
+int GetNumberOfSignals(int16_t telescopeID){
 
-    uint8_t id = telescopeID;
+    int16_t id = telescopeID;
     if (id == 10 || id == 13 || id == 15)
         return 0;
     else if ((id == 7) || (id == 8) || (id == 9) || id >= 11)
@@ -187,15 +184,12 @@ vector<string> split(const string &s, char delim) {
     return elems;
 }
 
-bool in(uint8_t num, vector<uint8_t> ids){
+bool in(int16_t num, vector<uint8_t> ids){
 
-    if (find(ids.begin(), ids.end(), num ) != ids.end())
-        return true;
-    else
-        return false;
+    return find(ids.begin(), ids.end(), num ) != ids.end();
 }
 
-bool GetUseSlopeInsteadOfAngle(int telescopeID){
+bool GetUseSlopeInsteadOfAngle(int16_t telescopeID){
     vector<uint8_t> ids = {13, 15};
     return bool(!in(telescopeID, ids));
 }
