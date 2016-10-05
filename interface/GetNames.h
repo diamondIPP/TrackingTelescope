@@ -8,8 +8,6 @@
 #include <sstream>
 #include <algorithm>
 
-uint16_t nTelescopes = 19;
-
 std::string GetCalibrationFilename(int telescopeID);
 std::string GetAlignmentFilename(int telescopeID, bool useInitial=0);
 std::string GetMaskingFilename(int telescopeID);

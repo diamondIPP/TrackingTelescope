@@ -53,8 +53,8 @@ bool PSIRootFileReader::OpenFile ()
     if (!(fNEntries>0)) return false;
 
     // Set Branch Addresses
-    fTree->SetBranchAddress("event_number",&f_event_number);
-    fTree->SetBranchAddress("time",&f_time);
+    fTree->SetBranchAddress("event_number", &f_event_number);
+    fTree->SetBranchAddress("time", &f_time);
 
     fTree->SetBranchAddress("plane", &f_plane);
     fTree->SetBranchAddress("col", &f_col);
