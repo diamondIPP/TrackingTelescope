@@ -79,7 +79,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 12)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 13)  return "calibration_lists/GKCalibrationList_Telescope13.txt";
     else if (telescopeID == 14)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == 15)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
+    else if (telescopeID == 15)  return "calibration_lists/GKCalibrationList_Telescope13.txt";
     else if (telescopeID == 16)  return "calibration_lists/GKCalibrationList_Telescope7.txt";
     else if (telescopeID == 17)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 18)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
@@ -99,7 +99,7 @@ int GetNumberOfROCS(int telescopeID){
         return 6;
     else if (id == 4)
         return 2;
-    else if (id == 10 || id == 13)
+    else if (id == 10 || id == 13 || id == 15)
         return 7;
     else if ((id == 5) || (id == 6) || (id == 7) || (id == -1) || (id >= 9))
         return 4;
@@ -131,7 +131,9 @@ int GetUseRootInput(int telescopeID){
 
 bool UseFileWriter(uint8_t telescopeID){
 
-    vector<uint8_t> ids = {7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19};
+    vector<uint8_t> ids;
+    for (uint8_t id = 7; id <= nTelescopes; id++)
+        ids.push_back(id);
     return in(telescopeID, ids);
 }
 
@@ -143,7 +145,7 @@ bool FillSignalHistos(uint8_t telescopeID){
 
 bool UseDigitalCalibration(uint8_t telescopeID){
 
-    vector<uint8_t> ids = {10, 13};
+    vector<uint8_t> ids = {10, 13, 15};
     return in(telescopeID, ids);
 
 }
@@ -151,7 +153,7 @@ bool UseDigitalCalibration(uint8_t telescopeID){
 int GetNumberOfSignals(int telescopeID){
 
     uint8_t id = telescopeID;
-    if (id == 10 || id == 13)
+    if (id == 10 || id == 13 || id == 15)
         return 0;
     else if ((id == 7) || (id == 8) || (id == 9) || id >= 11)
         return 4;
@@ -189,4 +191,3 @@ bool in(uint8_t num, vector<uint8_t> ids){
     else
         return false;
 }
-

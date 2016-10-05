@@ -267,7 +267,7 @@ void PLTAnalysis::PrintProcess(uint32_t ievent){
             cout << ":" << setw(2) << setfill('0') << seconds;
             cout << ":" << setw(3) << setfill('0') << miliseconds << "      ";
         }
-        else cout << "time left: ???";
+        //else cout << "time left: ???";// Don't know why it is persistent. Commented it :P
     }
 }
 void PLTAnalysis::MeasureSpeed(uint32_t ievent){
@@ -285,14 +285,6 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
     FW->setHitPlaneBits(FR->HitPlaneBits() );
     FW->setNTracks(FR->NTracks() );
     FW->setNClusters(FR->NClusters() );
-    for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
-        PLTPlane * Plane = FR->Plane(iplane);
-        FW->setClusters(iplane, Plane->NClusters() );
-//        for (uint8_t iCluster; iCluster != Plane->NClusters(); iCluster++){
-//            FW->setClusterPositionX(iplane, Plane->Cluster(iCluster)->TX() );
-//            FW->setClusterPositionY(iplane, Plane->Cluster(iCluster)->TY() );
-//        }
-    }
 
     if (FR->NTracks() > 0){
         PLTTrack * Track = FR->Track(0);
@@ -321,13 +313,32 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setDistDia1(-999, -999);
         FW->setDistDia2(-999, -999);
     }
-
-    for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane)
-        for (size_t icluster = 0; icluster != FR->Plane(iplane)->NClusters(); ++icluster)
-            FW->setChargeAll(iplane, FR->Plane(iplane)->Cluster(icluster)->Charge() );
+    // new Branches: DA
+    FW->setCoincidenceMap(FR->HitPlaneBits());
+    for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+        PLTPlane * Plane = FR->Plane(iplane);
+        FW->setClusters(iplane, Plane->NClusters() );
+        for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
+            FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
+            FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
+            FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
+            FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
+            FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
+            FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
+            FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
+            FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
+//            if ((Plane->Cluster(icluster)->NHits() > 0)) {
+//                size_t index = Plane->Cluster(icluster)->NHits() - 1;
+//                if(index < FW->GetNHits()){
+//                    FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
+//                }
+//                else
+//                    FW->setPulseHeightsRoc(iplane,FW->GetNHits()-1,Plane->Cluster(icluster)->Charge());
+//            }
+        }
+    }
 
     FW->fillTree();
-
 }
 void PLTAnalysis::MakeAvgPH(){
 
@@ -350,7 +361,7 @@ void PLTAnalysis::DrawTracks(){
     if (ieventdraw < 20) {
         uint16_t hp = FR->HitPlaneBits();
         if (hp == pow(2, FR->NPlanes() ) -1){
-            FR->DrawTracksAndHits(TString::Format(Histos->getOutDir() + "/Tracks_Ev%i.gif", ++ieventdraw).Data() );
+            FR->DrawTracksAndHits(TString::Format(Histos->getOutDir() + "/Tracks_Ev%i.png", ++ieventdraw).Data() );
             if (ieventdraw == 20) cout << endl;
         }
     }

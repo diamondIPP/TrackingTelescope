@@ -32,6 +32,7 @@
 #include "GetNames.h"
 #include "TestPlaneEfficiencySilicon.h"
 #include "DoAlignment.h"
+//#include "DoAlignment2.h"
 
 #include "PLTPlane.h"
 #include "PLTAlignment.h"
@@ -132,7 +133,7 @@ void Write2DCharge( TH3* h, TCanvas * Can, float maxz, TString OutDir){
   ph->SetMaximum(maxz);
   ph->Draw("COLZ");
   ph->Write();
-  Can->SaveAs( OutDir+ TString(h->GetName()) +"_profile.gif");
+  Can->SaveAs( OutDir+ TString(h->GetName()) +"_profile.png");
   Can->SaveAs( OutDir+ TString(h->GetName()) +"_profile.pdf");
 }
 
@@ -190,7 +191,7 @@ void WriteAngleHistograms( TH1 * h_before_chi2_x,
 
   Leg.Draw();
 
-  Can->SaveAs( OutDir+ TString(h_before_chi2_x->GetName()) + ".gif");
+  Can->SaveAs( OutDir+ TString(h_before_chi2_x->GetName()) + ".png");
 
 }
 
@@ -262,7 +263,7 @@ void Write1DCharge( std::vector<TH3*> hs, TCanvas *Can, TString OutDir){
   h45->Write();
   h60->Write();
 
-  Can->SaveAs( OutDir+ TString(hs[0]->GetName()) +".gif");
+  Can->SaveAs( OutDir+ TString(hs[0]->GetName()) +".png");
   Can->SaveAs( OutDir+ TString(hs[0]->GetName()) +".pdf");
 
 }
@@ -314,7 +315,7 @@ void Write1DFraction(std::vector<TH1*> hs, TCanvas *Can, TString OutDir){
   hs[3]->Draw("SAME");
   Leg.Draw();
 
-  Can->SaveAs( OutDir+ TString(hs[0]->GetName()) +".gif");
+  Can->SaveAs( OutDir+ TString(hs[0]->GetName()) +".png");
   Can->SaveAs( OutDir+ TString(hs[0]->GetName()) +".pdf");
 
 }
@@ -854,7 +855,7 @@ void TestPlaneEfficiency (std::string const InFileName,
 
   hOccupancyDenom.Draw("colz");
   hOccupancyDenom.Write();
-  Can.SaveAs( OutDir+TString(hOccupancyDenom.GetName()) + ".gif");
+  Can.SaveAs( OutDir+TString(hOccupancyDenom.GetName()) + ".png");
   Can.SaveAs( OutDir+TString(hOccupancyDenom.GetName()) + ".pdf");
 
   hOccupancyDenom.SetMinimum(0);
@@ -865,7 +866,7 @@ void TestPlaneEfficiency (std::string const InFileName,
 
   hOccupancyDenom.Draw("colz");
   hOccupancyDenom.Write();
-  Can.SaveAs( OutDir+TString(hOccupancyDenom.GetName()) + ".gif");
+  Can.SaveAs( OutDir+TString(hOccupancyDenom.GetName()) + ".png");
   Can.SaveAs( OutDir+TString(hOccupancyDenom.GetName()) + ".pdf");
 
 
@@ -876,23 +877,23 @@ void TestPlaneEfficiency (std::string const InFileName,
 
   hOccupancyNum.Draw("colz");
   // Do not write the numerator-histo after division to the file
-  Can.SaveAs( OutDir+TString(hOccupancyNum.GetName()) + ".gif");
+  Can.SaveAs( OutDir+TString(hOccupancyNum.GetName()) + ".png");
   Can.SaveAs( OutDir+TString(hOccupancyNum.GetName()) + ".pdf");
 
   hdtx.Draw();
   hdtx.Write();
-  Can.SaveAs( OutDir+ TString(hdtx.GetName()) +".gif");
+  Can.SaveAs( OutDir+ TString(hdtx.GetName()) +".png");
   Can.SaveAs( OutDir+ TString(hdtx.GetName()) +".pdf");
 
 
   hdty.Draw();
   hdty.Write();
-  Can.SaveAs(OutDir+ TString(hdty.GetName()) +".gif");
+  Can.SaveAs(OutDir+ TString(hdty.GetName()) +".png");
   Can.SaveAs(OutDir+ TString(hdty.GetName()) +".pdf");
 
   hdtr.Draw();
   hdtr.Write();
-  Can.SaveAs( OutDir+ TString(hdtr.GetName()) +".gif");
+  Can.SaveAs( OutDir+ TString(hdtr.GetName()) +".png");
   Can.SaveAs( OutDir+ TString(hdtr.GetName()) +".pdf");
 
 
@@ -905,7 +906,7 @@ void TestPlaneEfficiency (std::string const InFileName,
   hChi2.Draw();
   fun_chi2_6dof.Draw("SAME");
   hChi2.Write();
-  Can.SaveAs( OutDir+ TString(hChi2.GetName()) +".gif");
+  Can.SaveAs( OutDir+ TString(hChi2.GetName()) +".png");
   Can.SaveAs( OutDir+ TString(hChi2.GetName()) +".pdf");
 
   hChi2X.SetTitle("");
@@ -925,7 +926,7 @@ void TestPlaneEfficiency (std::string const InFileName,
 
 
   hChi2X.Write();
-  Can.SaveAs( OutDir+ TString(hChi2X.GetName()) +".gif");
+  Can.SaveAs( OutDir+ TString(hChi2X.GetName()) +".png");
   Can.SaveAs( OutDir+ TString(hChi2X.GetName()) +".pdf");
 
 
@@ -938,7 +939,7 @@ void TestPlaneEfficiency (std::string const InFileName,
   hChi2Y.Draw();
   fun_chi2_3dof.Draw("SAME");
   hChi2Y.Write();
-  Can.SaveAs( OutDir+ TString(hChi2Y.GetName()) +".gif");
+  Can.SaveAs( OutDir+ TString(hChi2Y.GetName()) +".png");
   Can.SaveAs( OutDir+ TString(hChi2Y.GetName()) +".pdf");
 
 
@@ -1037,7 +1038,7 @@ void TestPlaneEfficiency (std::string const InFileName,
 
   Can.SetLogy(1);
   hDrSecondCluster.Draw();
-  Can.SaveAs( OutDir+ TString(hDrSecondCluster.GetName()) +".gif");
+  Can.SaveAs( OutDir+ TString(hDrSecondCluster.GetName()) +".png");
   Can.SetLogy(0);
 
   std::vector<TH1*> hs_fraction_contained;
@@ -1047,7 +1048,7 @@ void TestPlaneEfficiency (std::string const InFileName,
   hs_fraction_contained.push_back(&hFractionContainted4);
   Write1DFraction(hs_fraction_contained, &Can, OutDir);
 
-  Can.SaveAs( OutDir+ TString(hFractionContainted1.GetName()) +".gif");
+  Can.SaveAs( OutDir+ TString(hFractionContainted1.GetName()) +".png");
 
   WriteAngleHistograms(&hAngleBeforeChi2X,
                        &hAngleBeforeChi2Y,
@@ -1197,11 +1198,11 @@ int FindResiduals(std::string const InFileName,
 
       hChi2_5_X.Draw();
       hChi2_6_X.Draw("SAME");
-      Can.SaveAs( OutDir+TString::Format("/FunWithChi2X_ROC%i",iplane) + ".gif");
+      Can.SaveAs( OutDir+TString::Format("/FunWithChi2X_ROC%i",iplane) + ".png");
 
       hChi2_5_Y.Draw();
       hChi2_6_Y.Draw("SAME");
-      Can.SaveAs( OutDir+TString::Format("/FunWithChi2Y_ROC%i",iplane) + ".gif");
+      Can.SaveAs( OutDir+TString::Format("/FunWithChi2Y_ROC%i",iplane) + ".png");
 
       chi2_5_x.push_back( fun1.GetParameter(0)*2 );
       chi2_5_y.push_back( fun3.GetParameter(0)*2 );
@@ -1308,47 +1309,47 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
   //f << "<hr />\n";
   //f << "<h2>Levels</h2>" << std::endl;
   //for (int i = 0; i != nplanes; ++i) {
-  //  f << Form("<a href=\"Levels_ROC%i.gif\"><img width=\"150\" src=\"Levels_ROC%i.gif\"></a>\n", i, i);
+  //  f << Form("<a href=\"Levels_ROC%i.png\"><img width=\"150\" src=\"Levels_ROC%i.png\"></a>\n", i, i);
   //}
   //f << "<br>" << std::endl;
 
   // OCCUPANCY
   f << "<hr />\n";
   f << "<h2>Occupancy</h2>" << std::endl;
-  f << "<a href=\"Occupancy_Coincidence.gif\"><img width=\"900\" src=\"Occupancy_Coincidence.gif\"></a>\n<br>" << std::endl;
+  f << "<a href=\"Occupancy_Coincidence.png\"><img width=\"900\" src=\"Occupancy_Coincidence.png\"></a>\n<br>" << std::endl;
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"Occupancy_ROC%i.gif\"><img width=\"150\" src=\"Occupancy_ROC%i.gif\"></a>\n", i, i);
+    f << Form("<a href=\"Occupancy_ROC%i.png\"><img width=\"150\" src=\"Occupancy_ROC%i.png\"></a>\n", i, i);
   }
   f << "<br>" << std::endl;
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"Occupancy_ROC%i_1DZ.gif\"><img width=\"150\" src=\"Occupancy_ROC%i_1DZ.gif\"></a>\n", i, i);
+    f << Form("<a href=\"Occupancy_ROC%i_1DZ.png\"><img width=\"150\" src=\"Occupancy_ROC%i_1DZ.png\"></a>\n", i, i);
   }
   f << "<br>" << std::endl;
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"Occupancy_ROC%i_Quantile.gif\"><img width=\"150\" src=\"Occupancy_ROC%i_Quantile.gif\"></a>\n", i, i);
+    f << Form("<a href=\"Occupancy_ROC%i_Quantile.png\"><img width=\"150\" src=\"Occupancy_ROC%i_Quantile.png\"></a>\n", i, i);
   }
   f << "<br>" << std::endl;
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"Occupancy1DZ_ROC%i_Quantile.gif\"><img width=\"150\" src=\"Occupancy1DZ_ROC%i_Quantile.gif\"></a>\n", i, i);
+    f << Form("<a href=\"Occupancy1DZ_ROC%i_Quantile.png\"><img width=\"150\" src=\"Occupancy1DZ_ROC%i_Quantile.png\"></a>\n", i, i);
   }
   f << "<br>" << std::endl;
 
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"Occupancy_ROC%i_3x3Efficiency.gif\"><img width=\"150\" src=\"Occupancy_ROC%i_3x3Efficiency.gif\"></a>\n", i, i);
+    f << Form("<a href=\"Occupancy_ROC%i_3x3Efficiency.png\"><img width=\"150\" src=\"Occupancy_ROC%i_3x3Efficiency.png\"></a>\n", i, i);
   }
   f << "<br>" << std::endl;
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"Occupancy_ROC%i_3x3Efficiency_1DZ.gif\"><img width=\"150\" src=\"Occupancy_ROC%i_3x3Efficiency_1DZ.gif\"></a>\n", i, i);
+    f << Form("<a href=\"Occupancy_ROC%i_3x3Efficiency_1DZ.png\"><img width=\"150\" src=\"Occupancy_ROC%i_3x3Efficiency_1DZ.png\"></a>\n", i, i);
   }
 
   f << "<br>" << std::endl;
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"NClusters_ROC%i.gif\"><img width=\"150\" src=\"NClusters_ROC%i.gif\"></a>\n", i, i);
+    f << Form("<a href=\"NClusters_ROC%i.png\"><img width=\"150\" src=\"NClusters_ROC%i.png\"></a>\n", i, i);
   }
   f << "<br>" << std::endl;
   f << "<br>" << std::endl;
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"NHitsPerCluster_ROC%i.gif\"><img width=\"150\" src=\"NHitsPerCluster_ROC%i.gif\"></a>\n", i, i);
+    f << Form("<a href=\"NHitsPerCluster_ROC%i.png\"><img width=\"150\" src=\"NHitsPerCluster_ROC%i.png\"></a>\n", i, i);
   }
   f << "<br>" << std::endl;
 
@@ -1356,44 +1357,44 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
   f << "<hr />\n";
   f << "<h2>Pulse Height</h2>" << std::endl;
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"PulseHeight_ROC%i.gif\"><img width=\"150\" src=\"PulseHeight_ROC%i.gif\"></a>\n", i, i);
+    f << Form("<a href=\"PulseHeight_ROC%i.png\"><img width=\"150\" src=\"PulseHeight_ROC%i.png\"></a>\n", i, i);
   }
   f << "<br>\n";
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"PulseHeightLong_ROC%i.gif\"><img width=\"150\" src=\"PulseHeightLong_ROC%i.gif\"></a>\n", i, i);
+    f << Form("<a href=\"PulseHeightLong_ROC%i.png\"><img width=\"150\" src=\"PulseHeightLong_ROC%i.png\"></a>\n", i, i);
   }
   f << "<br>\n";
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"PulseHeightTime_ROC%i.gif\"><img width=\"150\" src=\"PulseHeightTime_ROC%i.gif\"></a>\n", i, i);
+    f << Form("<a href=\"PulseHeightTime_ROC%i.png\"><img width=\"150\" src=\"PulseHeightTime_ROC%i.png\"></a>\n", i, i);
   }
   f << "<br>\n";
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"PulseHeightAvg2D_ROC%i.gif\"><img width=\"150\" src=\"PulseHeightAvg2D_ROC%i.gif\"></a>\n", i, i);
+    f << Form("<a href=\"PulseHeightAvg2D_ROC%i.png\"><img width=\"150\" src=\"PulseHeightAvg2D_ROC%i.png\"></a>\n", i, i);
   }
   f << "<br>\n";
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"OccupancyLowPH_ROC%i.gif\"><img width=\"150\" src=\"OccupancyLowPH_ROC%i.gif\"></a>\n", i, i);
+    f << Form("<a href=\"OccupancyLowPH_ROC%i.png\"><img width=\"150\" src=\"OccupancyLowPH_ROC%i.png\"></a>\n", i, i);
   }
   f << "<br>\n";
   for (int i = 0; i != nplanes; ++i) {
-    f << Form("<a href=\"OccupancyHighPH_ROC%i.gif\"><img width=\"150\" src=\"OccupancyHighPH_ROC%i.gif\"></a>\n", i, i);
+    f << Form("<a href=\"OccupancyHighPH_ROC%i.png\"><img width=\"150\" src=\"OccupancyHighPH_ROC%i.png\"></a>\n", i, i);
   }
 
   // TRACKING
   f << "<h2>Tracking</h2>\n";
-  f << "<a href=\"TrackSlopeX.gif\"><img width=\"150\" src=\"TrackSlopeX.gif\"></a>\n";
-  f << "<a href=\"TrackSlopeY.gif\"><img width=\"150\" src=\"TrackSlopeY.gif\"></a>\n";
+  f << "<a href=\"TrackSlopeX.png\"><img width=\"150\" src=\"TrackSlopeX.png\"></a>\n";
+  f << "<a href=\"TrackSlopeY.png\"><img width=\"150\" src=\"TrackSlopeY.png\"></a>\n";
   f << "<br>\n";
-  f << "<a href=\"Chi2.gif\"><img width=\"150\" src=\"Chi2.gif\"></a>\n";
-  f << "<a href=\"Chi2X.gif\"><img width=\"150\" src=\"Chi2X.gif\"></a>\n";
-  f << "<a href=\"Chi2Y.gif\"><img width=\"150\" src=\"Chi2Y.gif\"></a>\n";
+  f << "<a href=\"Chi2.png\"><img width=\"150\" src=\"Chi2.png\"></a>\n";
+  f << "<a href=\"Chi2X.png\"><img width=\"150\" src=\"Chi2X.png\"></a>\n";
+  f << "<a href=\"Chi2Y.png\"><img width=\"150\" src=\"Chi2Y.png\"></a>\n";
 
   // OFFLINE
 //  f << "<h2>Straight Tracks</h2>\n";
 //
 //  f << "<br>\n";
 //  for (int i = 0; i != nplanes; ++i) {
-//    f << Form("<a href=\"PulseHeightOffline_ROC%i.gif\"><img width=\"150\" src=\"PulseHeightOffline_ROC%i.gif\"></a>\n", i, i);
+//    f << Form("<a href=\"PulseHeightOffline_ROC%i.png\"><img width=\"150\" src=\"PulseHeightOffline_ROC%i.png\"></a>\n", i, i);
 //  }
 //  f << "<br>\n";
 //
@@ -1403,11 +1404,11 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 
   f << "<br>" << std::endl;
   for (int i = 0; i != nplanes; i++)
-    f << Form("<a href=\"Residual_ROC%i_X.gif\"><img width=\"150\" src=\"Residual_ROC%i_X.gif\"></a>\n", i, i);
+    f << Form("<a href=\"Residual_ROC%i_X.png\"><img width=\"150\" src=\"Residual_ROC%i_X.png\"></a>\n", i, i);
   f << "<br>\n";
 
   for (int i = 0; i != nplanes; i++)
-    f << Form("<a href=\"Residual_ROC%i_Y.gif\"><img width=\"150\" src=\"Residual_ROC%i_Y.gif\"></a>\n", i, i);
+    f << Form("<a href=\"Residual_ROC%i_Y.png\"><img width=\"150\" src=\"Residual_ROC%i_Y.png\"></a>\n", i, i);
   f << "<br>\n";
 
     /** Signal Distribution */
@@ -1417,7 +1418,7 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
         f << "<hr />\n";
         f << "<h2>Signal Distribution</h2>\n";
         for (uint8_t iSig = 0; iSig != nSig; iSig++)
-            f << Form("<a href=\"Signal_%i.gif\"><img width=\"150\" src=\"Signal_%i.gif\"></a>\n", iSig, iSig);
+            f << Form("<a href=\"Signal_%i.png\"><img width=\"150\" src=\"Signal_%i.png\"></a>\n", iSig, iSig);
         f << "<br>\n";
     }
 
@@ -1427,104 +1428,104 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
     f << "<br>" << std::endl;
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"TracksPassing_ROC%i.gif\"><img width=\"150\" src=\"TracksPassing_ROC%i.gif\"></a>\n", i, i);
+      f << Form("<a href=\"TracksPassing_ROC%i.png\"><img width=\"150\" src=\"TracksPassing_ROC%i.png\"></a>\n", i, i);
     f << "<br>\n";
 
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"PlaneEfficiency_ROC%i.gif\"><img width=\"150\" src=\"PlaneEfficiency_ROC%i.gif\"></a>\n", i, i);
+      f << Form("<a href=\"PlaneEfficiency_ROC%i.png\"><img width=\"150\" src=\"PlaneEfficiency_ROC%i.png\"></a>\n", i, i);
     f << "<br>\n";
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"ClusterSize_ROC%i_profile.gif\"><img width=\"150\" src=\"ClusterSize_ROC%i_profile.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SumCharge_ROC%i.gif\"><img width=\"150\" src=\"SumCharge_ROC%i.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"1stCharge_ROC%i.gif\"><img width=\"150\" src=\"1stCharge_ROC%i.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"2ndCharge_ROC%i.gif\"><img width=\"150\" src=\"2ndCharge_ROC%i.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SumCharge_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge_ROC%i_profile.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SumCharge2_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge2_ROC%i_profile.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SumCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge3_ROC%i_profile.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SumCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"SumCharge4_ROC%i_profile.gif\"></a>\n", i, i);
+      f << Form("<a href=\"ClusterSize_ROC%i_profile.png\"><img width=\"150\" src=\"ClusterSize_ROC%i_profile.png\"></a>\n", i, i);
     f << "<br>\n";
 
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"1stCharge_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge_ROC%i_profile.gif\"></a>\n", i, i);
+      f << Form("<a href=\"SumCharge_ROC%i.png\"><img width=\"150\" src=\"SumCharge_ROC%i.png\"></a>\n", i, i);
     f << "<br>\n";
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"1stCharge2_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge2_ROC%i_profile.gif\"></a>\n", i, i);
+      f << Form("<a href=\"1stCharge_ROC%i.png\"><img width=\"150\" src=\"1stCharge_ROC%i.png\"></a>\n", i, i);
     f << "<br>\n";
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"1stCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge3_ROC%i_profile.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"1stCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"1stCharge4_ROC%i_profile.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"2ndCharge_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge_ROC%i_profile.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"2ndCharge2_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge2_ROC%i_profile.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"2ndCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge3_ROC%i_profile.gif\"></a>\n", i, i);
-    f << "<br>\n";
-
-    for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"2ndCharge3_ROC%i_profile.gif\"><img width=\"150\" src=\"2ndCharge4_ROC%i_profile.gif\"></a>\n", i, i);
+      f << Form("<a href=\"2ndCharge_ROC%i.png\"><img width=\"150\" src=\"2ndCharge_ROC%i.png\"></a>\n", i, i);
     f << "<br>\n";
 
 
 
-
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SinglePlaneTestChi2_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestChi2_ROC%i.gif\"></a>\n", i, i);
+      f << Form("<a href=\"SumCharge_ROC%i_profile.png\"><img width=\"150\" src=\"SumCharge_ROC%i_profile.png\"></a>\n", i, i);
     f << "<br>\n";
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SinglePlaneTestChi2X_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestChi2X_ROC%i.gif\"></a>\n", i, i);
+      f << Form("<a href=\"SumCharge2_ROC%i_profile.png\"><img width=\"150\" src=\"SumCharge2_ROC%i_profile.png\"></a>\n", i, i);
     f << "<br>\n";
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SinglePlaneTestChi2Y_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestChi2Y_ROC%i.gif\"></a>\n", i, i);
+      f << Form("<a href=\"SumCharge3_ROC%i_profile.png\"><img width=\"150\" src=\"SumCharge3_ROC%i_profile.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SumCharge3_ROC%i_profile.png\"><img width=\"150\" src=\"SumCharge4_ROC%i_profile.png\"></a>\n", i, i);
     f << "<br>\n";
 
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SinglePlaneTestDY_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestDY_ROC%i.gif\"></a>\n", i, i);
+      f << Form("<a href=\"1stCharge_ROC%i_profile.png\"><img width=\"150\" src=\"1stCharge_ROC%i_profile.png\"></a>\n", i, i);
     f << "<br>\n";
 
     for (int i = 1; i != 5; i++)
-      f << Form("<a href=\"SinglePlaneTestDR_ROC%i.gif\"><img width=\"150\" src=\"SinglePlaneTestDR_ROC%i.gif\"></a>\n", i, i);
+      f << Form("<a href=\"1stCharge2_ROC%i_profile.png\"><img width=\"150\" src=\"1stCharge2_ROC%i_profile.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"1stCharge3_ROC%i_profile.png\"><img width=\"150\" src=\"1stCharge3_ROC%i_profile.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"1stCharge3_ROC%i_profile.png\"><img width=\"150\" src=\"1stCharge4_ROC%i_profile.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"2ndCharge_ROC%i_profile.png\"><img width=\"150\" src=\"2ndCharge_ROC%i_profile.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"2ndCharge2_ROC%i_profile.png\"><img width=\"150\" src=\"2ndCharge2_ROC%i_profile.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"2ndCharge3_ROC%i_profile.png\"><img width=\"150\" src=\"2ndCharge3_ROC%i_profile.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"2ndCharge3_ROC%i_profile.png\"><img width=\"150\" src=\"2ndCharge4_ROC%i_profile.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+
+
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestChi2_ROC%i.png\"><img width=\"150\" src=\"SinglePlaneTestChi2_ROC%i.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestChi2X_ROC%i.png\"><img width=\"150\" src=\"SinglePlaneTestChi2X_ROC%i.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestChi2Y_ROC%i.png\"><img width=\"150\" src=\"SinglePlaneTestChi2Y_ROC%i.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestDY_ROC%i.png\"><img width=\"150\" src=\"SinglePlaneTestDY_ROC%i.png\"></a>\n", i, i);
+    f << "<br>\n";
+
+    for (int i = 1; i != 5; i++)
+      f << Form("<a href=\"SinglePlaneTestDR_ROC%i.png\"><img width=\"150\" src=\"SinglePlaneTestDR_ROC%i.png\"></a>\n", i, i);
     f << "<br>\n";
   }
 
@@ -1535,7 +1536,7 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
   for (int irow = 0; irow != 4; irow++){
     for (int icol = 1; icol != nplanes; ++icol) {
       int i = irow*5+icol;
-      f << Form("<a href=\"Tracks_Ev%i.gif\"><img width=\"150\" src=\"Tracks_Ev%i.gif\"></a>\n", i, i);
+      f << Form("<a href=\"Tracks_Ev%i.png\"><img width=\"150\" src=\"Tracks_Ev%i.png\"></a>\n", i, i);
     }
     f << "<br>\n";
   }
@@ -1583,6 +1584,11 @@ int main (int argc, char* argv[])
     std::vector<std::string> x = split(InFileName, '/');
     TString runname = x[x.size() -1 ];
     TString const RunNumber = runname(4,9);
+    // validate existance of directory plots: DA
+    if(!gSystem->OpenDirectory("./plots")){
+      gSystem->mkdir("./plots");
+      gSystem->OpenDirectory("..");
+    }
     gSystem->mkdir("./plots/" + RunNumber);
 
     gROOT->ProcessLine("#include <vector>");

@@ -10,7 +10,7 @@ RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
     nSig(GetNumberOfSignals(telescopeID)),
     PlotsDir("plots/"),
     OutDir(PlotsDir + RunNumber + "/"),
-    FileType(".gif"),
+    FileType(".png"),
     HistColors {1, 4, 28, 2 },
     maxChi2(50) {
 
@@ -117,15 +117,15 @@ RootItems::~RootItems() {
         /** standard */
         ClearLegendsPH();
         FillLegendsPH(iRoc, PulseHeight());
-        DrawSavePH(iRoc, PulseHeight(), "Pulse Height ROC%i", "PulseHeight_ROC%i.gif");
+        DrawSavePH(iRoc, PulseHeight(), "Pulse Height ROC%i", "PulseHeight_ROC%i.png");
         /** offline */
         ClearLegendsPH();
         FillLegendsPH(iRoc, PulseHeightOffline());
-        DrawSavePH(iRoc, PulseHeightOffline(), "Pulse Height Offline ROC%i", "PulseHeightOffline_ROC%i.gif");
+        DrawSavePH(iRoc, PulseHeightOffline(), "Pulse Height Offline ROC%i", "PulseHeightOffline_ROC%i.png");
         /** long */
         ClearLegendsPH();
         FillLegendsPH(iRoc, PulseHeightLong());
-        DrawSavePH(iRoc, PulseHeightLong(), "Pulse Height Long ROC%i", "PulseHeightLong_ROC%i.gif");
+        DrawSavePH(iRoc, PulseHeightLong(), "Pulse Height Long ROC%i", "PulseHeightLong_ROC%i.png");
         /** average pulse height */
         DrawSaveAvPH(iRoc);
         FillAvPH2D(iRoc);
@@ -281,7 +281,7 @@ void RootItems::DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, const char 
     histo[iroc]->SetXTitle(xTit);
     histo[iroc]->SetYTitle(yTit);
     histo[iroc]->Draw("hist");
-    c1->SaveAs(OutDir+TString(histo[iroc]->GetName()) + ".gif");
+    c1->SaveAs(OutDir+TString(histo[iroc]->GetName()) + ".png");
 }
 void RootItems::PrepCoincidenceHisto(){
     hCoincidenceMap->SetFillColor(40);
@@ -315,14 +315,14 @@ void RootItems::DrawSaveCoincidence(){
     for (uint8_t iBins(0); iBins < pow(2, nRoc); iBins++) {
         x = hCoincidenceMap->GetXaxis()->GetBinCenter(iBins + 1);
         Labels.DrawText(x, y, bin[iBins].c_str());}
-    c2->SaveAs(OutDir + "Occupancy_Coincidence.gif");
+    c2->SaveAs(OutDir + "Occupancy_Coincidence.png");
 }
 void RootItems::DrawSaveChi2(TH1F * histo, TString saveName){
     c1->cd();
 //    hChi2X.Scale( 1/hChi2X.Integral());
     gStyle->SetOptStat(0);
     histo->Draw("hist");
-    c1->SaveAs(OutDir + saveName + ".gif");
+    c1->SaveAs(OutDir + saveName + ".png");
     histo->Write();
 }
 std::vector<std::vector<TGraphErrors*> > RootItems::FillVecAvPH(std::vector<std::vector<TGraphErrors*> > graphVec){
@@ -351,7 +351,7 @@ void RootItems::DrawSaveAvPH(uint8_t iroc){
     for (uint8_t iMode = 1; iMode != 4; iMode++)
         gAvgPH[iroc][iMode]->Draw("samepe");
     lPulseHeight->Draw("same");
-    c1->SaveAs(OutDir + TString::Format("PulseHeightTime_ROC%i.gif", iroc));
+    c1->SaveAs(OutDir + TString::Format("PulseHeightTime_ROC%i.png", iroc));
 }
 void RootItems::AllocateArrAvPH(){
     dAvgPH2D = new double**[nRoc]; nAvgPH2D = new int**[nRoc];
@@ -375,17 +375,17 @@ void RootItems::DrawSaveResidual(uint8_t iroc, vector<TH2F*> histVec){
     c1->cd();
     gStyle->SetOptStat(1111);
     histVec[iroc]->Draw("colz");
-    c1->SaveAs(OutDir+TString(histVec[iroc]->GetName()) + ".gif");
+    c1->SaveAs(OutDir+TString(histVec[iroc]->GetName()) + ".png");
 }
 void RootItems::DrawSaveResidualProj(uint8_t iroc, vector<TH2F*> histVec, TString proj){
     c1->cd();
     if (proj == "X" or proj == "x"){
         histVec[iroc]->ProjectionX()->Draw();
-        c1->SaveAs(OutDir+TString(hResidual[iroc]->GetName()) + "_X.gif");
+        c1->SaveAs(OutDir+TString(hResidual[iroc]->GetName()) + "_X.png");
     }
     else if (proj == "Y" or proj == "y"){
         histVec[iroc]->ProjectionY()->Draw();
-        c1->SaveAs(OutDir+TString(hResidual[iroc]->GetName()) + "_Y.gif");
+        c1->SaveAs(OutDir+TString(hResidual[iroc]->GetName()) + "_Y.png");
     }
 }
 /** Draw & Save */
@@ -415,7 +415,7 @@ void RootItems::DrawSaveOccupancyQuantile(uint8_t iroc){
         hOccupancy[iroc]->SetMaximum(QValue[0]);
     c1->cd();
     hOccupancy[iroc]->Draw("colz");
-//    c1->SaveAs( OutDir+Form("Occupancy_ROC%i_Quantile.gif", iroc) );
+//    c1->SaveAs( OutDir+Form("Occupancy_ROC%i_Quantile.png", iroc) );
     c1->SaveAs(OutDir + TString(hOccupancy[iroc]->GetName()) + "_Quantile" + FileType);
 
 }
