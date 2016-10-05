@@ -45,7 +45,7 @@ class PSIRootFileReader : public PSIFileReader
 
     // Scalar Branches
     int f_event_number;
-    float f_time;
+    double f_time;
 
     // Vector Branches
     std::vector<uint16_t> * f_plane;
