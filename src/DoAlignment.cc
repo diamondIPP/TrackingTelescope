@@ -133,7 +133,7 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
                 hResidualYdX[iroc_align].Fill( h_LY, d_LX); // Y vs dX
 
             } // end event loop
-            cout << "Loop duration:" << (clock() - now) / CLOCKS_PER_SEC << endl;
+            cout << "\nLoop duration:" << (clock() - now) / CLOCKS_PER_SEC << endl;
 
             std::cout << "RESIDUALS:\t" << setprecision(7) << hResidual[iroc_align].GetMean(1) << " " << hResidual[iroc_align].GetMean(2) << std::endl;
             std::cout << "RESIDUALS RMS:\t" << setprecision(7) << hResidual[iroc_align].GetRMS(1) << " " << hResidual[iroc_align].GetRMS(2) <<std::endl;
@@ -184,7 +184,7 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
 
 
 
-    std::cout << "PART TWO!!!!!" << std::endl;
+    std::cout << "\n************\nPART TWO!!!!!\n************\n" << std::endl;
 
 
     for (int ialign=1; ialign!=15;ialign++){// DA: TODO: use also threshold condition
@@ -307,7 +307,7 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
         float total_res = 0;
 
         for (int iroc=1; iroc!=GetNumberOfROCS(telescopeID); iroc++){
-            std::cout << "RESIDUALS: " << hResidual[iroc].GetMean(1) << " " << hResidual[iroc].GetMean(2) << std::endl;
+            std::cout << "\nRESIDUALS: " << hResidual[iroc].GetMean(1) << " " << hResidual[iroc].GetMean(2) << std::endl;
             std::cout << "RESIDUALS RMS: " << hResidual[iroc].GetRMS(1) << " " << hResidual[iroc].GetRMS(2) <<std::endl;
 
             FR->GetAlignment()->AddToLX(1, iroc, hResidual[iroc].GetMean(1));
