@@ -172,10 +172,10 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     gY.Fit( &funY, "Q" );
 
     // Store fit results // DA: TODO Refactor variable names to angle not slope
-    fSlopeX = atan(funX.GetParameter(0)) * 180 / 3.14159;
-    fSlopeY = atan(funY.GetParameter(0)) * 180 / 3.14159;
-    fSlopeRadX = funX.GetParameter(0);
-    fSlopeRadY = funY.GetParameter(0);
+    fAngleX = atan(funX.GetParameter(0)) * 180 / 3.14159;
+    fAngleY = atan(funY.GetParameter(0)) * 180 / 3.14159;
+    fAngleRadX = funX.GetParameter(0);
+    fAngleRadY = funY.GetParameter(0);
     fOffsetX = funX.GetParameter(1);
     fOffsetY = funY.GetParameter(1);
 
@@ -246,7 +246,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
   //}
   //printf("TEST: %f %f %f %f\n", fTOX, fTOY, fTOZ, fGOZ);
 
-  // Compute where the line passes in each planes coords // DA: TODO make it more general with NMAXROC or something like that
+  // Compute where the line passes in each planes coords // DA: TODO make it more general with NMAXROC-1 or something like that
   float XL[6];
   float YL[6];
 
@@ -373,13 +373,13 @@ float PLTTrack::LResidualY (size_t const i)
 float PLTTrack::TX (float const Z)
 {
 //  return fTVX * (Z / fTVZ) + fTOX;
-  return fSlopeRadX * Z + fOffsetX;
+  return fAngleRadX * Z + fOffsetX;
 }
 
 float PLTTrack::TY (float const Z)
 {
 //  return fTVY * (Z / fTVZ) + fTOY;
-  return fSlopeRadY * Z + fOffsetY;
+  return fAngleRadY * Z + fOffsetY;
 }
 
 

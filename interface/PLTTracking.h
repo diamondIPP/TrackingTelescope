@@ -22,8 +22,9 @@ class PLTTracking
       kTrackingAlgorithm_6PlanesHit,
       kTrackingAlgorithm_ETH
     };
+    TrackingAlgorithm fTrackingAlgorithm;
 
-    PLTTracking (int);
+    PLTTracking (int, bool TrackOnlyTelescope=false);
     ~PLTTracking ();
 
     void SetTrackingAlignment (PLTAlignment*);
@@ -48,7 +49,7 @@ class PLTTracking
 
   private:
     PLTAlignment* fAlignment;
-    TrackingAlgorithm fTrackingAlgorithm;
+
 
      /**Which planes to use for tracking
      One int per plane
@@ -70,6 +71,7 @@ class PLTTracking
     static bool const DEBUG = false;
 
     int const fNPlanes;
+    bool trackOnlyTelescope;
 
 };
 

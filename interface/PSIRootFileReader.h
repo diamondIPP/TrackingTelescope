@@ -19,7 +19,8 @@ class PSIRootFileReader : public PSIFileReader
                         bool const,
                         bool const,
                         bool const onlyAlign = false,
-                        uint8_t const TelescopeID=0);
+                        uint8_t const TelescopeID=0,
+                        bool TrackOnlyTelescope=false);
     ~PSIRootFileReader ();
 
     bool OpenFile ();
@@ -36,6 +37,7 @@ class PSIRootFileReader : public PSIFileReader
 
     const bool fOnlyAlign;
     uint8_t telescopeID;
+    bool trackOnlyTelescope;
 
     //  Current entry and total number of entries
     int fAtEntry;

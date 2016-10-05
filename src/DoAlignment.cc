@@ -11,6 +11,7 @@ int DoAlignment (std::string const InFileName,
     TString const PlotsDir = "plots/";
     TString const OutDir = PlotsDir + RunNumber;
     float const angle_threshold = 0.01;
+    float const tot_res_threshold = 0.01;
 
     gStyle->SetOptStat(0);
     gStyle->SetPalette(53);
@@ -75,7 +76,7 @@ int DoAlignment (std::string const InFileName,
             hResidualYdX.clear();
 
             for (uint8_t iroc = 0; iroc != GetNumberOfROCS(telescopeID); ++iroc){
-                hResidual.push_back(    TH2F(  Form("Residual_ROC%i",iroc),     Form("Residual_ROC%i",iroc), 200, -.2, .2, 200, -.2, .2));
+                hResidual.push_back(    TH2F(  Form("Residual_ROC%i",iroc),     Form("Residual_ROC%i",iroc), 200, -.5, .5, 200, -.5, .5));
                 hResidualXdY.push_back( TH2F(  Form("ResidualXdY_ROC%i",iroc),  Form("ResidualXdY_ROC%i",iroc), 133, -1, 0.995, 100, -.5, .5));
                 hResidualYdX.push_back( TH2F(  Form("ResidualYdX_ROC%i",iroc),  Form("ResidualYdX_ROC%i",iroc), 201, -1, 1, 100, -.5, .5));
             }
@@ -305,6 +306,7 @@ int DoAlignment (std::string const InFileName,
         } // end event loop
 
         float total_angle = 0;
+        float total_res = 0;
 
         for (int iroc=1; iroc!=GetNumberOfROCS(telescopeID); iroc++){
             std::cout << "RESIDUALS: " << hResidual[iroc].GetMean(1) << " " << hResidual[iroc].GetMean(2) << std::endl;
@@ -326,6 +328,7 @@ int DoAlignment (std::string const InFileName,
             float other_angle = atan(linear_fun.GetParameter(1));
             float other_angle2 = atan(linear_fun2.GetParameter(1));
             total_angle += fabs(other_angle);
+            total_res += fabs(hResidualXdY[iroc].GetMean(2)) + fabs(hResidualYdX[iroc].GetMean(2));
             std::cout << "BLA: ANGLE BEFORE: " << FR->GetAlignment()->GetCP(1,iroc)->LR << std::endl;
             FR->GetAlignment()->AddToLR(1, iroc, other_angle);// DA: this was ... other_angle/3.
             std::cout << "BLA: ANGLE AFTER: " << FR->GetAlignment()->GetCP(1,iroc)->LR << std::endl;
@@ -376,9 +379,10 @@ int DoAlignment (std::string const InFileName,
         std::cout << "END ITERATION " << ialign << " OUT OF 14" << std::endl;
 
         std::cout << "Sum of magnitude of angle correction per roc: " << total_angle << std::endl;
+        std::cout << "Sum of magnitude of residuals in YdX and XdY per rod: " << total_res << std::endl;
 
-        if (total_angle <= angle_threshold){
-            std::cout << "total_angle is below " << angle_threshold << ", stopping alignment." << std::endl;
+        if (total_angle < angle_threshold && total_res < tot_res_threshold){
+            std::cout << "total_angle is below " << angle_threshold << " and total_res is below "<< tot_res_threshold << "=> stopping alignment." << std::endl;
             break;
         }
 

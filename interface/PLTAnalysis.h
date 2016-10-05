@@ -35,13 +35,14 @@ private:
     RootItems * Histos;
     FileWriterTracking * FW;
     uint32_t stopAt;
+    bool trackOnlyTelescope;
 
 public:
 
     /** ============================
      CONSTRUCTOR // DECONSTRUCTOR
      =================================*/
-    PLTAnalysis(std::string const inFileName, TFile * Out_f,  TString const runNumber, uint8_t const TelescopeID);
+    PLTAnalysis(std::string const inFileName, TFile * Out_f,  TString const runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope=false);
     ~PLTAnalysis();
 
 
