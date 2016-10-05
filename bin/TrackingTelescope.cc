@@ -9,15 +9,11 @@
 #include <iostream>
 #include <utility>
 #include <cmath>
-#include <stdlib.h>
 #include <algorithm>
-#include <numeric>
-#include <string>
 #include <sstream>
 
 #include "TLegend.h"
 #include "TLegendEntry.h"
-#include "TString.h"
 #include "TSystem.h"
 #include "TFile.h"
 #include "TGraphErrors.h"
@@ -29,13 +25,9 @@
 
 #include "PSIBinaryFileReader.h"
 #include "PSIRootFileReader.h"
-#include "GetNames.h"
 #include "TestPlaneEfficiencySilicon.h"
 #include "DoAlignment.h"
-//#include "DoAlignment2.h"
 
-#include "PLTPlane.h"
-#include "PLTAlignment.h"
 #include "PLTAnalysis.h"
 
 #define DEBUG false
