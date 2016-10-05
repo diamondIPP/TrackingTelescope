@@ -15,10 +15,10 @@ tracking.cbp.save
 tracking.layout*
 *.save
 get_rootfile.sh
-TrackingTelescope
+lib/
 *.bak
 Vector*
 my*
 NewAlignment.dat
 build/
-*.diego
+*.exe
