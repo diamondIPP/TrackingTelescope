@@ -4,3 +4,5 @@ telescope 14 - PSI  Oct 15, pad 2
 telescope 15 - CERN May 16, pad 
 telescope 16 - PSI  May 15, pad (new) 
 telescope 09 - PSI  Aug 15, pad
+telescope 19 - PSI  Oct 16, pad 1 (S129, SiD1)
+telescope 20 - PSI  Oct 16, pad 2 (II6-B2, II6-97)
