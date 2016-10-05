@@ -184,9 +184,9 @@ public:
     void DrawSavePH(uint8_t iroc, std::vector<std::vector<TH1F*> > histVec, TString title, TString saveName);
     void DrawSaveAvPH(uint8_t);
     void DrawSaveTH1F(std::vector<TH1F*> histo, uint8_t iroc, const char * xTit, const char * yTit);
-    void DrawSaveResidual(uint8_t, vector<TH2F*>);
-    void DrawSaveResidualProj(uint8_t, vector<TH2F*>, TString);
-    void DrawSaveOccupancy(uint8_t, vector<TH2F*>);
+    void DrawSaveResidual(uint8_t, std::vector<TH2F*>);
+    void DrawSaveResidualProj(uint8_t, std::vector<TH2F*>, TString);
+    void DrawSaveOccupancy(uint8_t, std::vector<TH2F*>);
     void DrawSaveOccupancy1DZ(uint8_t);
     void DrawSaveOccupancyQuantile(uint8_t);
     void DrawSave3x3(uint8_t);
