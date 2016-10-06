@@ -9,15 +9,11 @@
 #include <iostream>
 #include <utility>
 #include <cmath>
-#include <stdlib.h>
 #include <algorithm>
-#include <numeric>
-#include <string>
 #include <sstream>
 
 #include "TLegend.h"
 #include "TLegendEntry.h"
-#include "TString.h"
 #include "TSystem.h"
 #include "TFile.h"
 #include "TGraphErrors.h"
@@ -29,13 +25,9 @@
 
 #include "PSIBinaryFileReader.h"
 #include "PSIRootFileReader.h"
-#include "GetNames.h"
 #include "TestPlaneEfficiencySilicon.h"
 #include "DoAlignment.h"
-//#include "DoAlignment2.h"
 
-#include "PLTPlane.h"
-#include "PLTAlignment.h"
 #include "PLTAnalysis.h"
 
 #define DEBUG false
@@ -371,7 +363,7 @@ void TestPlaneEfficiency (std::string const InFileName,
 				 GetUseGainInterpolator(telescopeID),
 				 GetUseExternalCalibrationFunction(telescopeID)
 				 );
-    ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
+    ((PSIBinaryFileReader*) FR)->CalculateLevels(OutDir);
   }
 
   FR->GetAlignment()->SetErrors(telescopeID);
@@ -1066,7 +1058,6 @@ int TestPlaneEfficiencySilicon(std::string const InFileName, TFile * out_f,
 
 
 int FindResiduals(std::string const InFileName,
-                  TFile * out_f,
                   TString const RunNumber,
                   int telescopeID){
 
@@ -1096,7 +1087,7 @@ int FindResiduals(std::string const InFileName,
 				 GetUseGainInterpolator(telescopeID),
 				 GetUseExternalCalibrationFunction(telescopeID)
 				 );
-    ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
+    ((PSIBinaryFileReader*) FR)->CalculateLevels(OutDir);
   }
 
   FR->GetAlignment()->SetErrors(telescopeID, true);
@@ -1607,7 +1598,7 @@ int main (int argc, char* argv[])
      7: Four-Plane Silicon Telescope (May 2015 Testbeam at PSI)
      9: Four-Plane Silicon Telescope (August 2015 Testbeam at PSI)
      10: Seven-Plane (4 Silicon analog ROC planes and 3 digital 1 Silicon and 2 diamond planes) Telescope (August 2015 Testbeam at PSI) */
-    int telescopeID = atoi(argv[3]);
+    int16_t telescopeID = atoi(argv[3]);
 
     /** Tracking only on the telescope:
      0: Use All planes (default until September 2016.
@@ -1620,18 +1611,18 @@ int main (int argc, char* argv[])
     do it here and pass to all functions we call */
     TString const PlotsDir = "plots/";
     TString const OutDir = PlotsDir + RunNumber + "/";
-    TFile out_f( OutDir + "histos.root", "recreate");
+    TFile out_f(OutDir + "histos.root", "recreate");
 
     std::cout << "Action = " << action << std::endl;
     std::cout << "TelescopeID = " << telescopeID << std::endl;
 
     /** ALIGNMENT */
     if (action==1)
-        DoAlignment(InFileName, &out_f, RunNumber, telescopeID);
+        DoAlignment(InFileName, RunNumber, telescopeID);
 
     /** RESIDUAL CALCULATION */
     else if (action==2)
-        FindResiduals(InFileName,  &out_f, RunNumber, telescopeID);
+        FindResiduals(InFileName, RunNumber, telescopeID);
 
     /** ANALYSIS */
     else {

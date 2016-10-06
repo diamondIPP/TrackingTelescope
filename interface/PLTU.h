@@ -13,6 +13,7 @@
 #include "TH2F.h"
 #include "TStyle.h"
 #include "TROOT.h"
+#include <vector>
 
 
 namespace PLTU
@@ -36,8 +37,14 @@ namespace PLTU
     float const PIXELHEIGHT = 0.0100;
 
     /** z-pos of the diamonds in centimeters*/
-    float const DIA1Z = 3.2;
-    float const DIA2Z = 5.1;
+//    float const DIA1Z = 5;
+//    float const DIA2Z = 7;
+    const float DIA1Z[2] = {3.2, 6};
+    const float DIA2Z[2] = {5.1, 8};
+//    const std::vector<float> DIA1Z = {3.2, 6};
+//    const std::vector<float> DIA2Z = {5.1, 8};
+//    float const DIA1Z = 3.2;
+//    float const DIA2Z = 5.1;
 
     float const DIACENTERX = (LASTCOL_DIAMOND + FIRSTCOL_DIAMOND) / float(2);
     float const DIACENTERY = (LASTROW_DIAMOND + FIRSTROW_DIAMOND) / float(2);

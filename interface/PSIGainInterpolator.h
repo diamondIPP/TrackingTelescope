@@ -24,7 +24,7 @@ class PSIGainInterpolator
     float GetCharge (int const, int const, int const, int const, int const);
     void  SetCharge(PLTHit&);
     float GetLinearInterpolation (int const, int const, int const, int const, int);
-    float GetInterpolation (int const, int const, int const, int const, int);
+//    float GetInterpolation (int const, int const, int const, int const, int);
 
 
   private:

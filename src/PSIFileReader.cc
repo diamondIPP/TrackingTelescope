@@ -147,12 +147,12 @@ bool PSIFileReader::IsPixelMasked (int const ChannelPixel)
 
 void PSIFileReader::DrawTracksAndHits (std::string const Name)
 {
-    int const NC = NClusters();
-    int const NT = NTracks();
+    size_t const NC = NClusters();
+    size_t const NT = NTracks();
 
-    float CX[NC];
-    float CY[NC];
-    float CZ[NC];
+    vector<float> CX(NC);
+    vector<float> CY(NC);
+    vector<float> CZ(NC);
 
   // Workaround for:
   //  TLine Line[3][NT];
@@ -163,7 +163,8 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
         Line.push_back( tmp );
     }
 
-    TH2F * HistCharge[NPlanes()];
+    vector<TH2F*> HistCharge(NPlanes());
+//    TH2F * HistCharge[NPlanes()];
     for (uint8_t i = 0; i != NPlanes() ; ++i) {
         TString Name;
         Name.Form("ChargeMap_ROC%i", i);
@@ -171,7 +172,8 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
         HistCharge[i]->GetZaxis()->SetRangeUser(0, 50000);
     }
 
-    TH2F * HistChargeUnclustered[NPlanes()];
+    vector<TH2F*> HistChargeUnclustered(NPlanes());
+//    TH2F * HistChargeUnclustered[NPlanes()];
     for (uint8_t i = 0; i != NPlanes(); ++i) {
         TString Name;
         Name.Form("ChargeMapUnclustered_ROC%i", i);
@@ -249,7 +251,7 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
   C.Divide(3, 4);
 
   C.cd(1);
-  TGraph gXZ(NC, CZ, CX);
+  TGraph gXZ(NC, &CZ[0], &CX[0]);
   gXZ.SetTitle("");
   gXZ.GetXaxis()->SetTitle("Z (cm)");
   gXZ.GetYaxis()->SetTitle("X (cm)");
@@ -264,12 +266,12 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
   if (NC) {
     gXZ.Draw("A*");
   }
-  for (int i = 0; i != NT; ++i) {
+  for (size_t i = 0; i != NT; ++i) {
     Line[0][i].Draw();
   }
 
   C.cd(2);
-  TGraph gYZ(NC, CZ, CY);
+  TGraph gYZ(NC, &CZ[0], &CY[0]);
   gYZ.SetTitle("");
   gYZ.GetXaxis()->SetTitle("Z (cm)");
   gYZ.GetYaxis()->SetTitle("Y (cm)");
@@ -284,14 +286,14 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
   if (NC) {
     gYZ.Draw("A*");
   }
-  for (int i = 0; i != NT; ++i) {
+  for (size_t i = 0; i != NT; ++i) {
     Line[1][i].Draw();
   }
 
   //TVirtualPad* Pad = C.cd(3);
   //Pad->DrawFrame(-30, -30, 30, 30);
   C.cd(3);
-  TGraph gXY(NC, CX, CY);
+  TGraph gXY(NC, &CX[0], &CY[0]);
   gXY.SetTitle("");
   gXY.GetXaxis()->SetTitle("X (cm)");
   gXY.GetYaxis()->SetTitle("Y (cm)");
@@ -306,7 +308,7 @@ void PSIFileReader::DrawTracksAndHits (std::string const Name)
   if (NC) {
     gXY.Draw("A*");
   }
-  for (int i = 0; i != NT; ++i) {
+  for (size_t i = 0; i != NT; ++i) {
     Line[2][i].Draw();
   }
 

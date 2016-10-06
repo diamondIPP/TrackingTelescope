@@ -7,7 +7,7 @@ PLTPlane::PLTPlane ()
 }
 
 
-PLTPlane::PLTPlane (int const Channel, int const ROC)
+PLTPlane::PLTPlane (int const Channel)
 {
   // Con me
   fChannel = Channel;
@@ -163,7 +163,7 @@ void PLTPlane::Clusterize (Clustering const Clust, FiducialRegion const FidR)
       ClusterizeAllTouching(FidR);
       break;
     case kClustering_OnePixOneCluster:
-      ClusterizeOnePixOneCluster(FidR);
+      ClusterizeOnePixOneCluster();
       break;
     case kClustering_NoClustering:
       // Dont to any clustering
@@ -240,7 +240,7 @@ void PLTPlane::ClusterizeAllTouching (FiducialRegion const FidR)
 
 
 
-void PLTPlane::ClusterizeOnePixOneCluster (FiducialRegion const FidR)
+void PLTPlane::ClusterizeOnePixOneCluster()
 {
   // Loop over hits and find biggest..then use as seeds..
   for (size_t i = 0; i != fHits.size(); ++i) {

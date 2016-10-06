@@ -54,7 +54,7 @@ PLTAnalysis::~PLTAnalysis()
         MeasureSpeed(ievent);
         PrintProcess(ievent);
         /** file writer */
-        if (GetUseRootInput(telescopeID)) WriteTrackingTree(ievent);
+        if (GetUseRootInput(telescopeID)) WriteTrackingTree();
 
         /** fill coincidence map */
         Histos->CoincidenceMap()->Fill(FR->HitPlaneBits() );
@@ -150,10 +150,12 @@ PLTAnalysis::~PLTAnalysis()
 //		    if (telescopeID == 9 || telescopeID == 8 || telescopeID ==7) {
 		      if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
                         for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
+              float dia1z = GetDiamondZPosition(telescopeID, 1);
+              float dia2z = GetDiamondZPosition(telescopeID, 2);
 			  if (iSig < 2)
-			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z), FR->SignalDiamond(iSig) );
+			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(dia1z), Track->ExtrapolateY(dia1z), FR->SignalDiamond(iSig) );
 			  else
-			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z), FR->SignalDiamond(iSig) );
+			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(dia2z), Track->ExtrapolateY(dia2z), FR->SignalDiamond(iSig) );
                         }
 		      }
 		    }
@@ -236,7 +238,7 @@ void PLTAnalysis::InitFileReader(){
     else {
         FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
             GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID));
-        ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, Histos->getOutDir());
+        ((PSIBinaryFileReader*) FR)->CalculateLevels(Histos->getOutDir());
     }
     FR->GetAlignment()->SetErrors(telescopeID);
     FILE * f = fopen("MyGainCal.dat", "w");
@@ -252,7 +254,7 @@ void PLTAnalysis::PrintProcess(uint32_t ievent){
 
     if (ievent == 0) cout << endl;
     if (ievent % 10 == 0 && ievent >= 1000){
-        if (ievent != 1000) cout << "\e[A\r";
+        if (ievent != 1000) cout << "\x1B[A\r";
         cout << "Processed events:\t"  << setprecision(2) << setw(5) << setfill('0') << fixed << float(ievent) / stopAt * 100 << "% ";
         if ( stopAt - ievent < 10 ) cout << "|" <<string( 50 , '=') << ">";
         else cout << "|" <<string(int(float(ievent) / stopAt * 100) / 2, '=') << ">";
@@ -279,7 +281,7 @@ void PLTAnalysis::MeasureSpeed(uint32_t ievent){
         now = clock();
     }
 }
-void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
+void PLTAnalysis::WriteTrackingTree(){
 
     /** first clear all vectors */
     FW->clearVectors();
@@ -294,12 +296,14 @@ void PLTAnalysis::WriteTrackingTree(uint32_t iEvent){
         FW->setChi2Y(Track->Chi2Y() );
         FW->setAngleX(Track->fAngleX);
         FW->setAngleY(Track->fAngleY);
-        FW->setDia1TrackX(Track->ExtrapolateX(PLTU::DIA1Z));
-        FW->setDia1TrackY(Track->ExtrapolateY(PLTU::DIA1Z));
-        FW->setDia2TrackX(Track->ExtrapolateX(PLTU::DIA2Z));
-        FW->setDia2TrackY(Track->ExtrapolateY(PLTU::DIA2Z));
-        FW->setDistDia1(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z));
-        FW->setDistDia2(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z));
+        float dia1z = GetDiamondZPosition(telescopeID, 1);
+        float dia2z = GetDiamondZPosition(telescopeID, 2);
+        FW->setDia1TrackX(Track->ExtrapolateX(dia1z));
+        FW->setDia1TrackY(Track->ExtrapolateY(dia1z));
+        FW->setDia2TrackX(Track->ExtrapolateX(dia2z));
+        FW->setDia2TrackY(Track->ExtrapolateY(dia2z));
+        FW->setDistDia1(Track->ExtrapolateX(dia1z), Track->ExtrapolateY(dia1z));
+        FW->setDistDia2(Track->ExtrapolateX(dia2z), Track->ExtrapolateY(dia2z));
 
         FW->setCoincidenceMap(FR->HitPlaneBits());
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
