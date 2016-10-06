@@ -9,6 +9,8 @@
 #include <iostream>
 #include <utility>
 #include <cmath>
+// numeric is needed to compile with make in certain systems
+#include <numeric>
 #include <algorithm>
 #include <sstream>
 
