@@ -150,10 +150,12 @@ PLTAnalysis::~PLTAnalysis()
 //		    if (telescopeID == 9 || telescopeID == 8 || telescopeID ==7) {
 		      if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
                         for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
+              float dia1z = GetDiamondZPosition(telescopeID, 1);
+              float dia2z = GetDiamondZPosition(telescopeID, 2);
 			  if (iSig < 2)
-			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z), FR->SignalDiamond(iSig) );
+			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(dia1z), Track->ExtrapolateY(dia1z), FR->SignalDiamond(iSig) );
 			  else
-			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z), FR->SignalDiamond(iSig) );
+			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(dia2z), Track->ExtrapolateY(dia2z), FR->SignalDiamond(iSig) );
                         }
 		      }
 		    }
@@ -294,12 +296,14 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2Y(Track->Chi2Y() );
         FW->setAngleX(Track->fAngleX);
         FW->setAngleY(Track->fAngleY);
-        FW->setDia1TrackX(Track->ExtrapolateX(PLTU::DIA1Z));
-        FW->setDia1TrackY(Track->ExtrapolateY(PLTU::DIA1Z));
-        FW->setDia2TrackX(Track->ExtrapolateX(PLTU::DIA2Z));
-        FW->setDia2TrackY(Track->ExtrapolateY(PLTU::DIA2Z));
-        FW->setDistDia1(Track->ExtrapolateX(PLTU::DIA1Z), Track->ExtrapolateY(PLTU::DIA1Z));
-        FW->setDistDia2(Track->ExtrapolateX(PLTU::DIA2Z), Track->ExtrapolateY(PLTU::DIA2Z));
+        float dia1z = GetDiamondZPosition(telescopeID, 1);
+        float dia2z = GetDiamondZPosition(telescopeID, 2);
+        FW->setDia1TrackX(Track->ExtrapolateX(dia1z));
+        FW->setDia1TrackY(Track->ExtrapolateY(dia1z));
+        FW->setDia2TrackX(Track->ExtrapolateX(dia2z));
+        FW->setDia2TrackY(Track->ExtrapolateY(dia2z));
+        FW->setDistDia1(Track->ExtrapolateX(dia1z), Track->ExtrapolateY(dia1z));
+        FW->setDistDia2(Track->ExtrapolateX(dia2z), Track->ExtrapolateY(dia2z));
 
         FW->setCoincidenceMap(FR->HitPlaneBits());
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {

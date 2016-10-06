@@ -1,5 +1,5 @@
+#include <PLTU.h>
 #include "GetNames.h"
-#include "TString.h"
 
 using namespace std;
 
@@ -187,6 +187,19 @@ vector<string> split(const string &s, char delim) {
 bool in(int16_t num, vector<uint8_t> ids){
 
     return find(ids.begin(), ids.end(), num ) != ids.end();
+}
+
+float GetDiamondZPosition(int16_t id, uint8_t diamond){
+
+    uint8_t tel = 0;
+    if (id > 16)
+        tel = 1;
+    if (diamond == 1)
+        return PLTU::DIA1Z[tel];
+    else if (diamond == 2)
+        return PLTU::DIA2Z[tel];
+    else
+        return -1;
 }
 
 bool GetUseSlopeInsteadOfAngle(int16_t telescopeID){

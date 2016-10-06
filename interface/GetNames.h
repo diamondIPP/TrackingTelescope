@@ -17,6 +17,7 @@ int GetNumberOfSignals(int16_t);
 int GetUseGainInterpolator(int telescopeID);
 int GetUseExternalCalibrationFunction(int telescopeID);
 int GetUseRootInput(int telescopeID);
+float GetDiamondZPosition(int16_t, uint8_t);
 bool UseFileWriter(uint8_t);
 bool FillSignalHistos(uint8_t);
 bool UseDigitalCalibration(uint8_t);
