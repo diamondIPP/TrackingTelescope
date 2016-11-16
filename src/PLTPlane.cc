@@ -440,3 +440,26 @@ void PLTPlane::SetROC (int const in)
   fROC = in;
   return;
 }
+void PLTPlane::CheckDoubleClassification() { // todo: DA: comentar
+	if (NClusters() > 0) {
+		for (size_t icluster = 0; icluster < NClusters(); icluster++) {
+			PLTCluster *clusti = Cluster((const size_t) icluster);
+//            for (size_t blahit = 0; blahit < clusti->NHits(); blahit ++){
+//              std::cout << "\tROC:\t" << fROC << "\tCluster:\t" << icluster << "\tHit:\t" << blahit << "\tRow:\t" << clusti->Hit(blahit)->Row() << "\tCol:\t" << clusti->Hit(blahit)->Column() << std::endl;
+//            }
+			for (size_t prevCluster = 0; prevCluster < icluster; prevCluster++) {
+				PLTCluster *clustPrev = Cluster((const size_t) prevCluster);
+				for (size_t ihit = 0; ihit < clusti->NHits(); ihit++) {
+					for (size_t phit = 0; phit < clustPrev->NHits(); phit++) {
+						if ((clusti->Hit(ihit)->Row() == clustPrev->Hit(phit)->Row()) && (clusti->Hit(ihit)->Column() == clustPrev->Hit(phit)->Column())) {
+							std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nERROR: A HIT BELONGS TO MORE THAN ONE CLUSTER! ABORT \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n" << std::endl;
+						}
+//						else{
+//							std::cout << "\n CLUSTER SAFE :) " << std::endl;
+//						}
+					}
+				}
+			}
+		}
+	}
+}

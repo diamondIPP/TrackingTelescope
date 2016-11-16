@@ -16,7 +16,7 @@ struct Digits {
 typedef std::vector<Digits> Vd;
 
 
-PLTTracking::PLTTracking (int nplanes) : fNPlanes(nplanes)
+PLTTracking::PLTTracking (int nplanes, bool TrackOnlyTelescope) : fNPlanes(nplanes), trackOnlyTelescope(TrackOnlyTelescope)
 {
   SetAllPlanes();
 }
@@ -54,8 +54,12 @@ int PLTTracking::GetTrackingAlgorithm ()
 void PLTTracking::SetAllPlanes(){
 
   fUsePlanesForTracking.resize(0);
+  std::cout<<"plane configuration for tracking: " << std::endl;
   for (int i=0;i!=fNPlanes;i++) {
-    fUsePlanesForTracking.push_back(2);
+    if(i<4 || !trackOnlyTelescope){
+      fUsePlanesForTracking.push_back(2);std::cout << 2 << std::endl;}
+    else{
+      fUsePlanesForTracking.push_back(0);std::cout << 0 << std::endl;}
   }
 
   fDoSinglePlaneEfficiency = false;
@@ -298,7 +302,7 @@ void PLTTracking::TrackFinder_AllPlanesHit (PLTTelescope& Telescope)
 
   // Put all the clusters we actually use for
   // tracking into a matrix.
-  // Need to have fUsePlanesForTracking of either 1 or 2
+  // Need to have fUsePlanesForTracking of either 1 or 2 or 3
   //  and > 0 hits
   std::vector< std::vector< PLTCluster* > > ClustersForTracking;
   for (uint8_t iPlane=0; iPlane < Telescope.NPlanes(); iPlane++){

@@ -14,10 +14,11 @@ PSIRootFileReader::PSIRootFileReader (std::string const InFileName,
 				      bool const useGainInterpolator,
 				      bool const useExternalCalibrationFunction,
 				      bool const onlyAlign,
-				      uint8_t const TelescopeID
-				      ) :   PSIFileReader(CalibrationList, AlignmentFileName, nrocs, useGainInterpolator, useExternalCalibrationFunction),
+				      uint8_t const TelescopeID,
+                      bool TrackOnlyTelescope
+				      ) :   PSIFileReader(CalibrationList, AlignmentFileName, nrocs, useGainInterpolator, useExternalCalibrationFunction, TrackOnlyTelescope),
                             fOnlyAlign(onlyAlign),
-							telescopeID(TelescopeID)
+							telescopeID(TelescopeID), trackOnlyTelescope(TrackOnlyTelescope)
 {
     fFileName = InFileName;
     if (!OpenFile()) {
@@ -116,7 +117,7 @@ int PSIRootFileReader::GetNextEvent ()
             fPlaneMap[Hit->ROC()].AddHit(Hit);
             if ( fOnlyAlign )
                 for (uint8_t i = 0; i !=roc+1; i++)
-                    if (fPlaneMap[i].NHits() == 0) return 0;
+                    if (fPlaneMap[i].NHits() == 0) return 0; // CHECKS THAT THERE WERE HITS IN THE PREVIOUS ROCS IF NOT RETURN 0
         }
     }
 
@@ -128,14 +129,29 @@ int PSIRootFileReader::GetNextEvent ()
 
     /** If we are doing single plane-efficiencies:
         Just send all events to the tracking and sort it out there */
-    if (DoingSinglePlaneEfficiency()) {
+    if (DoingSinglePlaneEfficiency()) { // TRUE FOR 1ST LOOP ALIGNMENT
         RunTracking( *((PLTTelescope*) this));
     }
 
     /** Otherwise require exactly one cluster per plane */
     else{
-        if (NClusters() == NPlanes() && HitPlaneBits() == pow(2, NPlanes() ) - 1){
-            RunTracking( *((PLTTelescope*) this));
+        switch (fTrackingAlgorithm) {
+            case kTrackingAlgorithm_ETH:
+                if (NClusters() == 4 && (HitPlaneBits() & 15) == pow(2, 4) - 1){
+//                    cout << "Event has the required conditions (ETH tracking): NClusters: " << NClusters() << " and HitPlaneBits (15): " << (HitPlaneBits() & 15) << endl;
+                    RunTracking(*((PLTTelescope*)this));
+                }
+            case kTrackingAlgorithm_6PlanesHit:
+                if (NClusters() == NPlanes() && HitPlaneBits() == pow(2, NPlanes() ) - 1){
+//                    cout << "Event has the required conditions (All planes for tracking): NClusters: " << NClusters() << " and HitPlaneBits (127): " << HitPlaneBits() << endl;
+                    RunTracking( *((PLTTelescope*) this));
+                }
+//            default:
+//                cout << "Entered the default for tracking " << endl;
+//                if (NClusters() == NPlanes() && HitPlaneBits() == pow(2, NPlanes() ) - 1){
+//                    cout << "Event has the required conditions: NClusters: " << NClusters() << " and HitPlaneBits (127): " << HitPlaneBits() << endl;
+//                    RunTracking( *((PLTTelescope*) this));
+//                }
         }
     }
     return 0;

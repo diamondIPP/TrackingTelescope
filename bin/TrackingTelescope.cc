@@ -1554,10 +1554,12 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 
 int main (int argc, char* argv[])
 {
-    if (argc != 4) {
+    if (argc != 5) { // argc == 5 is to specify the type of tracking algorithm to use. Default is 0 (All planes)
+      if (argc != 4) {
         std::cerr << "Usage: " << argv[0] << " InFileName action telescopeID" << std::endl;
         std::cerr << "action: 0 for analysis, 1 for producing alignment file, 2 for finding residuals" << std::endl;
         return 1;
+      }
     }
 
     /** There three usage modes: analysis, alignment and residuals
@@ -1607,6 +1609,13 @@ int main (int argc, char* argv[])
      10: Seven-Plane (4 Silicon analog ROC planes and 3 digital 1 Silicon and 2 diamond planes) Telescope (August 2015 Testbeam at PSI) */
     int telescopeID = atoi(argv[3]);
 
+    /** Tracking only on the telescope:
+     0: Use All planes (default until September 2016.
+     1: Use only the first 4 planes for tracking (telescope planes)
+     For pad, either would do the same effect since num telescope lanes = num of planes
+     */
+    bool trackOnlyTelescope = argc==5? bool(atoi(argv[4])): false;
+
     /** Open a ROOT file to store histograms in
     do it here and pass to all functions we call */
     TString const PlotsDir = "plots/";
@@ -1626,7 +1635,7 @@ int main (int argc, char* argv[])
 
     /** ANALYSIS */
     else {
-      PLTAnalysis Analysis(InFileName,  &out_f, RunNumber, telescopeID);
+      PLTAnalysis Analysis(InFileName,  &out_f, RunNumber, telescopeID, trackOnlyTelescope);
       Analysis.EventLoop();
       Analysis.FinishAnalysis();
     }
