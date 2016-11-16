@@ -59,6 +59,7 @@ public:
     // Should we use the GainInterpolator instead of GainCal
     // -> Only for Telescope 2 from May 2014 testmeab for now
     bool fUseGainInterpolator;
+    bool trackOnlyTelescope;
 
     std::map<int, PLTPlane> fPlaneMap;
 

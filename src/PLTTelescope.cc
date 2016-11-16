@@ -46,16 +46,16 @@ PLTPlane* PLTTelescope::Plane(size_t i)
 void PLTTelescope::DrawTracksAndHits (std::string const Name)
 {
 //  int const NH = NHits();
-  int const NC = NClusters();
-  int const NT = NTracks();
+  uint16_t const NC = NClusters();
+  uint16_t const NT = NTracks();
 
 //  float X[NH];
 //  float Y[NH];
 //  float Z[NH];
 
-  float CX[NC];
-  float CY[NC];
-  float CZ[NC];
+  std::vector<float> CX(NC);
+  std::vector<float> CY(NC);
+  std::vector<float> CZ(NC);
 
   // Workaround for:
   //  TLine Line[3][NT];
@@ -158,7 +158,7 @@ void PLTTelescope::DrawTracksAndHits (std::string const Name)
   C.Divide(3, 3);
 
   C.cd(1);
-  TGraph gXZ(NC, CZ, CX);
+  TGraph gXZ(NC, &CZ[0], &CX[0]);
   gXZ.SetTitle("");
   gXZ.GetXaxis()->SetTitle("Z (cm)");
   gXZ.GetYaxis()->SetTitle("X (cm)");
@@ -178,7 +178,7 @@ void PLTTelescope::DrawTracksAndHits (std::string const Name)
   }
 
   C.cd(4);
-  TGraph gYZ(NC, CZ, CY);
+  TGraph gYZ(NC, &CZ[0], &CX[0]);
   gYZ.SetTitle("");
   gYZ.GetXaxis()->SetTitle("Z (cm)");
   gYZ.GetYaxis()->SetTitle("Y (cm)");
@@ -200,7 +200,7 @@ void PLTTelescope::DrawTracksAndHits (std::string const Name)
   //TVirtualPad* Pad = C.cd(3);
   //Pad->DrawFrame(-30, -30, 30, 30);
   C.cd(7);
-  TGraph gXY(NC, CX, CY);
+  TGraph gXY(NC, &CZ[0], &CX[0]);
   gXY.SetTitle("");
   gXY.GetXaxis()->SetTitle("X (cm)");
   gXY.GetYaxis()->SetTitle("Y (cm)");
@@ -246,7 +246,7 @@ void PLTTelescope::DrawTracksAndHits (std::string const Name)
 
 
 
-void PLTTelescope::Draw2D (int const np, TString const Name)
+void PLTTelescope::Draw2D (TString const Name)
 {
   // This is to draw a telescope.  I'll get back to this later on
   std::vector<TH2F*> h;

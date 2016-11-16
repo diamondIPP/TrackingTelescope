@@ -1,6 +1,9 @@
+#include <PLTU.h>
 #include "GetNames.h"
 
 using namespace std;
+
+uint16_t nTelescopes = 20;
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(int telescopeID, bool useInitial){
@@ -35,12 +38,7 @@ string GetAlignmentFilename(int telescopeID, bool useInitial){
         else if (telescopeID==7)    return "ALIGNMENT/Alignment_ETHTelescope_telescope7.dat";
         else if (telescopeID==8)    return "ALIGNMENT/Alignment_ETHTelescope_telescope8.dat";
         else if (telescopeID==9)    return "ALIGNMENT/Alignment_ETHTelescope_telescope9.dat";
-        else if (telescopeID==10)   return "ALIGNMENT/telescope10.dat";
-        else if (telescopeID==11)   return "ALIGNMENT/telescope11.dat";
-        else if (telescopeID==12)   return "ALIGNMENT/telescope12.dat";
-        else if (telescopeID==13)   return "ALIGNMENT/telescope13.dat";
-        else if (telescopeID==14)   return "ALIGNMENT/telescope14.dat";
-        else if (telescopeID==15)   return "ALIGNMENT/telescope15.dat";
+        else if (telescopeID >= 10)   return string(TString::Format("ALIGNMENT/telescope%d.dat", telescopeID));
         else if (telescopeID==-1)   return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
 
         else{
@@ -60,12 +58,7 @@ string GetMaskingFilename(int telescopeID){
     else if (telescopeID == 7)  return "outer_pixel_masks/outerPixelMask_Telescope7.txt";
     else if (telescopeID == 8)  return "outer_pixel_masks/outerPixelMask_Telescope8.txt";
     else if (telescopeID == 9)  return "outer_pixel_masks/outerPixelMask_Telescope9.txt";
-    else if (telescopeID == 10)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
-    else if (telescopeID == 11)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
-    else if (telescopeID == 12)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
-    else if (telescopeID == 13)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
-    else if (telescopeID == 14)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
-    else if (telescopeID == 15) return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
+    else if (telescopeID >= 10)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == -1) return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
     else {
         cout << "ERROR: No Masking file for telescopeID=" << telescopeID << endl;
@@ -88,7 +81,12 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 12)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 13)  return "calibration_lists/GKCalibrationList_Telescope13.txt";
     else if (telescopeID == 14)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == 15) return "calibration_lists/GKCalibrationList_Telescope13.txt";
+    else if (telescopeID == 15)  return "calibration_lists/GKCalibrationList_Telescope13.txt";
+    else if (telescopeID == 16)  return "calibration_lists/GKCalibrationList_Telescope7.txt";
+    else if (telescopeID == 17)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
+    else if (telescopeID == 18)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
+    else if (telescopeID == 19)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
+    else if (telescopeID == 20)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
         cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << endl;
@@ -97,9 +95,10 @@ string GetCalibrationFilename(int telescopeID){
     }
 }
 
-int GetNumberOfROCS(int telescopeID){
+int GetNumberOfROCS(int16_t telescopeID){
 
-    uint8_t id = telescopeID;
+
+    int16_t id = telescopeID;
     if ((id == 1) || (id == 2) || (id == 3) || (id == 8))
         return 6;
     else if (id == 4)
@@ -117,26 +116,24 @@ int GetNumberOfROCS(int telescopeID){
 
 int GetUseGainInterpolator(int telescopeID){
 
-    if (telescopeID == 2)   return true;
-    else                    return false;
+    return telescopeID == 2;
 }
 
 int GetUseExternalCalibrationFunction(int telescopeID){
 
-    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11)   return true;
-    else                    return false;
+    return telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11;
 }
 
 int GetUseRootInput(int telescopeID){
 
-  if ((telescopeID == -1) || (telescopeID == 7) || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11)
-        return true;
-  else  return false;
+    return (telescopeID == -1) || (telescopeID == 7) || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11;
 }
 
 bool UseFileWriter(uint8_t telescopeID){
 
-    vector<uint8_t> ids = {7, 8, 9, 10, 11, 12, 13, 14, 15};
+    vector<uint8_t> ids;
+    for (uint8_t id = 7; id <= nTelescopes; id++)
+        ids.push_back(id);
     return in(telescopeID, ids);
 }
 
@@ -153,9 +150,9 @@ bool UseDigitalCalibration(uint8_t telescopeID){
 
 }
 
-int GetNumberOfSignals(int telescopeID){
+int GetNumberOfSignals(int16_t telescopeID){
 
-    uint8_t id = telescopeID;
+    int16_t id = telescopeID;
     if (id == 10 || id == 13 || id == 15)
         return 0;
     else if ((id == 7) || (id == 8) || (id == 9) || id >= 11)
@@ -187,10 +184,25 @@ vector<string> split(const string &s, char delim) {
     return elems;
 }
 
-bool in(uint8_t num, vector<uint8_t> ids){
+bool in(int16_t num, vector<uint8_t> ids){
 
-    if (find(ids.begin(), ids.end(), num ) != ids.end())
-        return true;
+    return find(ids.begin(), ids.end(), num ) != ids.end();
+}
+
+float GetDiamondZPosition(int16_t id, uint8_t diamond){
+
+    uint8_t tel = 0;
+    if (id > 16)
+        tel = 1;
+    if (diamond == 1)
+        return PLTU::DIA1Z[tel];
+    else if (diamond == 2)
+        return PLTU::DIA2Z[tel];
     else
-        return false;
+        return -1;
+}
+
+bool GetUseSlopeInsteadOfAngle(int16_t telescopeID){
+    vector<uint8_t> ids = {13, 15};
+    return bool(!in(telescopeID, ids));
 }

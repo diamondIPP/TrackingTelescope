@@ -8,7 +8,7 @@
 #include "PLTPlane.h"
 #include "PLTAlignment.h"
 
-int DoAlignment (std::string, TFile*, TString, int);
+int DoAlignment (std::string, TString, int);
 void print_progress(uint32_t, uint32_t);
 
 #endif // DoAlignment_h

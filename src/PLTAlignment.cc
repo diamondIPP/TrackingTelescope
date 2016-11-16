@@ -109,36 +109,32 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
 
 void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int numRocs)
 {
-  // Open output file
-  FILE* Out = fopen(OutFileName.c_str(), "w");
-  if (!Out) {
-    std::cerr << "ERROR: cannot open file: " << OutFileName << std::endl;
-    throw;
-  }
-
-  for (std::map<int, TelescopeAlignmentStruct>::iterator it = fTelescopeMap.begin(); it != fTelescopeMap.end(); ++it) {
-    int const Channel = it->first;
-    TelescopeAlignmentStruct& Tele = it->second;
-
-    fprintf(Out, "\n");
-    fprintf(Out, "%2i  -1        %15E      %15E  %15E  %15E  %15E\n", Channel, Tele.GRZ, Tele.GRY, Tele.GX, Tele.GY, Tele.GZ);
-    // TODO: make flexible
-    for (int iroc = 0; iroc != numRocs; ++iroc) {
-      std::pair<int, int> ChROC = std::make_pair(Channel, iroc);
-
-      if (!fConstantMap.count(ChROC)) {
-        std::cerr << "ERROR: No entry in fConstantMap for Ch ROC: " << Channel << " " << iroc << std::endl;
-        continue;
-      }
-
-      CP& C = fConstantMap[ChROC];
-      fprintf(Out, "%2i   %1i        %15E                       %15E  %15E  %15E\n", Channel, iroc, C.LR, C.LX, C.LY, C.LZ);
-
+    // Open output file
+    ofstream f;
+    f.open(OutFileName.c_str());
+    if (!f){
+        std::cerr << "ERROR: cannot open file: " << OutFileName << std::endl;
+        throw;
     }
-  }
 
+    // Writing the information
+    for (auto it:fTelescopeMap){
+        int const Channel = it.first;
+        TelescopeAlignmentStruct& Tele = it.second;
+        f << TString::Format("\n%2i  -1        %15E      %15E  %15E  %15E  %15E\n", Channel, Tele.GRZ, Tele.GRY, Tele.GX, Tele.GY, Tele.GZ);
+        for (uint8_t iroc = 0; iroc < numRocs; iroc++){
+            std::pair<int, int> ChROC = std::make_pair(Channel, int(iroc));
+            if (!fConstantMap.count(ChROC)) {
+                std::cerr << "ERROR: No entry in fConstantMap for Ch ROC: " << Channel << " " << iroc << std::endl;
+                continue;
+            }
+            CP & C = fConstantMap[ChROC];
+            f << TString::Format("%2i   %1i        %15E                       %15E  %15E  %15E\n", Channel, iroc, C.LR, C.LX, C.LY, C.LZ);
+        }
+    }
 
-  return;
+    f.close();
+    return;
 }
 
 
@@ -671,16 +667,29 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
             SetErrorY( 2, 0.01);
             SetErrorY( 3, 0.01);
         }
-        else if (id == 9 || id == 11 || id == 12 || id==14){
-            SetErrorX( 0, sqrt(5)*0.015/sqrt(12));
-            SetErrorX( 1, 0.015/sqrt(12));
-            SetErrorX( 2, 0.015/sqrt(12));
-            SetErrorX( 3, sqrt(5)*0.015/sqrt(12));
-
-            SetErrorY( 0, sqrt(5)*0.01/sqrt(12));
-            SetErrorY( 1, 0.01/sqrt(12));
-            SetErrorY( 2, 0.01/sqrt(12));
-            SetErrorY( 3, sqrt(5)*0.01/sqrt(12));
+        else if (id == 9 || id == 11 || id == 12 || id>=14){
+            float correction = 2.5;
+            bool use_geom_fac = false;
+            float geom_fac = use_geom_fac ? sqrt(5) : 1;
+            for (uint8_t i = 0; i < 4; i++){
+                if (i == 0 or i == 3) {
+                    SetErrorX(i, geom_fac * 0.015 / sqrt(12) * correction);
+                    SetErrorY(i, geom_fac * 0.01 / sqrt(12) * correction);
+                }
+                else {
+                    SetErrorX(i, 0.015/sqrt(12) * correction);
+                    SetErrorY(i, 0.01/sqrt(12) * correction);
+                }
+            }
+//            SetErrorX( 0, sqrt(5)*0.015/sqrt(12));
+//            SetErrorX( 1, 0.015/sqrt(12));
+//            SetErrorX( 2, 0.015/sqrt(12));
+//            SetErrorX( 3, sqrt(5)*0.015/sqrt(12));
+//
+//            SetErrorY( 0, sqrt(5)*0.01/sqrt(12));
+//            SetErrorY( 1, 0.01/sqrt(12));
+//            SetErrorY( 2, 0.01/sqrt(12));
+//            SetErrorY( 3, sqrt(5)*0.01/sqrt(12));
         }
         else if (telescopeID == 8){
             SetErrorX( 0, 0.01);

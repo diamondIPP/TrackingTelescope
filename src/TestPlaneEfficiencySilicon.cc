@@ -45,7 +45,7 @@ int TestPlaneEfficiencySilicon (std::string const InFileName, TFile * out_f,
                      GetUseGainInterpolator(telescopeID),
                      GetUseExternalCalibrationFunction(telescopeID)
                      );
-        ((PSIBinaryFileReader*) FR)->CalculateLevels(10000, OutDir);
+        ((PSIBinaryFileReader*) FR)->CalculateLevels(OutDir);
     }
 
     FR->GetAlignment()->SetErrors(telescopeID);

@@ -95,10 +95,10 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
     if (RowIndex(row) >= MAXROWS) { printf("ERROR: over MAXROWS: %i\n", row); };
     if (ColIndex(col) >= MAXCOLS) { printf("ERROR: over MAXCOLS: %i\n", col); };
 
-    uint8_t irow = RowIndex(row);
-    uint8_t icol = ColIndex(col);
-    uint8_t ich  = ChIndex(ch);
-    uint8_t iroc = RocIndex(roc);
+    int16_t irow = RowIndex(row);
+    int16_t icol = ColIndex(col);
+    int16_t ich  = ChIndex(ch);
+    int16_t iroc = RocIndex(roc);
 
     if (irow < 0 || icol < 0 || ich < 0 || iroc < 0) {
         return -9999;

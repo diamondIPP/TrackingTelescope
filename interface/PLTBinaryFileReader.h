@@ -32,7 +32,7 @@ class PLTBinaryFileReader
     bool DecodeSpyDataFifo (uint32_t, std::vector<PLTHit*>&);
     int  ReadEventHits (std::vector<PLTHit*>&, unsigned long&, uint32_t&, uint32_t&);
     int  ReadEventHits (std::ifstream&, std::vector<PLTHit*>&, unsigned long&, uint32_t&, uint32_t&);
-    int  ReadEventHitsText (std::ifstream&, std::vector<PLTHit*>&, unsigned long&, uint32_t&, uint32_t&);
+    int  ReadEventHitsText (std::ifstream&, std::vector<PLTHit*>&, unsigned long&);
 
     void ReadPixelMask (std::string const);
     bool IsPixelMasked (int const);

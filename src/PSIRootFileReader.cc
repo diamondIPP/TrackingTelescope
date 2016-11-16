@@ -54,8 +54,8 @@ bool PSIRootFileReader::OpenFile ()
     if (!(fNEntries>0)) return false;
 
     // Set Branch Addresses
-    fTree->SetBranchAddress("event_number",&f_event_number);
-    fTree->SetBranchAddress("time",&f_time);
+    fTree->SetBranchAddress("event_number", &f_event_number);
+    fTree->SetBranchAddress("time", &f_time);
 
     fTree->SetBranchAddress("plane", &f_plane);
     fTree->SetBranchAddress("col", &f_col);
@@ -152,6 +152,9 @@ int PSIRootFileReader::GetNextEvent ()
 //                    cout << "Event has the required conditions: NClusters: " << NClusters() << " and HitPlaneBits (127): " << HitPlaneBits() << endl;
 //                    RunTracking( *((PLTTelescope*) this));
 //                }
+            case kTrackingAlgorithm_NoTracking:break;
+            case kTrackingAlgorithm_01to2_All:break;
+            case kTrackingAlgorithm_2PlaneTracks_All:break;
         }
     }
     return 0;

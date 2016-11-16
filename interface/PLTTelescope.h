@@ -22,7 +22,7 @@ class PLTTelescope
     int       Channel ();
     PLTPlane* Plane(size_t i);
     void      DrawTracksAndHits (std::string const);
-    void      Draw2D (int const, TString const);
+    void      Draw2D (TString const);
     size_t    NPlanes ();
     size_t    NHits ();
     size_t    NClusters ();
