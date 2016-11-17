@@ -67,12 +67,11 @@ PLTAnalysis::~PLTAnalysis()
         DrawTracks();
 
         /** loop over the planes */
-
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
 
             PLTPlane * Plane = FR->Plane(iplane);
             /** Check that the each hit belongs to only one cluster type*/ //todo: DA: comentar
-    	    Plane->CheckDoubleClassification();
+//    	    Plane->CheckDoubleClassification();
             /** fill cluster histo */
             Histos->nClusters()[Plane->ROC()]->Fill(Plane->NClusters());
 
@@ -97,11 +96,11 @@ PLTAnalysis::~PLTAnalysis()
 
 
 //        cout << "Number of Tracks: " << FR->NTracks() << endl;
-        if (UseFileWriter(telescopeID) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
+        if (UseFileWriter(telescopeID) && FR->NTracks() == 1 && ((FR->Track(0)->NClusters() == Histos->NRoc()  && !trackOnlyTelescope) || (FR->Track(0)->NClusters() >= 4  && trackOnlyTelescope))){
 //		if ((telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID >= 10) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
 
 		  do_slope = true;
-		  for (uint8_t i_rocs(0); i_rocs != Histos->NRoc(); i_rocs++)
+		  for (uint8_t i_rocs(0); i_rocs != FR->Track(0)->NClusters(); i_rocs++)
 		    if (FR->Track(0)->Cluster(i_rocs)->Charge() > PHThreshold){
 		      do_slope = false;
 		      break;
