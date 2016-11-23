@@ -360,7 +360,7 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setDistDia2(-999, -999);
         FW->setCoincidenceMap(0);
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
-            PLTTrack * Track2 = FR->Track(0);
+//            PLTTrack * Track2 = FR->Track(0);
             PLTPlane * Plane = FR->Plane(iplane);
             FW->setClusters(iplane, Plane->NClusters() );
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
@@ -370,8 +370,8 @@ void PLTAnalysis::WriteTrackingTree(){
                 FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
                 FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
                 FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
-                FW->setResicualLocalX(iplane, Track2->LResidualX(iplane));
-                FW->setResicualLocalY(iplane, Track2->LResidualY(iplane));
+                FW->setResicualLocalX(iplane, -999);
+                FW->setResicualLocalY(iplane, -999);
                 FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
                 FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
                 FW->setTrackX(iplane, -9999);
