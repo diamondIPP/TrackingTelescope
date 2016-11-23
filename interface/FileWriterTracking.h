@@ -59,6 +59,8 @@ private:
     vector<vector<int> *> br_smallest_hit_adc;
     vector<vector<int> *> br_smallest_hit_pos_col;
     vector<vector<int> *> br_smallest_hit_pos_row;
+    vector<vector<float> *> br_residual_local_x;
+    vector<vector<float> *> br_residual_local_y;
 //    vector<vector<float> *> br_smalleest_hit_pos_telescope_x;  // DA: maybe they are necessary. If they are, implement them just as br_smallest_hit_pos_col/row
 //    vector<vector<float> *> br_smalleest_hit_pos_telescope_y;
 
@@ -110,6 +112,8 @@ public:
     vector<vector<int>* > SmallestHitADC() { return br_smallest_hit_adc; }
     vector<vector<int>* > SmallestHitPosCol() { return br_smallest_hit_pos_col; }
     vector<vector<int>* > SmallestHitPosRow() { return br_smallest_hit_pos_row; }
+    vector<vector<float>* > ResidualLocalX() { return br_residual_local_x; }
+    vector<vector<float>* > ResidualLocalY() { return br_residual_local_y; }
 
     /** ============================
      SET-FUNCTIONS
@@ -147,7 +151,8 @@ public:
     void setSmallestHitCharge(uint8_t iRoc, int value) { br_smallest_hit_adc[iRoc]->push_back(value); }
     void setSmallestHitPosCol(uint8_t iRoc, int value) { br_smallest_hit_pos_col[iRoc]->push_back(value); }
     void setSmallestHitPosRow(uint8_t iRoc, int value) { br_smallest_hit_pos_row[iRoc]->push_back(value); }
-
+    void setResicualLocalX(uint8_t iRoc, float value) { br_residual_local_x[iRoc]->push_back(value); }
+    void setResicualLocalY(uint8_t iRoc, float value) { br_residual_local_y[iRoc]->push_back(value); }
 
     /** ============================
      AUXILIARY FUNCTIONS

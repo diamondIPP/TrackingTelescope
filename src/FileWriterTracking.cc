@@ -33,6 +33,8 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     br_smallest_hit_adc.resize(nRoc);
     br_smallest_hit_pos_col.resize(nRoc);
     br_smallest_hit_pos_row.resize(nRoc);
+    br_residual_local_x.resize(nRoc);
+    br_residual_local_y.resize(nRoc);
     addBranches();
 
 }
@@ -87,6 +89,10 @@ void FileWriterTracking::addBranches(){
         newtree->Branch(branch_name_cluster_localX, &(br_cluster_pos_local_x[iRoc]));
         TString branch_name_cluster_localY = TString::Format("cluster_pos_ROC%d_Local_Y",iRoc);
         newtree->Branch(branch_name_cluster_localY, &(br_cluster_pos_local_y[iRoc]));
+        TString branch_name_residual_localX = TString::Format("residual_ROC%d_Local_X",iRoc);
+        newtree->Branch(branch_name_residual_localX, &(br_residual_local_x[iRoc]));
+        TString branch_name_residual_localY = TString::Format("residual_ROC%d_Local_Y",iRoc);
+        newtree->Branch(branch_name_residual_localY, &(br_residual_local_y[iRoc]));
         TString branch_name_cluster_row = TString::Format("cluster_row_ROC%d",iRoc);
         newtree->Branch(branch_name_cluster_row, &(br_cluster_row[iRoc]));
         TString branch_name_cluster_col = TString::Format("cluster_col_ROC%d",iRoc);
@@ -132,6 +138,8 @@ void FileWriterTracking::clearVectors(){
         br_cluster_pos_telescope_y[iRoc]->clear();
         br_cluster_pos_local_x[iRoc]->clear();
         br_cluster_pos_local_y[iRoc]->clear();
+        br_residual_local_x[iRoc]->clear();
+        br_residual_local_y[iRoc]->clear();
         br_cluster_col[iRoc]->clear();
         br_cluster_row[iRoc]->clear();
         br_track_x[iRoc]->clear();
