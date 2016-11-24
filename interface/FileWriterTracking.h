@@ -151,8 +151,8 @@ public:
     void setSmallestHitCharge(uint8_t iRoc, int value) { br_smallest_hit_adc[iRoc]->push_back(value); }
     void setSmallestHitPosCol(uint8_t iRoc, int value) { br_smallest_hit_pos_col[iRoc]->push_back(value); }
     void setSmallestHitPosRow(uint8_t iRoc, int value) { br_smallest_hit_pos_row[iRoc]->push_back(value); }
-    void setResicualLocalX(uint8_t iRoc, float value) { br_residual_local_x[iRoc]->push_back(value); }
-    void setResicualLocalY(uint8_t iRoc, float value) { br_residual_local_y[iRoc]->push_back(value); }
+    void setResidualLocalX(uint8_t iRoc, float value) { br_residual_local_x[iRoc]->push_back(value); }
+    void setResidualLocalY(uint8_t iRoc, float value) { br_residual_local_y[iRoc]->push_back(value); }
 
     /** ============================
      AUXILIARY FUNCTIONS

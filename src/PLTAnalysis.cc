@@ -316,12 +316,12 @@ void PLTAnalysis::WriteTrackingTree(){
                 FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
                 FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
                 FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
-                FW->setResicualLocalX(iplane, Track2->LResidualX(iplane));
-                FW->setResicualLocalY(iplane, Track2->LResidualY(iplane));
+                FW->setResidualLocalX(iplane, Track2->LResidualX(iplane));
+                FW->setResidualLocalY(iplane, Track2->LResidualY(iplane));
                 FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
                 FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
-                FW->setTrackX(iplane, Track2->ExtrapolateX(Plane->TZ()));
-                FW->setTrackY(iplane, Track2->ExtrapolateY(Plane->TZ()));
+                FW->setTrackX(iplane, Track2->ExtrapolateX(Plane->GZ()));
+                FW->setTrackY(iplane, Track2->ExtrapolateY(Plane->GZ()));
                 float chargeSmall = 1000000000;
                 size_t ihitSmall = 0;
                 for (size_t ihit = 0; ihit < Plane->Cluster(icluster)->NHits(); ihit ++){
@@ -370,8 +370,8 @@ void PLTAnalysis::WriteTrackingTree(){
                 FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
                 FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
                 FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
-                FW->setResicualLocalX(iplane, -999);
-                FW->setResicualLocalY(iplane, -999);
+                FW->setResidualLocalX(iplane, -999);
+                FW->setResidualLocalY(iplane, -999);
                 FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
                 FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
                 FW->setTrackX(iplane, -9999);
