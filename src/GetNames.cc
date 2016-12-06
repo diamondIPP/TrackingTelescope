@@ -87,7 +87,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 18)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 19)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 20)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == 22)  return "calibration_lists/GKCalibrationList_Telescope13.txt";
+    else if (telescopeID == 22)  return "calibration_lists/GKCalibrationList_Telescope22.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
         cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << endl;

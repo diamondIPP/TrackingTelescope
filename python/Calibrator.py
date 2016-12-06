@@ -8,7 +8,7 @@ Redo the GainCal fit
 # Imports
 ###############################
 
-import sys
+import sys, os
 
 import ROOT
 
@@ -90,6 +90,10 @@ in_f.readline()
 c1 = ROOT.TCanvas("","", 800, 800)
 
 counter = 1
+if produce_debugplots:
+    if not os.path.isdir('debugplots'):
+        os.makedirs('debugplots')
+
 for line in in_f:
     
     # Format of line should be:
@@ -127,7 +131,7 @@ for line in in_f:
     gr.Fit(fun, 'Q')
     
     if produce_debugplots:
-        gr.Draw("APL*")    
+        gr.Draw("APL*")
         c1.Print("debugplots/Pix_{0}_{1}.pdf".format(atoms[pix_index+1], atoms[pix_index+2]))
 
     out_string = "{0} {1} {2} {3}    Pix {4} {5}".format( fun.GetParameter(0),

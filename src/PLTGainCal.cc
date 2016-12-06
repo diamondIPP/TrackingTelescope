@@ -114,13 +114,17 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
 
         /** change calibration factor for digital planes*/
         if (UseDigitalCalibration(telescopeID)){
-            if (iroc == 4 || iroc == 5){
+            if (iroc == 4 || (iroc == 5 && telescopeID != 22)){
                 charge = 47 * fFitFunction.GetX(adc);
 //                cout << "iroc: adc/charge: " << int(iroc) <<": " << adc << "/" << charge << endl;
             }
-            else if (iroc == 6)         charge = 43.13 * fFitFunction.GetX(adc) + 333.0;
+            else if (iroc == 5 && telescopeID == 22)
+                charge = 47.5 * fFitFunction.GetX(adc) - 427.4;
+            else if (iroc == 6){
+                if (telescopeID != 22)
+                    charge = 43.13 * fFitFunction.GetX(adc) + 333.0;
+            }
             else                        charge = 65. * fFitFunction.GetX(adc);
-
         }
         else                            charge = 65. * fFitFunction.GetX(adc);
     }
