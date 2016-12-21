@@ -35,6 +35,8 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     br_smallest_hit_pos_row.resize(nRoc);
     br_residual_local_x.resize(nRoc);
     br_residual_local_y.resize(nRoc);
+    br_residuals_x.resize(nRoc);
+    br_residuals_y.resize(nRoc);
     addBranches();
 
 }
@@ -75,6 +77,8 @@ void FileWriterTracking::addBranches(){
     newtree->Branch("clusters_per_plane", &br_clusters_per_plane);
     // new branches: DA
     newtree->Branch("coincidence_map", &br_coincidence_map);
+    newtree->Branch("residuals_x", &br_residuals_x);
+    newtree->Branch("residuals_y", &br_residuals_y);
 
     for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
         TString branch_name_charge = TString::Format("charge_all_ROC%d", iRoc);

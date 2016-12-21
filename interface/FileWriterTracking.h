@@ -61,6 +61,8 @@ private:
     vector<vector<int> *> br_smallest_hit_pos_row;
     vector<vector<float> *> br_residual_local_x;
     vector<vector<float> *> br_residual_local_y;
+    vector<float> br_residuals_x;
+    vector<float> br_residuals_y;
 //    vector<vector<float> *> br_smalleest_hit_pos_telescope_x;  // DA: maybe they are necessary. If they are, implement them just as br_smallest_hit_pos_col/row
 //    vector<vector<float> *> br_smalleest_hit_pos_telescope_y;
 
@@ -114,6 +116,8 @@ public:
     vector<vector<int>* > SmallestHitPosRow() { return br_smallest_hit_pos_row; }
     vector<vector<float>* > ResidualLocalX() { return br_residual_local_x; }
     vector<vector<float>* > ResidualLocalY() { return br_residual_local_y; }
+    vector<float> ResidualX() { return br_residuals_x; }
+    vector<float> ResidualY() { return br_residuals_y; }
 
     /** ============================
      SET-FUNCTIONS
@@ -153,6 +157,8 @@ public:
     void setSmallestHitPosRow(uint8_t iRoc, int value) { br_smallest_hit_pos_row[iRoc]->push_back(value); }
     void setResidualLocalX(uint8_t iRoc, float value) { br_residual_local_x[iRoc]->push_back(value); }
     void setResidualLocalY(uint8_t iRoc, float value) { br_residual_local_y[iRoc]->push_back(value); }
+    void setResidualsX(uint8_t iRoc, float value) { br_residuals_x.at(iRoc) = value; }
+    void setResidualsY(uint8_t iRoc, float value) { br_residuals_y.at(iRoc) = value; }
 
     /** ============================
      AUXILIARY FUNCTIONS

@@ -309,6 +309,7 @@ void PLTAnalysis::WriteTrackingTree(){
             PLTTrack * Track2 = FR->Track(0);
             PLTPlane * Plane = FR->Plane(iplane);
             FW->setClusters(iplane, Plane->NClusters() );
+            FW->setResidualsX(iplane, ((Plane->NClusters() == 1) ? Track2->LResidualX(iplane) : -999));
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
                 FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
                 FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
