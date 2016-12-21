@@ -187,7 +187,8 @@ vector<string> split(const string &s, char delim) {
     return elems;
 }
 
-bool in(int16_t num, vector<uint8_t> ids){
+template<typename T>
+bool in(T num, vector<T> ids){
 
     return find(ids.begin(), ids.end(), num ) != ids.end();
 }
@@ -206,6 +207,6 @@ float GetDiamondZPosition(int16_t id, uint8_t diamond){
 }
 
 bool GetUseSlopeInsteadOfAngle(int16_t telescopeID){
-    vector<uint8_t> ids = {13, 15, 22};
+    vector<int16_t > ids = {13, 15, 22};
     return bool(!in(telescopeID, ids));
 }

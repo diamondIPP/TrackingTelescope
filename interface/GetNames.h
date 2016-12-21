@@ -23,7 +23,8 @@ bool FillSignalHistos(uint8_t);
 bool UseDigitalCalibration(uint8_t);
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 std::vector<std::string> split(const std::string &s, char delim);
-bool in(int16_t , std::vector<uint8_t>);
+template <typename T>
+bool in(T , std::vector<T>);
 
 bool GetUseSlopeInsteadOfAngle(int16_t telescopeID);
 
