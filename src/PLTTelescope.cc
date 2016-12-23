@@ -383,3 +383,15 @@ float PLTTelescope::SignalDiamond(uint8_t number){
         return -999;
     }
 }
+
+bool PLTTelescope::HaveOneCluster(uint16_t nplanes) {
+
+  bool one_cluster = true;
+  for (uint8_t iplane = 0; iplane < nplanes; iplane++){
+    if (not Plane(iplane)->NClusters() == 1){
+      one_cluster = false;
+      break;
+    }
+  }
+  return one_cluster;
+}
