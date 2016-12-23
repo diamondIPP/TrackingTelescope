@@ -21,7 +21,7 @@ using namespace std;
 PSIFileReader::PSIFileReader (string const CalibrationList, string const AlignmentFileName,
     int const nrocs, bool const useGainInterpolator, bool const useExternalCalibrationFunction, bool TrackOnlyTelescope):
         PLTTracking(nrocs, TrackOnlyTelescope), NMAXROCS(nrocs), fGainCal(nrocs, useExternalCalibrationFunction),
-        fUseGainInterpolator(useGainInterpolator), trackOnlyTelescope(TrackOnlyTelescope){
+        trackOnlyTelescope(TrackOnlyTelescope), fUseGainInterpolator(useGainInterpolator){
 
    /** Initialize fCalibrationFile and fRawCalibrationFile with empty strings */
     for (int i_roc=0; i_roc != NMAXROCS; i_roc++) {
