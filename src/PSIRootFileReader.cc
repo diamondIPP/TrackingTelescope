@@ -137,7 +137,7 @@ int PSIRootFileReader::GetNextEvent ()
     else{
         switch (fTrackingAlgorithm) {
             case kTrackingAlgorithm_ETH:
-                if (NClusters() >= 4 && NClusters() != NPlanes() && (HitPlaneBits() & 15) == pow(2, 4) - 1){
+                if (HaveOneCluster(4) && NClusters() != NPlanes() && (HitPlaneBits() & 15) == pow(2, 4) - 1){
 //                    cout << "Event has the required conditions (ETH tracking): NClusters: " << NClusters() << " and HitPlaneBits (15): " << (HitPlaneBits() & 15) << endl;
                     RunTracking(*((PLTTelescope*)this));
                 }
