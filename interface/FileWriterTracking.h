@@ -42,6 +42,7 @@ private:
     float   br_slope_x, br_slope_y;
     uint8_t br_n_tracks, br_n_clusters;
     vector<uint8_t> br_clusters_per_plane;
+    vector<uint16_t> br_n_hits;
     vector<vector<float>* > br_charge_all;
     vector<vector<int>* > br_cluster_size;
 //    vector<vector<vector<float>*>> br_pulse_heights_all;
@@ -141,6 +142,7 @@ public:
     void setChargeAll(uint8_t iRoc, float value) { br_charge_all[iRoc]->push_back(value); }
     void setClusterSize(uint8_t iRoc, int value) { br_cluster_size[iRoc]->push_back(value); }
     void setClusters(uint8_t iRoc, uint8_t value) { br_clusters_per_plane[iRoc] = value; }
+    void setNHits(uint8_t iRoc, uint16_t value) { br_n_hits[iRoc] = value; }
     void setClusterPositionTelescopeX(uint8_t iRoc, float value) { br_cluster_pos_telescope_x[iRoc]->push_back(value); }
     void setClusterPositionTelescopeY(uint8_t iRoc, float value) { br_cluster_pos_telescope_y[iRoc]->push_back(value); }
     void setClusterPositionLocalX(uint8_t iRoc, float value) { br_cluster_pos_local_x[iRoc]->push_back(value); }
