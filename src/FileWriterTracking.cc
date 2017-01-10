@@ -76,6 +76,7 @@ void FileWriterTracking::addBranches(){
     newtree->Branch("n_tracks", &br_n_tracks);
     newtree->Branch("n_clusters", &br_n_clusters);
     newtree->Branch("clusters_per_plane", &br_clusters_per_plane);
+    newtree->Branch("cluster_plane", &br_cluster_plane);
     newtree->Branch("n_hits", &br_n_hits);
     // new branches: DA
     newtree->Branch("coincidence_map", &br_coincidence_map);
@@ -137,6 +138,7 @@ void FileWriterTracking::saveTree(){
 
 }
 void FileWriterTracking::clearVectors(){
+    br_cluster_plane.clear();
     for (uint8_t iRoc = 0; iRoc !=nRoc; iRoc++){
         br_charge_all[iRoc]->clear();
         br_cluster_size[iRoc]->clear();

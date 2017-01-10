@@ -51,6 +51,7 @@ PLTAnalysis::~PLTAnalysis()
         if (ievent > stopAt) break;
         ThisTime = ievent;
 
+//        cout << ievent << " ";
         MeasureSpeed(ievent);
         PrintProcess(ievent);
         /** file writer */
@@ -288,6 +289,10 @@ void PLTAnalysis::WriteTrackingTree(){
     FW->setNTracks(FR->NTracks() );
     FW->setNClusters(FR->NClusters() );
 
+    for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+      PLTPlane * Plane = FR->Plane(iplane);
+      FW->setNHits(iplane, Plane->NHits() );
+    }
     if (FR->NTracks() > 0){
         PLTTrack * Track = FR->Track(0);
         FW->setChi2(Track->Chi2() );
@@ -305,13 +310,16 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setDistDia2(Track->ExtrapolateX(dia2z), Track->ExtrapolateY(dia2z));
 
         FW->setCoincidenceMap(FR->HitPlaneBits());
-        for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+        for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
             PLTTrack * Track2 = FR->Track(0);
             PLTPlane * Plane = FR->Plane(iplane);
             FW->setClusters(iplane, Plane->NClusters() );
-            FW->setNHits(iplane, Plane->NHits() );
             FW->setResidualsX(iplane, ((Plane->NClusters() == 1) ? Track2->LResidualX(iplane) : -999));
+//            if (Plane->NHits() == 1 and iplane == 4){
+//              cout << (Plane->Hit(0)->Column() == Plane->Cluster(0)->SeedHit()->Column()) << endl;
+//            }
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
+                FW->setClusterPlane(iplane);
                 FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
                 FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
                 FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
