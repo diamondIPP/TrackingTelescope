@@ -96,7 +96,7 @@ string GetCalibrationFilename(int telescopeID){
     }
 }
 
-int GetNumberOfROCS(int16_t telescopeID){
+uint8_t GetNumberOfROCS(int16_t telescopeID){
 
 
     int16_t id = telescopeID;
