@@ -1,5 +1,4 @@
 #include "FileWriterTracking.h"
-#include "GetNames.h"
 
 using namespace std;
 
@@ -14,10 +13,6 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     names = ((PSIRootFileReader*) FR)->fMacro;
     newfile = new TFile(NewFileName.c_str(), "RECREATE");
     newtree = intree->CloneTree(0);
-//    br_pulse_heights_all.resize(nRoc);
-//    for(uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
-//        br_pulse_heights_all[iRoc].resize(nHits);
-//    }
     br_charge_all.resize(nRoc);
     br_cluster_size.resize(nRoc);
     br_clusters_per_plane.resize(nRoc);
@@ -26,8 +21,6 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     br_cluster_pos_telescope_y.resize(nRoc);
     br_cluster_pos_local_x.resize(nRoc);
     br_cluster_pos_local_y.resize(nRoc);
-    br_cluster_col.resize(nRoc);
-    br_cluster_row.resize(nRoc);
     br_track_x.resize(nRoc);
     br_track_y.resize(nRoc);
     br_smallest_hit_charge.resize(nRoc);
@@ -55,6 +48,7 @@ string FileWriterTracking::getFileName(string InFileName){
     return NewFileName;
 }
 void FileWriterTracking::addBranches(){
+
     newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
     newtree->Branch("diam1_track_x", &br_diam1_track_x);
     newtree->Branch("diam1_track_y", &br_diam1_track_y);
@@ -77,6 +71,9 @@ void FileWriterTracking::addBranches(){
     newtree->Branch("n_clusters", &br_n_clusters);
     newtree->Branch("clusters_per_plane", &br_clusters_per_plane);
     newtree->Branch("cluster_plane", &br_cluster_plane);
+    newtree->Branch("cluster_col", &br_cluster_col);
+    newtree->Branch("cluster_row", &br_cluster_row);
+    newtree->Branch("cluster_charge", &br_cluster_charge);
     newtree->Branch("n_hits", &br_n_hits);
     // new branches: DA
     newtree->Branch("coincidence_map", &br_coincidence_map);
@@ -100,10 +97,6 @@ void FileWriterTracking::addBranches(){
         newtree->Branch(branch_name_residual_localX, &(br_residual_local_x[iRoc]));
         TString branch_name_residual_localY = TString::Format("residual_ROC%d_Local_Y",iRoc);
         newtree->Branch(branch_name_residual_localY, &(br_residual_local_y[iRoc]));
-        TString branch_name_cluster_row = TString::Format("cluster_row_ROC%d",iRoc);
-        newtree->Branch(branch_name_cluster_row, &(br_cluster_row[iRoc]));
-        TString branch_name_cluster_col = TString::Format("cluster_col_ROC%d",iRoc);
-        newtree->Branch(branch_name_cluster_col, &(br_cluster_col[iRoc]));
         TString branch_name_track_x = TString::Format("track_x_ROC%d",iRoc);
         newtree->Branch(branch_name_track_x, &(br_track_x[iRoc]));
         TString branch_name_track_y = TString::Format("track_y_ROC%d",iRoc);
@@ -138,7 +131,11 @@ void FileWriterTracking::saveTree(){
 
 }
 void FileWriterTracking::clearVectors(){
+
     br_cluster_plane.clear();
+    br_cluster_col.clear();
+    br_cluster_row.clear();
+    br_cluster_charge.clear();
     for (uint8_t iRoc = 0; iRoc !=nRoc; iRoc++){
         br_charge_all[iRoc]->clear();
         br_cluster_size[iRoc]->clear();
@@ -148,17 +145,12 @@ void FileWriterTracking::clearVectors(){
         br_cluster_pos_local_y[iRoc]->clear();
         br_residual_local_x[iRoc]->clear();
         br_residual_local_y[iRoc]->clear();
-        br_cluster_col[iRoc]->clear();
-        br_cluster_row[iRoc]->clear();
         br_track_x[iRoc]->clear();
         br_track_y[iRoc]->clear();
         br_smallest_hit_charge[iRoc]->clear();
         br_smallest_hit_adc[iRoc]->clear();
         br_smallest_hit_pos_col[iRoc]->clear();
         br_smallest_hit_pos_row[iRoc]->clear();
-//        for (uint8_t iHits = 0; iHits != nHits; iHits++){
-//            br_pulse_heights_all[iRoc][iHits]->clear();
-//        }
     }
 }
 

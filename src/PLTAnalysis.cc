@@ -292,6 +292,14 @@ void PLTAnalysis::WriteTrackingTree(){
     for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
       PLTPlane * Plane = FR->Plane(iplane);
       FW->setNHits(iplane, Plane->NHits() );
+//      for (uint16_t ihit = 0; ihit < Plane->NHits(); ihit++){
+//        PLTHit * Hit = Plane->Hit(ihit);
+//        FW->setPlane(Hit->ROC() );
+//        FW->setCol(Hit->Column() );
+//        FW->setRow(Hit->Row() );
+//        FW->setADC(Hit->ADC() );
+//        FW->setCharge(Hit->Charge() );
+//      }
     }
     if (FR->NTracks() > 0){
         PLTTrack * Track = FR->Track(0);
@@ -321,6 +329,7 @@ void PLTAnalysis::WriteTrackingTree(){
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
                 FW->setClusterPlane(iplane);
                 FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
+                FW->setClusterCharge(Plane->Cluster(icluster)->Charge());
                 FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
                 FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
                 FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
@@ -328,8 +337,8 @@ void PLTAnalysis::WriteTrackingTree(){
                 FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
                 FW->setResidualLocalX(iplane, Track2->LResidualX(iplane));
                 FW->setResidualLocalY(iplane, Track2->LResidualY(iplane));
-                FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
-                FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
+                FW->setClusterRow(Plane->Cluster(icluster)->SeedHit()->Row() );
+                FW->setClusterColumn(Plane->Cluster(icluster)->SeedHit()->Column() );
                 FW->setTrackX(iplane, Track2->ExtrapolateX(Plane->GZ()));
                 FW->setTrackY(iplane, Track2->ExtrapolateY(Plane->GZ()));
                 float chargeSmall = 1000000000;
@@ -382,8 +391,6 @@ void PLTAnalysis::WriteTrackingTree(){
                 FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
                 FW->setResidualLocalX(iplane, -999);
                 FW->setResidualLocalY(iplane, -999);
-                FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
-                FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
                 FW->setTrackX(iplane, -9999);
                 FW->setTrackY(iplane, -9999);
                 float chargeSmall = 1000000000;
