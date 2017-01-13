@@ -3,5 +3,5 @@ phCalibrationGErfFit80_C0.dat
 phCalibrationGErfFit50_C1.dat
 phCalibrationGErfFit50_C2.dat
 phCalibrationGErfFit45_C5.dat
-phCalibrationFitErr35_C0.dat
-phCalibrationFitErr35_C1.dat
+phCalibrationGErfFit_C0.dat
+phCalibrationGErfFit_C1.dat
