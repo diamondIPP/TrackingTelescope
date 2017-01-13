@@ -58,6 +58,7 @@ string GetMaskingFilename(int telescopeID){
     else if (telescopeID == 7)  return "outer_pixel_masks/outerPixelMask_Telescope7.txt";
     else if (telescopeID == 8)  return "outer_pixel_masks/outerPixelMask_Telescope8.txt";
     else if (telescopeID == 9)  return "outer_pixel_masks/outerPixelMask_Telescope9.txt";
+    else if (telescopeID == 22)  return "outer_pixel_masks/outerPixelMask_Telescope22.txt";
     else if (telescopeID >= 10)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == -1) return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
     else {
