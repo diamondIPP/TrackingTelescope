@@ -231,18 +231,23 @@ std::pair<float, float> PLTCluster::TCenterOfMass ()
   float X = 0.0;
   float Y = 0.0;
   float ChargeSum = 0.0;
+  bool found_zero_charge = false;
 
   // Loop over each hit in the cluster
+  for (auto ihit: fHits)
+    if (ihit->Charge() == 0)
+      found_zero_charge = true;
   for (std::vector<PLTHit*>::iterator It = fHits.begin(); It != fHits.end(); ++It) {
-    X += (*It)->TX() * (*It)->Charge();
-    Y += (*It)->TY() * (*It)->Charge();
+    float iCharge = ((not found_zero_charge) ? (*It)->Charge() : 1);
+    X += (*It)->TX() * iCharge;
+    Y += (*It)->TY() * iCharge;
     ChargeSum += (*It)->Charge();
   }
 
   // If charge sum is zero or less return average
-  if (ChargeSum <= 0.0) {
+  if (ChargeSum <= 0.0 or found_zero_charge) {
     //std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::GCenterOfMass()" << std::endl;
-    std::make_pair<float, float>(X / (float) NHits(), Y / (float) NHits());
+    return std::make_pair<float, float>(X / (float) NHits(), Y / (float) NHits());
   }
 
   // Put fiducial warning here?
