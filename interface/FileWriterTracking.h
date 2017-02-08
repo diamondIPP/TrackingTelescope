@@ -46,13 +46,13 @@ private:
     vector<uint16_t> br_cluster_plane;
     vector<uint16_t> br_cluster_col;
     vector<uint16_t> br_cluster_row;
+    vector<float> br_cluster_xpos_tel;
+    vector<float> br_cluster_ypos_tel;
+    vector<float> br_cluster_xpos_local;
+    vector<float> br_cluster_ypos_local;
     vector<float> br_cluster_charge;
     vector<vector<float>* > br_charge_all;
     vector<vector<int>* > br_cluster_size;
-    vector<vector<float> *> br_cluster_pos_telescope_x;
-    vector<vector<float> *> br_cluster_pos_telescope_y;
-    vector<vector<float> *> br_cluster_pos_local_x;
-    vector<vector<float> *> br_cluster_pos_local_y;
     float br_coincidence_map;
     vector<vector<float> *> br_track_x;
     vector<vector<float> *> br_track_y;
@@ -98,10 +98,6 @@ public:
     float   Chi2Y() { return br_chi2_y; }
     vector<vector<float>* > ChargeAll() { return br_charge_all; }
     vector<vector<int>* > ClusterSize() { return br_cluster_size; }
-    vector<vector<float>* > ClusterPosTelescopeX() { return br_cluster_pos_telescope_x; }
-    vector<vector<float>* > ClusterPosTelescopeY() { return br_cluster_pos_telescope_y; }
-    vector<vector<float>* > ClusterPosLocalX() { return br_cluster_pos_local_x; }
-    vector<vector<float>* > ClusterPosLocalY() { return br_cluster_pos_local_y; }
     size_t GetNHits() { return nHits; }
     float   GetCoincidenceMap() { return br_coincidence_map; }
     vector<uint16_t> ClusterRow() { return br_cluster_row; }
@@ -141,13 +137,13 @@ public:
     void setClusters(uint8_t iRoc, uint8_t value) { br_clusters_per_plane[iRoc] = value; }
     void setClusterPlane(uint16_t value) { br_cluster_plane.push_back(value); }
     void setNHits(uint8_t iRoc, uint16_t value) { br_n_hits[iRoc] = value; }
-    void setClusterPositionTelescopeX(uint8_t iRoc, float value) { br_cluster_pos_telescope_x[iRoc]->push_back(value); }
-    void setClusterPositionTelescopeY(uint8_t iRoc, float value) { br_cluster_pos_telescope_y[iRoc]->push_back(value); }
-    void setClusterPositionLocalX(uint8_t iRoc, float value) { br_cluster_pos_local_x[iRoc]->push_back(value); }
-    void setClusterPositionLocalY(uint8_t iRoc, float value) { br_cluster_pos_local_y[iRoc]->push_back(value); }
     void setCoincidenceMap(float value) { br_coincidence_map = value; }
     void setClusterColumn(int value) { br_cluster_col.push_back(value); }
     void setClusterRow(int value) { br_cluster_row.push_back(value); }
+    void setClusterXPosTel(float value) { br_cluster_xpos_tel.push_back(value); }
+    void setClusterYPosTel(float value) { br_cluster_ypos_tel.push_back(value); }
+    void setClusterXPosLocal(float value) { br_cluster_xpos_local.push_back(value); }
+    void setClusterYPosLocal(float value) { br_cluster_ypos_local.push_back(value); }
     void setClusterCharge(float value) { br_cluster_charge.push_back(value); }
     void setTrackX(uint8_t iRoc, float value) { br_track_x[iRoc]->push_back(value); }
     void setTrackY(uint8_t iRoc, float value) { br_track_y[iRoc]->push_back(value); }

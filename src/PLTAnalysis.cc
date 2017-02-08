@@ -332,10 +332,10 @@ void PLTAnalysis::WriteTrackingTree(){
                 FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
                 FW->setClusterCharge(Plane->Cluster(icluster)->Charge());
                 FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
-                FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
-                FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
-                FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
-                FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
+                FW->setClusterXPosTel(Plane->Cluster(icluster)->TX() );
+                FW->setClusterYPosTel(Plane->Cluster(icluster)->TY() );
+                FW->setClusterXPosLocal(Plane->Cluster(icluster)->LX() );
+                FW->setClusterYPosLocal(Plane->Cluster(icluster)->LY() );
                 FW->setResidualLocalX(iplane, Track2->LResidualX(iplane));
                 FW->setResidualLocalY(iplane, Track2->LResidualY(iplane));
                 FW->setClusterRow(Plane->Cluster(icluster)->SeedHit()->Row() );
@@ -386,10 +386,12 @@ void PLTAnalysis::WriteTrackingTree(){
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
                 FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
                 FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
-                FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
-                FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
-                FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
-                FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
+                FW->setClusterXPosTel(Plane->Cluster(icluster)->TX() );
+                FW->setClusterYPosTel(Plane->Cluster(icluster)->TY() );
+                FW->setClusterXPosLocal(Plane->Cluster(icluster)->LX() );
+                FW->setClusterYPosLocal(Plane->Cluster(icluster)->LY() );
+                FW->setClusterRow(Plane->Cluster(icluster)->SeedHit()->Row() );
+                FW->setClusterColumn(Plane->Cluster(icluster)->SeedHit()->Column() );
                 FW->setResidualLocalX(iplane, -999);
                 FW->setResidualLocalY(iplane, -999);
                 FW->setTrackX(iplane, -9999);
