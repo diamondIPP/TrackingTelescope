@@ -20,7 +20,7 @@ int GetUseRootInput(int telescopeID);
 float GetDiamondZPosition(int16_t, uint8_t);
 bool UseFileWriter(uint8_t);
 bool FillSignalHistos(uint8_t);
-bool UseDigitalCalibration(uint8_t);
+bool UseDigitalCalibration(int16_t);
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 std::vector<std::string> split(const std::string &s, char delim);
 template <typename T>

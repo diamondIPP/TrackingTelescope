@@ -147,9 +147,9 @@ bool FillSignalHistos(uint8_t telescopeID){
     return in(telescopeID, ids);
 }
 
-bool UseDigitalCalibration(uint8_t telescopeID){
+bool UseDigitalCalibration(int16_t telescopeID){
 
-    vector<uint8_t> ids = {10, 13, 15, 22};
+    vector<int16_t> ids = {10, 13, 15, 22};
     return in(telescopeID, ids);
 
 }
