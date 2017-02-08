@@ -23,6 +23,9 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
     /** init histos */
     Histos = new RootItems(telescopeID, RunNumber);
+    Dia1Z = getZPosition(1);
+    Dia2Z = getZPosition(2);
+    cout << "Found diamond z positions: " << Dia1Z << " " << Dia2Z << endl;
     cout << "Output directory: " << Histos->getOutDir() << endl;
     /** init file writer */
     if (UseFileWriter(telescopeID)) FW = new FileWriterTracking(InFileName, telescopeID, FR);
@@ -308,14 +311,12 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2Y(Track->Chi2Y() );
         FW->setAngleX(Track->fAngleX);
         FW->setAngleY(Track->fAngleY);
-        float dia1z = GetDiamondZPosition(telescopeID, 1);
-        float dia2z = GetDiamondZPosition(telescopeID, 2);
-        FW->setDia1TrackX(Track->ExtrapolateX(dia1z));
-        FW->setDia1TrackY(Track->ExtrapolateY(dia1z));
-        FW->setDia2TrackX(Track->ExtrapolateX(dia2z));
-        FW->setDia2TrackY(Track->ExtrapolateY(dia2z));
-        FW->setDistDia1(Track->ExtrapolateX(dia1z), Track->ExtrapolateY(dia1z));
-        FW->setDistDia2(Track->ExtrapolateX(dia2z), Track->ExtrapolateY(dia2z));
+        FW->setDia1TrackX(Track->ExtrapolateX(Dia1Z));
+        FW->setDia1TrackY(Track->ExtrapolateY(Dia1Z));
+        FW->setDia2TrackX(Track->ExtrapolateX(Dia2Z));
+        FW->setDia2TrackY(Track->ExtrapolateY(Dia2Z));
+        FW->setDistDia1(Track->ExtrapolateX(Dia1Z), Track->ExtrapolateY(Dia1Z));
+        FW->setDistDia2(Track->ExtrapolateX(Dia2Z), Track->ExtrapolateY(Dia2Z));
 
         FW->setCoincidenceMap(FR->HitPlaneBits());
         for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
@@ -513,4 +514,11 @@ void PLTAnalysis::FillOfflinePH(PLTTrack * Track, PLTCluster * Cluster){
         else if (Cluster->NHits() >= 3)
             Histos->PulseHeightOffline()[Cluster->ROC()][3]->Fill(Cluster->Charge());
     }
+}
+
+float PLTAnalysis::getZPosition(uint8_t dia){
+
+    if (UseDigitalCalibration(telescopeID))
+        return FR->GetAlignment()->LZ(1, 3 + dia);
+    return GetDiamondZPosition(telescopeID, dia);
 }

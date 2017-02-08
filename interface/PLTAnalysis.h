@@ -36,6 +36,7 @@ private:
     FileWriterTracking * FW;
     uint32_t stopAt;
     bool trackOnlyTelescope;
+    float Dia1Z, Dia2Z;
 
 public:
 
@@ -64,6 +65,7 @@ public:
     float getTime(float now, float & time);
     void SinglePlaneStudies();
     void InitFileReader();
+    float getZPosition(uint8_t);
     void PrintProcess(uint32_t);
     void MeasureSpeed(uint32_t);
     void WriteTrackingTree();
