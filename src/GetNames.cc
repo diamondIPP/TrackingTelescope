@@ -206,8 +206,3 @@ float GetDiamondZPosition(int16_t id, uint8_t diamond){
     else
         return -1;
 }
-
-bool GetUseSlopeInsteadOfAngle(int16_t telescopeID){
-    vector<int16_t > ids = {13, 15, 22};
-    return bool(!in(telescopeID, ids));
-}
