@@ -3,7 +3,7 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 22;
+uint16_t nTelescopes = 23;
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(int telescopeID, bool useInitial){
@@ -89,6 +89,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 19)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 20)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 22)  return "calibration_lists/GKCalibrationList_Telescope22.txt";
+    else if (telescopeID >= 10)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
         cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << endl;
