@@ -232,10 +232,12 @@ std::pair<float, float> PLTCluster::TCenterOfMass ()
   float ChargeSum = 0.0;
   bool found_zero_charge = false;
 
-  // Loop over each hit in the cluster
+  // We should never have negative or zero charges and cannot handle them -> just take the unweighted average in that case
   for (auto ihit: fHits)
-    if (ihit->Charge() == 0)
+    if (ihit->Charge() == -9999 or ihit->Charge() < 0)
       found_zero_charge = true;
+
+  // Loop over each hit in the cluster
   for (std::vector<PLTHit*>::iterator It = fHits.begin(); It != fHits.end(); ++It) {
     float iCharge = ((not found_zero_charge) ? (*It)->Charge() : 1);
     X += (*It)->TX() * iCharge;
