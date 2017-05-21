@@ -3,7 +3,7 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 23;
+uint16_t nTelescopes = 25;
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(int telescopeID, bool useInitial){
@@ -59,6 +59,7 @@ string GetMaskingFilename(int telescopeID){
     else if (telescopeID == 8)  return "outer_pixel_masks/outerPixelMask_Telescope8.txt";
     else if (telescopeID == 9)  return "outer_pixel_masks/outerPixelMask_Telescope9.txt";
     else if (telescopeID == 22)  return "outer_pixel_masks/outerPixelMask_Telescope22.txt";
+    else if (telescopeID == 25)  return "outer_pixel_masks/outerPixelMask_Telescope22.txt";
     else if (telescopeID >= 10)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == -1) return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
     else {
@@ -89,6 +90,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 19)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 20)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == 22)  return "calibration_lists/GKCalibrationList_Telescope22.txt";
+    else if (telescopeID == 25)  return "calibration_lists/GKCalibrationList_Telescope25.txt";
     else if (telescopeID >= 10)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
@@ -108,7 +110,7 @@ uint8_t GetNumberOfROCS(int16_t telescopeID){
         return 2;
     else if (id == 10 || id == 13 || id == 15)
         return 7;
-    else if(id == 22)
+    else if(id == 22 or id == 25)
         return 6;
     else if ((id == 5) || (id == 6) || (id == 7) || (id == -1) || (id >= 9))
         return 4;
@@ -150,7 +152,7 @@ bool FillSignalHistos(uint8_t telescopeID){
 
 bool UseDigitalCalibration(int16_t telescopeID){
 
-    vector<int16_t> ids = {10, 13, 15, 22};
+    vector<int16_t> ids = {10, 13, 15, 22, 25};
     return in(telescopeID, ids);
 
 }
@@ -158,7 +160,7 @@ bool UseDigitalCalibration(int16_t telescopeID){
 int GetNumberOfSignals(int16_t telescopeID){
 
     int16_t id = telescopeID;
-    if (id == 10 || id == 13 || id == 15 || id == 22)
+    if (id == 10 || id == 13 || id == 15 || id == 22 or id == 25)
         return 0;
     else if ((id == 7) || (id == 8) || (id == 9) || id >= 11)
         return 4;
