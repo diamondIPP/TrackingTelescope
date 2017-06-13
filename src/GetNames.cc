@@ -202,6 +202,8 @@ float GetDiamondZPosition(int16_t id, uint8_t diamond){
     uint8_t tel = 0;
     if (id > 16 && id < 22)
         tel = 1;
+    else if (id > 22)
+        tel = 2;
     if (diamond == 1)
         return PLTU::DIA1Z[tel];
     else if (diamond == 2)

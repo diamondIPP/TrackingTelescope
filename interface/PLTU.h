@@ -37,8 +37,8 @@ namespace PLTU
     float const PIXELHEIGHT = 0.0100;
 
     /** z-pos of the diamonds in centimeters*/
-    const float DIA1Z[2] = {3.2, 6.7};
-    const float DIA2Z[2] = {5.1, 8.2};
+    const float DIA1Z[3] = {3.2, 6.7, 5.8};
+    const float DIA2Z[3] = {5.1, 8.2, 7.5};
 
     float const DIACENTERX = (LASTCOL_DIAMOND + FIRSTCOL_DIAMOND) / float(2);
     float const DIACENTERY = (LASTROW_DIAMOND + FIRSTROW_DIAMOND) / float(2);
