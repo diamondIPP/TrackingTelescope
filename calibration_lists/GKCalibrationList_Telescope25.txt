@@ -1,7 +1,7 @@
 ./Calibrations/telescope25
-phCalibrationGErfFit80_C0.dat
-phCalibrationGErfFit50_C1.dat
-phCalibrationGErfFit50_C2.dat
-phCalibrationGErfFit45_C5.dat
-phCalibrationFitErr_C0.dat
+phCalibrationGErfFit_C0.dat
+phCalibrationGErfFit_C1.dat
+phCalibrationGErfFit_C2.dat
+phCalibrationGErfFit_C3.dat
+phCalibrationGErfFit_C4.dat
 phCalibrationFitErr_C1.dat
