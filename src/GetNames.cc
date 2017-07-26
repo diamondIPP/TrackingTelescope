@@ -3,7 +3,7 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 27;
+uint16_t nTelescopes = 28;
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(int telescopeID, bool useInitial){
@@ -59,7 +59,7 @@ string GetMaskingFilename(int telescopeID){
     else if (telescopeID == 8)  return "outer_pixel_masks/outerPixelMask_Telescope8.txt";
     else if (telescopeID == 9)  return "outer_pixel_masks/outerPixelMask_Telescope9.txt";
     else if (telescopeID == 22)  return "outer_pixel_masks/outerPixelMask_Telescope22.txt";
-    else if (telescopeID == 25)  return "outer_pixel_masks/outerPixelMask_Telescope22.txt";
+    else if (telescopeID >= 25)  return "outer_pixel_masks/outerPixelMask_Telescope22.txt";
     else if (telescopeID >= 10)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == -1) return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
     else {
