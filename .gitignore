@@ -1,6 +1,7 @@
 *.png
 *.gif
 .*
+*.pdf
 *.out
 plots/
 lib/DHidasPLT.so
