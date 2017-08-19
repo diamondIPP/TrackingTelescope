@@ -155,7 +155,7 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
 void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
 {
 
-  std::cout << "ReadGainCalFile" << std::endl;
+  std::cout << "ReadGainCalFile: " << GainCalFileName << std::endl;
 
   if (GainCalFileName == "") {
     fIsGood = false;
