@@ -39,7 +39,7 @@ public:
 
     long long GetTime () {return fTime;}
 
-    const int  NMAXROCS;
+    const uint8_t NMAXROCS;
 
 
   protected:
