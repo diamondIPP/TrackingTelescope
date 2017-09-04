@@ -370,11 +370,6 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2Y(-999);
         FW->setAngleX(-999);
         FW->setAngleY(-999);
-        for (auto dummy: *DiaZ){
-          std::ignore = dummy;
-          FW->setDiaTracks(-999, -999);
-          FW->setDistDia(-999, -999);
-        }
         FW->setCoincidenceMap(0);
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
 //            PLTTrack * Track2 = FR->Track(0);

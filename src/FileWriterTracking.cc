@@ -47,8 +47,8 @@ string FileWriterTracking::getFileName(string InFileName){
 void FileWriterTracking::addBranches(){
 
     newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
-    newtree->Branch("diam_track_x", &br_dia_track_pos_x);
-    newtree->Branch("diam_track_y", &br_dia_track_pos_y);
+    newtree->Branch("dia_track_x", &br_dia_track_pos_x);
+    newtree->Branch("dia_track_y", &br_dia_track_pos_y);
     newtree->Branch("dist_to_dia", &br_dist_to_dia);
     newtree->Branch("chi2_tracks", &br_chi2);
     newtree->Branch("chi2_x", &br_chi2_x);
