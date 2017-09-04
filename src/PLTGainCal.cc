@@ -152,10 +152,7 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
     return float(charge);
 }
 
-void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
-{
-
-  std::cout << "ReadGainCalFile: " << GainCalFileName << std::endl;
+void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc) {
 
   if (GainCalFileName == "") {
     fIsGood = false;
@@ -172,7 +169,6 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
   CheckFirstLine.ReadLine(InFile);
 
   if (CheckFirstLine.BeginsWith("Parameters of the vcal vs. pulse height fits")) {// DA: TODO else condition?
-    std::cout << "PLTGainCal setting fIsExternalFunction" << std::endl;
     fIsExternalFunction = true;
   }
 
@@ -201,8 +197,6 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
   InFile.close();
   fNParams = i;
 
-  printf("PLTGainCal sees a parameter file with %i params\n", fNParams);
-
   if (fIsExternalFunction) {
     ReadGainCalFileExt(GainCalFileName, roc);
   } else {
@@ -215,8 +209,6 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
       throw;
     }
   }
-
-  return;
 }
 
 int PLTGainCal::GetHardwareID (int const Channel)
@@ -250,9 +242,7 @@ void PLTGainCal::ReadGainCalFile5 (std::string const GainCalFileName)
     ss >> mf >> mfc >> hub >> ch;
 
     fHardwareMap[ch] = 1000*mf + 100*mfc + hub;
-    printf("Adding ch %i -> %i %i %i\n", ch, mf, mfc, hub);
   }
-
 
   std::string line;
   std::getline(f, line);
@@ -318,7 +308,6 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
 
   //int const mf = 8, mfc = 1, hub = 5;
   fHardwareMap[ch] = 1000*ch + roc;// DA: TODO unused?
-  printf("Adding ch %i as -> %i\n", ch, fHardwareMap[ch]);
 
   ifstream f(GainCalFileName.c_str());
   if (!f) {

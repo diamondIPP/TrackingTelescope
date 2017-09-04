@@ -128,19 +128,16 @@ void PSIFileReader::ReadPixelMask (std::string const InFileName)
 
     if (line.find("col") != std::string::npos){
       linestream >> ch >> roc >> col;
-      cout << "Masking Column: " << col << endl;
       for (uint8_t i_row = 0; i_row < PLTU::NROW; i_row++)
         fPixelMask.insert(ch * 100000 + roc * 10000 + col * 100 + i_row);
     }
     else if (line.find("row") != std::string::npos){
       linestream >> ch >> roc >> row;
-      cout << "Masking Row: " << row << endl;
       for (uint8_t i_col = 0; i_col < PLTU::NCOL; i_col++)
         fPixelMask.insert(ch * 100000 + roc * 10000 + i_col * 100 + row);
     }
     else {
       linestream >> ch >> roc >> col >> row;
-      std::cout << "Masking: " << ch << " " << roc << " " << col << " " << row << std::endl;
       fPixelMask.insert( ch*100000 + roc*10000 + col*100 + row );
     }
   }

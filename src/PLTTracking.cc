@@ -54,13 +54,18 @@ int PLTTracking::GetTrackingAlgorithm ()
 void PLTTracking::SetAllPlanes(){
 
   fUsePlanesForTracking.resize(0);
-  std::cout<<"plane configuration for tracking: " << std::endl;
-  for (int i=0;i!=fNPlanes;i++) {
-    if(i<4 || !trackOnlyTelescope){
-      fUsePlanesForTracking.push_back(2);std::cout << 2 << std::endl;}
-    else{
-      fUsePlanesForTracking.push_back(0);std::cout << 0 << std::endl;}
+  std::cout<<"Plane configuration for tracking: ";
+  for (int i=0; i!=fNPlanes; i++) {
+    if(i < 4 || !trackOnlyTelescope){
+      fUsePlanesForTracking.push_back(2);
+      std::cout << "2 ";
+    }
+    else {
+      fUsePlanesForTracking.push_back(0);
+      std::cout << "0 ";
+    }
   }
+  std::cout << std::endl;
 
   fDoSinglePlaneEfficiency = false;
 }
