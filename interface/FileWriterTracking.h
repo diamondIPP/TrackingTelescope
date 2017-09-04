@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <map>
 
 #include "TTree.h"
 #include "TFile.h"
@@ -33,9 +34,8 @@ private:
 
     /** branch variables */
     uint8_t br_hit_plane_bits;
-    float   br_diam1_track_x, br_diam1_track_y;
-    float   br_diam2_track_x, br_diam2_track_y;
-    float   br_dist_to_dia1, br_dist_to_dia2;
+    map<string, vector<float>* > br_dia_track_pos;
+    vector<float> * br_dist_to_dia;
     float   br_chi2;
     float   br_chi2_x, br_chi2_y;
     float   br_angle_x, br_angle_y;
@@ -84,10 +84,7 @@ public:
     uint8_t HitPlaneBits() { return br_hit_plane_bits; }
     uint8_t nTracks() { return br_n_tracks; }
     uint8_t nClusters() { return br_n_clusters; }
-    float   Dia1TrackX() { return br_diam1_track_x; }
-    float   Dia1TrackY() { return br_diam1_track_y; }
-    float   Dia2TrackX() { return br_diam2_track_x; }
-    float   Dia2TrackY() { return br_diam2_track_y; }
+    float DiaTrack(string dir, uint8_t roc) { return br_dia_track_pos.at(dir)->at(roc); }
     float   AngleX() { return br_angle_x; }
     float   AngleY() { return br_angle_y; }
     float   Chi2() { return br_chi2; }
@@ -111,17 +108,13 @@ public:
     vector<float> ResidualY() { return br_residuals_y; }
 
     /** ============================
-     SET-FUNCTIONS
-     =================================*/
+        SETTER METHODS
+        =================================*/
     void setHitPlaneBits(uint8_t value) { br_hit_plane_bits = value; }
     void setNTracks(uint8_t value) { br_n_tracks = value; }
     void setNClusters(uint8_t value) { br_n_clusters = value; }
-    void setDia1TrackX(float value) { br_diam1_track_x = value; }
-    void setDia1TrackY(float value) { br_diam1_track_y = value; }
-    void setDia2TrackX(float value) { br_diam2_track_x = value; }
-    void setDia2TrackY(float value) { br_diam2_track_y = value; }
-    void setDistDia1(float xVal, float yVal) { br_dist_to_dia1 = sqrt(xVal*xVal + yVal*yVal); }
-    void setDistDia2(float xVal, float yVal) { br_dist_to_dia2 = sqrt(xVal*xVal + yVal*yVal); }
+    void setDiaTracks(float xVal, float yVal) { br_dia_track_pos.at("x")->push_back(xVal); br_dia_track_pos.at("y")->push_back(yVal); }
+    void setDistDia(float xVal, float yVal) { br_dist_to_dia->push_back(sqrt(xVal * xVal + yVal * yVal)); }
     void setAngleX(float value) { br_angle_x = value; }
     void setAngleY(float value) { br_angle_y = value; }
     void setChi2(float value) { br_chi2 = value; }

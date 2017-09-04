@@ -23,13 +23,11 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
     /** init histos */
     Histos = new RootItems(telescopeID, RunNumber);
-    Dia1Z = getZPosition(1);
-    Dia2Z = getZPosition(2);
-    cout << "Found diamond z positions: " << Dia1Z << " " << Dia2Z << endl;
+    DiaZ = getDiaZPositions();
     cout << "Output directory: " << Histos->getOutDir() << endl;
     /** init file writer */
-    if (UseFileWriter(telescopeID)) FW = new FileWriterTracking(InFileName, telescopeID, FR);
-//    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11) FW = new FileWriterTracking(InFileName, telescopeID, FR);
+    if (UseFileWriter(telescopeID))
+      FW = new FileWriterTracking(InFileName, telescopeID, FR);
 }
 
 PLTAnalysis::~PLTAnalysis()
@@ -311,12 +309,12 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2Y(Track->Chi2Y() );
         FW->setAngleX(Track->fAngleX);
         FW->setAngleY(Track->fAngleY);
-        FW->setDia1TrackX(Track->ExtrapolateX(Dia1Z));
-        FW->setDia1TrackY(Track->ExtrapolateY(Dia1Z));
-        FW->setDia2TrackX(Track->ExtrapolateX(Dia2Z));
-        FW->setDia2TrackY(Track->ExtrapolateY(Dia2Z));
-        FW->setDistDia1(Track->ExtrapolateX(Dia1Z), Track->ExtrapolateY(Dia1Z));
-        FW->setDistDia2(Track->ExtrapolateX(Dia2Z), Track->ExtrapolateY(Dia2Z));
+        for (auto i_pos : *DiaZ){
+          float x_pos = Track->ExtrapolateX(i_pos);
+          float y_pos = Track->ExtrapolateY(i_pos);
+          FW->setDiaTracks(x_pos, y_pos);
+          FW->setDistDia(x_pos, y_pos);
+        }
 
         FW->setCoincidenceMap(FR->HitPlaneBits());
         for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
@@ -372,12 +370,11 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2Y(-999);
         FW->setAngleX(-999);
         FW->setAngleY(-999);
-        FW->setDia1TrackX(-999);
-        FW->setDia1TrackY(-999);
-        FW->setDia2TrackX(-999);
-        FW->setDia2TrackY(-999);
-        FW->setDistDia1(-999, -999);
-        FW->setDistDia2(-999, -999);
+        for (auto dummy: *DiaZ){
+          std::ignore = dummy;
+          FW->setDiaTracks(-999, -999);
+          FW->setDistDia(-999, -999);
+        }
         FW->setCoincidenceMap(0);
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
 //            PLTTrack * Track2 = FR->Track(0);
@@ -518,9 +515,14 @@ void PLTAnalysis::FillOfflinePH(PLTTrack * Track, PLTCluster * Cluster){
     }
 }
 
-float PLTAnalysis::getZPosition(uint8_t dia){
+vector<float> * PLTAnalysis::getDiaZPositions(){
 
-    if (UseDigitalCalibration(telescopeID))
-        return FR->GetAlignment()->LZ(1, 3 + dia);
-    return GetDiamondZPosition(telescopeID, dia);
+    auto * tmp = new vector<float>;
+    size_t n_dut_planes = UseDigitalCalibration(telescopeID) ? FR->NPlanes() - 4 : 2;
+    for (uint8_t i_dut(0); i_dut < n_dut_planes; i_dut++){
+      float pos = UseDigitalCalibration(telescopeID) ? FR->GetAlignment()->LZ(1, 4 + i_dut) : GetDiamondZPosition(telescopeID, i_dut);
+      cout << "z-position of diamond " << i_dut << ": " << pos << endl;
+      tmp->push_back(pos);
+    }
+  return tmp;
 }
