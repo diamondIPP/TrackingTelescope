@@ -24,13 +24,12 @@
 #include "TParameter.h"
 #include "TTree.h"
 
+#include "PLTAnalysis.h"
 
 #include "PSIBinaryFileReader.h"
 #include "PSIRootFileReader.h"
-#include "TestPlaneEfficiencySilicon.h"
 #include "DoAlignment.h"
-
-#include "PLTAnalysis.h"
+#include "Utils.h"
 
 #define DEBUG false
 
@@ -1576,15 +1575,14 @@ int main (int argc, char* argv[])
     TString const FullRunName = InFileName;
 //    Int_t const Index = FullRunName.Index("test",0);
 //    TString const RunNumber = FullRunName(Index+4,9);
-    std::vector<std::string> x = split(InFileName, '/');
-    TString runname = x[x.size() -1 ];
-    TString const RunNumber = runname(4,9);
+    std::vector<std::string> x = tel::split(InFileName, '/');
+    string RunNumber = tel::trim(tel::trim(x.back(), "estroot0"), ".");
     // validate existance of directory plots: DA
-    if(!gSystem->OpenDirectory("./plots")){
+    if(gSystem->OpenDirectory("./plots") == nullptr){
       gSystem->mkdir("./plots");
       gSystem->OpenDirectory("..");
     }
-    gSystem->mkdir("./plots/" + RunNumber);
+    gSystem->mkdir("./plots/" + TString(RunNumber));
 
     gROOT->ProcessLine("#include <vector>");
 

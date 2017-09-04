@@ -12,8 +12,8 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     intree = ((PSIRootFileReader*) FR)->fTree;
     names = ((PSIRootFileReader*) FR)->fMacro;
     newfile = new TFile(NewFileName.c_str(), "RECREATE");
-    br_dia_track_pos["x"] = new vector<float>;
-    br_dia_track_pos["y"] = new vector<float>;
+    br_dia_track_pos_x = new vector<float>;
+    br_dia_track_pos_y = new vector<float>;
     br_dist_to_dia = new vector<float>;
     newtree = intree->CloneTree(0);
     br_charge_all.resize(nRoc);
@@ -47,8 +47,8 @@ string FileWriterTracking::getFileName(string InFileName){
 void FileWriterTracking::addBranches(){
 
     newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
-    for (auto p:br_dia_track_pos)
-        newtree->Branch(TString::Format("diam_track_%s", p.first.c_str()), &p.second);
+    newtree->Branch("diam_track_x", &br_dia_track_pos_x);
+    newtree->Branch("diam_track_y", &br_dia_track_pos_y);
     newtree->Branch("dist_to_dia", &br_dist_to_dia);
     newtree->Branch("chi2_tracks", &br_chi2);
     newtree->Branch("chi2_x", &br_chi2_x);
@@ -136,8 +136,8 @@ void FileWriterTracking::clearVectors(){
         br_smallest_hit_pos_col[iRoc]->clear();
         br_smallest_hit_pos_row[iRoc]->clear();
     }
-  for (auto p : br_dia_track_pos)
-    p.second->clear();
+  br_dia_track_pos_x->clear();
+  br_dia_track_pos_y->clear();
   br_dist_to_dia->clear();
 }
 

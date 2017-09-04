@@ -34,7 +34,8 @@ private:
 
     /** branch variables */
     uint8_t br_hit_plane_bits;
-    map<string, vector<float>* > br_dia_track_pos;
+    vector<float> * br_dia_track_pos_x;
+    vector<float> * br_dia_track_pos_y;
     vector<float> * br_dist_to_dia;
     float   br_chi2;
     float   br_chi2_x, br_chi2_y;
@@ -84,7 +85,8 @@ public:
     uint8_t HitPlaneBits() { return br_hit_plane_bits; }
     uint8_t nTracks() { return br_n_tracks; }
     uint8_t nClusters() { return br_n_clusters; }
-    float DiaTrack(string dir, uint8_t roc) { return br_dia_track_pos.at(dir)->at(roc); }
+    float DiaTrackX(uint8_t roc) { return br_dia_track_pos_x->at(roc); }
+    float DiaTrackY(uint8_t roc) { return br_dia_track_pos_y->at(roc); }
     float   AngleX() { return br_angle_x; }
     float   AngleY() { return br_angle_y; }
     float   Chi2() { return br_chi2; }
@@ -113,7 +115,7 @@ public:
     void setHitPlaneBits(uint8_t value) { br_hit_plane_bits = value; }
     void setNTracks(uint8_t value) { br_n_tracks = value; }
     void setNClusters(uint8_t value) { br_n_clusters = value; }
-    void setDiaTracks(float xVal, float yVal) { br_dia_track_pos.at("x")->push_back(xVal); br_dia_track_pos.at("y")->push_back(yVal); }
+    void setDiaTracks(float xVal, float yVal) { br_dia_track_pos_x->push_back(xVal); br_dia_track_pos_y->push_back(yVal); }
     void setDistDia(float xVal, float yVal) { br_dist_to_dia->push_back(sqrt(xVal * xVal + yVal * yVal)); }
     void setAngleX(float value) { br_angle_x = value; }
     void setAngleY(float value) { br_angle_y = value; }
