@@ -12,6 +12,9 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     intree = ((PSIRootFileReader*) FR)->fTree;
     names = ((PSIRootFileReader*) FR)->fMacro;
     newfile = new TFile(NewFileName.c_str(), "RECREATE");
+    br_dia_track_pos["x"] = new vector<float>;
+    br_dia_track_pos["y"] = new vector<float>;
+    br_dist_to_dia = new vector<float>;
     newtree = intree->CloneTree(0);
     br_charge_all.resize(nRoc);
     br_cluster_size.resize(nRoc);
@@ -30,9 +33,7 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
     addBranches();
 
 }
-FileWriterTracking::~FileWriterTracking(){
-
-}
+FileWriterTracking::~FileWriterTracking() = default;
 
 /** ============================
  AUXILIARY FUNCTIONS
@@ -46,12 +47,9 @@ string FileWriterTracking::getFileName(string InFileName){
 void FileWriterTracking::addBranches(){
 
     newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
-    newtree->Branch("diam1_track_x", &br_diam1_track_x);
-    newtree->Branch("diam1_track_y", &br_diam1_track_y);
-    newtree->Branch("diam2_track_x", &br_diam2_track_x);
-    newtree->Branch("diam2_track_y", &br_diam2_track_y);
-    newtree->Branch("dist_to_dia1", &br_dist_to_dia1);
-    newtree->Branch("dist_to_dia2", &br_dist_to_dia2);
+    for (auto p:br_dia_track_pos)
+        newtree->Branch(TString::Format("diam_track_%s", p.first.c_str()), &p.second);
+    newtree->Branch("dist_to_dia", &br_dist_to_dia);
     newtree->Branch("chi2_tracks", &br_chi2);
     newtree->Branch("chi2_x", &br_chi2_x);
     newtree->Branch("chi2_y", &br_chi2_y);
@@ -126,7 +124,7 @@ void FileWriterTracking::clearVectors(){
     br_cluster_ypos_tel.clear();
     br_cluster_xpos_local.clear();
     br_cluster_ypos_local.clear();
-    for (uint8_t iRoc = 0; iRoc !=nRoc; iRoc++){
+    for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
         br_charge_all[iRoc]->clear();
         br_cluster_size[iRoc]->clear();
         br_residual_local_x[iRoc]->clear();
@@ -138,5 +136,8 @@ void FileWriterTracking::clearVectors(){
         br_smallest_hit_pos_col[iRoc]->clear();
         br_smallest_hit_pos_row[iRoc]->clear();
     }
+  for (auto p : br_dia_track_pos)
+    p.second->clear();
+  br_dist_to_dia->clear();
 }
 

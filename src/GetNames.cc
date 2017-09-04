@@ -32,7 +32,7 @@ string GetAlignmentFilename(int telescopeID, bool useInitial){
     /** Real Alignment */
     else{
         if (telescopeID==1)         return "ALIGNMENT/Alignment_ETHTelescope_run316.dat";
-        else if (telescopeID==2)    return "ALIGNMENT/Alignment_ETHTelescope_run466.dat";
+        if (telescopeID==2)         return "ALIGNMENT/Alignment_ETHTelescope_run466.dat";
         else if (telescopeID==5)    return "ALIGNMENT/Alignment_ETHTelescope_4planes_run63.dat";
         else if (telescopeID==6)    return "ALIGNMENT/Alignment_ETHTelescope_4planesCERN_run71.dat";
         else if (telescopeID==7)    return "ALIGNMENT/Alignment_ETHTelescope_telescope7.dat";
@@ -205,14 +205,13 @@ float GetDiamondZPosition(int16_t id, uint8_t diamond){
     uint8_t tel = 0;
     if (id > 16 && id < 22)
         tel = 1;
-    else if (id == 28)
+    else if (id == 28 or id == 30)
         tel = 3;
     else if (id > 22)
         tel = 2;
-    if (diamond == 1)
+    if (diamond == 0)
         return PLTU::DIA1Z[tel];
-    else if (diamond == 2)
+    if (diamond == 1)
         return PLTU::DIA2Z[tel];
-    else
-        return -1;
+    return -1;
 }
