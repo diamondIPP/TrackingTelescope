@@ -177,21 +177,6 @@ const char * GetSignalBranchName(){
     return "blub";
 }
 
-vector<string> & split(const string &s, char delim, vector<string> &elems) {
-    stringstream ss(s);
-    string item;
-    while (getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
-
-vector<string> split(const string &s, char delim) {
-    vector<string> elems;
-    split(s, delim, elems);
-    return elems;
-}
-
 template<typename T>
 bool in(T num, vector<T> ids){
 
