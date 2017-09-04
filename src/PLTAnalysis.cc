@@ -518,10 +518,10 @@ void PLTAnalysis::FillOfflinePH(PLTTrack * Track, PLTCluster * Cluster){
 vector<float> * PLTAnalysis::getDiaZPositions(){
 
     auto * tmp = new vector<float>;
-    size_t n_dut_planes = UseDigitalCalibration(telescopeID) ? FR->NPlanes() - 4 : 2;
+    size_t n_dut_planes = UseDigitalCalibration(telescopeID) ? size_t(FR->NMAXROCS - 4) : 2;
     for (uint8_t i_dut(0); i_dut < n_dut_planes; i_dut++){
       float pos = UseDigitalCalibration(telescopeID) ? FR->GetAlignment()->LZ(1, 4 + i_dut) : GetDiamondZPosition(telescopeID, i_dut);
-      cout << "z-position of diamond " << i_dut << ": " << pos << endl;
+      cout << "z-position of diamond " << int(i_dut) << ": " << pos << endl;
       tmp->push_back(pos);
     }
   return tmp;
