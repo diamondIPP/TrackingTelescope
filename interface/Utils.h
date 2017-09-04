@@ -11,7 +11,7 @@
 namespace tel{
 
     std::string trim(const std::string &, std::string="\t\n\r\v ");
-    std::vector<std::string> split(const std::string & str, const char & delim = '\t');
+    std::vector<std::string> split(const std::string &, const char & = '\t');
 }
 
 #endif //TRACKINGTELESCOPE_UTILS_H

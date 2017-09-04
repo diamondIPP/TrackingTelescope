@@ -9,7 +9,7 @@ using namespace std;
 
 namespace tel {
 
-  vector<string> split(const string &s, const char &deliminator) {
+  vector<string> split(const string & s, const char & deliminator) {
     stringstream ss(s);
     string item;
     vector<string> elements;
