@@ -1571,7 +1571,7 @@ int main (int argc, char* argv[])
   auto action = strtoul(argv[2], nullptr, 10);
 
   /** Telescope IDs: See ALIGNMENT/DICTIONARY.txt file */
-  auto telescopeID = strtoul(argv[3], nullptr, 10);
+  auto telescopeID = int16_t(strtol(argv[3], nullptr, 10));
 
   /** Tracking only on the telescope (only for digital telescope):
       0: Use All planes (default until September 2016.
@@ -1598,7 +1598,7 @@ int main (int argc, char* argv[])
 
     /** ALIGNMENT */
     if (action==1)
-        DoAlignment(InFileName, RunNumber, telescopeID);
+      DoAlignment(InFileName, RunNumber, telescopeID);
 
     /** RESIDUAL CALCULATION */
     else if (action==2)
