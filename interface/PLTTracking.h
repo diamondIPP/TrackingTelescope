@@ -44,7 +44,7 @@ class PLTTracking
 
     void SortOutTracksNoOverlapBestD2(std::vector<PLTTrack*>&);
 
-    bool DoingSinglePlaneEfficiency(){ return fDoSinglePlaneEfficiency;};
+    bool DoingSinglePlaneEfficiency(){ return fDoSinglePlaneEfficiency; }
 
 
   private:

@@ -54,18 +54,18 @@ int PLTTracking::GetTrackingAlgorithm ()
 void PLTTracking::SetAllPlanes(){
 
   fUsePlanesForTracking.resize(0);
-//  std::cout<<"plane configuration for tracking: " << std::endl;
-  for (int i=0;i!=fNPlanes;i++) {
-    if(i<4 || !trackOnlyTelescope) {
+  std::cout<<"Plane configuration for tracking: ";
+  for (int i=0; i!=fNPlanes; i++) {
+    if(i < 4 || !trackOnlyTelescope){
       fUsePlanesForTracking.push_back(2);
-//      std::cout << 2 << std::endl;
+      std::cout << "2 ";
     }
-
-    else{
+    else {
       fUsePlanesForTracking.push_back(0);
-//        std::cout << 0 << std::endl;
-      }
+      std::cout << "0 ";
+    }
   }
+  std::cout << std::endl;
 
   fDoSinglePlaneEfficiency = false;
 }
@@ -409,11 +409,9 @@ void PLTTracking::TrackFinder_ETH (PLTTelescope& Telescope)
     std::cerr << "ERROR: It looks like tracks have already been filled here: PLTTelescope::TrackFinderParallelTracks()" << std::endl;
     return;
   }
-
   // Check if the first four planes with mandatory clusters also have a cluster
   for (uint8_t iPlane=0; iPlane < 4; iPlane++){
-    if ( (fUsePlanesForTracking[iPlane]==2)
-      && (Telescope.Plane(iPlane)->NClusters()==0)){
+    if ( (fUsePlanesForTracking[iPlane]==2) && (Telescope.Plane(iPlane)->NClusters()==0)){
         return;
     }
   }
@@ -432,8 +430,7 @@ void PLTTracking::TrackFinder_ETH (PLTTelescope& Telescope)
 
   // Check if all the planes which require exactly one cluster have that
   for (uint8_t iPlane=0; iPlane < 4; iPlane++){
-    if ((fUsePlanesForTracking[iPlane]==3) &&
-        (Telescope.Plane(iPlane)->NClusters() != 1 )){
+    if ((fUsePlanesForTracking[iPlane]==3) && (Telescope.Plane(iPlane)->NClusters() != 1 )){
         return;
     }
   }
@@ -444,8 +441,7 @@ void PLTTracking::TrackFinder_ETH (PLTTelescope& Telescope)
   //  and > 0 hits
   std::vector< std::vector< PLTCluster* > > ClustersForTracking;
   for (uint8_t iPlane=0; iPlane < 4; iPlane++){
-    if ( (fUsePlanesForTracking[iPlane]>0)
-      && (Telescope.Plane(iPlane)->NClusters()>0)){
+    if ( (fUsePlanesForTracking[iPlane] > 0) && (Telescope.Plane(iPlane)->NClusters() > 0)){
 
         std::vector< PLTCluster* > VClusters;
         for (size_t iCluster = 0;
@@ -468,9 +464,7 @@ void PLTTracking::TrackFinder_ETH (PLTTelescope& Telescope)
   // loop over a vector<cluster*>.
   // Start all of the iterators at the beginning.
   Vd vd;
-  for(Vvc::const_iterator it = ClustersForTracking.begin();
-    it != ClustersForTracking.end();
-    ++it) {
+  for (Vvc::const_iterator it = ClustersForTracking.begin(); it != ClustersForTracking.end(); ++it) {
     Digits d = {(*it).begin(), (*it).end(), (*it).begin()};
     vd.push_back(d);
   } // end of initializing the digits

@@ -1,10 +1,18 @@
 telescope 12 - PSI  Oct 15, pad 1
-telescope 13 - PSI  Oct 15, pix
+telescope 13 - CERN May 15, pix
 telescope 14 - PSI  Oct 15, pad 2
-telescope 15 - CERN May 16, pad 
+telescope 15 - PSI  Oct 15, pix
 telescope 16 - PSI  May 15, pad (new) 
 telescope 09 - PSI  Aug 15, pad
 telescope 17 - PSI  Aug 16, pad 1
 telescope 18 - PSI  Aug 16, pad 2
 telescope 19 - PSI  Oct 16, pad 1 (S129, SiD1)
 telescope 20 - PSI  Oct 16, pad 2 (II6-B2, II6-97)
+telescope 22 - PSI  Oct 16, pix (II6-A2, Si-352)
+telescope 23 - PSI  May 17, pad 1
+telescope 24 - PSI  May 17, pad 2
+telescope 25 - PSI  May 17, pixel
+telescope 26 - PSI  Jul 17-2, pad 1
+telescope 27 - PSI  Jul 17-2, pad 2
+telescope 28 - PSI  Aug 17, pad
+telescope 29 - PSI  Aug 17, pixel

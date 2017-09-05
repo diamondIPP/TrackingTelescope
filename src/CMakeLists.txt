@@ -27,7 +27,8 @@ SET(LIB_SOURCE_FILES
         PSIFileReader.cc
         PLTCluster.cc
         PSIRootFileReader.cc
-        PLTTesterEvent.cc)
+        PLTTesterEvent.cc
+        Utils.cc)
 
 # header files
 SET(LIB_HEADER_FILES

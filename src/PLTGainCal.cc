@@ -99,12 +99,11 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
     int16_t icol = ColIndex(col);
     int16_t ich  = ChIndex(ch);
     int16_t iroc = RocIndex(roc);
-
     if (irow < 0 || icol < 0 || ich < 0 || iroc < 0) {
         return -9999;
     }
 
-    float charge = -9999;
+    double charge = -9999;
 
     /** external calibration */
     if (fIsExternalFunction) {
@@ -114,15 +113,19 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
 
         /** change calibration factor for digital planes*/
         if (UseDigitalCalibration(telescopeID)){
-            if (iroc == 4 || iroc == 5){
+            if (not adc and iroc >= 4 and telescopeID == 22)
+                charge = -9999;
+            else if (iroc == 6)
+                charge = 43.13 * fFitFunction.GetX(adc) + 333.0;
+            else if (iroc == 5 && telescopeID == 22)
+                charge = 47.5 * fFitFunction.GetX(adc) - 427.4;
+            else if (iroc >= 4)
                 charge = 47 * fFitFunction.GetX(adc);
-//                cout << "iroc: adc/charge: " << int(iroc) <<": " << adc << "/" << charge << endl;
-            }
-            else if (iroc == 6)         charge = 43.13 * fFitFunction.GetX(adc) + 333.0;
-            else                        charge = 65. * fFitFunction.GetX(adc);
-
+            else
+                charge = 65. * fFitFunction.GetX(adc);
         }
-        else                            charge = 65. * fFitFunction.GetX(adc);
+        else
+            charge = 65. * fFitFunction.GetX(adc);
     }
     /** old calibration */
     else {
@@ -146,13 +149,10 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
             printf("%2i %1i %2i %2i %4i %10.1f\n", ch, roc, col, row, adc, charge);
     }
 
-    return charge;
+    return float(charge);
 }
 
-void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
-{
-
-  std::cout << "ReadGainCalFile" << std::endl;
+void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc) {
 
   if (GainCalFileName == "") {
     fIsGood = false;
@@ -169,7 +169,6 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
   CheckFirstLine.ReadLine(InFile);
 
   if (CheckFirstLine.BeginsWith("Parameters of the vcal vs. pulse height fits")) {// DA: TODO else condition?
-    std::cout << "PLTGainCal setting fIsExternalFunction" << std::endl;
     fIsExternalFunction = true;
   }
 
@@ -198,8 +197,6 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
   InFile.close();
   fNParams = i;
 
-  printf("PLTGainCal sees a parameter file with %i params\n", fNParams);
-
   if (fIsExternalFunction) {
     ReadGainCalFileExt(GainCalFileName, roc);
   } else {
@@ -212,8 +209,6 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc)
       throw;
     }
   }
-
-  return;
 }
 
 int PLTGainCal::GetHardwareID (int const Channel)
@@ -247,9 +242,7 @@ void PLTGainCal::ReadGainCalFile5 (std::string const GainCalFileName)
     ss >> mf >> mfc >> hub >> ch;
 
     fHardwareMap[ch] = 1000*mf + 100*mfc + hub;
-    printf("Adding ch %i -> %i %i %i\n", ch, mf, mfc, hub);
   }
-
 
   std::string line;
   std::getline(f, line);
@@ -315,7 +308,6 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
 
   //int const mf = 8, mfc = 1, hub = 5;
   fHardwareMap[ch] = 1000*ch + roc;// DA: TODO unused?
-  printf("Adding ch %i as -> %i\n", ch, fHardwareMap[ch]);
 
   ifstream f(GainCalFileName.c_str());
   if (!f) {

@@ -8,7 +8,7 @@ Redo the GainCal fit
 # Imports
 ###############################
 
-import sys
+import sys, os
 
 import ROOT
 
@@ -90,6 +90,12 @@ in_f.readline()
 c1 = ROOT.TCanvas("","", 800, 800)
 
 counter = 1
+if produce_debugplots:
+    if not os.path.isdir('debugplots'):
+        os.makedirs('debugplots')
+
+h = ROOT.TH1F('h', 'ChiSquare Distribution of Calibration Fits', 100, 0, 50)
+
 for line in in_f:
     
     # Format of line should be:
@@ -125,9 +131,10 @@ for line in in_f:
     fun.SetParameter(3, 150)
     
     gr.Fit(fun, 'Q')
-    
+
+    h.Fill(fun.GetChisquare())
     if produce_debugplots:
-        gr.Draw("APL*")    
+        gr.Draw("APL*")
         c1.Print("debugplots/Pix_{0}_{1}.pdf".format(atoms[pix_index+1], atoms[pix_index+2]))
 
     out_string = "{0} {1} {2} {3}    Pix {4} {5}".format( fun.GetParameter(0),
@@ -138,3 +145,12 @@ for line in in_f:
                                                           atoms[pix_index+2])
     out_f.write(out_string + "\n")
     counter += 1
+
+if produce_debugplots:
+    h.Draw()
+    h.GetXaxis().SetTitle('#chi{^2}')
+    h.GetYaxis().SetTitle('Number of Entries')
+    h.GetYaxis().SetTitleOffset(1.4)
+    c1.SetLogy()
+    c1.SetLeftMargin(0.13)
+    c1.SaveAs('debugplots/Chi2.pdf')

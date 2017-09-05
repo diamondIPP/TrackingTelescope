@@ -123,7 +123,7 @@ void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int 
         TelescopeAlignmentStruct& Tele = it.second;
         f << TString::Format("\n%2i  -1        %15E      %15E  %15E  %15E  %15E\n", Channel, Tele.GRZ, Tele.GRY, Tele.GX, Tele.GY, Tele.GZ);
         for (uint8_t iroc = 0; iroc < numRocs; iroc++){
-            std::pair<int, int> ChROC = std::make_pair(Channel, iroc);
+            std::pair<int, int> ChROC = std::make_pair(Channel, int(iroc));
             if (!fConstantMap.count(ChROC)) {
                 std::cerr << "ERROR: No entry in fConstantMap for Ch ROC: " << Channel << " " << iroc << std::endl;
                 continue;
@@ -146,12 +146,12 @@ bool PLTAlignment::IsGood ()
 
 float PLTAlignment::PXtoLX (int const px)
 {
-  return PLTU::PIXELWIDTH * ((px + 0.00001) - PLTU::DIACENTERX);
+  return PLTU::PIXELWIDTH * ((px + 0.000001) - PLTU::DIACENTERX);
 }
 
 float PLTAlignment::PYtoLY (int const py)
 {
-  return PLTU::PIXELHEIGHT * ((py + 0.00001) - PLTU::DIACENTERY);
+  return PLTU::PIXELHEIGHT * ((py + 0.000001) - PLTU::DIACENTERY);
 }
 
 int PLTAlignment::PXfromLX (float const lx)

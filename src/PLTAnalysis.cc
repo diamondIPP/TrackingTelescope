@@ -23,10 +23,11 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
     /** init histos */
     Histos = new RootItems(telescopeID, RunNumber);
+    DiaZ = getDiaZPositions();
     cout << "Output directory: " << Histos->getOutDir() << endl;
     /** init file writer */
-    if (UseFileWriter(telescopeID)) FW = new FileWriterTracking(InFileName, telescopeID, FR);
-//    if (telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11) FW = new FileWriterTracking(InFileName, telescopeID, FR);
+    if (UseFileWriter(telescopeID))
+      FW = new FileWriterTracking(InFileName, telescopeID, FR);
 }
 
 PLTAnalysis::~PLTAnalysis()
@@ -51,6 +52,7 @@ PLTAnalysis::~PLTAnalysis()
         if (ievent > stopAt) break;
         ThisTime = ievent;
 
+//        cout << ievent << " ";
         MeasureSpeed(ievent);
         PrintProcess(ievent);
         /** file writer */
@@ -67,12 +69,11 @@ PLTAnalysis::~PLTAnalysis()
         DrawTracks();
 
         /** loop over the planes */
-
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
 
             PLTPlane * Plane = FR->Plane(iplane);
             /** Check that the each hit belongs to only one cluster type*/ //todo: DA: comentar
-    	    Plane->CheckDoubleClassification();
+//    	    Plane->CheckDoubleClassification();
             /** fill cluster histo */
             Histos->nClusters()[Plane->ROC()]->Fill(Plane->NClusters());
 
@@ -97,11 +98,11 @@ PLTAnalysis::~PLTAnalysis()
 
 
 //        cout << "Number of Tracks: " << FR->NTracks() << endl;
-        if (UseFileWriter(telescopeID) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
+        if (UseFileWriter(telescopeID) && FR->NTracks() == 1 && ((FR->Track(0)->NClusters() == Histos->NRoc()  && !trackOnlyTelescope) || (FR->Track(0)->NClusters() >= 4  && trackOnlyTelescope))){
 //		if ((telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID >= 10) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
 
 		  do_slope = true;
-		  for (uint8_t i_rocs(0); i_rocs != Histos->NRoc(); i_rocs++)
+		  for (uint8_t i_rocs(0); i_rocs != FR->Track(0)->NClusters(); i_rocs++)
 		    if (FR->Track(0)->Cluster(i_rocs)->Charge() > PHThreshold){
 		      do_slope = false;
 		      break;
@@ -289,6 +290,18 @@ void PLTAnalysis::WriteTrackingTree(){
     FW->setNTracks(FR->NTracks() );
     FW->setNClusters(FR->NClusters() );
 
+    for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+      PLTPlane * Plane = FR->Plane(iplane);
+      FW->setNHits(iplane, Plane->NHits() );
+//      for (uint16_t ihit = 0; ihit < Plane->NHits(); ihit++){
+//        PLTHit * Hit = Plane->Hit(ihit);
+//        FW->setPlane(Hit->ROC() );
+//        FW->setCol(Hit->Column() );
+//        FW->setRow(Hit->Row() );
+//        FW->setADC(Hit->ADC() );
+//        FW->setCharge(Hit->Charge() );
+//      }
+    }
     if (FR->NTracks() > 0){
         PLTTrack * Track = FR->Track(0);
         FW->setChi2(Track->Chi2() );
@@ -296,31 +309,37 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2Y(Track->Chi2Y() );
         FW->setAngleX(Track->fAngleX);
         FW->setAngleY(Track->fAngleY);
-        float dia1z = GetDiamondZPosition(telescopeID, 1);
-        float dia2z = GetDiamondZPosition(telescopeID, 2);
-        FW->setDia1TrackX(Track->ExtrapolateX(dia1z));
-        FW->setDia1TrackY(Track->ExtrapolateY(dia1z));
-        FW->setDia2TrackX(Track->ExtrapolateX(dia2z));
-        FW->setDia2TrackY(Track->ExtrapolateY(dia2z));
-        FW->setDistDia1(Track->ExtrapolateX(dia1z), Track->ExtrapolateY(dia1z));
-        FW->setDistDia2(Track->ExtrapolateX(dia2z), Track->ExtrapolateY(dia2z));
+        for (auto i_pos : *DiaZ){
+          float x_pos = Track->ExtrapolateX(i_pos);
+          float y_pos = Track->ExtrapolateY(i_pos);
+          FW->setDiaTracks(x_pos, y_pos);
+          FW->setDistDia(x_pos, y_pos);
+        }
 
         FW->setCoincidenceMap(FR->HitPlaneBits());
-        for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+        for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
             PLTTrack * Track2 = FR->Track(0);
             PLTPlane * Plane = FR->Plane(iplane);
             FW->setClusters(iplane, Plane->NClusters() );
+            FW->setResidualsX(iplane, ((Plane->NClusters() == 1) ? Track2->LResidualX(iplane) : -999));
+//            if (Plane->NHits() == 1 and iplane == 4){
+//              cout << (Plane->Hit(0)->Column() == Plane->Cluster(0)->SeedHit()->Column()) << endl;
+//            }
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
+                FW->setClusterPlane(iplane);
                 FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
+                FW->setClusterCharge(Plane->Cluster(icluster)->Charge());
                 FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
-                FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
-                FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
-                FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
-                FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
-                FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
-                FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
-                FW->setTrackX(iplane, Track2->ExtrapolateX(Plane->TZ()));
-                FW->setTrackY(iplane, Track2->ExtrapolateY(Plane->TZ()));
+                FW->setClusterXPosTel(Plane->Cluster(icluster)->TX() );
+                FW->setClusterYPosTel(Plane->Cluster(icluster)->TY() );
+                FW->setClusterXPosLocal(Plane->Cluster(icluster)->LX() );
+                FW->setClusterYPosLocal(Plane->Cluster(icluster)->LY() );
+                FW->setResidualLocalX(iplane, Track2->LResidualX(iplane));
+                FW->setResidualLocalY(iplane, Track2->LResidualY(iplane));
+                FW->setClusterRow(Plane->Cluster(icluster)->SeedHit()->Row() );
+                FW->setClusterColumn(Plane->Cluster(icluster)->SeedHit()->Column() );
+                FW->setTrackX(iplane, Track2->ExtrapolateX(Plane->GZ()));
+                FW->setTrackY(iplane, Track2->ExtrapolateY(Plane->GZ()));
                 float chargeSmall = 1000000000;
                 size_t ihitSmall = 0;
                 for (size_t ihit = 0; ihit < Plane->Cluster(icluster)->NHits(); ihit ++){
@@ -351,12 +370,11 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2Y(-999);
         FW->setAngleX(-999);
         FW->setAngleY(-999);
-        FW->setDia1TrackX(-999);
-        FW->setDia1TrackY(-999);
-        FW->setDia2TrackX(-999);
-        FW->setDia2TrackY(-999);
-        FW->setDistDia1(-999, -999);
-        FW->setDistDia2(-999, -999);
+        for (auto dummy: *DiaZ){
+          std::ignore = dummy;
+          FW->setDiaTracks(-999, -999);
+          FW->setDistDia(-999, -999);
+        }
         FW->setCoincidenceMap(0);
         for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
 //            PLTTrack * Track2 = FR->Track(0);
@@ -365,12 +383,14 @@ void PLTAnalysis::WriteTrackingTree(){
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
                 FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
                 FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
-                FW->setClusterPositionTelescopeX(iplane, Plane->Cluster(icluster)->TX() );
-                FW->setClusterPositionTelescopeY(iplane, Plane->Cluster(icluster)->TY() );
-                FW->setClusterPositionLocalX(iplane, Plane->Cluster(icluster)->LX() );
-                FW->setClusterPositionLocalY(iplane, Plane->Cluster(icluster)->LY() );
-                FW->setClusterRow(iplane, Plane->Cluster(icluster)->SeedHit()->Row() );
-                FW->setClusterColumn(iplane, Plane->Cluster(icluster)->SeedHit()->Column() );
+                FW->setClusterXPosTel(Plane->Cluster(icluster)->TX() );
+                FW->setClusterYPosTel(Plane->Cluster(icluster)->TY() );
+                FW->setClusterXPosLocal(Plane->Cluster(icluster)->LX() );
+                FW->setClusterYPosLocal(Plane->Cluster(icluster)->LY() );
+                FW->setClusterRow(Plane->Cluster(icluster)->SeedHit()->Row() );
+                FW->setClusterColumn(Plane->Cluster(icluster)->SeedHit()->Column() );
+                FW->setResidualLocalX(iplane, -999);
+                FW->setResidualLocalY(iplane, -999);
                 FW->setTrackX(iplane, -9999);
                 FW->setTrackY(iplane, -9999);
                 float chargeSmall = 1000000000;
@@ -493,4 +513,16 @@ void PLTAnalysis::FillOfflinePH(PLTTrack * Track, PLTCluster * Cluster){
         else if (Cluster->NHits() >= 3)
             Histos->PulseHeightOffline()[Cluster->ROC()][3]->Fill(Cluster->Charge());
     }
+}
+
+vector<float> * PLTAnalysis::getDiaZPositions(){
+
+    auto * tmp = new vector<float>;
+    size_t n_dut_planes = UseDigitalCalibration(telescopeID) ? size_t(FR->NMAXROCS - 4) : 2;
+    for (uint8_t i_dut(0); i_dut < n_dut_planes; i_dut++){
+      float pos = UseDigitalCalibration(telescopeID) ? FR->GetAlignment()->LZ(1, 4 + i_dut) : GetDiamondZPosition(telescopeID, i_dut);
+      cout << "z-position of diamond " << int(i_dut) << ": " << pos << endl;
+      tmp->push_back(pos);
+    }
+  return tmp;
 }

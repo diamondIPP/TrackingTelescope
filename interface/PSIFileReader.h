@@ -39,7 +39,7 @@ public:
 
     long long GetTime () {return fTime;}
 
-    const int  NMAXROCS;
+    const uint8_t NMAXROCS;
 
 
   protected:
@@ -54,11 +54,11 @@ public:
     PLTAlignment fAlignment;
 
     std::string fBinaryFileName;
+    bool trackOnlyTelescope;
 
     // Should we use the GainInterpolator instead of GainCal
     // -> Only for Telescope 2 from May 2014 testmeab for now
     bool fUseGainInterpolator;
-    bool trackOnlyTelescope;
 
     std::map<int, PLTPlane> fPlaneMap;
 

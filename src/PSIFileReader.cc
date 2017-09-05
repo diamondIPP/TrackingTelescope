@@ -21,7 +21,7 @@ using namespace std;
 PSIFileReader::PSIFileReader (string const CalibrationList, string const AlignmentFileName,
     int const nrocs, bool const useGainInterpolator, bool const useExternalCalibrationFunction, bool TrackOnlyTelescope):
         PLTTracking(nrocs, TrackOnlyTelescope), NMAXROCS(nrocs), fGainCal(nrocs, useExternalCalibrationFunction),
-        fUseGainInterpolator(useGainInterpolator), trackOnlyTelescope(TrackOnlyTelescope){
+        trackOnlyTelescope(TrackOnlyTelescope), fUseGainInterpolator(useGainInterpolator){
 
    /** Initialize fCalibrationFile and fRawCalibrationFile with empty strings */
     for (int i_roc=0; i_roc != NMAXROCS; i_roc++) {
@@ -124,12 +124,22 @@ void PSIFileReader::ReadPixelMask (std::string const InFileName)
   for (std::string line; std::getline(InFile, line); ) {
     int ch=0, roc=0, col=0, row=0;
     std::istringstream linestream;
-
     linestream.str(line);
-    linestream >> ch >> roc >> col >> row;
 
-    //std::cout << "Masking: " << ch << " " << roc << " " << col << " " << row << std::endl;
-    fPixelMask.insert( ch*100000 + roc*10000 + col*100 + row );
+    if (line.find("col") != std::string::npos){
+      linestream >> ch >> roc >> col;
+      for (uint8_t i_row = 0; i_row < PLTU::NROW; i_row++)
+        fPixelMask.insert(ch * 100000 + roc * 10000 + col * 100 + i_row);
+    }
+    else if (line.find("row") != std::string::npos){
+      linestream >> ch >> roc >> row;
+      for (uint8_t i_col = 0; i_col < PLTU::NCOL; i_col++)
+        fPixelMask.insert(ch * 100000 + roc * 10000 + i_col * 100 + row);
+    }
+    else {
+      linestream >> ch >> roc >> col >> row;
+      fPixelMask.insert( ch*100000 + roc*10000 + col*100 + row );
+    }
   }
 
   return;

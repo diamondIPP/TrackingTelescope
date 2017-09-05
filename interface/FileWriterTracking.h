@@ -6,6 +6,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <map>
 
 #include "TTree.h"
 #include "TFile.h"
@@ -29,38 +30,40 @@ private:
     TMacro * names;
     string NewFileName;
 
-    int TelescopeID;
+    int16_t TelescopeID;
 
     /** branch variables */
     uint8_t br_hit_plane_bits;
-    float   br_diam1_track_x, br_diam1_track_y;
-    float   br_diam2_track_x, br_diam2_track_y;
-    float   br_dist_to_dia1, br_dist_to_dia2;
+    vector<float> * br_dia_track_pos_x;
+    vector<float> * br_dia_track_pos_y;
+    vector<float> * br_dist_to_dia;
     float   br_chi2;
     float   br_chi2_x, br_chi2_y;
     float   br_angle_x, br_angle_y;
-    float   br_slope_x, br_slope_y;
     uint8_t br_n_tracks, br_n_clusters;
     vector<uint8_t> br_clusters_per_plane;
+    vector<uint16_t> br_n_hits;
+    vector<uint16_t> br_cluster_plane;
+    vector<uint16_t> br_cluster_col;
+    vector<uint16_t> br_cluster_row;
+    vector<float> br_cluster_xpos_tel;
+    vector<float> br_cluster_ypos_tel;
+    vector<float> br_cluster_xpos_local;
+    vector<float> br_cluster_ypos_local;
+    vector<float> br_cluster_charge;
     vector<vector<float>* > br_charge_all;
     vector<vector<int>* > br_cluster_size;
-//    vector<vector<vector<float>*>> br_pulse_heights_all;
-    vector<vector<float> *> br_cluster_pos_telescope_x;
-    vector<vector<float> *> br_cluster_pos_telescope_y;
-    vector<vector<float> *> br_cluster_pos_local_x;
-    vector<vector<float> *> br_cluster_pos_local_y;
     float br_coincidence_map;
-    vector<vector<int> *> br_cluster_row;
-    vector<vector<int> *> br_cluster_col;
-//    vector<vector<float> > br_test;
     vector<vector<float> *> br_track_x;
     vector<vector<float> *> br_track_y;
     vector<vector<float> *> br_smallest_hit_charge;
     vector<vector<int> *> br_smallest_hit_adc;
     vector<vector<int> *> br_smallest_hit_pos_col;
     vector<vector<int> *> br_smallest_hit_pos_row;
-//    vector<vector<float> *> br_smalleest_hit_pos_telescope_x;  // DA: maybe they are necessary. If they are, implement them just as br_smallest_hit_pos_col/row
-//    vector<vector<float> *> br_smalleest_hit_pos_telescope_y;
+    vector<vector<float> *> br_residual_local_x;
+    vector<vector<float> *> br_residual_local_y;
+    vector<float> br_residuals_x;
+    vector<float> br_residuals_y;
 
     /** some functions*/
     string getFileName(string);
@@ -82,72 +85,66 @@ public:
     uint8_t HitPlaneBits() { return br_hit_plane_bits; }
     uint8_t nTracks() { return br_n_tracks; }
     uint8_t nClusters() { return br_n_clusters; }
-    float   Dia1TrackX() { return br_diam1_track_x; }
-    float   Dia1TrackY() { return br_diam1_track_y; }
-    float   Dia2TrackX() { return br_diam2_track_x; }
-    float   Dia2TrackY() { return br_diam2_track_y; }
+    float DiaTrackX(uint8_t roc) { return br_dia_track_pos_x->at(roc); }
+    float DiaTrackY(uint8_t roc) { return br_dia_track_pos_y->at(roc); }
     float   AngleX() { return br_angle_x; }
     float   AngleY() { return br_angle_y; }
-    float   SlopeX() { return br_slope_x; }
-    float   SlopeY() { return br_slope_y; }
     float   Chi2() { return br_chi2; }
     float   Chi2X() { return br_chi2_x; }
     float   Chi2Y() { return br_chi2_y; }
     vector<vector<float>* > ChargeAll() { return br_charge_all; }
     vector<vector<int>* > ClusterSize() { return br_cluster_size; }
-    vector<vector<float>* > ClusterPosTelescopeX() { return br_cluster_pos_telescope_x; }
-    vector<vector<float>* > ClusterPosTelescopeY() { return br_cluster_pos_telescope_y; }
-    vector<vector<float>* > ClusterPosLocalX() { return br_cluster_pos_local_x; }
-    vector<vector<float>* > ClusterPosLocalY() { return br_cluster_pos_local_y; }
-//    vector<vector<vector<float>*>> PulseHeightsAll() { return br_pulse_heights_all; }
     size_t GetNHits() { return nHits; }
     float   GetCoincidenceMap() { return br_coincidence_map; }
-    vector<vector<int>* > ClusterRow() { return br_cluster_row; }
-    vector<vector<int>* > ClusterCol() { return br_cluster_col; }
+    vector<uint16_t> ClusterRow() { return br_cluster_row; }
+    vector<uint16_t> ClusterCol() { return br_cluster_col; }
     vector<vector<float>* > TrackX() { return br_track_x; }
     vector<vector<float>* > TrackY() { return br_track_y; }
     vector<vector<float>* > SmallestHitCharge() { return br_smallest_hit_charge; }
     vector<vector<int>* > SmallestHitADC() { return br_smallest_hit_adc; }
     vector<vector<int>* > SmallestHitPosCol() { return br_smallest_hit_pos_col; }
     vector<vector<int>* > SmallestHitPosRow() { return br_smallest_hit_pos_row; }
+    vector<vector<float>* > ResidualLocalX() { return br_residual_local_x; }
+    vector<vector<float>* > ResidualLocalY() { return br_residual_local_y; }
+    vector<float> ResidualX() { return br_residuals_x; }
+    vector<float> ResidualY() { return br_residuals_y; }
 
     /** ============================
-     SET-FUNCTIONS
-     =================================*/
+        SETTER METHODS
+        =================================*/
     void setHitPlaneBits(uint8_t value) { br_hit_plane_bits = value; }
     void setNTracks(uint8_t value) { br_n_tracks = value; }
     void setNClusters(uint8_t value) { br_n_clusters = value; }
-    void setDia1TrackX(float value) { br_diam1_track_x = value; }
-    void setDia1TrackY(float value) { br_diam1_track_y = value; }
-    void setDia2TrackX(float value) { br_diam2_track_x = value; }
-    void setDia2TrackY(float value) { br_diam2_track_y = value; }
-    void setDistDia1(float xVal, float yVal) { br_dist_to_dia1 = sqrt(xVal*xVal + yVal*yVal); }
-    void setDistDia2(float xVal, float yVal) { br_dist_to_dia2 = sqrt(xVal*xVal + yVal*yVal); }
+    void setDiaTracks(float xVal, float yVal) { br_dia_track_pos_x->push_back(xVal); br_dia_track_pos_y->push_back(yVal); }
+    void setDistDia(float xVal, float yVal) { br_dist_to_dia->push_back(sqrt(xVal * xVal + yVal * yVal)); }
     void setAngleX(float value) { br_angle_x = value; }
     void setAngleY(float value) { br_angle_y = value; }
-    void setSlopeX(float value) { br_slope_x = value; }
-    void setSlopeY(float value) { br_slope_y = value; }
     void setChi2(float value) { br_chi2 = value; }
     void setChi2X(float value) { br_chi2_x = value; }
     void setChi2Y(float value) { br_chi2_y = value; }
     void setChargeAll(uint8_t iRoc, float value) { br_charge_all[iRoc]->push_back(value); }
     void setClusterSize(uint8_t iRoc, int value) { br_cluster_size[iRoc]->push_back(value); }
     void setClusters(uint8_t iRoc, uint8_t value) { br_clusters_per_plane[iRoc] = value; }
-    void setClusterPositionTelescopeX(uint8_t iRoc, float value) { br_cluster_pos_telescope_x[iRoc]->push_back(value); }
-    void setClusterPositionTelescopeY(uint8_t iRoc, float value) { br_cluster_pos_telescope_y[iRoc]->push_back(value); }
-    void setClusterPositionLocalX(uint8_t iRoc, float value) { br_cluster_pos_local_x[iRoc]->push_back(value); }
-    void setClusterPositionLocalY(uint8_t iRoc, float value) { br_cluster_pos_local_y[iRoc]->push_back(value); }
-//    void setPulseHeightsRoc(uint8_t iRoc, size_t clusterSize, float value) { br_pulse_heights_all[iRoc][clusterSize]->push_back(value); }
+    void setClusterPlane(uint16_t value) { br_cluster_plane.push_back(value); }
+    void setNHits(uint8_t iRoc, uint16_t value) { br_n_hits[iRoc] = value; }
     void setCoincidenceMap(float value) { br_coincidence_map = value; }
-    void setClusterColumn(uint8_t iRoc, int value) { br_cluster_col[iRoc]->push_back(value); }
-    void setClusterRow(uint8_t iRoc, int value) { br_cluster_row[iRoc]->push_back(value); }
+    void setClusterColumn(int value) { br_cluster_col.push_back(value); }
+    void setClusterRow(int value) { br_cluster_row.push_back(value); }
+    void setClusterXPosTel(float value) { br_cluster_xpos_tel.push_back(value); }
+    void setClusterYPosTel(float value) { br_cluster_ypos_tel.push_back(value); }
+    void setClusterXPosLocal(float value) { br_cluster_xpos_local.push_back(value); }
+    void setClusterYPosLocal(float value) { br_cluster_ypos_local.push_back(value); }
+    void setClusterCharge(float value) { br_cluster_charge.push_back(value); }
     void setTrackX(uint8_t iRoc, float value) { br_track_x[iRoc]->push_back(value); }
     void setTrackY(uint8_t iRoc, float value) { br_track_y[iRoc]->push_back(value); }
     void setSmallestHitCharge(uint8_t iRoc, float value) { br_smallest_hit_charge[iRoc]->push_back(value); }
     void setSmallestHitCharge(uint8_t iRoc, int value) { br_smallest_hit_adc[iRoc]->push_back(value); }
     void setSmallestHitPosCol(uint8_t iRoc, int value) { br_smallest_hit_pos_col[iRoc]->push_back(value); }
     void setSmallestHitPosRow(uint8_t iRoc, int value) { br_smallest_hit_pos_row[iRoc]->push_back(value); }
-
+    void setResidualLocalX(uint8_t iRoc, float value) { br_residual_local_x[iRoc]->push_back(value); }
+    void setResidualLocalY(uint8_t iRoc, float value) { br_residual_local_y[iRoc]->push_back(value); }
+    void setResidualsX(uint8_t iRoc, float value) { br_residuals_x.at(iRoc) = value; }
+    void setResidualsY(uint8_t iRoc, float value) { br_residuals_y.at(iRoc) = value; }
 
     /** ============================
      AUXILIARY FUNCTIONS
