@@ -19,7 +19,7 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   br_dist_to_dia = new vector<float>;
   newtree = intree->CloneTree(0);
   br_charge_all.resize(nRoc);
-  br_cluster_size = new vector<vector<uint8_t> >;
+  br_cluster_size = new vector<vector<uint16_t> >;
   br_cluster_size->resize(nRoc);
   br_clusters_per_plane.resize(nRoc);
   br_n_hits.resize(nRoc);
@@ -78,8 +78,6 @@ void FileWriterTracking::addBranches(){
   for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
     TString branch_name_charge = TString::Format("charge_all_ROC%d", iRoc);
     newtree->Branch(branch_name_charge, &(br_charge_all[iRoc]));
-//        TString branch_name_cluster_size = TString::Format("cluster_size_ROC%d", iRoc);
-//        newtree->Branch(branch_name_cluster_size, &(br_cluster_size[iRoc]));
     TString branch_name_residual_localX = TString::Format("residual_ROC%d_Local_X",iRoc);
     newtree->Branch(branch_name_residual_localX, &(br_residual_local_x[iRoc]));
     TString branch_name_residual_localY = TString::Format("residual_ROC%d_Local_Y",iRoc);

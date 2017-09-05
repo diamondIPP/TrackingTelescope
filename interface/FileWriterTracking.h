@@ -49,7 +49,7 @@ private:
     std::vector<float> br_cluster_ypos_local;
     std::vector<float> br_cluster_charge;
     std::vector<std::vector<float>* > br_charge_all;
-    std::vector<std::vector<uint8_t> > * br_cluster_size;
+    std::vector<std::vector<uint16_t> > * br_cluster_size;
     float br_coincidence_map;
     std::vector<std::vector<float> *> br_track_x;
     std::vector<std::vector<float> *> br_track_y;
@@ -90,7 +90,7 @@ public:
     float   Chi2X() { return br_chi2_x; }
     float   Chi2Y() { return br_chi2_y; }
     std::vector<std::vector<float>* > ChargeAll() { return br_charge_all; }
-    std::vector<std::vector<uint8_t> > * ClusterSize() { return br_cluster_size; }
+    std::vector<std::vector<uint16_t> > * ClusterSize() { return br_cluster_size; }
     size_t GetNHits() { return nHits; }
     float   GetCoincidenceMap() { return br_coincidence_map; }
     std::vector<uint16_t> ClusterRow() { return br_cluster_row; }
