@@ -1,3 +1,4 @@
+#include <Utils.h>
 #include "DoAlignment.h"
 
 using namespace std;
@@ -41,6 +42,7 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
 
     uint32_t stopAt = ((PSIRootFileReader*) FR)->fTree->GetEntries();
 //    uint32_t stopAt = 5e4;
+    auto * PBar = new tel::ProgressBar(stopAt - 1);
 
     /** Apply Masking */
     FR->ReadPixelMask(GetMaskingFilename(telescopeID));
@@ -87,7 +89,7 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
                     break;
 
                 /** print progress */
-                print_progress(ievent, stopAt);
+                PBar->update(ievent);
 
                 /** continue only if we have exactly one track */
                 if ( !(FR->NTracks()==1) ) continue;
@@ -226,7 +228,7 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
                 break;
 
             /** print progress */
-            print_progress(ievent, stopAt);
+            PBar->update(ievent);
 
             if (! (FR->NTracks()==1))// DA: Check that there is one track per event, or skip
                 continue;
@@ -405,18 +407,4 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
 
     gROOT->ProcessLine("gErrorIgnoreLevel = 0;");
     return 0;
-}
-
-void print_progress(uint32_t ievent, uint32_t stopAt){
-
-    if (ievent % 10 == 0 && ievent > 1000){
-        if (ievent != 0) cout << "\r";
-        cout << "Processed events: "  << setprecision(2) << setw(5) << setfill('0') << fixed << float(ievent) / stopAt * 100 << "% ";
-        if ( stopAt - ievent < 10 ) cout << "|" <<string( 50 , '=') << ">";
-        else cout << "|" <<string(int(float(ievent) / stopAt * 100) / 2, '=') << ">";
-        if ( stopAt - ievent < 10 ) cout << "| 100%    ";
-        else cout << string(50 - int(float(ievent) / stopAt * 100) / 2, ' ') << "| 100%    ";
-        cout.flush();
-        if ( stopAt - ievent < 10 ) cout << endl;
-    }
 }
