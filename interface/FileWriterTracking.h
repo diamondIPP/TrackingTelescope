@@ -49,7 +49,11 @@ private:
     std::vector<float> br_cluster_ypos_local;
     std::vector<float> br_cluster_charge;
     std::vector<std::vector<float>* > br_charge_all;
+    /** double vectors */
     std::vector<std::vector<uint16_t> > * br_cluster_size;
+    std::vector<std::vector<float> > * br_residuals_x;
+    std::vector<std::vector<float> > * br_residuals_y;
+    std::vector<std::vector<float> > * br_residuals;
     float br_coincidence_map;
     std::vector<std::vector<float> *> br_track_x;
     std::vector<std::vector<float> *> br_track_y;
@@ -57,10 +61,6 @@ private:
     std::vector<std::vector<int> *> br_smallest_hit_adc;
     std::vector<std::vector<int> *> br_smallest_hit_pos_col;
     std::vector<std::vector<int> *> br_smallest_hit_pos_row;
-    std::vector<std::vector<float> *> br_residual_local_x;
-    std::vector<std::vector<float> *> br_residual_local_y;
-    std::vector<float> br_residuals_x;
-    std::vector<float> br_residuals_y;
 
     /** some functions*/
     std::string getFileName(std::string &);
@@ -101,10 +101,8 @@ public:
     std::vector<std::vector<int>* > SmallestHitADC() { return br_smallest_hit_adc; }
     std::vector<std::vector<int>* > SmallestHitPosCol() { return br_smallest_hit_pos_col; }
     std::vector<std::vector<int>* > SmallestHitPosRow() { return br_smallest_hit_pos_row; }
-    std::vector<std::vector<float>* > ResidualLocalX() { return br_residual_local_x; }
-    std::vector<std::vector<float>* > ResidualLocalY() { return br_residual_local_y; }
-    std::vector<float> ResidualX() { return br_residuals_x; }
-    std::vector<float> ResidualY() { return br_residuals_y; }
+    std::vector<std::vector<float> > * ResidualX() { return br_residuals_x; }
+    std::vector<std::vector<float> > * ResidualY() { return br_residuals_y; }
 
     /** ============================
         SETTER METHODS
@@ -138,19 +136,18 @@ public:
     void setSmallestHitCharge(uint8_t iRoc, int value) { br_smallest_hit_adc[iRoc]->push_back(value); }
     void setSmallestHitPosCol(uint8_t iRoc, int value) { br_smallest_hit_pos_col[iRoc]->push_back(value); }
     void setSmallestHitPosRow(uint8_t iRoc, int value) { br_smallest_hit_pos_row[iRoc]->push_back(value); }
-    void setResidualLocalX(uint8_t iRoc, float value) { br_residual_local_x[iRoc]->push_back(value); }
-    void setResidualLocalY(uint8_t iRoc, float value) { br_residual_local_y[iRoc]->push_back(value); }
-    void setResidualsX(uint8_t iRoc, float value) { br_residuals_x.at(iRoc) = value; }
-    void setResidualsY(uint8_t iRoc, float value) { br_residuals_y.at(iRoc) = value; }
+    void setResidualsX(uint8_t iRoc, float value) { br_residuals_x->at(iRoc).push_back(value); }
+    void setResidualsY(uint8_t iRoc, float value) { br_residuals_y->at(iRoc).push_back(value); }
+    void setResidual(uint8_t iRoc, float value) { br_residuals->at(iRoc).push_back(value); }
 
     /** ============================
      AUXILIARY FUNCTIONS
      =================================*/
     void addBranches();
+    void resizeVectors();
     void saveTree();
     void fillTree();
     void clearVectors();
-
 
 };
 

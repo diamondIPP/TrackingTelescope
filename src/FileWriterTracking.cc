@@ -10,6 +10,7 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   nRoc(GetNumberOfROCS(telescopeID)), nHits(4), TelescopeID(telescopeID) {
 
   gInterpreter->GenerateDictionary("vector<vector<UShort_t> >");  // add vector<vector> to root dicts
+  gInterpreter->GenerateDictionary("vector<vector<Float_t> >");  // add vector<vector> to root dicts
   NewFileName = getFileName(InFileName);
   intree = ((PSIRootFileReader*) FR)->fTree;
   names = ((PSIRootFileReader*) FR)->fMacro;
@@ -18,21 +19,10 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   br_dia_track_pos_y = new vector<float>;
   br_dist_to_dia = new vector<float>;
   newtree = intree->CloneTree(0);
-  br_charge_all.resize(nRoc);
   br_cluster_size = new vector<vector<uint16_t> >;
-  br_cluster_size->resize(nRoc);
-  br_clusters_per_plane.resize(nRoc);
-  br_n_hits.resize(nRoc);
-  br_track_x.resize(nRoc);
-  br_track_y.resize(nRoc);
-  br_smallest_hit_charge.resize(nRoc);
-  br_smallest_hit_adc.resize(nRoc);
-  br_smallest_hit_pos_col.resize(nRoc);
-  br_smallest_hit_pos_row.resize(nRoc);
-  br_residual_local_x.resize(nRoc);
-  br_residual_local_y.resize(nRoc);
-  br_residuals_x.resize(nRoc);
-  br_residuals_y.resize(nRoc);
+  br_residuals_x = new vector<vector<float> >;
+  br_residuals_y = new vector<vector<float> >;
+  resizeVectors();
   addBranches();
 }
 FileWriterTracking::~FileWriterTracking() = default;
@@ -73,15 +63,12 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("coincidence_map", &br_coincidence_map);
   newtree->Branch("residuals_x", &br_residuals_x);
   newtree->Branch("residuals_y", &br_residuals_y);
+  newtree->Branch("residuals", &br_residuals);
   newtree->Branch("cluster_size", &br_cluster_size);
 
   for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
     TString branch_name_charge = TString::Format("charge_all_ROC%d", iRoc);
     newtree->Branch(branch_name_charge, &(br_charge_all[iRoc]));
-    TString branch_name_residual_localX = TString::Format("residual_ROC%d_Local_X",iRoc);
-    newtree->Branch(branch_name_residual_localX, &(br_residual_local_x[iRoc]));
-    TString branch_name_residual_localY = TString::Format("residual_ROC%d_Local_Y",iRoc);
-    newtree->Branch(branch_name_residual_localY, &(br_residual_local_y[iRoc]));
     TString branch_name_track_x = TString::Format("track_x_ROC%d",iRoc);
     newtree->Branch(branch_name_track_x, &(br_track_x[iRoc]));
     TString branch_name_track_y = TString::Format("track_y_ROC%d",iRoc);
@@ -125,8 +112,9 @@ void FileWriterTracking::clearVectors(){
   for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++) {
     br_charge_all[iRoc]->clear();
     br_cluster_size->at(iRoc).clear();
-    br_residual_local_x[iRoc]->clear();
-    br_residual_local_y[iRoc]->clear();
+    br_residuals_x->at(iRoc).clear();
+    br_residuals_y->at(iRoc).clear();
+    br_residuals->at(iRoc).clear();
     br_track_x[iRoc]->clear();
     br_track_y[iRoc]->clear();
     br_smallest_hit_charge[iRoc]->clear();
@@ -137,5 +125,23 @@ void FileWriterTracking::clearVectors(){
   br_dia_track_pos_x->clear();
   br_dia_track_pos_y->clear();
   br_dist_to_dia->clear();
+}
+
+void FileWriterTracking::resizeVectors() {
+
+  br_cluster_size->resize(nRoc);
+  br_residuals_x->resize(nRoc);
+  br_residuals_y->resize(nRoc);
+  br_residuals->resize(nRoc);
+
+  br_clusters_per_plane.resize(nRoc);
+  br_n_hits.resize(nRoc);
+  br_track_x.resize(nRoc);
+  br_track_y.resize(nRoc);
+  br_smallest_hit_charge.resize(nRoc);
+  br_smallest_hit_adc.resize(nRoc);
+  br_smallest_hit_pos_col.resize(nRoc);
+  br_smallest_hit_pos_row.resize(nRoc);
+  br_charge_all.resize(nRoc);
 }
 
