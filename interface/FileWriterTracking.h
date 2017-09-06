@@ -136,8 +136,8 @@ public:
     void setSmallestHitCharge(uint8_t iRoc, int value) { br_smallest_hit_adc[iRoc]->push_back(value); }
     void setSmallestHitPosCol(uint8_t iRoc, int value) { br_smallest_hit_pos_col[iRoc]->push_back(value); }
     void setSmallestHitPosRow(uint8_t iRoc, int value) { br_smallest_hit_pos_row[iRoc]->push_back(value); }
-    void setResidualsX(uint8_t iRoc, float value) { br_residuals_x->at(iRoc).push_back(value); }
-    void setResidualsY(uint8_t iRoc, float value) { br_residuals_y->at(iRoc).push_back(value); }
+    void setResidualX(uint8_t iRoc, float value) { br_residuals_x->at(iRoc).push_back(value); }
+    void setResidualY(uint8_t iRoc, float value) { br_residuals_y->at(iRoc).push_back(value); }
     void setResidual(uint8_t iRoc, float value) { br_residuals->at(iRoc).push_back(value); }
 
     /** ============================
@@ -150,7 +150,5 @@ public:
     void clearVectors();
 
 };
-
-
 
 #endif // FileWriterTracking_h
