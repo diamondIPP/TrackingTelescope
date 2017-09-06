@@ -13,6 +13,7 @@
 #include <numeric>
 #include <algorithm>
 #include <sstream>
+#include <zconf.h>
 
 #include "TLegend.h"
 #include "TLegendEntry.h"
@@ -1539,7 +1540,6 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
   f.close();
 
 
-  return;
 }
 
 
@@ -1554,70 +1554,51 @@ int main (int argc, char* argv[])
       }
     }
 
-    /** There three usage modes: analysis, alignment and residuals
+  /** There three usage modes: analysis, alignment and residuals
 
-    analysis: uses alignment and residuals for the given telescope to perform
-        global and single plane studies
+      analysis: uses alignment and residuals for the given telescope to perform global and single plane studies
 
-    alignment: starts with all alignment constants zero and does several iterations
-        to minimize the residuals. All planes are shifted in x and y and rotated
-        around the z-axis. Residual plots of the last iteration are saved.
-        As output the file NewAlignment.dat is produced.
+      alignment: starts with all alignment constants zero and does several iterations to minimize the residuals. All planes are shifted in x and y and rotated
+          around the z-axis. Residual plots of the last iteration are saved. As output the file NewAlignment.dat is produced.
 
-    residuals: tries to find the correct residuals for tracking
+      residuals: tries to find the correct residuals for tracking
 
-    0: Analysis
-    1: Alignment
-    2: Residuals */
-    int action = atoi(argv[2]);
+      action:
+      0: Analysis
+      1: Alignment
+      2: Residuals */
+  vector<string> action_str = {" (Analysis)", " (Alignment)", " (Residuals)"};
+  auto action = strtoul(argv[2], nullptr, 10);
 
-    std::string const InFileName = argv[1];
-    TString const FullRunName = InFileName;
-//    Int_t const Index = FullRunName.Index("test",0);
-//    TString const RunNumber = FullRunName(Index+4,9);
-    std::vector<std::string> x = tel::split(InFileName, '/');
+  /** Telescope IDs: See ALIGNMENT/DICTIONARY.txt file */
+  auto telescopeID = int16_t(strtol(argv[3], nullptr, 10));
+
+  /** Tracking only on the telescope (only for digital telescope):
+      0: Use All planes (default until September 2016.
+      1: Use only the first 4 planes for tracking (telescope planes) */
+  bool trackOnlyTelescope = argc >= 5 && bool(strtoul(argv[4], nullptr, 10));
+
+  cout << "Action = " << int(action) << action_str.at(action) << endl;
+  cout << "TelescopeID = " << int(telescopeID) << endl;
+  cout << "Track only analogue telescope: " << trackOnlyTelescope << "\n" << endl;
+
+    string const InFileName = argv[1];
+    vector<std::string> x = tel::split(InFileName, '/');
     string RunNumber = tel::trim(tel::trim(x.back(), "estroot0"), ".");
-    // validate existance of directory plots: DA
+    // validate existance of directory plots
     if(gSystem->OpenDirectory("./plots") == nullptr){
       gSystem->mkdir("./plots");
       gSystem->OpenDirectory("..");
     }
     gSystem->mkdir("./plots/" + TString(RunNumber));
-
     gROOT->ProcessLine("#include <vector>");
 
-
-    /** Telescope IDs:
-    -1: Root file format testing
-     1: First May-Testbeam Telescope (Si, PolyA, PolyD, S86,  S105, Si)
-     2: Second May-Tesbeam Telescope (Si, PolyB, PolyD, S108, Si,   Si)
-     3: First Silicon + 1 Diamond Telescope (July Testbeam)
-     4: Two-Plane Silicon Telescope (July Testbeam)
-     5: Four-Plane Silicon Telescope (September Testbeam at PSI)
-     6: Four-Plane Silicon Telescope (October Testbeam at CERN)
-     7: Four-Plane Silicon Telescope (May 2015 Testbeam at PSI)
-     9: Four-Plane Silicon Telescope (August 2015 Testbeam at PSI)
-     10: Seven-Plane (4 Silicon analog ROC planes and 3 digital 1 Silicon and 2 diamond planes) Telescope (August 2015 Testbeam at PSI) */
-    int16_t telescopeID = atoi(argv[3]);
-
-    /** Tracking only on the telescope:
-     0: Use All planes (default until September 2016.
-     1: Use only the first 4 planes for tracking (telescope planes)
-     For pad, either would do the same effect since num telescope lanes = num of planes
-     */
-    bool trackOnlyTelescope = argc==5? bool(atoi(argv[4])): false;
-    /** Open a ROOT file to store histograms in
-    do it here and pass to all functions we call */
-    TString const PlotsDir = "plots/";
-    TString const OutDir = PlotsDir + RunNumber + "/";
-    TFile out_f(OutDir + "histos.root", "recreate");
-
-    std::cout << "Action = " << action << std::endl;
-    std::cout << "TelescopeID = " << telescopeID << std::endl;
+    /** Open a ROOT file to store histograms in. Do it here and pass to all functions we call */
+    TFile out_f(TString::Format("plots/%s/histos.root", RunNumber.c_str()), "recreate");
 
     /** ALIGNMENT */
     if (action==1)
-        DoAlignment(InFileName, RunNumber, telescopeID);
+      DoAlignment(InFileName, RunNumber, telescopeID);
 
     /** RESIDUAL CALCULATION */
     else if (action==2)

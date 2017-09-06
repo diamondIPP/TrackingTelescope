@@ -12,6 +12,7 @@ namespace tel{
 
     std::string trim(const std::string &, std::string="\t\n\r\v ");
     std::vector<std::string> split(const std::string &, const char & = '\t');
+    double distance(std::pair<float, float>, std::pair<float, float>);
 }
 
 #endif //TRACKINGTELESCOPE_UTILS_H
