@@ -1,7 +1,7 @@
 #include "FileWriterTracking.h"
 #include "TInterpreter.h"
 
-using std::cout; using std::string; using std::stringstream; using std::vector;
+using std::cout; using std::string; using std::stringstream; using std::vector; using std::endl;
 
 /** ============================
  CONSTRUCTOR
@@ -22,6 +22,7 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   br_cluster_size = new vector<vector<uint16_t> >;
   br_residuals_x = new vector<vector<float> >;
   br_residuals_y = new vector<vector<float> >;
+  br_residuals = new vector<vector<float> >;
   resizeVectors();
   addBranches();
 }

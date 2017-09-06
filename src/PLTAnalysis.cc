@@ -53,7 +53,6 @@ PLTAnalysis::~PLTAnalysis()
         if (ievent > stopAt) break;
         ThisTime = ievent;
 
-        cout << ievent << endl;
         MeasureSpeed(ievent);
         PrintProcess(ievent);
         /** file writer */
