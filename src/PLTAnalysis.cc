@@ -29,6 +29,7 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     /** init file writer */
     if (UseFileWriter(telescopeID))
       FW = new FileWriterTracking(InFileName, telescopeID, FR);
+    PBar = new tel::ProgressBar(stopAt - 1);
 }
 
 PLTAnalysis::~PLTAnalysis()
@@ -53,8 +54,7 @@ PLTAnalysis::~PLTAnalysis()
         if (ievent > stopAt) break;
         ThisTime = ievent;
 
-        MeasureSpeed(ievent);
-        PrintProcess(ievent);
+        PBar->update(ievent);
         /** file writer */
         if (GetUseRootInput(telescopeID)) WriteTrackingTree();
 
@@ -251,37 +251,7 @@ float PLTAnalysis::getTime(float now, float & time){
     time += (clock() - now) / CLOCKS_PER_SEC;
     return time;
 }
-void PLTAnalysis::PrintProcess(uint32_t ievent){
 
-    if (ievent == 0) cout << endl;
-    if (ievent % 10 == 0 && ievent >= 1000){
-        if (ievent != 1000) cout << "\x1B[A\r";
-        cout << "Processed events:\t"  << setprecision(2) << setw(5) << setfill('0') << fixed << float(ievent) / stopAt * 100 << "% ";
-        if ( stopAt - ievent < 10 ) cout << "|" <<string( 50 , '=') << ">";
-        else cout << "|" <<string(int(float(ievent) / stopAt * 100) / 2, '=') << ">";
-        if ( stopAt - ievent < 10 ) cout << "| 100%    ";
-        else cout << string(50 - int(float(ievent) / stopAt * 100) / 2, ' ') << "| 100%    " << endl;
-        float all_seconds = (stopAt - ievent) / speed;
-        uint16_t minutes = all_seconds / 60;
-        uint16_t seconds = all_seconds - int(all_seconds) / 60 * 60;
-        uint16_t miliseconds =  (all_seconds - int(all_seconds)) * 1000;
-//        if (speed) cout << "time left:\t\t" << setprecision(2) << fixed << (nEntries - ievent) / speed <<  " seconds     " << minutes;
-        if (speed) {
-            cout << "time left:\t\t" << setw(2) << setfill('0') << minutes;
-            cout << ":" << setw(2) << setfill('0') << seconds;
-            cout << ":" << setw(3) << setfill('0') << miliseconds << "      ";
-        }
-        //else cout << "time left: ???";// Don't know why it is persistent. Commented it :P
-    }
-}
-void PLTAnalysis::MeasureSpeed(uint32_t ievent){
-
-    if (ievent == 10000) now = clock();
-    if (ievent % 10000 == 0 && ievent >= 20000){
-        speed = (ievent - 10000) / getTime(now, averTime);
-        now = clock();
-    }
-}
 void PLTAnalysis::WriteTrackingTree(){
 
     /** first clear all vectors */

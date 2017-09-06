@@ -8,6 +8,10 @@
 #include "RootItems.h"
 #include "FileWriterTracking.h"
 
+namespace tel{
+    class ProgressBar;
+}
+
 #define verbose 0
 
 /** ============================
@@ -37,6 +41,7 @@ private:
     uint32_t stopAt;
     bool trackOnlyTelescope;
     vector<float> * DiaZ;
+    tel::ProgressBar * PBar;
 
 public:
 
@@ -66,8 +71,6 @@ public:
     void SinglePlaneStudies();
     void InitFileReader();
     vector<float> * getDiaZPositions();
-    void PrintProcess(uint32_t);
-    void MeasureSpeed(uint32_t);
     void WriteTrackingTree();
     void MakeAvgPH();
     void DrawTracks();
