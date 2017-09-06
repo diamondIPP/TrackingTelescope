@@ -176,11 +176,11 @@ std::pair<float, float> PLTCluster::CenterOfMass(std::string type) {
   for (auto &fHit : fHits) {
     float iCharge = (FoundZeroCharge ? 1 : fHit->Charge());
     float iX, iY;
-    if (type.find("local") != 0u){
+    if (type.find("local") != std::string::npos){
       iX = fHit->LX();
       iY = fHit->LY();
     }
-    else if ((type.find("global") != 0u)){
+    else if ((type.find("global") != std::string::npos)){
       iX = fHit->GX();
       iY = fHit->GY();
     }
