@@ -282,10 +282,12 @@ void PLTAnalysis::WriteTrackingTree(){
         for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
             PLTPlane * Plane = FR->Plane(iplane);
             FW->setClusters(iplane, uint8_t(Plane->NClusters()) );
+            FW->setSResidual(iplane, -999);
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
                 PLTCluster * Cluster = Plane->Cluster(icluster);
                 float xl = FR->GetAlignment()->TtoLX(Track->ExtrapolateX(Cluster->TZ()), Track->ExtrapolateY(Cluster->TZ()), Cluster->Channel(), iplane);
                 float yl = FR->GetAlignment()->TtoLY(Track->ExtrapolateX(Cluster->TZ()), Track->ExtrapolateY(Cluster->TZ()), Cluster->Channel(), iplane);
+                FW->setSResidual(iplane, (Plane->NClusters() == 1 ? float(tel::distance(make_pair(xl, yl), make_pair(Cluster->LX(), Cluster->LY()))) : -999));
                 FW->setResidualX(iplane, xl - Cluster->LX());
                 FW->setResidualY(iplane, yl - Cluster->LY());
                 FW->setResidual(iplane, float(tel::distance(make_pair(xl, yl), make_pair(Cluster->LX(), Cluster->LY()))) );

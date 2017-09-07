@@ -23,6 +23,7 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   br_residuals_x = new vector<vector<float> >;
   br_residuals_y = new vector<vector<float> >;
   br_residuals = new vector<vector<float> >;
+  br_single_cluster_residuals = new vector<float>;
   resizeVectors();
   addBranches();
 }
@@ -65,6 +66,7 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("residuals_x", &br_residuals_x);
   newtree->Branch("residuals_y", &br_residuals_y);
   newtree->Branch("residuals", &br_residuals);
+  newtree->Branch("s_residuals", &br_single_cluster_residuals);
   newtree->Branch("cluster_size", &br_cluster_size);
 
   for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++){
@@ -134,6 +136,7 @@ void FileWriterTracking::resizeVectors() {
   br_residuals_x->resize(nRoc);
   br_residuals_y->resize(nRoc);
   br_residuals->resize(nRoc);
+  br_single_cluster_residuals->resize(nRoc);
 
   br_clusters_per_plane.resize(nRoc);
   br_n_hits.resize(nRoc);

@@ -54,6 +54,7 @@ private:
     std::vector<std::vector<float> > * br_residuals_x;
     std::vector<std::vector<float> > * br_residuals_y;
     std::vector<std::vector<float> > * br_residuals;
+    std::vector<float> * br_single_cluster_residuals;
     float br_coincidence_map;
     std::vector<std::vector<float> *> br_track_x;
     std::vector<std::vector<float> *> br_track_y;
@@ -139,6 +140,7 @@ public:
     void setResidualX(uint8_t iRoc, float value) { br_residuals_x->at(iRoc).push_back(value); }
     void setResidualY(uint8_t iRoc, float value) { br_residuals_y->at(iRoc).push_back(value); }
     void setResidual(uint8_t iRoc, float value) { br_residuals->at(iRoc).push_back(value); }
+    void setSResidual(uint8_t iRoc, float value) { br_single_cluster_residuals->at(iRoc) = value; }
 
     /** ============================
      AUXILIARY FUNCTIONS
