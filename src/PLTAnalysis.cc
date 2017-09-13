@@ -53,7 +53,6 @@ PLTAnalysis::~PLTAnalysis()
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
         if (ievent > stopAt) break;
         ThisTime = ievent;
-        cout << ievent << endl;
 
         PBar->update(ievent);
         /** file writer */
