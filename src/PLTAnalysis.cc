@@ -53,6 +53,7 @@ PLTAnalysis::~PLTAnalysis()
     for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
         if (ievent > stopAt) break;
         ThisTime = ievent;
+        cout << ievent << endl;
 
         PBar->update(ievent);
         /** file writer */
@@ -257,22 +258,28 @@ void PLTAnalysis::WriteTrackingTree(){
     /** first clear all vectors */
     FW->clearVectors();
 
-    FW->setHitPlaneBits(FR->HitPlaneBits() );
-    FW->setNTracks(FR->NTracks() );
-    FW->setNClusters(FR->NClusters() );
+    FW->setHitPlaneBits(uint16_t(FR->HitPlaneBits()) );
+    FW->setNTracks(uint8_t(FR->NTracks()) );
+    FW->setTotalClusters(uint8_t(FR->NClusters()) );
+    FW->setTotalHits(uint16_t(FR->NHits()) );
 
     for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
       PLTPlane * Plane = FR->Plane(iplane);
       FW->setNHits(iplane, uint16_t(Plane->NHits()) );
+      for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
+        PLTCluster * Cluster = Plane->Cluster(icluster);
+        FW->setClusterPos(iplane, Cluster->SeedHit()->Column(), Cluster->SeedHit()->Row() );
+        FW->setClusterPosTel(iplane, Cluster->TX() , Cluster->TY());
+        FW->setClusterPosLocal(iplane, Cluster->LX() , Cluster->LY());
+        FW->setClusterCharge(iplane, Cluster->Charge());
+        FW->setClusterSize(iplane, int(Cluster->NHits()));
+      }
     }
     if (FR->NTracks() > 0){
         PLTTrack * Track = FR->Track(0);
-        FW->setChi2(Track->Chi2() );
-        FW->setChi2X(Track->Chi2X() );
-        FW->setChi2Y(Track->Chi2Y() );
-        FW->setAngleX(Track->fAngleX);
-        FW->setAngleY(Track->fAngleY);
-        FW->setCoincidenceMap(FR->HitPlaneBits());
+        FW->setChi2(Track->Chi2(), Track->Chi2X(), Track->Chi2Y() );
+        FW->setAngle(Track->fAngleX, Track->fAngleY);
+        /** set extrapolated position of the track at the diamond position */
         for (auto i_pos : *DiaZ){
             float x_pos = Track->ExtrapolateX(i_pos);
             float y_pos = Track->ExtrapolateY(i_pos);
@@ -281,100 +288,24 @@ void PLTAnalysis::WriteTrackingTree(){
         }
         for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
             PLTPlane * Plane = FR->Plane(iplane);
-            FW->setClusters(iplane, uint8_t(Plane->NClusters()) );
+          FW->setNClusters(iplane, uint8_t(Plane->NClusters()));
             FW->setSResidual(iplane, -999);
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
                 PLTCluster * Cluster = Plane->Cluster(icluster);
                 float xl = FR->GetAlignment()->TtoLX(Track->ExtrapolateX(Cluster->TZ()), Track->ExtrapolateY(Cluster->TZ()), Cluster->Channel(), iplane);
                 float yl = FR->GetAlignment()->TtoLY(Track->ExtrapolateX(Cluster->TZ()), Track->ExtrapolateY(Cluster->TZ()), Cluster->Channel(), iplane);
                 FW->setSResidual(iplane, (Plane->NClusters() == 1 ? float(tel::distance(make_pair(xl, yl), make_pair(Cluster->LX(), Cluster->LY()))) : -999));
-                FW->setResidualX(iplane, xl - Cluster->LX());
-                FW->setResidualY(iplane, yl - Cluster->LY());
+                FW->setResidualXY(iplane, xl - Cluster->LX(), yl - Cluster->LY() );
                 FW->setResidual(iplane, float(tel::distance(make_pair(xl, yl), make_pair(Cluster->LX(), Cluster->LY()))) );
-                FW->setClusterPlane(iplane);
-                FW->setChargeAll(iplane, Cluster->Charge());
-                FW->setClusterCharge(Cluster->Charge());
-                FW->setClusterSize(iplane, int(Cluster->NHits()));
-                FW->setClusterXPosTel(Cluster->TX() );
-                FW->setClusterYPosTel(Cluster->TY() );
-                FW->setClusterXPosLocal(Cluster->LX() );
-                FW->setClusterYPosLocal(Cluster->LY() );
-                FW->setClusterRow(Cluster->SeedHit()->Row() );
-                FW->setClusterColumn(Cluster->SeedHit()->Column() );
-                FW->setTrackX(iplane, Track->ExtrapolateX(Plane->GZ()));
-                FW->setTrackY(iplane, Track->ExtrapolateY(Plane->GZ()));
-                float chargeSmall = 1000000000;
-                size_t ihitSmall = 0;
-                for (size_t ihit = 0; ihit < Cluster->NHits(); ihit ++){
-                    if (chargeSmall > Cluster->Hit(ihit)->Charge()){
-                        chargeSmall = Cluster->Hit(ihit)->Charge();
-                        ihitSmall = ihit;
-                    }
-                }
-                FW->setSmallestHitCharge(iplane, chargeSmall);
-                FW->setSmallestHitCharge(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->ADC());
-                FW->setSmallestHitPosCol(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Column());
-                FW->setSmallestHitPosRow(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Row());
-
-//            if ((Plane->Cluster(icluster)->NHits() > 0)) {
-//                size_t index = Plane->Cluster(icluster)->NHits() - 1;
-//                if(index < FW->GetNHits()){
-//                    FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
-//                }
-//                else
-//                    FW->setPulseHeightsRoc(iplane,FW->GetNHits()-1,Plane->Cluster(icluster)->Charge());
-//            }
+//                FW->setClusterPlane(iplane);
+                FW->setTrackPos(iplane, Track->ExtrapolateX(Plane->TZ()), Track->ExtrapolateY(Plane->TZ()) );
             }
         }
     }
     else {
-        FW->setChi2(-999);
-        FW->setChi2X(-999);
-        FW->setChi2Y(-999);
-        FW->setAngleX(-999);
-        FW->setAngleY(-999);
-        FW->setCoincidenceMap(0);
-        for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
-//            PLTTrack * Track2 = FR->Track(0);
-            PLTPlane * Plane = FR->Plane(iplane);
-            FW->setClusters(iplane, Plane->NClusters() );
-            for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
-                FW->setChargeAll(iplane, Plane->Cluster(icluster)->Charge());
-                FW->setClusterSize(iplane, Plane->Cluster(icluster)->NHits());
-                FW->setClusterXPosTel(Plane->Cluster(icluster)->TX() );
-                FW->setClusterYPosTel(Plane->Cluster(icluster)->TY() );
-                FW->setClusterXPosLocal(Plane->Cluster(icluster)->LX() );
-                FW->setClusterYPosLocal(Plane->Cluster(icluster)->LY() );
-                FW->setClusterRow(Plane->Cluster(icluster)->SeedHit()->Row() );
-                FW->setClusterColumn(Plane->Cluster(icluster)->SeedHit()->Column() );
-                FW->setTrackX(iplane, -9999);
-                FW->setTrackY(iplane, -9999);
-                float chargeSmall = 1000000000;
-                size_t ihitSmall = 0;
-                for (size_t ihit = 0; ihit < Plane->Cluster(icluster)->NHits(); ihit ++){
-                    if (chargeSmall > Plane->Cluster(icluster)->Hit(ihit)->Charge()){
-                        chargeSmall = Plane->Cluster(icluster)->Hit(ihit)->Charge();
-                        ihitSmall = ihit;
-                    }
-                }
-                FW->setSmallestHitCharge(iplane, chargeSmall);
-                FW->setSmallestHitCharge(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->ADC());
-                FW->setSmallestHitPosCol(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Column());
-                FW->setSmallestHitPosRow(iplane, Plane->Cluster(icluster)->Hit(ihitSmall)->Row());
-
-//            if ((Plane->Cluster(icluster)->NHits() > 0)) {
-//                size_t index = Plane->Cluster(icluster)->NHits() - 1;
-//                if(index < FW->GetNHits()){
-//                    FW->setPulseHeightsRoc(iplane,index,Plane->Cluster(icluster)->Charge());
-//                }
-//                else
-//                    FW->setPulseHeightsRoc(iplane,FW->GetNHits()-1,Plane->Cluster(icluster)->Charge());
-//            }
-            }
-        }
+        FW->setChi2(-999, -999, -999);
+        FW->setAngle(-999, -999);
     }
-    // new Branches: DA
-
 
     FW->fillTree();
 }
@@ -397,7 +328,7 @@ void PLTAnalysis::DrawTracks(){
 
     static int ieventdraw = 0;
     if (ieventdraw < 20) {
-        uint16_t hp = FR->HitPlaneBits();
+        auto hp = uint16_t(FR->HitPlaneBits());
         if (hp == pow(2, FR->NPlanes() ) -1){
             FR->DrawTracksAndHits(TString::Format(Histos->getOutDir() + "/Tracks_Ev%i.png", ++ieventdraw).Data() );
             if (ieventdraw == 20) cout << endl;
