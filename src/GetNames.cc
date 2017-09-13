@@ -123,17 +123,17 @@ uint8_t GetNumberOfROCS(int16_t telescopeID){
     }
 }
 
-int GetUseGainInterpolator(int telescopeID){
+bool GetUseGainInterpolator(int telescopeID){
 
     return telescopeID == 2;
 }
 
-int GetUseExternalCalibrationFunction(int telescopeID){
+bool GetUseExternalCalibrationFunction(int telescopeID){
 
     return telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11;
 }
 
-int GetUseRootInput(int telescopeID){
+bool GetUseRootInput(int telescopeID){
 
     return (telescopeID == -1) || (telescopeID == 7) || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11;
 }
