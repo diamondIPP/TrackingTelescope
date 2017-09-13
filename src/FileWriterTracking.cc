@@ -17,7 +17,6 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   newfile = new TFile(NewFileName.c_str(), "RECREATE");
   newtree = intree->CloneTree(0);
 
-  cout << "<<<0>>>>" << endl;
   /** init vectors */
   br_dia_track_pos_x = new vector<float>;
   br_dia_track_pos_y = new vector<float>;
@@ -38,9 +37,7 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   br_cluster_ypos_local = new vector<vector<float> >;
 
   br_cluster_charge = new vector<vector<float> >;
-  cout << "<<<1>>>>" << endl;
   resizeVectors();
-  cout << "<<<2>>>>" << endl;
   addBranches();
 }
 FileWriterTracking::~FileWriterTracking() = default;
