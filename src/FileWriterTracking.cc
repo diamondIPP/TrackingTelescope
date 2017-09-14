@@ -1,5 +1,4 @@
 #include "FileWriterTracking.h"
-#include "TInterpreter.h"
 
 using std::cout; using std::string; using std::stringstream; using std::vector; using std::endl;
 
@@ -9,8 +8,6 @@ using std::cout; using std::string; using std::stringstream; using std::vector; 
 FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, PSIFileReader * FR):
   nRoc(GetNumberOfROCS(telescopeID)), nHits(4), TelescopeID(telescopeID) {
 
-  gInterpreter->GenerateDictionary("vector<vector<UShort_t> >");  // add vector<vector> to root dicts
-  gInterpreter->GenerateDictionary("vector<vector<Float_t> >");  // add vector<vector> to root dicts
   NewFileName = getFileName(InFileName);
   intree = ((PSIRootFileReader*) FR)->fTree;
   names = ((PSIRootFileReader*) FR)->fMacro;

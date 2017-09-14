@@ -24,6 +24,7 @@
 #include "TProfile2D.h"
 #include "TParameter.h"
 #include "TTree.h"
+#include "TInterpreter.h"
 
 #include "PLTAnalysis.h"
 
@@ -1553,6 +1554,7 @@ int main (int argc, char* argv[])
         return 1;
       }
     }
+  gInterpreter->GenerateDictionary("vector<vector<Float_t> >;vector<vector<UShort_t> >");  // add root dicts for vector<vector> >
 
   /** There three usage modes: analysis, alignment and residuals
 
