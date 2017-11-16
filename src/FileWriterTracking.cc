@@ -45,7 +45,7 @@ FileWriterTracking::~FileWriterTracking() = default;
 string FileWriterTracking::getFileName(string & InFileName){
 
   stringstream ss(InFileName);
-  while (getline(ss, NewFileName, '/') != nullptr){}
+  while (getline(ss, NewFileName, '/') ){}
   NewFileName.insert(unsigned(NewFileName.length() - 5), "_withTracks");
   return NewFileName;
 }
