@@ -34,6 +34,8 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   br_cluster_ypos_local = new vector<vector<float> >;
 
   br_cluster_charge = new vector<vector<float> >;
+  br_aligned = new vector<bool>;
+  is_aligned = new vector<bool>;
   resizeVectors();
   addBranches();
 }
@@ -80,6 +82,7 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("cluster_size", &br_cluster_size);
   newtree->Branch("track_x", &br_track_x);
   newtree->Branch("track_y", &br_track_y);
+  newtree->Branch("aligned", &br_aligned);
 }
 
 void FileWriterTracking::fillTree(){
@@ -141,5 +144,7 @@ void FileWriterTracking::resizeVectors() {
   br_cluster_ypos_local->resize(nRoc);
 
   br_cluster_charge->resize(nRoc);
+  is_aligned->resize(nRoc, true);
+  br_aligned->resize(nRoc, true);
 }
 

@@ -33,6 +33,9 @@ private:
         BRANCH VARIABLES
      =================================*/
     uint16_t br_hit_plane_bits;
+    std::vector<bool> * is_aligned;
+    std::vector<bool> * br_aligned;
+
     /** tracks */
     uint8_t br_n_tracks;
     std::vector<float> * br_dia_track_pos_x, * br_dia_track_pos_y;
@@ -43,6 +46,7 @@ private:
     std::vector<std::vector<float> > * br_residuals;
     std::vector<float> * br_single_cluster_residuals;
     std::vector<std::vector<float> > * br_track_x, * br_track_y;
+
     /** cluster numbers */
     uint16_t br_total_hits;
     std::vector<uint16_t> br_n_hits;
@@ -50,10 +54,12 @@ private:
     std::vector<uint8_t> br_n_clusters;
     std::vector<std::vector<uint16_t> > * br_cluster_size;
 //    std::vector<uint16_t> br_cluster_plane;
+
     /** cluster positions */
     std::vector<std::vector<uint16_t> > * br_cluster_col, * br_cluster_row;
     std::vector<std::vector<float> > * br_cluster_xpos_tel, * br_cluster_ypos_tel;      // telescope coordinates (after alignment)
     std::vector<std::vector<float> > * br_cluster_xpos_local, * br_cluster_ypos_local;  // local coordinates
+
     /** cluster charge */
     std::vector<std::vector<float> > * br_cluster_charge;
 
@@ -85,11 +91,12 @@ public:
     float   Chi2X() { return br_chi2_x; }
     float   Chi2Y() { return br_chi2_y; }
     std::vector<std::vector<uint16_t> > * ClusterSize() { return br_cluster_size; }
-    size_t GetNHits() { return nHits; }
+    std::vector<uint16_t> GetNHits() { return br_n_hits; }
     std::vector<std::vector<float> > * TrackX() { return br_track_x; }
     std::vector<std::vector<float> > * TrackY() { return br_track_y; }
     std::vector<std::vector<float> > * ResidualX() { return br_residuals_x; }
     std::vector<std::vector<float> > * ResidualY() { return br_residuals_y; }
+    bool lastIsAligned(uint8_t iRoc) { return is_aligned->at(iRoc); }
 
     /** ============================
         SETTER METHODS
@@ -118,6 +125,8 @@ public:
     /** cluster charge */
     void setClusterCharge(uint8_t iRoc, float value) { br_cluster_charge->at(iRoc).push_back(value); }
 //    void setClusterPlane(uint16_t value) { br_cluster_plane.push_back(value); }
+    void setAligned(uint8_t iRoc, bool aligned) { br_aligned->at(iRoc) = aligned; }
+    void setOldAligned(uint8_t iRoc, bool aligned) { is_aligned->at(iRoc) = aligned; }
 
     /** ============================
      AUXILIARY FUNCTIONS

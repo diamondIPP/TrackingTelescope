@@ -69,7 +69,12 @@ PLTAnalysis::~PLTAnalysis()
         DrawTracks();
 
         /** loop over the planes */
-        for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+        for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+
+            /** quick alignment check */
+            bool aligned = FR->NTracks() > 0 ? FR->NTracks() and FR->Plane(iplane)->NHits() : true;  //set automatically true if there is no track (don't care about these events)
+            FW->setAligned(iplane, FW->lastIsAligned(iplane) or aligned);  //only set misaligned mark if this and the last event are not aligned
+            FW->setOldAligned(iplane, aligned);
 
             PLTPlane * Plane = FR->Plane(iplane);
             /** Check that the each hit belongs to only one cluster type*/ //todo: DA: comentar
