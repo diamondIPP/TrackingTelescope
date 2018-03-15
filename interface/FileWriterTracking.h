@@ -39,6 +39,7 @@ private:
     /** tracks */
     uint8_t br_n_tracks;
     std::vector<float> * br_dia_track_pos_x, * br_dia_track_pos_y;
+    std::vector<float> * br_dia_track_pos_x_loc, * br_dia_track_pos_y_loc;
     std::vector<float> * br_dist_to_dia;
     float   br_chi2, br_chi2_x, br_chi2_y;
     float   br_angle_x, br_angle_y;
@@ -105,6 +106,7 @@ public:
     /** tracks */
     void setNTracks(uint8_t value) { br_n_tracks = value; }
     void setDiaTracks(float xVal, float yVal) { br_dia_track_pos_x->push_back(xVal); br_dia_track_pos_y->push_back(yVal); }
+    void setDiaTracksLocal(std::pair<float, float> pos) { br_dia_track_pos_x_loc->push_back(pos.first); br_dia_track_pos_y_loc->push_back(pos.second); }
     void setDistDia(float xVal, float yVal) { br_dist_to_dia->push_back(sqrt(xVal * xVal + yVal * yVal)); }
     void setAngle(float xval, float yval) { br_angle_x = xval;  br_angle_y = yval; }
     void setChi2(float total, float xval, float yval) { br_chi2 = total; br_chi2_x = xval; br_chi2_y = yval; }
