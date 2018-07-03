@@ -28,3 +28,4 @@ telescope 28 - PSI  Aug 17, pad
 telescope 29 - PSI  Aug 17, pixel
 telescope 30 - PSI  Aug 17-2, pixel
 telescope 31 - PSI  Aug 17-2, pad
+telescope 32 - PSI  Jul 18, pad

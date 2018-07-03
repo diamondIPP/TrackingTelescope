@@ -3,7 +3,7 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 31;
+uint16_t nTelescopes = 32;
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(int telescopeID, bool useInitial){
@@ -114,7 +114,7 @@ uint8_t GetNumberOfROCS(int16_t telescopeID){
         return 7;
     else if(id == 22 or id == 25)
         return 6;
-    else if ((id == 5) || (id == 6) || (id == 7) || (id == -1) || (id >= 9))
+    else if ((id == -1) || (id >= 9))
         return 4;
     else {
         cout << "ERROR: Number of ROCs not defined for telescopeID=" << telescopeID << endl;
