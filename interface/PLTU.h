@@ -40,8 +40,8 @@ namespace PLTU
     const float DIA1Z[4] = {3.2, 6.7, 5.8, 5.8};
     const float DIA2Z[4] = {5.1, 8.2, 7.5, 7.7};
 
-    float const DIACENTERX = (LASTCOL_DIAMOND + FIRSTCOL_DIAMOND) / float(2);
-    float const DIACENTERY = (LASTROW_DIAMOND + FIRSTROW_DIAMOND) / float(2);
+    float const DIACENTERX = (LASTCOL_DIAMOND + FIRSTCOL_DIAMOND + 1) / float(2);
+    float const DIACENTERY = (LASTROW_DIAMOND + FIRSTROW_DIAMOND + 1) / float(2);
 
     Double_t PoissonFit(Double_t* x, Double_t* par);
     void SetStyle ();

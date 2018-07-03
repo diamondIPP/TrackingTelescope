@@ -17,7 +17,7 @@ namespace tel {
     stringstream ss(s);
     string item;
     vector<string> elements;
-    while (getline(ss, item, deliminator) != nullptr)
+    while (getline(ss, item, deliminator))
       elements.push_back(item);
     return elements;
   }

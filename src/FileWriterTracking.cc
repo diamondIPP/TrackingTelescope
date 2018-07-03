@@ -17,6 +17,8 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   /** init vectors */
   br_dia_track_pos_x = new vector<float>;
   br_dia_track_pos_y = new vector<float>;
+  br_dia_track_pos_x_loc = new vector<float>;
+  br_dia_track_pos_y_loc = new vector<float>;
   br_dist_to_dia = new vector<float>;
   br_residuals_x = new vector<vector<float> >;
   br_residuals_y = new vector<vector<float> >;
@@ -34,6 +36,8 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   br_cluster_ypos_local = new vector<vector<float> >;
 
   br_cluster_charge = new vector<vector<float> >;
+  br_aligned = new vector<bool>;
+  is_aligned = new vector<bool>;
   resizeVectors();
   addBranches();
 }
@@ -45,7 +49,7 @@ FileWriterTracking::~FileWriterTracking() = default;
 string FileWriterTracking::getFileName(string & InFileName){
 
   stringstream ss(InFileName);
-  while (getline(ss, NewFileName, '/') != nullptr){}
+  while (getline(ss, NewFileName, '/') ){}
   NewFileName.insert(unsigned(NewFileName.length() - 5), "_withTracks");
   return NewFileName;
 }
@@ -54,6 +58,8 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
   newtree->Branch("dia_track_x", &br_dia_track_pos_x);
   newtree->Branch("dia_track_y", &br_dia_track_pos_y);
+  newtree->Branch("dia_track_x_local", &br_dia_track_pos_x_loc);
+  newtree->Branch("dia_track_y_local", &br_dia_track_pos_y_loc);
   newtree->Branch("dist_to_dia", &br_dist_to_dia);
   newtree->Branch("chi2_tracks", &br_chi2);
   newtree->Branch("chi2_x", &br_chi2_x);
@@ -80,6 +86,7 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("cluster_size", &br_cluster_size);
   newtree->Branch("track_x", &br_track_x);
   newtree->Branch("track_y", &br_track_y);
+  newtree->Branch("aligned", &br_aligned);
 }
 
 void FileWriterTracking::fillTree(){
@@ -117,6 +124,8 @@ void FileWriterTracking::clearVectors(){
   }
   br_dia_track_pos_x->clear();
   br_dia_track_pos_y->clear();
+  br_dia_track_pos_x_loc->clear();
+  br_dia_track_pos_y_loc->clear();
   br_dist_to_dia->clear();
 }
 
@@ -141,5 +150,7 @@ void FileWriterTracking::resizeVectors() {
   br_cluster_ypos_local->resize(nRoc);
 
   br_cluster_charge->resize(nRoc);
+  is_aligned->resize(nRoc, true);
+  br_aligned->resize(nRoc, true);
 }
 

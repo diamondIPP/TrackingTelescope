@@ -69,7 +69,12 @@ PLTAnalysis::~PLTAnalysis()
         DrawTracks();
 
         /** loop over the planes */
-        for (size_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+        for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
+
+            /** quick alignment check */
+            bool aligned = FR->NTracks() > 0 ? FR->NTracks() and FR->Plane(iplane)->NHits() : true;  //set automatically true if there is no track (don't care about these events)
+            FW->setAligned(iplane, FW->lastIsAligned(iplane) or aligned);  //only set misaligned mark if this and the last event are not aligned
+            FW->setOldAligned(iplane, aligned);
 
             PLTPlane * Plane = FR->Plane(iplane);
             /** Check that the each hit belongs to only one cluster type*/ //todo: DA: comentar
@@ -279,10 +284,11 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setChi2(Track->Chi2(), Track->Chi2X(), Track->Chi2Y() );
         FW->setAngle(Track->fAngleX, Track->fAngleY);
         /** set extrapolated position of the track at the diamond position */
-        for (auto i_pos : *DiaZ){
-            float x_pos = Track->ExtrapolateX(i_pos);
-            float y_pos = Track->ExtrapolateY(i_pos);
+        for (uint8_t i(0); i < DiaZ->size(); i++){
+            float x_pos = Track->ExtrapolateX(DiaZ->at(i));
+            float y_pos = Track->ExtrapolateY(DiaZ->at(i));
             FW->setDiaTracks(x_pos, y_pos);
+            FW->setDiaTracksLocal(FR->GetAlignment()->TtoLXY(x_pos, y_pos, FR->Channel(), int(FR->NPlanes() - DiaZ->size() + i)));
             FW->setDistDia(x_pos, y_pos);
         }
         for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
