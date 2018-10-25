@@ -3,7 +3,7 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 33;
+uint16_t nTelescopes = 34;
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(int telescopeID, bool useInitial){
@@ -93,6 +93,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 25)  return "calibration_lists/GKCalibrationList_Telescope25.txt";
     else if (telescopeID == 29)  return "calibration_lists/GKCalibrationList_Telescope29.txt";
     else if (telescopeID == 30)  return "calibration_lists/GKCalibrationList_Telescope29.txt";
+    else if (telescopeID == 34)  return "calibration_lists/GKCalibrationList_Telescope34.txt";
     else if (telescopeID >= 10)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
@@ -106,14 +107,13 @@ uint8_t GetNumberOfROCS(int16_t telescopeID){
 
 
     int16_t id = telescopeID;
-    if ((id == 1) || (id == 2) || (id == 3) || (id == 8))
+    vector<int16_t > roc6 = {1, 2, 3, 8, 22, 25, 34};
+    if (in(id, roc6))
         return 6;
     else if (id == 4)
         return 2;
     else if (id == 10 or id == 13 or id == 15 or id == 29 or id == 30)
         return 7;
-    else if(id == 22 or id == 25)
-        return 6;
     else if ((id == -1) || (id >= 9))
         return 4;
     else {
@@ -154,7 +154,7 @@ bool FillSignalHistos(uint8_t telescopeID){
 
 bool UseDigitalCalibration(int16_t telescopeID){
 
-    vector<int16_t> ids = {10, 13, 15, 22, 25, 29, 30};
+    vector<int16_t> ids = {10, 13, 15, 22, 25, 29, 30, 34};
     return in(telescopeID, ids);
 
 }
@@ -162,7 +162,7 @@ bool UseDigitalCalibration(int16_t telescopeID){
 int GetNumberOfSignals(int16_t telescopeID){
 
     int16_t id = telescopeID;
-    vector<int16_t> pixel_ids = {10, 13, 15, 22, 25, 29, 30};
+    vector<int16_t> pixel_ids = {10, 13, 15, 22, 25, 29, 30, 34};
     if (in(id, pixel_ids))
         return 0;
     else if ((id == 7) || (id == 8) || (id == 9) || id >= 11)
