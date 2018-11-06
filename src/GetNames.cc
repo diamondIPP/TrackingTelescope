@@ -3,7 +3,7 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 34;
+uint16_t nTelescopes = 36;
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(int telescopeID, bool useInitial){
@@ -94,6 +94,8 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 29)  return "calibration_lists/GKCalibrationList_Telescope29.txt";
     else if (telescopeID == 30)  return "calibration_lists/GKCalibrationList_Telescope29.txt";
     else if (telescopeID == 34)  return "calibration_lists/GKCalibrationList_Telescope34.txt";
+    else if (telescopeID == 35)  return "calibration_lists/GKCalibrationList_Telescope35.txt";
+    else if (telescopeID == 36)  return "calibration_lists/GKCalibrationList_Telescope35.txt";
     else if (telescopeID >= 10)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
@@ -112,7 +114,7 @@ uint8_t GetNumberOfROCS(int16_t telescopeID){
         return 6;
     else if (id == 4)
         return 2;
-    else if (id == 10 or id == 13 or id == 15 or id == 29 or id == 30)
+    else if (in(id, {10, 13, 15, 29, 30, 35}))
         return 7;
     else if ((id == -1) || (id >= 9))
         return 4;
@@ -154,7 +156,7 @@ bool FillSignalHistos(uint8_t telescopeID){
 
 bool UseDigitalCalibration(int16_t telescopeID){
 
-    vector<int16_t> ids = {10, 13, 15, 22, 25, 29, 30, 34};
+    vector<int16_t> ids = {10, 13, 15, 22, 25, 29, 30, 34, 35};
     return in(telescopeID, ids);
 
 }
