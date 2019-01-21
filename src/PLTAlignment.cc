@@ -29,6 +29,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
 
 
   // Open file
+  std::cout << "Opening " << InFileName << std::endl;
   std::ifstream InFile(InFileName.c_str());
   if (!InFile.is_open()) {
     fIsGood = false;
