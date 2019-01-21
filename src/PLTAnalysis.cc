@@ -270,6 +270,7 @@ void PLTAnalysis::WriteTrackingTree(){
     for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
       PLTPlane * Plane = FR->Plane(iplane);
       FW->setNHits(iplane, uint16_t(Plane->NHits()) );
+      FW->setNClusters(iplane, uint8_t(Plane->NClusters()));
       for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
         PLTCluster * Cluster = Plane->Cluster(icluster);
         FW->setClusterPos(iplane, Cluster->SeedHit()->Column(), Cluster->SeedHit()->Row() );
@@ -293,7 +294,6 @@ void PLTAnalysis::WriteTrackingTree(){
         }
         for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
             PLTPlane * Plane = FR->Plane(iplane);
-          FW->setNClusters(iplane, uint8_t(Plane->NClusters()));
             FW->setSResidual(iplane, -999);
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
                 PLTCluster * Cluster = Plane->Cluster(icluster);
