@@ -172,8 +172,8 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     gY.Fit( &funY, "Q" );
 
     // Store fit results // DA: TODO Refactor variable names to angle not slope
-    fAngleX = atan(funX.GetParameter(0)) * 180 / 3.14159;
-    fAngleY = atan(funY.GetParameter(0)) * 180 / 3.14159;
+    fAngleX = float(atan(funX.GetParameter(0)) * 180 / M_PI);
+    fAngleY = float(atan(funY.GetParameter(0)) * 180 / M_PI);
     fAngleRadX = funX.GetParameter(0);
     fAngleRadY = funY.GetParameter(0);
     fOffsetX = funX.GetParameter(1);
