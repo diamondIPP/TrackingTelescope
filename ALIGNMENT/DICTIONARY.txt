@@ -7,7 +7,8 @@ telescope  5 - PSI  Sep 14, pad 	(4 plane Si)
 telescope  6 - CERN Oct 14, pad 	(4 plane Si)
 telescope  7 - PSI  May 15, pad 	(4 plane Si)
 telescope  9 - PSI  Aug 15, pad 	(4 plane Si)
-telescope 10 - PSI  Oct 15, pix  	(4 plane Si + 2 dig Dia + 1 dig Si)
+telescope 10 - PSI  Aug 15, pix  	(4 plane Si + 2 dig Dia + 1 dig Si)
+telescope 11 - PSI  Aug 15, pad 	(4 plane Si)
 telescope 12 - PSI  Oct 15, pad 1
 telescope 13 - CERN May 15, pix
 telescope 14 - PSI  Oct 15, pad 2
