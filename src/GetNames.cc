@@ -3,7 +3,7 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 37;
+uint16_t nTelescopes = 39;
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(int telescopeID, bool useInitial){

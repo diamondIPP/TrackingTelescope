@@ -31,3 +31,9 @@ telescope 30 - PSI  Aug 17-2, pixel
 telescope 31 - PSI  Aug 17-2, pad
 telescope 32 - PSI  Jul 18, pad
 telescope 33 - PSI  Jul 18, pad
+telescope 34 - PSI  Jul 18, pad
+telescope 35 - PSI  Jul 18, pad
+telescope 36 - PSI  Jul 18, pad
+telescope 37 - PSI  Jul 18, pad
+telescope 38 - PSI  Jul 18, pad (4 plane Si -> S116, S83)
+telescope 39 - PSI  Jul 18, pad (4 plane Si -> S116, S125)
