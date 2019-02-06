@@ -7,6 +7,7 @@ uint16_t nTelescopes = 39;
 vector<int16_t> pixelIDs = {10, 13, 15, 21, 25, 29, 30, 34, 35};
 vector<int16_t> roc6IDs = {1, 2, 3, 8, 21, 25, 34};
 vector<int16_t> roc7IDs = {10, 13, 15, 29, 30, 35};
+vector<int16_t> bcmPrimeIDs = {36, 42};
 
 string GetMaskingFilename(int telescopeID){
 
@@ -148,6 +149,8 @@ float GetDiamondZPosition(int16_t id, uint8_t diamond){
     uint8_t tel = 0;
     if (id > 16 && id < 22)
         tel = 1;
+    else if (in(id, bcmPrimeIDs))
+        tel = 4;
     else if (id == 28 or id == 31)
         tel = 3;
     else if (id > 22)
