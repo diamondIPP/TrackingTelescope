@@ -1,11 +1,162 @@
+#include <utility>
+
 #include <Utils.h>
-#include "DoAlignment.h"
+#include <DoAlignment.h>
+#include "PSIBinaryFileReader.h"
+#include "PSIRootFileReader.h"
+#include "GetNames.h"
+#include "TestPlaneEfficiencySilicon.h"
+#include "PLTPlane.h"
+#include "PLTAlignment.h"
 
 using namespace std;
 
+Alignment::Alignment(string in_file_name, TString run_number, short telescope_ID):
+  TelescopeID(telescope_ID),
+  NPlanes(GetNumberOfROCS(telescope_ID)),
+  InFileName(std::move(in_file_name)),
+  PlotsDir("plots/"),
+  OutDir(PlotsDir + run_number),
+  AngleThreshold(.01),
+  TotResThreshold(.01),
+  Now(clock()) {
+
+  gROOT->ProcessLine("gErrorIgnoreLevel = kError;");
+  gStyle->SetOptStat(0);
+  gStyle->SetPalette(53);
+
+  XAlign.resize(NPlanes, 0);
+  YAlign.resize(NPlanes, 0);
+  ZAlign.resize(NPlanes, 0);
+  RAlign.resize(NPlanes, 0);
+
+  FR = InitFileReader();
+  MaxEventNumber = unsigned(dynamic_cast<PSIRootFileReader*>(FR)->fTree->GetEntries());
+  ProgressBar = new tel::ProgressBar(MaxEventNumber - 1);
+  /** Apply Masking */
+  FR->ReadPixelMask(GetMaskingFilename(TelescopeID));
+  InitHistograms();
+    
+  PreAlign();
+}
+
+PSIFileReader * Alignment::InitFileReader() {
+
+  PSIFileReader * tmp;
+  if (GetUseRootInput(TelescopeID)){
+    tmp = new PSIRootFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(TelescopeID), NPlanes, GetUseGainInterpolator(TelescopeID),
+      GetUseExternalCalibrationFunction(TelescopeID), false, uint8_t(TelescopeID));
+  }
+  else {
+    tmp = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(TelescopeID), NPlanes, GetUseGainInterpolator(TelescopeID),
+      GetUseExternalCalibrationFunction(TelescopeID));
+  }
+  tmp->GetAlignment()->SetErrors(TelescopeID);
+  FILE * f = fopen("MyGainCal.dat", "w");
+  tmp->GetGainCal()->PrintGainCal(f);
+  fclose(f);
+  return tmp;
+}
+
+void Alignment::PreAlign() {
+
+  /** coarsely move the two inner planes to minimise the residuals without rotations */
+  cout << "=== STARTING PRE-ALIGNMENT ===" << endl;
+  FR->ResetFile();
+  FR->SetPlanesUnderTest(1, 2); /** ignore inner planes for tracking */;
+  ClearHistograms(); /** Reset residual histograms */
+  Now = clock();
+        
+  /** EVENT LOOP */
+  for (uint32_t i_event = 0; FR->GetNextEvent() >= 0; ++i_event) {
+
+    cout << i_event << endl;
+    if (i_event > MaxEventNumber) break;
+    ProgressBar->update(i_event); /** print progress */
+    if (FR->NTracks() != 1) continue; /** proceed only if we have exactly one track */
+
+    PLTTrack * Track = FR->Track(0);
+    for (unsigned i_plane(1); i_plane < NPlanes - 1; ++i_plane) {
+
+      if (FR->Plane(i_plane)->NClusters() != 1) continue; /** proceed only if there is exactly one cluster */
+
+      PLTCluster * Cluster = FR->Plane(i_plane)->Cluster(0);
+      pair<float, float> l_res = Track->GetResiduals(*Cluster, *FR->GetAlignment());
+      cout << "Track Residuals for " << i_plane << " (x/y): " << l_res.first << "/" << l_res.second << endl;
+      if (fabs(l_res.first) >= 2 or fabs(l_res.second) >= 2) continue; /** only proceed if the residual is smaller than 2mm in x or y */
+
+      hResidual[i_plane].Fill(l_res.first, l_res.second); // dX vs dY
+      hResidualXdY[i_plane].Fill(Cluster->LX(), l_res.second); // X vs dY
+      hResidualYdX[i_plane].Fill(Cluster->LY(), l_res.first); // Y vs dX
+    }
+  } // end event loop
+  cout << "\nLoop duration:" << (clock() - Now) / CLOCKS_PER_SEC << endl;
+
+
+
+  for (unsigned i_plane(1); i_plane < NPlanes - 1; i_plane++){
+
+    XAlign[i_plane] += hResidual[i_plane].GetMean(1);
+    YAlign[i_plane] += hResidual[i_plane].GetMean(2);
+
+    cout << "RESIDUALS Plane " << i_plane << ":\t" << setprecision(7) << XAlign[i_plane] << " " << YAlign[i_plane] << endl;
+    cout << "RESIDUALS RMSPlane " << i_plane << ":\t" << setprecision(7) << hResidual[i_plane].GetRMS(1) << " " << hResidual[i_plane].GetRMS(2) <<endl;
+
+    /** update the alignment */
+    cout << "Before: " << FR->GetAlignment()->LX(1, i_plane) << endl;
+    FR->GetAlignment()->AddToLX(1, i_plane, XAlign[i_plane] );
+    FR->GetAlignment()->AddToLY(1, i_plane, YAlign[i_plane] );
+    cout << "After:  " << FR->GetAlignment()->LX(1, i_plane) << endl;
+
+    SaveResiduals(i_plane);
+  }
+}
+
+void Alignment::InitHistograms() {
+
+  for (uint8_t i_plane(0); i_plane != NPlanes; ++i_plane){
+    hResidual.emplace_back(        Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 200, -.5, .5, 200, -.5, .5);
+    hResidualXdY.emplace_back(TH2F(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 133, -1, 0.995, 100, -.5, .5));
+    hResidualYdX.emplace_back(TH2F(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 201, -1, 1, 100, -.5, .5));
+  }
+}
+
+void Alignment::ClearHistograms() {
+
+  for (uint8_t i_plane(0); i_plane != NPlanes; ++i_plane){
+    hResidual.at(i_plane).Clear();
+    hResidualXdY.at(i_plane).Clear();
+    hResidualYdX.at(i_plane).Clear();
+  }
+}
+
+void Alignment::SaveResiduals(unsigned i_plane) {
+
+  TCanvas Can;
+  Can.cd();
+  // 2D Residuals
+  hResidual[i_plane].SetContour(1024);
+  hResidual[i_plane].Draw("colz");
+  Can.SaveAs( OutDir + "/" + TString(hResidual[i_plane].GetName()) + ".png");
+  // Residual X-Projection
+  gStyle->SetOptStat(1111);
+  hResidual[i_plane].ProjectionX()->Draw();
+  Can.SaveAs( OutDir + "/" + TString(hResidual[i_plane].GetName()) + "_X.png");
+  // Residual Y-Projection
+  hResidual[i_plane].ProjectionY()->Draw();
+  Can.SaveAs( OutDir + "/" + TString(hResidual[i_plane].GetName()) + "_Y.png");
+  // 2D Residuals X/dY
+  hResidualXdY[i_plane].SetContour(1024);
+  hResidualXdY[i_plane].Draw("colz");
+  Can.SaveAs( OutDir + "/" + TString(hResidualXdY[i_plane].GetName()) + ".png");
+  // 2D Residuals Y/dX
+  hResidualYdX[i_plane].SetContour(1024);
+  hResidualYdX[i_plane].Draw("colz");
+  Can.SaveAs( OutDir + "/" + TString(hResidualYdX[i_plane].GetName()) + ".png");
+}
+
 /** DoAlignment: Produce alignment constants and save them to NewAlignment.dat */
-int DoAlignment (std::string const InFileName, TString const RunNumber, int telescopeID)
-{
+int DoAlignment (string const InFileName, TString const RunNumber, int telescopeID) {
     gROOT->ProcessLine("gErrorIgnoreLevel = kError;");
     TString const PlotsDir = "plots/";
     TString const OutDir = PlotsDir + RunNumber;
@@ -60,7 +211,7 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
             std::cout << "GOING TO ALIGN: " << iroc_align << std::endl;
 
             FR->ResetFile();
-            FR->SetPlaneUnderTest( iroc_align );// ignore plane for tracking
+            FR->SetPlaneUnderTest(iroc_align);// ignore plane for tracking
 
             /** Prepare Residual histograms
                 hResidual:    x=dX / y=dY
@@ -85,6 +236,7 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
             /** EVENT LOOP */
             for (uint32_t ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
 
+                cout << ievent << endl;
                 if (ievent > stopAt)
                     break;
 
@@ -115,7 +267,8 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
                     }
                 }
 
-                float track_TX = Track->TX(iroc_align);
+                float track_TX = Track->TX(iroc_align); //MR: should be z-position not roc number...
+                cout << Track->NClusters() << " " << Track->Cluster(0)->LX() <<", "<< h_LX << " " << h_LY <<", " << track_TX << " " << Track->ExtrapolateX(FR->Plane(iroc_align)->TZ()) << endl;
                 float track_TY = Track->TY(iroc_align);
 
                 float track_LX = FR->GetAlignment()->TtoLX( track_TX, track_TY, 1, iroc_align);// Local position of the track in the plane under test
@@ -124,7 +277,7 @@ int DoAlignment (std::string const InFileName, TString const RunNumber, int tele
                 float d_LX =  (track_LX - h_LX);// residuals of track local position and highes charge hit local position
                 float d_LY =  (track_LY - h_LY);
 
-                //std::cout << "Track LX/LY" << track_LX << " " << track_LY << std::endl;
+                std::cout << "Track LX/LY" << track_LX << " " << track_LY << std::endl;
                 // if the residual of track with biggest charge hit is greater than 2mm in x or y, dont take it into account
                 if ( !(fabs(d_LX)<2000) || !(fabs(d_LY)<2000) ) continue;// DA: before was <2
 

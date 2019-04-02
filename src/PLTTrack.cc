@@ -1,3 +1,7 @@
+#include <cmath>
+#include <PLTTrack.h>
+
+
 #include "PLTTrack.h"
 #include "PLTTelescope.h"
 
@@ -67,11 +71,13 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     VY = fClusters[1]->TY() - fClusters[0]->TY();
     VZ = fClusters[1]->TZ() - fClusters[0]->TZ();
 
-    float const SlopeX = VX / VZ;
-    float const SlopeY = VY / VZ;
+    fSlopeX = VX / VZ;
+    fSlopeY = VY / VZ;
+    fOffsetX = fClusters[0]->TZ() * fSlopeX + fClusters[0]->TX();
+    fOffsetX = fClusters[0]->TZ() * fSlopeY + fClusters[0]->TY();
 
     // Length
-    float const Mod = sqrt(VX*VX + VY*VY + VZ*VZ);
+    double const Mod = std::sqrt(VX*VX + VY*VY + VZ*VZ);
 
     // Normalize vectors
     VX = VX / Mod;
@@ -87,8 +93,8 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
 
       PLTAlignment::CP* C = Alignment.GetCP(Channel, iPlane);
 
-      XT[iPlane] = (C->LZ - fClusters[0]->TZ()) * SlopeX + fClusters[0]->TX();
-      YT[iPlane] = (C->LZ - fClusters[0]->TZ()) * SlopeY + fClusters[0]->TY();
+      XT[iPlane] = (C->LZ - fClusters[0]->TZ()) * fSlopeX + fClusters[0]->TX();
+      YT[iPlane] = (C->LZ - fClusters[0]->TZ()) * fSlopeY + fClusters[0]->TY();
       ZT[iPlane] =  C->LZ;
     }
   }
@@ -113,11 +119,11 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
 //    float const MySlopeX = (3 * SumXZ - SumX * SumZ) / (3 * SumZ2 - SumZ * SumZ);
 //    float const MySlopeY = (3 * SumYZ - SumY * SumZ) / (3 * SumZ2 - SumZ * SumZ);
 
-    float const SlopeX = (fClusters[2]->TX() - fClusters[0]->TX()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
-    float const SlopeY = (fClusters[2]->TY() - fClusters[0]->TY()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
+    fSlopeX = (fClusters[2]->TX() - fClusters[0]->TX()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
+    fSlopeY = (fClusters[2]->TY() - fClusters[0]->TY()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
 
-    VX = SlopeX;
-    VY = SlopeY;
+    VX = fSlopeX;
+    VY = fSlopeY;
     VZ = 1;
 
     // Length
@@ -128,9 +134,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     VY = VY / Mod;
     VZ = VZ / Mod;
 
-    if (DEBUG) {
-      printf("3P VXVYVZ %12.3f %12.3f %12.3f %12.3f\n", VX, VY, VZ, Mod);
-    }
+    if (DEBUG) { printf("3P VXVYVZ %12.3f %12.3f %12.3f %12.3f\n", VX, VY, VZ, Mod); }
 
     float const AvgX = (fClusters[0]->TX() + fClusters[1]->TX() + fClusters[2]->TX()) / 3.0;
     float const AvgY = (fClusters[0]->TY() + fClusters[1]->TY() + fClusters[2]->TY()) / 3.0;
@@ -141,8 +145,8 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
 
       PLTAlignment::CP* C = Alignment.GetCP(Channel, ip);
 
-      XT[ip] = (C->LZ - AvgZ) * SlopeX + AvgX;
-      YT[ip] = (C->LZ - AvgZ) * SlopeY + AvgY;
+      XT[ip] = (C->LZ - AvgZ) * fSlopeX + AvgX;
+      YT[ip] = (C->LZ - AvgZ) * fSlopeY + AvgY;
       ZT[ip] = C->LZ;
     }
   }
@@ -171,7 +175,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     gX.Fit( &funX, "Q" );
     gY.Fit( &funY, "Q" );
 
-    // Store fit results // DA: TODO Refactor variable names to angle not slope
+    // Store fit results
     fAngleX = float(atan(funX.GetParameter(0)) * 180 / M_PI);
     fAngleY = float(atan(funY.GetParameter(0)) * 180 / M_PI);
     fAngleRadX = funX.GetParameter(0);
@@ -397,4 +401,17 @@ std::pair<float, float> PLTTrack::GXYatGZ (float const GZ, PLTAlignment& Alignme
 float PLTTrack::D2 ()
 {
   return fD2;
+}
+
+std::pair<float, float> PLTTrack::GetResiduals(PLTCluster & Cluster, PLTAlignment & Alignment) {
+
+  float track_TX = InterPolateX(Cluster.TZ());
+  float track_TY = InterPolateY(Cluster.TZ());
+
+  float track_LX = Alignment.TtoLX( track_TX, track_TY, 1, Cluster.ROC()); // Local position of the track in the plane under test
+  float track_LY = Alignment.TtoLY( track_TX, track_TY, 1, Cluster.ROC());
+
+  float d_LX =  (track_LX - Cluster.LX()); // residuals of track local position and the cluster local position
+  float d_LY =  (track_LY - Cluster.LY());
+  return std::make_pair(d_LX, d_LY);
 }

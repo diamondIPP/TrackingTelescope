@@ -48,7 +48,7 @@ void FillIth(TH3F *h, int px, int py, std::vector<T> values, int i, bool fill_wh
     // Count from the front
     // [0,1,2,3,...]
     if (i>=0){
-        if (values.size() >= i+1)
+        if (values.size() >= unsigned(i + 1))
             h->Fill(px, py, values[i]);
         else
             if (fill_when_too_small)
@@ -57,9 +57,9 @@ void FillIth(TH3F *h, int px, int py, std::vector<T> values, int i, bool fill_wh
     // Count from the back
     // [...,-3, -2, -1]
     else{
-      int abs_i = i*-1;
+      int abs_i = abs(i);
 
-      if (values.size() >= abs_i)
+      if (values.size() >= unsigned(abs_i))
         h->Fill(px, py, values[values.size()-abs_i]);
       else
         if (fill_when_too_small)
@@ -1600,7 +1600,9 @@ int main (int argc, char* argv[])
 
     /** ALIGNMENT */
     if (action==1)
-      DoAlignment(InFileName, RunNumber, telescopeID);
+      Alignment(InFileName, RunNumber, telescopeID);
+//      DoAlignment(InFileName, RunNumber, telescopeID);
+
 
     /** RESIDUAL CALCULATION */
     else if (action==2)

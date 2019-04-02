@@ -40,6 +40,7 @@ class PLTTrack
 
     float TX (float const);
     float TY (float const);
+    std::pair<float, float> GetResiduals (PLTCluster&, PLTAlignment&);
 
     std::pair<float, float> GXYatGZ (float const, PLTAlignment&);
 
@@ -53,6 +54,9 @@ class PLTTrack
 
     float ExtrapolateX(float Z){return (Z * tan(fAngleRadX)) + fOffsetX;}
     float ExtrapolateY(float Z){return (Z * tan(fAngleRadY)) + fOffsetY;}
+
+    float InterPolateX(float z) { return z * fSlopeX + fOffsetX; }
+    float InterPolateY(float z) { return z * fSlopeY + fOffsetY; }
 
   private:
     std::vector<PLTCluster*> fClusters;
@@ -79,6 +83,7 @@ class PLTTrack
 
     // Track Fit result for slope (use to get telescope coordinates for any point in z-direction)
     float fAngleX, fAngleY, fOffsetX, fOffsetY, fAngleRadX, fAngleRadY;
+    float fSlopeX, fSlopeY;
 
     // Where the track passes through the X=0(=0), Y=0(=1), and Z=0 planes
     // Three corrds just because that's easy enough
