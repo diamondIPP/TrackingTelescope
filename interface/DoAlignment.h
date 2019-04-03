@@ -22,7 +22,8 @@ public:
   void SaveHistograms(unsigned, int ind=-1);
   void SaveGraphs(unsigned);
   int Align();
-  void PrintAligment();
+  void PrintAlignment();
+  std::vector<unsigned short> GetOrderedPlanes();
 
 private:
   std::string InFileName;
@@ -31,13 +32,13 @@ private:
   TString const OutDir;
   float const AngleThreshold;
   float const TotResThreshold;
-  std::vector<float> XAlign, YAlign, ZAlign, RAlign;
   PSIFileReader * FR;
   PSIFileReader * InitFileReader();
   unsigned MaxEventNumber;
   tel::ProgressBar * ProgressBar;
   float Now;
   unsigned short const MaximumSteps;
+  std::vector<unsigned short> OrderedPlanes;
   /** Histograms
       hResidual:    x=dX / y=dY
       hResidualXdY: x=X  / y=dY

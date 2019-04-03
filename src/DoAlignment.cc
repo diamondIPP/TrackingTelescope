@@ -27,14 +27,11 @@ Alignment::Alignment(string in_file_name, TString run_number, short telescope_ID
   gStyle->SetOptStat(0);
   gStyle->SetPalette(53);
 
-  XAlign.resize(NPlanes, 0);
-  YAlign.resize(NPlanes, 0);
-  ZAlign.resize(NPlanes, 0);
-  RAlign.resize(NPlanes, 0);
-
   FR = InitFileReader();
   MaxEventNumber = unsigned(dynamic_cast<PSIRootFileReader*>(FR)->fTree->GetEntries());
-  MaxEventNumber = 20000;
+//  MaxEventNumber = 20000;
+  OrderedPlanes = GetOrderedPlanes();
+  FR->GetAlignment()->ResetPlane(1, OrderedPlanes.at(0)); /** the first plane in z should be kept fixed */
   ProgressBar = new tel::ProgressBar(MaxEventNumber - 1);
   /** Apply Masking */
   FR->ReadPixelMask(GetMaskingFilename(TelescopeID));
@@ -71,12 +68,11 @@ void Alignment::PreAlign() {
   FR->SetPlanesUnderTest(1, 2); /** ignore inner planes for tracking */;
   ResetHistograms(); /** Reset residual histograms */
   Now = clock();
-  PrintAligment();
+  PrintAlignment();
         
   /** EVENT LOOP */
   for (uint32_t i_event = 0; FR->GetNextEvent() >= 0; ++i_event) {
 
-//    cout << i_event << endl;
     if (i_event >= MaxEventNumber) break;
     ProgressBar->update(i_event); /** print progress */
 
@@ -84,9 +80,10 @@ void Alignment::PreAlign() {
     PLTTrack * Track = FR->Track(0);
     for (unsigned i_plane(1); i_plane < NPlanes - 1; ++i_plane) {
 
-      if (FR->Plane(i_plane)->NClusters() != 1) continue; /** proceed only if there is exactly one cluster */
+      PLTPlane * Plane = FR->Plane(i_plane);
+      if (Plane->NClusters() != 1) continue; /** proceed only if there is exactly one cluster */
 
-      PLTCluster * Cluster = FR->Plane(i_plane)->Cluster(0);
+      PLTCluster * Cluster = Plane->Cluster(0);
       pair<float, float> l_res = Track->GetResiduals(*Cluster, *FR->GetAlignment());
 //      cout << "Track Residuals for " << i_plane << " (x/y): " << l_res.first << "/" << l_res.second << endl;
       if (fabs(l_res.first) >= 2 or fabs(l_res.second) >= 2) continue; /** only proceed if the residual is smaller than 2mm in x or y */
@@ -112,15 +109,14 @@ void Alignment::PreAlign() {
 
     SaveHistograms(i_plane);
   }
-  PrintAligment();
 }
 
 void Alignment::InitHistograms() {
 
   for (uint8_t i_plane(0); i_plane != NPlanes; ++i_plane){
-    hResidual.emplace_back(        Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 400, -1, 1, 400, -1, 1);
-    hResidualXdY.emplace_back(TH2F(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 133, -1, 0.995, 200, -1, 1));
-    hResidualYdX.emplace_back(TH2F(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 201, -1, 1, 200, -1, 1));
+    hResidual.emplace_back(        Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 400, -.5, .5, 400, -.5, .5);
+    hResidualXdY.emplace_back(TH2F(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 133, -1, 0.995, 400, -.5, .5));
+    hResidualYdX.emplace_back(TH2F(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 201, -1, 1, 400, -.5, .5));
     gResidualXdY.emplace_back(TGraph());
     gResidualYdX.emplace_back(TGraph());
   }
@@ -137,7 +133,7 @@ void Alignment::ResetHistograms() {
 
 void Alignment::SaveHistograms(unsigned i_plane, int ind) {
 
-  TString sub_dir = (ind != -1 or ind != MaximumSteps - 1) ? to_string(ind) + "/" : "";
+  TString sub_dir = (ind != -1) ? to_string(ind) + "/" : "";
   gSystem->mkdir(OutDir + "/" + sub_dir, true);
   TCanvas Can;
   Can.cd();
@@ -172,7 +168,7 @@ void Alignment::SaveGraphs(unsigned i_plane) {
 
 int Alignment::Align() {
 
-  cout << "\n************************\nPART TWO - FINE ALIGNMENT\n************************\n" << endl;
+  cout << "\n*************************\nPART TWO - FINE ALIGNMENT\n*************************\n" << endl;
   for (int i_align(0); i_align < MaximumSteps; i_align++) {
     cout << "BEGIN ITERATION " << i_align + 1 << " OUT OF " << MaximumSteps << endl;
     FR->ResetFile();
@@ -209,13 +205,18 @@ int Alignment::Align() {
     float total_angle = 0;
     float total_res = 0;
 
-    for (unsigned i_plane(1); i_plane < NPlanes; i_plane++) { /** keep the first plane unchange */
+    vector<unsigned short> planes = OrderedPlanes;
+    planes.erase(planes.begin()); /** keep the first plane unchanged */
+    for (auto i_plane: planes) {
+
       double x_res = hResidual[i_plane].GetMean(1), x_rms = hResidual[i_plane].GetRMS(1);
       double y_res = hResidual[i_plane].GetMean(2), y_rms = hResidual[i_plane].GetRMS(2);
       cout << "\nPLANE " << i_plane << "\n--RESIDUALS: " << setprecision(3) << x_res << " (" << x_rms << "), " << y_res << " (" << y_rms << ")" << endl;
 
-      FR->GetAlignment()->AddToLX(1, i_plane, float(x_res));
-      FR->GetAlignment()->AddToLY(1, i_plane, float(y_res));
+      if (i_plane < NPlanes - 1){
+        FR->GetAlignment()->AddToLX(1, i_plane, float(x_res));
+        FR->GetAlignment()->AddToLY(1, i_plane, float(y_res));
+      }
 
       double angle = atan(hResidualXdY[i_plane].GetCorrelationFactor());
       TF1 fX = TF1("fX", "pol1"), fY = TF1("fY", "pol1");
@@ -231,7 +232,7 @@ int Alignment::Align() {
       cout << "--Angle Corr: " << angle << ", Angle XdY: " << angle_x << ", Angle YdX: " << angle_y << endl;
 
       SaveGraphs(i_plane);
-      SaveHistograms(i_plane, (total_angle < AngleThreshold && total_res < TotResThreshold) ? MaximumSteps - 1 : i_align);
+      SaveHistograms(i_plane, (total_angle < AngleThreshold && total_res < TotResThreshold) ? -1 : i_align);
     }
     cout << "END ITERATION " << i_align + 1 << " OUT OF 14" << endl;
     cout << "\nSum of angle corrections:    " << total_angle << endl;
@@ -245,7 +246,7 @@ int Alignment::Align() {
   } // end alignment loop
 
   cout << "Saving alignment file \"" << OutFileName << "\" with the following parameters:" << endl;
-  PrintAligment();
+  PrintAlignment();
   return 0;
 }
 
@@ -255,11 +256,25 @@ Alignment::~Alignment() {
   gROOT->ProcessLine("gErrorIgnoreLevel = 0;");
 }
 
-void Alignment::PrintAligment() {
+void Alignment::PrintAlignment() {
 
   PLTAlignment * al = FR->GetAlignment();
   for (unsigned i_plane(0); i_plane < NPlanes; i_plane++)
     cout << Form("%2i %1i %15E %15E %15E %15E\n", 1, i_plane, al->LR(1, i_plane), al->LX(1, i_plane), al->LY(1, i_plane), al->LZ(1, i_plane));
   al->WriteAlignmentFile(OutFileName, FR->NMAXROCS);
 
+}
+
+std::vector<unsigned short> Alignment::GetOrderedPlanes() {
+
+  vector<unsigned short> tmp;
+  vector<float> z_pos;
+  for (unsigned i_plane(0); i_plane < NPlanes; i_plane++)
+    z_pos.emplace_back(FR->GetAlignment()->LZ(1, i_plane));
+  for (unsigned i_plane(0); i_plane < NPlanes; i_plane++){
+    auto result = min_element(z_pos.begin(), z_pos.end());
+    tmp.emplace_back(distance(z_pos.begin(), result));
+    z_pos.erase(result);
+  }
+  return tmp;
 }
