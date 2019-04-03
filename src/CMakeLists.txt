@@ -1,34 +1,8 @@
 INCLUDE_DIRECTORIES( . ${PROJECT_SOURCE_DIR}/interface )
 
 # source files
-SET(LIB_SOURCE_FILES
-        PLTTesterReader.cc
-        PLTTelescope.cc
-        PLTAlignment.cc
-        PLTHistReader.cc
-        PLTAnalysis.cc
-        DoAlignment.cc
-        PSIBinaryFileReader.cc
-        GetNames.cc
-        PLTTrack.cc
-        PLTTextFileReader.cc
-        PLTPlane.cc
-        PSIGainInterpolator.cc
-        PLTTracking.cc
-        PLTHardwareMap.cc
-        PLTHit.cc
-        TestPlaneEfficiencySilicon.cc
-        PLTU.cc
-        RootItems.cc
-        FileWriterTracking.cc
-        PLTGainCal.cc
-        PLTBinaryFileReader.cc
-        PLTDACs.cc
-        PSIFileReader.cc
-        PLTCluster.cc
-        PSIRootFileReader.cc
-        PLTTesterEvent.cc
-        Utils.cc)
+FILE(GLOB LIB_SOURCES "*.cc")
+SET(LIB_SOURCE_FILES ${LIB_SOURCES})
 
 # header files
 SET(LIB_HEADER_FILES

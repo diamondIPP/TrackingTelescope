@@ -1,9 +1,8 @@
 SET(Eval_SOURCES TrackingTelescope.cc)
-
-SET(MY_INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/include ${ROOT_INCLUDE_DIR} )
-
+SET(MY_INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/interface ${ROOT_INCLUDE_DIR} )
 SET(EVAL_EXECUTABLE TrackingTelescope.exe)
-add_executable(${EVAL_EXECUTABLE} TrackingTelescope.cc)
+
+add_executable(${EVAL_EXECUTABLE} ${Eval_SOURCES})
 target_link_libraries(${EVAL_EXECUTABLE} ${PROJECT_NAME} ${ROOT_LIBRARIES})
 
 INSTALL(TARGETS ${EVAL_EXECUTABLE}
