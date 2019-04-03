@@ -63,7 +63,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
   fChi2X = 0;
   fChi2Y = 0;
 
-  // For ==2 clusters: Just use the direct line connecting them as a track
+  /** For 2 points just use the direct line connecting them as a track */
   if (NClusters() == 2) {
 
     // Vector components
@@ -73,8 +73,8 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
 
     fSlopeX = VX / VZ;
     fSlopeY = VY / VZ;
-    fOffsetX = fClusters[0]->TZ() * fSlopeX + fClusters[0]->TX();
-    fOffsetX = fClusters[0]->TZ() * fSlopeY + fClusters[0]->TY();
+    fOffsetX = fClusters[0]->TX() - fClusters[0]->TZ() * fSlopeX;
+    fOffsetY = fClusters[0]->TY() - fClusters[0]->TZ() * fSlopeY;
 
     // Length
     double const Mod = std::sqrt(VX*VX + VY*VY + VZ*VZ);
@@ -180,8 +180,10 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     fAngleY = float(atan(funY.GetParameter(0)) * 180 / M_PI);
     fAngleRadX = funX.GetParameter(0);
     fAngleRadY = funY.GetParameter(0);
-    fOffsetX = funX.GetParameter(1);
-    fOffsetY = funY.GetParameter(1);
+    fOffsetX = float(funX.GetParameter(1));
+    fOffsetY = float(funY.GetParameter(1));
+    fSlopeX = fAngleRadX;
+    fSlopeY = fAngleRadY;
 
     VX = funX.GetParameter(0);
     VY = funY.GetParameter(0);
@@ -408,8 +410,8 @@ std::pair<float, float> PLTTrack::GetResiduals(PLTCluster & Cluster, PLTAlignmen
   float track_TX = InterPolateX(Cluster.TZ());
   float track_TY = InterPolateY(Cluster.TZ());
 
-  float track_LX = Alignment.TtoLX( track_TX, track_TY, 1, Cluster.ROC()); // Local position of the track in the plane under test
-  float track_LY = Alignment.TtoLY( track_TX, track_TY, 1, Cluster.ROC());
+  float track_LX = Alignment.TtoLX(track_TX, track_TY, 1, Cluster.ROC()); // Local position of the track in the plane under test
+  float track_LY = Alignment.TtoLY(track_TX, track_TY, 1, Cluster.ROC());
 
   float d_LX =  (track_LX - Cluster.LX()); // residuals of track local position and the cluster local position
   float d_LY =  (track_LY - Cluster.LY());
