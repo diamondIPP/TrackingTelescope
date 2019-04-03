@@ -2,6 +2,8 @@
 
 #include <map>
 #include <cstdlib>
+#include <PLTAlignment.h>
+
 
 PLTAlignment::PLTAlignment ()
 {
@@ -746,4 +748,11 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
         }
     }
 
+}
+
+void PLTAlignment::ResetPlane(int const ch, int const roc) {
+
+  fConstantMap[std::make_pair(ch, roc)].LX = 0;
+  fConstantMap[std::make_pair(ch, roc)].LY = 0;
+  fConstantMap[std::make_pair(ch, roc)].LR = 0;
 }
