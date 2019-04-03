@@ -55,11 +55,11 @@ PSIFileReader::PSIFileReader (string const CalibrationList, string const Alignme
     SetTrackingAlignment(&fAlignment);
 
     if(!trackOnlyTelescope) {
-        std::cout << "Setting reader's tracking altorithm to All plalne algorithm " << std::endl;
+        std::cout << "Setting reader's tracking algorithm to: All plane " << std::endl;
         SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
     }
     else {
-        std::cout << "Setting reader's tracking algorithm to ETH algorithm" << std::endl;
+        std::cout <<"Setting reader's tracking algorithm to: ETH" << std::endl;
         SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_ETH);
     }
 }

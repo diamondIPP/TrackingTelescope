@@ -35,6 +35,7 @@ namespace tel{
     void update(uint32_t=0);
     void averageTime();
     float getTime();
+    void reset() { currentEvent = 0u; }
   };
 }
 

@@ -7,21 +7,26 @@
 class PSIFileReader;
 namespace tel { class ProgressBar; }
 class TH2F;
+class TGraph;
 
 class Alignment {
 
 public:
   Alignment(std::string, TString, short);
-  ~Alignment() {};
+  ~Alignment();
   short const TelescopeID;
   unsigned const NPlanes;
   void PreAlign();
   void InitHistograms();
-  void ClearHistograms();
-  void SaveResiduals(unsigned);
+  void ResetHistograms();
+  void SaveHistograms(unsigned, int ind=-1);
+  void SaveGraphs(unsigned);
+  int Align();
+  void PrintAligment();
 
 private:
   std::string InFileName;
+  std::string OutFileName;
   TString const PlotsDir;
   TString const OutDir;
   float const AngleThreshold;
@@ -32,6 +37,7 @@ private:
   unsigned MaxEventNumber;
   tel::ProgressBar * ProgressBar;
   float Now;
+  unsigned short const MaximumSteps;
   /** Histograms
       hResidual:    x=dX / y=dY
       hResidualXdY: x=X  / y=dY
@@ -39,8 +45,8 @@ private:
   std::vector<TH2F> hResidual;
   std::vector<TH2F> hResidualXdY;
   std::vector<TH2F> hResidualYdX;
+  std::vector<TGraph> gResidualXdY;
+  std::vector<TGraph> gResidualYdX;
 };
-
-int DoAlignment (std::string, TString, int);
 
 #endif // DoAlignment_h
