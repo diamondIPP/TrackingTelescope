@@ -3,7 +3,7 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 42;
+uint16_t nTelescopes = 50;
 vector<int16_t> pixelIDs = {10, 13, 15, 21, 25, 29, 30, 34, 35};
 vector<int16_t> roc6IDs = {1, 2, 3, 8, 21, 25, 34};
 vector<int16_t> roc7IDs = {10, 13, 15, 29, 30, 35};
