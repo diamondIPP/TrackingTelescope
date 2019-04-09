@@ -97,6 +97,8 @@ class PLTAlignment
     void AddToGY (int const, float);
     void AddToGZ (int const, float);
 
+    void ResetPlane(int const, int const);
+
     float GetErrorX(int plane){ return fErrorsX[plane];};
     float GetErrorY(int plane){ return fErrorsY[plane];};
 

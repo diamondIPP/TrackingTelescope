@@ -2,6 +2,8 @@
 
 #include <map>
 #include <cstdlib>
+#include <PLTAlignment.h>
+
 
 PLTAlignment::PLTAlignment ()
 {
@@ -29,6 +31,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
 
 
   // Open file
+  std::cout << "Opening " << InFileName << std::endl;
   std::ifstream InFile(InFileName.c_str());
   if (!InFile.is_open()) {
     fIsGood = false;
@@ -253,7 +256,7 @@ std::pair<float, float> PLTAlignment::TtoLXY (float const TX, float const TY, in
   CP* C = fConstantMap.count(CHROC) == 1 ? &fConstantMap[CHROC] : (CP*) 0x0;
 
   if (!C) {
-    std::cerr << "ERROR: cannot grab the constant mape for this CH ROC: " << CHROC.first << " " << CHROC.second << std::endl;
+//    std::cerr << "ERROR: cannot grab the constant mape for this CH ROC: " << CHROC.first << " " << CHROC.second << std::endl;
     return std::make_pair(-999, -999);
   }
 
@@ -745,4 +748,11 @@ void PLTAlignment::SetErrors(int telescopeID, bool initial){
         }
     }
 
+}
+
+void PLTAlignment::ResetPlane(int const ch, int const roc) {
+
+  fConstantMap[std::make_pair(ch, roc)].LX = 0;
+  fConstantMap[std::make_pair(ch, roc)].LY = 0;
+  fConstantMap[std::make_pair(ch, roc)].LR = 0;
 }

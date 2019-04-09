@@ -14,6 +14,7 @@ tracking.cbp
 tracking.cbp.save
 tracking.layout*
 *.save
+crashlog.txt
 get_rootfile.sh
 lib/
 *.bak
@@ -23,3 +24,4 @@ NewAlignment.dat
 build/
 *.exe
 TrackingTelescope
+cmake-build-debug

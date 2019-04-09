@@ -1,3 +1,6 @@
+
+#include <PLTTracking.h>
+
 #include "PLTTracking.h"
 
 // Needed these for the track-creation loop
@@ -88,6 +91,13 @@ void PLTTracking::SetPlaneUnderTest(int put){
         fUsePlanesForTracking[i] = 3;
       }
     }
+}
+
+void PLTTracking::SetPlanesUnderTest(unsigned p1, unsigned p2) {
+
+  fDoSinglePlaneEfficiency = true;
+  for (uint8_t i(0); i != fUsePlanesForTracking.size(); i++)
+    fUsePlanesForTracking[i] = (i==p1 or i==p2) ? 0 : 3;
 }
 
 

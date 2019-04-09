@@ -26,7 +26,7 @@ class PLTCluster
     int Channel ();
     int ROC ();
 
-    // Local w.r.t. center of damond
+    // Local w.r.t. center of diamond
     float LX ();
     float LY ();
     std::pair<float, float> LCenter ();
@@ -44,9 +44,10 @@ class PLTCluster
     std::pair<float, float> GCenter ();
 
     // Cluster center
-    std::pair<float, float> LCenterOfMass ();
-    std::pair<float, float> TCenterOfMass ();
-    std::pair<float, float> GCenterOfMass ();
+    std::pair<float, float> CenterOfMass(std::string);
+    std::pair<float, float> LCenterOfMass() { return CenterOfMass("local"); }
+    std::pair<float, float> TCenterOfMass() { return CenterOfMass("telescope"); }
+    std::pair<float, float> GCenterOfMass() { return CenterOfMass("global"); }
 
 
   private:

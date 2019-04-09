@@ -158,103 +158,45 @@ std::pair<float, float> PLTCluster::GCenter ()
   //return std::make_pair<float, float>(SeedHit()->GX(), SeedHit()->GY());
 }
 
+std::pair<float, float> PLTCluster::CenterOfMass(std::string type) {
 
-std::pair<float, float> PLTCluster::LCenterOfMass ()
-{
-  // Return the Local coords based on a charge weighted average of pixel hits
+  /** Return the coordinates based on a charge weighted average of pixel hits
 
-  // X, Y, and Total Charge
-  float X = 0.0;
-  float Y = 0.0;
-  float ChargeSum = 0.0;
-  bool found_zero_charge = false;
+     X, Y, and Total Charge */
+  float X(0.0), Y(0.0);
+  float ChargeSum(0.0);
+  bool FoundZeroCharge = false;
+
+  /** We should never have negative or zero charges and cannot handle them -> just take the unweighted average in that case */
+  for (auto fHit: fHits)
+    if (fHit->Charge() == -9999 or fHit->Charge() < 0)
+      FoundZeroCharge = true;
 
   // Loop over each hit in the cluster
-  for (auto ihit: fHits)
-    if (ihit->Charge() == 0)
-      found_zero_charge = true;
-  for (std::vector<PLTHit*>::iterator It = fHits.begin(); It != fHits.end(); ++It) {
-    float iCharge = ((not found_zero_charge) ? (*It)->Charge() : 1);
-    X += (*It)->LX() * iCharge;
-    Y += (*It)->LY() * iCharge;
-    ChargeSum += (*It)->Charge();
+  for (auto &fHit : fHits) {
+    float iCharge = (FoundZeroCharge ? 1 : fHit->Charge());
+    float iX, iY;
+    if (type.find("local") != std::string::npos){
+      iX = fHit->LX();
+      iY = fHit->LY();
+    }
+    else if ((type.find("global") != std::string::npos)){
+      iX = fHit->GX();
+      iY = fHit->GY();
+    }
+    else {
+      iX = fHit->TX();
+      iY = fHit->TY();
+    }
+
+    X += iX * iCharge;
+    Y += iY * iCharge;
+    ChargeSum += fHit->Charge();
   }
-  // If charge sum is zero return average
-  if (ChargeSum <= 0.0 or found_zero_charge) {
-    //std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::LCenterOfMass()" << std::endl;
+
+  /** If charge sum is zero or less or we have a zero charge return average */
+  if (ChargeSum <= 0.0 or FoundZeroCharge)
     return std::make_pair<float, float>(X / (float) NHits(), Y / (float) NHits());
-  }
-
-  return std::make_pair<float, float>(X / ChargeSum, Y / ChargeSum);
-}
-
-
-
-std::pair<float, float> PLTCluster::GCenterOfMass ()
-{
-  // Return the Global coords based on a charge weighted average of pixel hits
-
-  // X, Y, and Total Charge
-  float X = 0.0;
-  float Y = 0.0;
-  float ChargeSum = 0.0;
-
-  // Loop over each hit in the cluster
-  for (std::vector<PLTHit*>::iterator It = fHits.begin(); It != fHits.end(); ++It) {
-    X += (*It)->GX() * (*It)->Charge();
-    Y += (*It)->GY() * (*It)->Charge();
-    ChargeSum += (*It)->Charge();
-  }
-
-  // If charge sum is zero or less return average
-  if (ChargeSum <= 0.0) {
-    //std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::GCenterOfMass()" << std::endl;
-    std::make_pair<float, float>(X / (float) NHits(), Y / (float) NHits());
-  }
-
-  // Put fiducial warning here?
-
-  // Just for printing diagnostics
-  //printf("GCenterOfMass: %12E  %12E\n", X / ChargeSum, Y / ChargeSum);
-
-  return std::make_pair<float, float>(X / ChargeSum, Y / ChargeSum);
-}
-
-
-
-std::pair<float, float> PLTCluster::TCenterOfMass ()
-{
-  // Return the Global coords based on a charge weighted average of pixel hits
-
-  // X, Y, and Total Charge
-  float X = 0.0;
-  float Y = 0.0;
-  float ChargeSum = 0.0;
-  bool found_zero_charge = false;
-
-  // We should never have negative or zero charges and cannot handle them -> just take the unweighted average in that case
-  for (auto ihit: fHits)
-    if (ihit->Charge() == -9999 or ihit->Charge() < 0)
-      found_zero_charge = true;
-
-  // Loop over each hit in the cluster
-  for (std::vector<PLTHit*>::iterator It = fHits.begin(); It != fHits.end(); ++It) {
-    float iCharge = ((not found_zero_charge) ? (*It)->Charge() : 1);
-    X += (*It)->TX() * iCharge;
-    Y += (*It)->TY() * iCharge;
-    ChargeSum += (*It)->Charge();
-  }
-
-  // If charge sum is zero or less return average
-  if (ChargeSum <= 0.0 or found_zero_charge) {
-    //std::cerr << "WARNING: ChargeSum <= 0 in PLTCluster::GCenterOfMass()" << std::endl;
-    return std::make_pair<float, float>(X / (float) NHits(), Y / (float) NHits());
-  }
-
-  // Put fiducial warning here?
-
-  // Just for printing diagnostics
-  //printf("GCenterOfMass: %12E  %12E\n", X / ChargeSum, Y / ChargeSum);
 
   return std::make_pair<float, float>(X / ChargeSum, Y / ChargeSum);
 }
