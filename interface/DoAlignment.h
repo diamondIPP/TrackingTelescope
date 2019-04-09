@@ -8,6 +8,7 @@ class PSIFileReader;
 namespace tel { class ProgressBar; }
 class TH2F;
 class TGraph;
+class TH1;
 
 class Alignment {
 
@@ -24,12 +25,14 @@ public:
   int Align();
   void PrintAlignment();
   std::vector<unsigned short> GetOrderedPlanes();
+  static void FormatHistogram(TH1 *, const std::string&, float, const std::string&, float);
 
 private:
   std::string InFileName;
   std::string OutFileName;
   TString const PlotsDir;
   TString const OutDir;
+  std::string FileType;
   float const AngleThreshold;
   float const TotResThreshold;
   PSIFileReader * FR;

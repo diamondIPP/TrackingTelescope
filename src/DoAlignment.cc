@@ -18,6 +18,7 @@ Alignment::Alignment(string in_file_name, TString run_number, short telescope_ID
   OutFileName("NewAlignment.dat"),
   PlotsDir("plots/"),
   OutDir(PlotsDir + run_number),
+  FileType(".png"),
   AngleThreshold(.01),
   TotResThreshold(.01),
   Now(clock()),
@@ -140,22 +141,26 @@ void Alignment::SaveHistograms(unsigned i_plane, int ind) {
   // 2D Residuals
   hResidual[i_plane].SetContour(1024);
   hResidual[i_plane].Draw("colz");
-  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidual[i_plane].GetName()) + ".png");
+  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidual[i_plane].GetName()) + FileType);
   // Residual X-Projection
   gStyle->SetOptStat(1111);
-  hResidual[i_plane].ProjectionX()->Draw();
-  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidual[i_plane].GetName()) + "_X.png");
+  auto p_x = hResidual[i_plane].ProjectionX();
+  FormatHistogram(p_x, "dX [cm]", 1, "Number of Entries", 1.3);
+  p_x->Draw();
+  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidual[i_plane].GetName()) + "_X" + FileType);
   // Residual Y-Projection
-  hResidual[i_plane].ProjectionY()->Draw();
-  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidual[i_plane].GetName()) + "_Y.png");
+  auto p_y = hResidual[i_plane].ProjectionY();
+  FormatHistogram(p_y, "dY [cm]", 1, "Number of Entries", 1.3);
+  p_y->Draw();
+  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidual[i_plane].GetName()) + "_Y" + FileType);
   // 2D Residuals X/dY
   hResidualXdY[i_plane].SetContour(1024);
   hResidualXdY[i_plane].Draw("colz");
-  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidualXdY[i_plane].GetName()) + ".png");
+  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidualXdY[i_plane].GetName()) + FileType);
   // 2D Residuals Y/dX
   hResidualYdX[i_plane].SetContour(1024);
   hResidualYdX[i_plane].Draw("colz");
-  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidualYdX[i_plane].GetName()) + ".png");
+  Can.SaveAs(OutDir + "/" + sub_dir + TString(hResidualYdX[i_plane].GetName()) + FileType);
 }
 
 void Alignment::SaveGraphs(unsigned i_plane) {
@@ -277,4 +282,14 @@ std::vector<unsigned short> Alignment::GetOrderedPlanes() {
     z_pos.erase(result);
   }
   return tmp;
+}
+
+void Alignment::FormatHistogram(TH1 * h, const string & x_tit, float x_off, const string & y_tit, float y_off) {
+
+  auto x_axis = h->GetXaxis();
+  x_axis->SetTitle(x_tit.c_str());
+  x_axis->SetTitleOffset(x_off);
+  auto y_axis = h->GetYaxis();
+  y_axis->SetTitle(y_tit.c_str());
+  y_axis->SetTitleOffset(y_off);
 }
