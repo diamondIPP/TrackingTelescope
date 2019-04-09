@@ -1600,9 +1600,7 @@ int main (int argc, char* argv[])
 
     /** ALIGNMENT */
     if (action==1)
-      Alignment(InFileName, RunNumber, telescopeID);
-//      DoAlignment(InFileName, RunNumber, telescopeID);
-
+      Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope);
 
     /** RESIDUAL CALCULATION */
     else if (action==2)

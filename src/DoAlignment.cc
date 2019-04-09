@@ -11,9 +11,10 @@
 
 using namespace std;
 
-Alignment::Alignment(string in_file_name, TString run_number, short telescope_ID):
+Alignment::Alignment(string in_file_name, const TString & run_number, short telescope_ID, bool align_only_inner_planes):
   TelescopeID(telescope_ID),
   NPlanes(GetNumberOfROCS(telescope_ID)),
+  AlignOnlyInnerPlanes(align_only_inner_planes),
   InFileName(std::move(in_file_name)),
   OutFileName("NewAlignment.dat"),
   PlotsDir("plots/"),
@@ -66,7 +67,7 @@ void Alignment::PreAlign() {
   /** coarsely move the two inner planes to minimise the residuals without rotations */
   cout << "\n***************************\nPART ONE - COARSE ALIGNMENT\n***************************\n" << endl;
   FR->ResetFile();
-  FR->SetPlanesUnderTest(1, 2); /** ignore inner planes for tracking */;
+  FR->SetPlanesUnderTest(1, 2); /** ignore inner planes for tracking */
   ResetHistograms(); /** Reset residual histograms */
   Now = clock();
   PrintAlignment();
@@ -103,10 +104,10 @@ void Alignment::PreAlign() {
     cout << "\nPLANE " << i_plane << "\n--RESIDUALS: " << setprecision(3) << x_res << " (" << x_rms << "), " << y_res << " (" << y_rms << ")" << endl;
 
     /** update the alignment */
-    cout << "Before: " << FR->GetAlignment()->LX(1, i_plane) << endl;
+    cout << "Before: " << FR->GetAlignment()->LX(1, i_plane) << " / " << FR->GetAlignment()->LY(1, i_plane) << endl;
     FR->GetAlignment()->AddToLX(1, i_plane, float(x_res));
     FR->GetAlignment()->AddToLY(1, i_plane, float(y_res));
-    cout << "After:  " << FR->GetAlignment()->LX(1, i_plane) << endl;
+    cout << "After:  " << FR->GetAlignment()->LX(1, i_plane) << " / " << FR->GetAlignment()->LY(1, i_plane) << endl;
 
     SaveHistograms(i_plane);
   }
@@ -218,10 +219,6 @@ int Alignment::Align() {
       double y_res = hResidual[i_plane].GetMean(2), y_rms = hResidual[i_plane].GetRMS(2);
       cout << "\nPLANE " << i_plane << "\n--RESIDUALS: " << setprecision(3) << x_res << " (" << x_rms << "), " << y_res << " (" << y_rms << ")" << endl;
 
-      if (i_plane < NPlanes - 1){
-        FR->GetAlignment()->AddToLX(1, i_plane, float(x_res));
-        FR->GetAlignment()->AddToLY(1, i_plane, float(y_res));
-      }
 
       double angle = atan(hResidualXdY[i_plane].GetCorrelationFactor());
       TF1 fX = TF1("fX", "pol1"), fY = TF1("fY", "pol1");
@@ -233,11 +230,15 @@ int Alignment::Align() {
       double angle_x = atan(fX.GetParameter(1)), angle_y = atan(fY.GetParameter(1));
       total_angle += fabs(angle_x);
       total_res += fabs(x_res) + fabs(y_res);
-      FR->GetAlignment()->AddToLR(1, i_plane, float(angle_x)); // DA: this was ... other_angle/3.
       cout << "--Angle Corr: " << angle << ", Angle XdY: " << angle_x << ", Angle YdX: " << angle_y << endl;
 
       SaveGraphs(i_plane);
       SaveHistograms(i_plane, (total_angle < AngleThreshold && total_res < TotResThreshold) ? -1 : i_align);
+
+      FR->GetAlignment()->AddToLR(1, i_plane, float(angle_x)); // DA: this was ... other_angle/3.
+      if (AlignOnlyInnerPlanes and i_plane == planes.back()) continue; /** only align the middle planes */
+      FR->GetAlignment()->AddToLX(1, i_plane, float(x_res));
+      FR->GetAlignment()->AddToLY(1, i_plane, float(y_res));
     }
     cout << "END ITERATION " << i_align + 1 << " OUT OF 14" << endl;
     cout << "\nSum of angle corrections:    " << total_angle << endl;

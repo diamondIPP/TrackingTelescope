@@ -13,10 +13,11 @@ class TH1;
 class Alignment {
 
 public:
-  Alignment(std::string, TString, short);
+  Alignment(std::string, const TString&, short, bool=false);
   ~Alignment();
   short const TelescopeID;
   unsigned const NPlanes;
+  bool const AlignOnlyInnerPlanes;
   void PreAlign();
   void InitHistograms();
   void ResetHistograms();
