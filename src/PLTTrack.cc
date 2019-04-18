@@ -84,9 +84,7 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     VY = VY / Mod;
     VZ = VZ / Mod;
 
-    if (DEBUG) {
-      printf("2P VXVYVZ %12.3f %12.3f %12.3f\n", VX, VY, VZ);
-    }
+    if (DEBUG) { printf("2P VXVYVZ %12.3f %12.3f %12.3f\n", VX, VY, VZ); }
 
     // Compute the points in telescope coords where line passes each plane
     for (int iPlane = 0; iPlane < nPlanes; ++iPlane) {
@@ -288,23 +286,6 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
   return 0;
 }
 
-
-
-
-std::pair<float, float> PLTTrack::LResiduals (PLTCluster& Cluster, PLTAlignment& Alignment)
-{
-
-  float TZ = Alignment.GetCP(Cluster.Channel(), Cluster.ROC())->LZ;
-  float TX = fTVX * TZ + fTOX;
-  float TY = fTVY * TZ + fTOY;
-  std::pair<float, float> LPXY = Alignment.TtoLXY(TX, TY, Cluster.Channel(), Cluster.ROC());
-  //printf("LResiduals Cluster.LX %12.3E   LPXY.first %12.3E\n", Cluster.LX(), LPXY.first);
-  return std::make_pair( LPXY.first - Cluster.LX(), LPXY.second - Cluster.LY() );
-
-}
-
-
-
 bool PLTTrack::IsFiducial (PLTPlane* Plane, PLTAlignment& Alignment, PLTPlane::FiducialRegion FidRegion)
 {
   return IsFiducial (Plane->Channel(), Plane->ROC(), Alignment, FidRegion);
@@ -343,37 +324,12 @@ bool PLTTrack::IsFiducial (int const Channel, int const ROC, PLTAlignment& Align
   return true;
 }
 
-
-size_t PLTTrack::NClusters ()
-{
-  return fClusters.size();
-}
-
-size_t PLTTrack::NHits ()
-{
-  size_t Sum = 0;
+size_t PLTTrack::NHits () {
+  size_t sum = 0;
   for (size_t i = 0; i != fClusters.size(); ++i) {
-    Sum += fClusters[i]->NHits();
+    sum += fClusters[i]->NHits();
   }
-
-  return Sum;
-}
-
-
-PLTCluster* PLTTrack::Cluster (size_t const i)
-{
-  return fClusters[i];
-}
-
-
-float PLTTrack::LResidualX (size_t const i)
-{
-  return fLResidualX[i];
-}
-
-float PLTTrack::LResidualY (size_t const i)
-{
-  return fLResidualY[i];
+  return sum;
 }
 
 float PLTTrack::TX (float const Z)

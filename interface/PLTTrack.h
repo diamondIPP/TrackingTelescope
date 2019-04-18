@@ -26,23 +26,22 @@ class PLTTrack
     void AddCluster (PLTCluster*);
     int  MakeTrack (PLTAlignment&, int);
 
-    size_t NClusters ();
-    size_t NHits ();
+    size_t NClusters() { return fClusters.size(); }
+    size_t NHits();
 
-    PLTCluster* Cluster (size_t const);
-
-    float LResidualX (size_t const);
-    float LResidualY (size_t const);
-    std::pair<float, float> LResiduals (PLTCluster&, PLTAlignment&);
+    PLTCluster * Cluster (size_t const i ) { return fClusters[i]; }
+    float LResidualX (size_t const i) { return fLResidualX[i]; }
+    float LResidualY (size_t const i) { return fLResidualY[i]; }
+    std::pair<float, float> GetResiduals (PLTCluster&, PLTAlignment &);
+    std::pair<float, float> GetResiduals(size_t const i) { return std::make_pair(fLResidualX[i], fLResidualY[i]); }
 
     bool IsFiducial (PLTPlane*, PLTAlignment&, PLTPlane::FiducialRegion);
-    bool IsFiducial (int const, int const, PLTAlignment&, PLTPlane::FiducialRegion);
+    bool IsFiducial (int, int, PLTAlignment&, PLTPlane::FiducialRegion);
 
-    float TX (float const);
-    float TY (float const);
-    std::pair<float, float> GetResiduals (PLTCluster&, PLTAlignment&);
+    float TX (float);
+    float TY (float);
 
-    std::pair<float, float> GXYatGZ (float const, PLTAlignment&);
+    std::pair<float, float> GXYatGZ (float, PLTAlignment&);
 
     float D2 ();
 
