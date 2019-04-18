@@ -18,7 +18,7 @@ struct winsize;
 
 namespace tel{
 
-  std::string trim(const std::string &, std::string="\t\n\r\v ");
+  std::string trim(const std::string &, const std::string & chars="\t\n\r\v ");
   std::vector<std::string> split(const std::string &, const char & = '\t');
   double distance(std::pair<float, float>, std::pair<float, float>);
   void critical(const std::string & msg);
