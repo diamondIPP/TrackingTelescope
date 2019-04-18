@@ -43,6 +43,8 @@ namespace tel {
     barLength = uint8_t(w.ws_col - diff);
   }
 
+   void critical(const std::string & msg) { std::cerr << std::endl << ERROR << "CRITICAL: " << ENDC << msg << std::endl; }
+
   void ProgressBar::update(uint32_t event) {
 
     if (currentEvent == 0u)

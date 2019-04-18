@@ -8,6 +8,11 @@
 #include <string>
 #include <vector>
 #include <sys/ioctl.h>
+#include <iostream>
+
+/** terminal output colors */
+#define ERROR "\033[91m"
+#define ENDC "\033[0m"
 
 struct winsize;
 
@@ -16,6 +21,7 @@ namespace tel{
   std::string trim(const std::string &, std::string="\t\n\r\v ");
   std::vector<std::string> split(const std::string &, const char & = '\t');
   double distance(std::pair<float, float>, std::pair<float, float>);
+  void critical(const std::string & msg);
 
   class ProgressBar {
   private:
@@ -30,7 +36,7 @@ namespace tel{
     float timePerCycle;
 
   public:
-    ProgressBar(uint32_t, bool use_ETA=true, uint16_t update=100);
+    explicit ProgressBar(uint32_t, bool use_ETA=true, uint16_t update=100);
     ~ProgressBar() = default;
     void update(uint32_t=0);
     void averageTime();
