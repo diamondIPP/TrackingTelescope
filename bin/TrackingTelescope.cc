@@ -1060,9 +1060,7 @@ int TestPlaneEfficiencySilicon(std::string const InFileName, TFile * out_f,
                                 TString const RunNumber, int telescopeID);
 
 
-int FindResiduals(std::string const InFileName,
-                  TString const RunNumber,
-                  int telescopeID){
+int FindResiduals(std::string const InFileName, TString const RunNumber, int telescopeID){
 
   TString const PlotsDir = "plots/";
   TString const OutDir = PlotsDir + RunNumber;
@@ -1544,36 +1542,28 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 }
 
 
+int main (int argc, char* argv[]) {
 
-int main (int argc, char* argv[])
-{
-    if (argc != 5) { // argc == 5 is to specify the type of tracking algorithm to use. Default is 0 (All planes)
-      if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " InFileName action telescopeID" << std::endl;
-        std::cerr << "action: 0 for analysis, 1 for producing alignment file, 2 for finding residuals" << std::endl;
-        return 1;
-      }
-    }
+  if (argc != 5 and argc != 4) {
+    tel::critical("Wrong arguments");
+    std::cerr << "Usage: " << argv[0] << " <InFileName> <action> <telescopeID> (<TrackOnlyTelescope>=0)" << std::endl;
+    std::cerr << "action:\n  0: analysis\n  1: alignment\n  2: residuals" << std::endl;
+    return 1;
+  }
   gInterpreter->GenerateDictionary("vector<vector<Float_t> >;vector<vector<UShort_t> >");  // add root dicts for vector<vector> >
 
   /** There three usage modes: analysis, alignment and residuals
-
       analysis: uses alignment and residuals for the given telescope to perform global and single plane studies
-
       alignment: starts with all alignment constants zero and does several iterations to minimize the residuals. All planes are shifted in x and y and rotated
-          around the z-axis. Residual plots of the last iteration are saved. As output the file NewAlignment.dat is produced.
-
+        around the z-axis. Residual plots of the last iteration are saved. As output the file NewAlignment.dat is produced.
       residuals: tries to find the correct residuals for tracking
-
       action:
-      0: Analysis
-      1: Alignment
-      2: Residuals */
+        0: Analysis
+        1: Alignment
+        2: Residuals */
   vector<string> action_str = {" (Analysis)", " (Alignment)", " (Residuals)"};
   auto action = strtoul(argv[2], nullptr, 10);
-
-  /** Telescope IDs: See ALIGNMENT/DICTIONARY.txt file */
-  auto telescopeID = int16_t(strtol(argv[3], nullptr, 10));
+  auto telescopeID = int16_t(strtol(argv[3], nullptr, 10)); /** see ALIGNMENT/DICTIONARY.txt file */
 
   /** Tracking only on the telescope (only for digital telescope):
       0: Use All planes (default until September 2016.
@@ -1584,34 +1574,28 @@ int main (int argc, char* argv[])
   cout << "TelescopeID = " << int(telescopeID) << endl;
   cout << "Track only analogue telescope: " << trackOnlyTelescope << "\n" << endl;
 
-    string const InFileName = argv[1];
-    vector<std::string> x = tel::split(InFileName, '/');
-    string RunNumber = tel::trim(tel::trim(x.back(), "estroot0"), ".");
-    // validate existance of directory plots
-    if(gSystem->OpenDirectory("./plots") == nullptr){
-      gSystem->mkdir("./plots");
-      gSystem->OpenDirectory("..");
-    }
-    gSystem->mkdir("./plots/" + TString(RunNumber));
-    gROOT->ProcessLine("#include <vector>");
+  string const InFileName = argv[1];
+  vector<std::string> x = tel::split(InFileName, '/');
+  string RunNumber = tel::trim(tel::trim(x.back(), "estroot0"), ".");
+  // validate existence of directory plots
+  if (gSystem->OpenDirectory("./plots") == nullptr) {
+    gSystem->mkdir("./plots");
+    gSystem->OpenDirectory("..");
+  }
+  gSystem->mkdir("./plots/" + TString(RunNumber));
+  gROOT->ProcessLine("#include <vector>");
 
-    /** Open a ROOT file to store histograms in. Do it here and pass to all functions we call */
-    TFile out_f(TString::Format("plots/%s/histos.root", RunNumber.c_str()), "recreate");
+  TFile out_f(TString::Format("plots/%s/histos.root", RunNumber.c_str()), "recreate"); /** Open a ROOT file to store histograms in. */
 
-    /** ALIGNMENT */
-    if (action==1)
-      Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope);
+  if (action == 1) { /** ALIGNMENT */
+    Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope);
+  } else if (action==2) { /** RESIDUAL CALCULATION */
+    FindResiduals(InFileName, RunNumber, telescopeID);
+  } else { /** ANALYSIS */
+    PLTAnalysis Analysis(InFileName, &out_f, RunNumber, telescopeID, trackOnlyTelescope);
+    Analysis.EventLoop();
+    Analysis.FinishAnalysis();
+  }
 
-    /** RESIDUAL CALCULATION */
-    else if (action==2)
-        FindResiduals(InFileName, RunNumber, telescopeID);
-
-    /** ANALYSIS */
-    else {
-      PLTAnalysis Analysis(InFileName,  &out_f, RunNumber, telescopeID, trackOnlyTelescope);
-      Analysis.EventLoop();
-      Analysis.FinishAnalysis();
-    }
-
-    return 0;
+  return 0;
 }
