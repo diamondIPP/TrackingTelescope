@@ -100,6 +100,13 @@ void PLTTracking::SetPlanesUnderTest(unsigned p1, unsigned p2) {
     fUsePlanesForTracking[i] = (i==p1 or i==p2) ? 0 : 3;
 }
 
+void PLTTracking::SetPlanesUnderTest(const std::vector<unsigned short> & planes) {
+
+  fDoSinglePlaneEfficiency = true;
+  for (auto i_plane: planes) {
+    fUsePlanesForTracking.at(i_plane) = 0;
+  }
+}
 
 void PLTTracking::SetPlaneUnderTestSandwich( int put){
 
