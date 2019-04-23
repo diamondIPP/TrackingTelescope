@@ -21,6 +21,7 @@ public:
   unsigned const NPlanes;
   float Threshold;  /** in [cm] */
   int Run();
+  void SaveErrors();
 
 private:
   std::string InFileName;

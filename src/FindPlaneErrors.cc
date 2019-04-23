@@ -218,14 +218,19 @@ PSIFileReader * FindPlaneErrors::InitFileReader() {
 
 FindPlaneErrors::~FindPlaneErrors(){
 
-  cout << "\nFINISHED FINDING PLANE ERRORS" << endl;
-  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
-    cout  <<  "SetErrorX(" << i_plane << ", " << FR->GetAlignment()->GetErrorX(i_plane) << ");" << endl;
-  }
-  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
-    cout  <<  "SetErrorY(" << i_plane << ", " << FR->GetAlignment()->GetErrorY(i_plane) << ");" << endl;
-  }
+  SaveErrors();
   delete FR;
   gROOT->ProcessLine("gErrorIgnoreLevel = 0;");
+}
+
+void FindPlaneErrors::SaveErrors() {
+
+  PLTAlignment * al = FR->GetAlignment();
+  cout << "Saving alignment file \"" << OutFileName << "\" with the following parameters:\n" << endl;
+  cout << "ROC ErrorX  ErrorY" << endl;
+  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
+    cout << Form("%2i %7.4f %7.4f\n", i_plane, al->GetErrorX(i_plane), al->GetErrorY(i_plane));
+  }
+  al->WriteAlignmentFile(OutFileName, NPlanes, true);
 }
 
