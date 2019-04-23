@@ -20,9 +20,10 @@ class PLTAlignment
     ~PLTAlignment ();
 
     void ReadAlignmentFile (std::string const);
-    void WriteAlignmentFile (std::string const, const int numRocs);
+    void WriteAlignmentFile (std::string const, const int numRocs, bool writeErrors=false);
     void AlignHit (PLTHit&);
-    bool IsGood ();
+    bool ErrorsFromFile;
+    bool IsGood () { return fIsGood; }
 
     float TtoLX (float const, float const, int const, int const);
     float TtoLY (float const, float const, int const, int const);
