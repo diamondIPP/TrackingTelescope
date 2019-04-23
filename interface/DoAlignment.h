@@ -19,10 +19,10 @@ public:
   unsigned const NPlanes;
   bool const AlignOnlyInnerPlanes;
   void PreAlign();
+  int Align();
   void InitHistograms();
   void ResetHistograms();
   void SaveHistograms(unsigned, int ind=-1);
-  int Align();
   void PrintAlignment();
   std::vector<unsigned short> GetOrderedPlanes();
   static void FormatHistogram(TH1 *, const std::string&, float, const std::string&, float);

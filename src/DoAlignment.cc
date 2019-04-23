@@ -30,7 +30,7 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
   gStyle->SetPalette(53);
 
   FR = InitFileReader();
-  MaxEventNumber = unsigned(dynamic_cast<PSIRootFileReader*>(FR)->fTree->GetEntries());
+  MaxEventNumber = FR->GetEntries();
 //  MaxEventNumber = 20000;
   OrderedPlanes = GetOrderedPlanes();
   InnerPlanes = vector<unsigned short>(OrderedPlanes.begin() + 1, OrderedPlanes.end() - 1);
