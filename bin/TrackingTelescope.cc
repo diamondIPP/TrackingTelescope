@@ -1361,6 +1361,10 @@ int main (int argc, char* argv[]) {
         2: Residuals */
   vector<string> action_str = {" (Analysis)", " (Alignment)", " (Residuals)"};
   auto action = strtoul(argv[2], nullptr, 10);
+  if (action > 3) {
+    tel::critical("Wrong action argument: " + to_string(action));
+    return 2;
+  }
   auto telescopeID = int16_t(strtol(argv[3], nullptr, 10)); /** see ALIGNMENT/DICTIONARY.txt file */
 
   /** Tracking only on the telescope (only for digital telescope):
