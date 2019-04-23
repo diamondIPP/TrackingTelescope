@@ -96,58 +96,58 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
       ZT[iPlane] =  C->LZ;
     }
   }
-  else if (NClusters() == 3) {
-
-//    float const SumX = fClusters[0]->TX() + fClusters[1]->TX() + fClusters[2]->TX();
-//    float const SumY = fClusters[0]->TY() + fClusters[1]->TY() + fClusters[2]->TY();
-//    float const SumZ = fClusters[0]->TZ() + fClusters[1]->TZ() + fClusters[2]->TZ();
+//  else if (NClusters() == 3) {
 //
-//    float const SumZ2 = fClusters[0]->TZ() * fClusters[0]->TZ()
-//                      + fClusters[1]->TZ() * fClusters[1]->TZ()
-//                      + fClusters[2]->TZ() * fClusters[2]->TZ();
+////    float const SumX = fClusters[0]->TX() + fClusters[1]->TX() + fClusters[2]->TX();
+////    float const SumY = fClusters[0]->TY() + fClusters[1]->TY() + fClusters[2]->TY();
+////    float const SumZ = fClusters[0]->TZ() + fClusters[1]->TZ() + fClusters[2]->TZ();
+////
+////    float const SumZ2 = fClusters[0]->TZ() * fClusters[0]->TZ()
+////                      + fClusters[1]->TZ() * fClusters[1]->TZ()
+////                      + fClusters[2]->TZ() * fClusters[2]->TZ();
+////
+////    float const SumXZ = fClusters[0]->TX() * fClusters[0]->TZ()
+////                      + fClusters[1]->TX() * fClusters[1]->TZ()
+////                      + fClusters[2]->TX() * fClusters[2]->TZ();
+////
+////    float const SumYZ = fClusters[0]->TY() * fClusters[0]->TZ()
+////                      + fClusters[1]->TY() * fClusters[1]->TZ()
+////                      + fClusters[2]->TY() * fClusters[2]->TZ();
 //
-//    float const SumXZ = fClusters[0]->TX() * fClusters[0]->TZ()
-//                      + fClusters[1]->TX() * fClusters[1]->TZ()
-//                      + fClusters[2]->TX() * fClusters[2]->TZ();
+////    float const MySlopeX = (3 * SumXZ - SumX * SumZ) / (3 * SumZ2 - SumZ * SumZ);
+////    float const MySlopeY = (3 * SumYZ - SumY * SumZ) / (3 * SumZ2 - SumZ * SumZ);
 //
-//    float const SumYZ = fClusters[0]->TY() * fClusters[0]->TZ()
-//                      + fClusters[1]->TY() * fClusters[1]->TZ()
-//                      + fClusters[2]->TY() * fClusters[2]->TZ();
-
-//    float const MySlopeX = (3 * SumXZ - SumX * SumZ) / (3 * SumZ2 - SumZ * SumZ);
-//    float const MySlopeY = (3 * SumYZ - SumY * SumZ) / (3 * SumZ2 - SumZ * SumZ);
-
-    fSlopeX = (fClusters[2]->TX() - fClusters[0]->TX()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
-    fSlopeY = (fClusters[2]->TY() - fClusters[0]->TY()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
-
-    VX = fSlopeX;
-    VY = fSlopeY;
-    VZ = 1;
-
-    // Length
-    float const Mod = sqrt(VX*VX + VY*VY + VZ*VZ);
-
-    // Normalize vectors
-    VX = VX / Mod;
-    VY = VY / Mod;
-    VZ = VZ / Mod;
-
-    if (DEBUG) { printf("3P VXVYVZ %12.3f %12.3f %12.3f %12.3f\n", VX, VY, VZ, Mod); }
-
-    float const AvgX = (fClusters[0]->TX() + fClusters[1]->TX() + fClusters[2]->TX()) / 3.0;
-    float const AvgY = (fClusters[0]->TY() + fClusters[1]->TY() + fClusters[2]->TY()) / 3.0;
-    float const AvgZ = (fClusters[0]->TZ() + fClusters[1]->TZ() + fClusters[2]->TZ()) / 3.0;
-
-    // Compute the points in telescope coords where line passes each plane
-    for (int ip = 0; ip < nPlanes ; ++ip) {
-
-      PLTAlignment::CP* C = Alignment.GetCP(Channel, ip);
-
-      XT[ip] = (C->LZ - AvgZ) * fSlopeX + AvgX;
-      YT[ip] = (C->LZ - AvgZ) * fSlopeY + AvgY;
-      ZT[ip] = C->LZ;
-    }
-  }
+//    fSlopeX = (fClusters[2]->TX() - fClusters[0]->TX()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
+//    fSlopeY = (fClusters[2]->TY() - fClusters[0]->TY()) / (fClusters[2]->TZ() - fClusters[0]->TZ());
+//
+//    VX = fSlopeX;
+//    VY = fSlopeY;
+//    VZ = 1;
+//
+//    // Length
+//    float const Mod = sqrt(VX*VX + VY*VY + VZ*VZ);
+//
+//    // Normalize vectors
+//    VX = VX / Mod;
+//    VY = VY / Mod;
+//    VZ = VZ / Mod;
+//
+//    if (DEBUG) { printf("3P VXVYVZ %12.3f %12.3f %12.3f %12.3f\n", VX, VY, VZ, Mod); }
+//
+//    float const AvgX = (fClusters[0]->TX() + fClusters[1]->TX() + fClusters[2]->TX()) / 3.0;
+//    float const AvgY = (fClusters[0]->TY() + fClusters[1]->TY() + fClusters[2]->TY()) / 3.0;
+//    float const AvgZ = (fClusters[0]->TZ() + fClusters[1]->TZ() + fClusters[2]->TZ()) / 3.0;
+//
+//    // Compute the points in telescope coords where line passes each plane
+//    for (int ip = 0; ip < nPlanes ; ++ip) {
+//
+//      PLTAlignment::CP* C = Alignment.GetCP(Channel, ip);
+//
+//      XT[ip] = (C->LZ - AvgZ) * fSlopeX + AvgX;
+//      YT[ip] = (C->LZ - AvgZ) * fSlopeY + AvgY;
+//      ZT[ip] = C->LZ;
+//    }
+//  }
   // >3 clusters
   else{
 
