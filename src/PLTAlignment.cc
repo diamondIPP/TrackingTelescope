@@ -3,6 +3,7 @@
 #include <map>
 #include <cstdlib>
 #include <PLTAlignment.h>
+#include "GetNames.h"
 
 
 PLTAlignment::PLTAlignment ()
@@ -42,12 +43,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
   // Read each line in file
   int Channel, ROC;
   for (std::string InLine; std::getline(InFile, InLine); ) {
-    if (InLine.size() < 1) {
-      continue;
-    }
-    if (InLine.at(0) == '#') {
-      continue;
-    }
+    if (InLine.size() < 3 or InLine.at(0) == '#') { continue; }
 
     //std::cout << InLine << std::endl;
     std::istringstream LineStream;
@@ -601,20 +597,12 @@ void PLTAlignment::AddToGZ (int const ch, float val)
 void PLTAlignment::SetErrors(int telescopeID, bool initial){
 
     uint8_t id = telescopeID;
-    if (initial){
-        SetErrorX( 0, 0.004);
-        SetErrorX( 1, 0.004);
-        SetErrorX( 2, 0.004);
-        SetErrorX( 3, 0.004);
-        SetErrorX( 4, 0.004);
-        SetErrorX( 5, 0.004);
-
-        SetErrorY( 0, 0.003);
-        SetErrorY( 1, 0.003);
-        SetErrorY( 2, 0.003);
-        SetErrorY( 3, 0.003);
-        SetErrorY( 4, 0.003);
-        SetErrorY( 5, 0.003);
+    uint8_t n_planes = GetNumberOfROCS(telescopeID);
+    if (initial) { /** just use increased digital resolution for initial config */
+      for (auto i_plane(0); i_plane < n_planes; i_plane++){
+        SetErrorX(i_plane, PLTU::PIXELWIDTH / sqrt(12) * 2.5);
+        SetErrorY(i_plane, PLTU::PIXELHEIGHT / sqrt(12) * 2.5);
+      }
     }
     else{
         if (telescopeID == 1){
