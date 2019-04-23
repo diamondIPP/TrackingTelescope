@@ -26,6 +26,7 @@ class PSIRootFileReader : public PSIFileReader
     bool OpenFile ();
     void ResetFile ();
     int GetNextEvent ();
+    unsigned GetEntries() override { return fTree->GetEntries(); }
 
     // Make tree accessible
     TTree * fTree;
