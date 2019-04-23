@@ -31,6 +31,7 @@
 #include "PSIBinaryFileReader.h"
 #include "PSIRootFileReader.h"
 #include "DoAlignment.h"
+#include "FindPlaneErrors.h"
 #include "Utils.h"
 
 #define DEBUG false
@@ -115,10 +116,6 @@ bool CheckEllipse(float dx, float dy, float max_dx, float max_dy){
   else
     return false;
 }
-
-
-
-void WriteHTML (TString const, TString const, int telescopeID);
 
 void Write2DCharge( TH3* h, TCanvas * Can, float maxz, TString OutDir){
   TProfile2D * ph = h->Project3DProfile("yx");
@@ -1056,205 +1053,6 @@ void TestPlaneEfficiency (std::string const InFileName,
 
 }
 
-int TestPlaneEfficiencySilicon(std::string const InFileName, TFile * out_f,
-                                TString const RunNumber, int telescopeID);
-
-
-int FindResiduals(std::string const InFileName, TString const RunNumber, int telescopeID){
-
-  TString const PlotsDir = "plots/";
-  TString const OutDir = PlotsDir + RunNumber;
-
-  gStyle->SetOptStat(0);
-
-
-  // Initialize Reader
-  PSIFileReader * FR;
-
-  if (GetUseRootInput(telescopeID)) {
-    FR = new PSIRootFileReader(InFileName,
-			       GetCalibrationFilename(telescopeID),
-			       GetAlignmentFilename(telescopeID),
-			       GetNumberOfROCS(telescopeID),
-			       GetUseGainInterpolator(telescopeID),
-			       GetUseExternalCalibrationFunction(telescopeID)
-			       );
-  }
-  else{
-    FR = new PSIBinaryFileReader(InFileName,
-				 GetCalibrationFilename(telescopeID),
-				 GetAlignmentFilename(telescopeID),
-				 GetNumberOfROCS(telescopeID),
-				 GetUseGainInterpolator(telescopeID),
-				 GetUseExternalCalibrationFunction(telescopeID)
-				 );
-    ((PSIBinaryFileReader*) FR)->CalculateLevels(OutDir);
-  }
-
-  FR->GetAlignment()->SetErrors(telescopeID, true);
-
-  FILE* f = fopen("MyGainCal.dat", "w");
-  FR->GetGainCal()->PrintGainCal(f);
-  fclose(f);
-  FR->ReadPixelMask(GetMaskingFilename(telescopeID));
-
-  for (int ires=0; ires != 8; ires++){
-
-    FR->ResetFile();
-    FR->SetAllPlanes();
-
-    TH1F hChi2_6_X( "", "", 100, 0, 10);
-    TH1F hChi2_6_Y( "", "", 100, 0, 10);
-
-    float chi2_6_x;
-    float chi2_6_y;
-    std::vector<float> chi2_5_x;
-    std::vector<float> chi2_5_y;
-
-    // Determine the 6-plane CHi2
-    // Event Loop
-    for (int ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
-
-
-      if (! (FR->NTracks()==1))
-        continue;
-
-      PLTTrack * Track = FR->Track(0);
-      hChi2_6_X.Fill( Track->Chi2X() );
-      hChi2_6_Y.Fill( Track->Chi2Y() );
-
-    } // end event loop
-
-
-
-    for (int iplane=0; iplane!=6;iplane++){
-
-      // Prepare Residual histograms
-      TH1F hChi2_5_X( "", "", 100, 0, 10);
-      TH1F hChi2_5_Y( "", "", 100, 0, 10);
-
-      // Determine the 5-plane CHi2
-      {
-      // Initialize Reader
-      FR->ResetFile();
-      FR->SetPlaneUnderTest( iplane );
-
-      // Event Loop
-      for (int ievent = 0; FR->GetNextEvent() >= 0; ++ievent) {
-
-        if (! (FR->NTracks()==1))
-          continue;
-
-        PLTTrack * Track = FR->Track(0);
-        hChi2_5_X.Fill( Track->Chi2X() );
-        hChi2_5_Y.Fill( Track->Chi2Y() );
-
-
-      } // end event loop
-      } // end getting 5-plane Chi2
-
-
-
-      TCanvas Can;
-      Can.cd();
-
-      hChi2_5_X.SetLineColor(3);
-      hChi2_5_Y.SetLineColor(3);
-
-
-      TF1 fun1("fun1","TMath::GammaDist(x, [0], 0, 2)/10.", 0, 10);
-      TF1 fun2("fun2","TMath::GammaDist(x, [0], 0, 2)/10.", 0, 10);
-      TF1 fun3("fun3","TMath::GammaDist(x, [0], 0, 2)/10.", 0, 10);
-      TF1 fun4("fun4","TMath::GammaDist(x, [0], 0, 2)/10.", 0, 10);
-
-      fun1.SetNpx(1000);
-      fun2.SetNpx(1000);
-      fun3.SetNpx(1000);
-      fun4.SetNpx(1000);
-
-      fun1.SetParameter(0, 2);
-      fun2.SetParameter(0, 2);
-      fun3.SetParameter(0, 2);
-      fun4.SetParameter(0, 2);
-
-      hChi2_5_X.Scale( 1./ hChi2_5_X.Integral());
-      hChi2_5_Y.Scale( 1./ hChi2_5_Y.Integral());
-
-      hChi2_6_X.Scale( 1./ hChi2_6_X.Integral());
-      hChi2_6_Y.Scale( 1./ hChi2_6_Y.Integral());
-
-      hChi2_5_X.Fit( &fun1 );
-      hChi2_6_X.Fit( &fun2 );
-      hChi2_5_Y.Fit( &fun3 );
-      hChi2_6_Y.Fit( &fun4 );
-
-      hChi2_5_X.Draw();
-      hChi2_6_X.Draw("SAME");
-      Can.SaveAs( OutDir+TString::Format("/FunWithChi2X_ROC%i",iplane) + ".png");
-
-      hChi2_5_Y.Draw();
-      hChi2_6_Y.Draw("SAME");
-      Can.SaveAs( OutDir+TString::Format("/FunWithChi2Y_ROC%i",iplane) + ".png");
-
-      chi2_5_x.push_back( fun1.GetParameter(0)*2 );
-      chi2_5_y.push_back( fun3.GetParameter(0)*2 );
-
-      chi2_6_x = fun2.GetParameter(0)*2 ;
-      chi2_6_y = fun4.GetParameter(0)*2 ;
-
-    } // end loop over planes
-
-
-    if (true){
-
-      float max_dchi2_x=-1;
-      float max_dchi2_y=-1;
-      int imax_x=-1;
-      int imax_y=-1;
-
-      std::cout << "SIX PLANES: " << chi2_6_x << " " << chi2_6_y << std::endl;
-
-      for (int ic=0; ic!=6; ic++){
-
-          std::cout << "X ROC: " << ic << " " << chi2_5_x[ic] <<std::endl;
-          std::cout << "Y ROC: " << ic << " " << chi2_5_y[ic] <<std::endl;
-
-          if (fabs(1-(chi2_6_x-chi2_5_x[ic])) > max_dchi2_x ){
-            imax_x      = ic;
-            max_dchi2_x = fabs(1-(chi2_6_x-chi2_5_x[ic]));
-          }
-          if (fabs(1-(chi2_6_y-chi2_5_y[ic])) > max_dchi2_y ){
-            imax_y = ic;
-            max_dchi2_y = fabs(1-(chi2_6_y-chi2_5_y[ic]));
-          }
-
-
-      }
-
-      FR->GetAlignment()->SetErrorX(imax_x, FR->GetAlignment()->GetErrorX(imax_x)*(chi2_6_x-chi2_5_x[imax_x]));
-      FR->GetAlignment()->SetErrorY(imax_y, FR->GetAlignment()->GetErrorY(imax_y)*(chi2_6_y-chi2_5_y[imax_y]));
-
-
-      for (int ic=0; ic!=6; ic++){
-        FR->GetAlignment()->SetErrorX(ic, FR->GetAlignment()->GetErrorX(ic)*(chi2_6_x/4.));
-        FR->GetAlignment()->SetErrorY(ic, FR->GetAlignment()->GetErrorY(ic)*(chi2_6_y/4.));
-
-        std::cout << "X ROC RES: " << ic << " " << FR->GetAlignment()->GetErrorX(ic) <<std::endl;
-        std::cout << "Y ROC RES: " << ic << " " << FR->GetAlignment()->GetErrorY(ic) <<std::endl;
-      }
-
-
-    }
-
-  } // end of residual finding loop
-
-  delete FR;
-
-  return 0;
-}
-
-
-
 
 void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 {
@@ -1590,7 +1388,7 @@ int main (int argc, char* argv[]) {
   if (action == 1) { /** ALIGNMENT */
     Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope);
   } else if (action==2) { /** RESIDUAL CALCULATION */
-    FindResiduals(InFileName, RunNumber, telescopeID);
+    FindPlaneErrors(InFileName, RunNumber, telescopeID);
   } else { /** ANALYSIS */
     PLTAnalysis Analysis(InFileName, &out_f, RunNumber, telescopeID, trackOnlyTelescope);
     Analysis.EventLoop();
