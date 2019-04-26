@@ -37,7 +37,7 @@ private:
   TString const OutDir;
   std::string FileType;
   float const AngleThreshold;
-  float const TotResThreshold;
+  float const ResThreshold;
   PSIFileReader * FR;
   PSIFileReader * InitFileReader();
   void EventLoop(const std::vector<unsigned short>&);
@@ -48,6 +48,10 @@ private:
   std::vector<unsigned short> OrderedPlanes;
   std::vector<unsigned short> InnerPlanes;
   std::vector<unsigned short> PlanesToAlign;
+  /** Means (offsets) and RMS of the residual distributions */
+  std::vector<std::pair<float, float>> fdX;
+  std::vector<std::pair<float, float>> fdY;
+  std::vector<std::pair<float, float>> fdA;
   /** Histograms
       hResidual:    x=dX / y=dY
       hResidualXdY: x=X  / y=dY
