@@ -22,6 +22,10 @@ public:
   float Threshold;  /** in [cm] */
   int Run();
   void SaveErrors();
+  void PrintErrors();
+  void PrintChi2s();
+  void PrintChi2s(unsigned short);
+  std::vector<unsigned short> GetOrderedPlanes();
 
 private:
   std::string InFileName;
@@ -31,6 +35,7 @@ private:
   std::string FileType;
   PSIFileReader * FR;
   PSIFileReader * InitFileReader();
+  std::vector<unsigned short> OrderedPlanes;
   unsigned MaxEventNumber;
   tel::ProgressBar * ProgressBar;
   unsigned short MaxIterations;
@@ -38,9 +43,11 @@ private:
   std::pair<TH1F*, TH1F*> hChi2All;
   std::pair<TH1F*, TH1F*> hChi2Res;
   std::vector<std::pair<float, float>> Chi2Res;
+  std::vector<std::pair<float, float>> RealChi2Res;
   std::pair<float, float> Chi2All;
   void FillAllChi2();
-  void FillResChi2(unsigned short);
+  void FillResChi2();
+  void FillResChi2(unsigned short, bool=true);
   /** Fits */
   std::pair<TF1*, TF1*> AllFit;
   std::pair<TF1*, TF1*> ResFit;
@@ -48,8 +55,11 @@ private:
   void FitGammaDistRes();
   void FitGammaDistAll();
   void SavePlots(unsigned short);
-//  void SetErrors();
-  void SetErrors(unsigned short);
+  void SavePlots();
+  void AdjustBiggestError();
+  void AdjustErrors();
+  void AdjustErrors(unsigned short);
+  void AdjustErrors(unsigned short, int);
 
 };
 

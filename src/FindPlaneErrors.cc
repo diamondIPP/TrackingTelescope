@@ -15,9 +15,9 @@ using namespace std;
 FindPlaneErrors::FindPlaneErrors(string in_file_name, const TString & run_number, short telescope_ID):
   TelescopeID(telescope_ID),
   NPlanes(GetNumberOfROCS(telescope_ID)),
-  Threshold(.03),
+  Threshold(.01),
   InFileName(std::move(in_file_name)),
-  OutFileName("NewAlignment.dat"),
+  OutFileName(Form("ALIGNMENT/telescope%i.dat", telescope_ID)),
   PlotsDir("plots/"),
   OutDir(PlotsDir + run_number),
   FileType(".png"),
@@ -30,10 +30,13 @@ FindPlaneErrors::FindPlaneErrors(string in_file_name, const TString & run_number
 
   gROOT->ProcessLine("gErrorIgnoreLevel = kError;");
 
+  Chi2Res.assign(NPlanes, make_pair(1, 1));
+  RealChi2Res.assign(NPlanes, make_pair(1, 1));
+
   FR = InitFileReader();
   FR->ReadPixelMask(GetMaskingFilename(TelescopeID)); /** Apply Masking */
-  MaxEventNumber = unsigned(FR->GetEntries());
-//  MaxEventNumber = 10000;
+  OrderedPlanes = GetOrderedPlanes();
+  MaxEventNumber = (FR->GetEntries() > 50000) ? 10000 : unsigned(FR->GetEntries());
   ProgressBar = new tel::ProgressBar(MaxEventNumber - 1);
   InitFits();
 
@@ -42,35 +45,30 @@ FindPlaneErrors::FindPlaneErrors(string in_file_name, const TString & run_number
 
 int FindPlaneErrors::Run() {
 
-  for (unsigned i(0); i < MaxIterations; i++){
+  PrintErrors();
+  FillAllChi2();
+  AdjustErrors();
+  PrintErrors();
+
+  for (unsigned i(0); i < 2; i++){
     cout << "\n=========== BEGINNING ITERATION " << i + 1 << "/" << MaxIterations << " ===========\n" << endl;
 
-    FillAllChi2(); /** Fill All Plane Chi2 */
-    FitGammaDistAll();
-    TCanvas c;
-    c.cd();
-    hChi2All.first->Draw();
-    c.SaveAs(OutDir + "/blub.png");
-    Chi2All = make_pair(AllFit.first->GetParameter(0), AllFit.second->GetParameter(0));
-    cout << "Chi2 of all planes (x/y): " << setprecision(4) << Chi2All.first << " / " << Chi2All.second << endl;
-
-    Chi2Res.resize(NPlanes, make_pair(0, 0));
-    for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
-      while ((fabs(1 - Chi2Res.at(i_plane).first) > Threshold) or (fabs(1 - Chi2Res.at(i_plane).second) > Threshold)) {
-        FillResChi2(i_plane); /** Fill Chi2 with one plane under test */
-        FitGammaDistRes();
-        SavePlots(i_plane);
-        Chi2Res.at(i_plane) = make_pair(ResFit.first->GetParameter(0), ResFit.second->GetParameter(0));
-        SetErrors(i_plane);
+    for (auto i_plane: OrderedPlanes){
+      FillResChi2(i_plane);
+      PrintChi2s(i_plane);
+      unsigned tries(0);
+      while ((fabs(Chi2Res.at(i_plane).first) > Threshold or fabs(Chi2Res.at(i_plane).second) > Threshold) and tries++ < 4){
+        AdjustErrors(i_plane);
+        FillResChi2(i_plane);
+        PrintErrors();
+        PrintChi2s(i_plane);
       }
     }
-    bool done(true);
-    cout << "Chi2 of all planes (x/y): " << Chi2All.first << " / " << Chi2All.second << endl;
-    for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
-      done = (fabs(1 - Chi2Res.at(i_plane).first) < Threshold) and (fabs(1 - Chi2Res.at(i_plane).second) < Threshold);
-      cout << "Chi2 for plane " << i_plane << " (x/y): " << 1 - Chi2Res.at(i_plane).first << " / " << 1 - Chi2Res.at(i_plane).second << endl;
-    }
-    if (done) { break; }
+//    FillAllChi2();
+//    AdjustErrors();
+//    PrintErrors();
+//    PrintChi2s();
+//    if (fabs(Chi2All.first) < Threshold and fabs(Chi2All.second) < Threshold) { break; }
   }
   return 0;
 }
@@ -81,6 +79,8 @@ void FindPlaneErrors::FillAllChi2() {
   FR->SetAllPlanes();
   hChi2All.first->Reset();
   hChi2All.second->Reset();
+  ProgressBar->reset();
+  ProgressBar->setNEvents(MaxEventNumber);
 
   cout << "\nFilling chi2 histograms with all planes tracked." << endl;\
   for (size_t i_event(0); FR->GetNextEvent() >= 0; ++i_event){
@@ -92,26 +92,46 @@ void FindPlaneErrors::FillAllChi2() {
   }
   hChi2All.first->Scale(1 / hChi2All.first->Integral());
   hChi2All.second->Scale(1 / hChi2All.second->Integral());
+  FitGammaDistAll();
+  SavePlots();
+  Chi2All = make_pair(AllFit.first->GetParameter(0) - 1, AllFit.second->GetParameter(0) - 1); /** fill the deviation from the expected value of 1*/
 }
 
-void FindPlaneErrors::FillResChi2(unsigned short i_plane) {
+void FindPlaneErrors::FillResChi2() {
 
+  cout << "Filling Chi2 with planes under test." << endl;
   ProgressBar->reset();
+  ProgressBar->setNEvents(NPlanes * MaxEventNumber);
+  Chi2Res.assign(NPlanes, make_pair(0, 0));
+  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
+    FillResChi2(i_plane, false);
+  }
+}
+
+void FindPlaneErrors::FillResChi2(unsigned short i_plane, bool out) {
+
+  if (out) {
+    cout << Form("Filling Chi2 with plane %i under test.", i_plane) << endl;
+    ProgressBar->reset();
+    ProgressBar->setNEvents(MaxEventNumber);
+  }
   FR->ResetFile();
   FR->SetPlaneUnderTest(i_plane);
   hChi2Res.first->Reset();
   hChi2Res.second->Reset();
-
-  cout << "Filling Chi2 histogram with plane " << i_plane << " under test." << endl;
   for (size_t i_event(0); FR->GetNextEvent() >= 0; ++i_event){
     if (i_event >= MaxEventNumber) break;
-    ProgressBar->update(i_event);
+    ++*ProgressBar;
     if (FR->NTracks() != 1) { continue; }
     hChi2Res.first->Fill(FR->Track(0)->Chi2X());
     hChi2Res.second->Fill(FR->Track(0)->Chi2Y());
   }
   hChi2Res.first->Scale(1 / hChi2Res.first->Integral());
   hChi2Res.second->Scale(1 / hChi2Res.second->Integral());
+  FitGammaDistRes();
+  SavePlots(i_plane);
+  Chi2Res.at(i_plane) = make_pair(ResFit.first->GetParameter(0) - 1, ResFit.second->GetParameter(0) - 1); /** fill the deviation from the expected value of 1*/
+  RealChi2Res.at(i_plane) = make_pair(ResFit.first->GetChisquare(), ResFit.second->GetChisquare());
 }
 
 pair<TF1*, TF1*> FindPlaneErrors::InitFits(bool dut) {
@@ -139,8 +159,8 @@ void FindPlaneErrors::FitGammaDistAll() {
 
 void FindPlaneErrors::FitGammaDistRes() {
 
-  AllFit.first->SetParameters(0, 1, 1, 1);
-  AllFit.second->SetParameters(0, 1, 1, 1);
+  ResFit.first->SetParameters(1, .2);
+  ResFit.second->SetParameters(1, .2);
   hChi2Res.first->Fit(ResFit.first, "q");
   hChi2Res.second->Fit(ResFit.second, "q");
 }
@@ -159,41 +179,59 @@ void FindPlaneErrors::SavePlots(unsigned short i_plane) {
   c.SaveAs(OutDir + Form("/FunWithChi2Y_ROC%i", i_plane) + FileType);
 }
 
-//void FindPlaneErrors::SetErrors() {
-//
-//  pair<float, float> max_dchi2(-1, -1);
-//  pair<unsigned short, unsigned short> max_ind(-1, -1);
-//  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
-//    cout << "Chi2 for plane " << i_plane << ": " << Chi2Res.at(i_plane).first << " in x and " << Chi2Res.at(i_plane).second << " in y" << endl;
-//    if (fabs(Chi2All.first - Chi2Res.at(i_plane).first) > max_dchi2.first){
-//      max_ind.first = i_plane;
-//      max_dchi2.first = fabs(Chi2All.first - Chi2Res.at(i_plane).first);
-//    }
-//    if (fabs(Chi2All.second - Chi2Res.at(i_plane).second) > max_dchi2.second){
-//      max_ind.second = i_plane;
-//      max_dchi2.second = fabs(Chi2All.second - Chi2Res.at(i_plane).second);
-//    }
-//  }
-//  FR->GetAlignment()->SetErrorX(max_ind.first, FR->GetAlignment()->GetErrorX(max_ind.first) / fabs(Chi2All.first - Chi2Res.at(max_ind.first).first) / 2);
-//  FR->GetAlignment()->SetErrorY(max_ind.second, FR->GetAlignment()->GetErrorY(max_ind.second) / fabs(Chi2All.second - Chi2Res.at(max_ind.second).second) / 2);
-//
-//  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
-//    FR->GetAlignment()->SetErrorX(i_plane, FR->GetAlignment()->GetErrorX(i_plane) / Chi2All.first);
-//    FR->GetAlignment()->SetErrorY(i_plane, FR->GetAlignment()->GetErrorY(i_plane) / Chi2All.second);
-//    cout <<  "Residual for plane " << i_plane << ": " << FR->GetAlignment()->GetErrorX(i_plane) << " in x and " << FR->GetAlignment()->GetErrorY(i_plane) << " in y" << endl;
-//  }
-//}
+void FindPlaneErrors::SavePlots() {
 
-void FindPlaneErrors::SetErrors(unsigned short i_pl) {
+  TCanvas c;
+  c.cd();
+  hChi2All.first->Draw();
+  c.SaveAs(OutDir + "/AllPlaneChi2X" + FileType);
+  hChi2All.second->Draw();
+  c.SaveAs(OutDir + "/AllPlaneChi2Y" + FileType);
+}
 
-  pair<float, float> dChi2((Chi2Res.at(i_pl).first - 1) / (NPlanes - 1), (Chi2Res.at(i_pl).second - 1) / (NPlanes - 1));
-  cout << "dChi2 for plane " << i_pl << " (x/y): " << Chi2Res.at(i_pl).first - 1 << " / " << Chi2Res.at(i_pl).second - 1 << endl;
+void FindPlaneErrors::AdjustBiggestError() {
+
+  vector<float> x_diff, y_diff;
+  for (auto i_chi2_res: Chi2Res){
+    x_diff.emplace_back(fabs(i_chi2_res.first - Chi2All.first));
+    y_diff.emplace_back(fabs(i_chi2_res.second - Chi2All.first));
+  }
+  size_t max_plane_x = distance(x_diff.begin(), max_element(x_diff.begin(), x_diff.end()));
+  size_t max_plane_y = distance(y_diff.begin(), max_element(y_diff.begin(), y_diff.end()));
+  /** increase the error for the biggest deviation. For small deviations the shape is basically not influenced */
+  cout << "MAX DIFF " << x_diff.at(max_plane_x) << endl;
   for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++) {
-    if (i_plane == i_pl) { continue; }
+    if (i_plane != max_plane_x) { FR->GetAlignment()->SetErrorX(i_plane, FR->GetAlignment()->GetErrorX(i_plane) / (x_diff.at(max_plane_x) * .5 + 1)); }
+    if (i_plane != max_plane_y) { FR->GetAlignment()->SetErrorY(i_plane, FR->GetAlignment()->GetErrorY(i_plane) / (y_diff.at(max_plane_y) * .5 + 1)); }
+  }
+}
+
+void FindPlaneErrors::AdjustErrors() {
+
+  pair<float, float> dChi2(Chi2All.first * .5, Chi2All.second * .5);
+  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++) {
     FR->GetAlignment()->SetErrorX(i_plane, FR->GetAlignment()->GetErrorX(i_plane) / (dChi2.first + 1));
     FR->GetAlignment()->SetErrorY(i_plane, FR->GetAlignment()->GetErrorY(i_plane) / (dChi2.second + 1));
-    cout << "Residual for plane " << i_plane << " (x/y): " << FR->GetAlignment()->GetErrorX(i_plane) << " / " << FR->GetAlignment()->GetErrorY(i_plane) << endl;
   }
+}
+
+void FindPlaneErrors::AdjustErrors(unsigned short plane_under_test) {
+
+  pair<float, float> dChi2(Chi2Res.at(plane_under_test).first * .5, Chi2Res.at(plane_under_test).second * .5);
+  for (auto i_plane: OrderedPlanes) {
+    if (i_plane == plane_under_test) { continue; }
+    FR->GetAlignment()->SetErrorX(i_plane, FR->GetAlignment()->GetErrorX(i_plane) / (dChi2.first + 1));
+    FR->GetAlignment()->SetErrorY(i_plane, FR->GetAlignment()->GetErrorY(i_plane) / (dChi2.second + 1));
+  }
+//  FR->GetAlignment()->SetErrorX(plane_under_test, FR->GetAlignment()->GetErrorX(plane_under_test) * (dChi2.first + 1));
+//  FR->GetAlignment()->SetErrorY(plane_under_test, FR->GetAlignment()->GetErrorY(plane_under_test) * (dChi2.second + 1));
+}
+
+void FindPlaneErrors::AdjustErrors(unsigned short plane_under_test, int tries) {
+
+  pair<float, float> dChi2(Chi2Res.at(plane_under_test).first * .5, Chi2Res.at(plane_under_test).second * .5);
+  FR->GetAlignment()->SetErrorX(plane_under_test, FR->GetAlignment()->GetErrorX(plane_under_test) * (dChi2.first + 1));
+  FR->GetAlignment()->SetErrorY(plane_under_test, FR->GetAlignment()->GetErrorY(plane_under_test) * (dChi2.second + 1));
 }
 
 
@@ -216,21 +254,57 @@ PSIFileReader * FindPlaneErrors::InitFileReader() {
   return tmp;
 }
 
+void FindPlaneErrors::SaveErrors() {
+
+  cout << "Saving alignment file \"" << OutFileName << "\" with the following parameters:\n" << endl;
+  PrintErrors();
+  FR->GetAlignment()->WriteAlignmentFile(OutFileName, NPlanes, true);
+}
+
+void FindPlaneErrors::PrintErrors() {
+
+  PLTAlignment * al = FR->GetAlignment();
+  cout << "ROC ErrorX  ErrorY" << endl;
+  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
+    cout << Form("%2i %7.4f %7.4f\n", i_plane, al->GetErrorX(i_plane), al->GetErrorY(i_plane));
+  }
+}
+
+void FindPlaneErrors::PrintChi2s() {
+
+  cout << "Chi2 ALL   (x/y): " << setprecision(4) << Chi2All.first << " / " << Chi2All.second << endl;
+  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
+    cout << "Chi2 RES " << i_plane << " (x/y): " << Chi2Res.at(i_plane).first << " / " << Chi2Res.at(i_plane).second << endl;
+  }
+}
+
+void FindPlaneErrors::PrintChi2s(unsigned short i_plane) {
+  cout << "Chi2 RES " << i_plane << " (x/y): " << Chi2Res.at(i_plane).first << " / " << Chi2Res.at(i_plane).second << endl;
+}
+
+std::vector<unsigned short> FindPlaneErrors::GetOrderedPlanes() {
+
+  vector<unsigned short> tmp;
+  vector<float> z_pos;
+  for (unsigned i_plane(0); i_plane < NPlanes; i_plane++)
+    z_pos.emplace_back(FR->GetAlignment()->LZ(1, i_plane));
+  for (unsigned i_plane(0); i_plane < NPlanes; i_plane++){
+    auto result = max_element(z_pos.begin(), z_pos.end());
+    auto index = distance(z_pos.begin(), result);
+    tmp.emplace_back(index);
+    z_pos.at(index) = -999;
+  }
+  vector<unsigned short> res;
+  res.emplace_back(tmp.front());
+  res.emplace_back(tmp.back());
+  for (auto val: vector<unsigned short>(tmp.begin() + 1, tmp.end() - 1)) { res.emplace_back(val); }
+  return res;
+}
+
 FindPlaneErrors::~FindPlaneErrors(){
 
   SaveErrors();
   delete FR;
   gROOT->ProcessLine("gErrorIgnoreLevel = 0;");
-}
-
-void FindPlaneErrors::SaveErrors() {
-
-  PLTAlignment * al = FR->GetAlignment();
-  cout << "Saving alignment file \"" << OutFileName << "\" with the following parameters:\n" << endl;
-  cout << "ROC ErrorX  ErrorY" << endl;
-  for (unsigned short i_plane(0); i_plane < NPlanes; i_plane++){
-    cout << Form("%2i %7.4f %7.4f\n", i_plane, al->GetErrorX(i_plane), al->GetErrorY(i_plane));
-  }
-  al->WriteAlignmentFile(OutFileName, NPlanes, true);
 }
 
