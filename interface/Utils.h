@@ -42,6 +42,8 @@ namespace tel{
     void averageTime();
     float getTime();
     void reset() { currentEvent = 0u; }
+    void setNEvents(uint32_t n_events) { nEvents = n_events; }
+    ProgressBar & operator++();
   };
 }
 

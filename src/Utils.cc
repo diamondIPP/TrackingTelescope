@@ -85,4 +85,10 @@ namespace tel {
       timePerCycle = float(.98) * timePerCycle + float(.02) * getTime();
     nCycles++;
   }
+
+  ProgressBar & ProgressBar::operator++() {
+
+    update(++currentEvent);
+    return *this;
+  }
 }
