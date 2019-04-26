@@ -106,6 +106,9 @@ void PLTTracking::SetPlanesUnderTest(const std::vector<unsigned short> & planes)
   for (auto i_plane: planes) {
     fUsePlanesForTracking.at(i_plane) = 0;
   }
+  std::cout << "Plane configuration for tracking: ";
+  for (auto val: fUsePlanesForTracking) { std::cout << val << " "; }
+  std::cout << std::endl;
 }
 
 void PLTTracking::SetPlaneUnderTestSandwich( int put){
