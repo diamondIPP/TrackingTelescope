@@ -22,12 +22,13 @@ public:
   int Align();
   void InitHistograms();
   void ResetHistograms();
-  void SaveHistograms(unsigned, int ind=-1);
+  void SaveHistograms(unsigned, int=-1);
+  void SaveAllHistograms(int=-1);
   void PrintAlignment();
+  void PrintResiduals(const std::vector<unsigned short>&);
   std::vector<unsigned short> GetOrderedPlanes();
-  static void FormatHistogram(TH1 *, const std::string&, float, const std::string&, float);
-  std::pair<float, float> GetMeanResiduals(unsigned short i_plane);
-  std::pair<float, float> GetRMS(unsigned short i_plane);
+  template <typename Q>
+  static void FormatHistogram(Q *, const std::string&, float, const std::string&, float, float=0, float=0, float=0, float=0);
 
 private:
   std::string InFileName;
@@ -54,6 +55,7 @@ private:
   std::vector<TH2F> hResidual;
   std::vector<TH2F> hResidualXdY;
   std::vector<TH2F> hResidualYdX;
+  static float GetMaxResidual(const std::vector<std::pair<float, float>>&);
 };
 
 #endif // DoAlignment_h

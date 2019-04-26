@@ -248,16 +248,38 @@ std::vector<unsigned short> Alignment::GetOrderedPlanes() {
   }
   return tmp;
 }
-
-void Alignment::FormatHistogram(TH1 * h, const string & x_tit, float x_off, const string & y_tit, float y_off) {
+template <typename Q>
+void Alignment::FormatHistogram(Q * h, const string & x_tit, float x_off, const string & y_tit, float y_off, float x_min, float x_max, float y_min, float y_max) {
 
   auto x_axis = h->GetXaxis();
   x_axis->SetTitle(x_tit.c_str());
   x_axis->SetTitleOffset(x_off);
+  if (x_min != 0 and x_max != 0) { x_axis->SetRangeUser(x_min, x_max); }
   auto y_axis = h->GetYaxis();
   y_axis->SetTitle(y_tit.c_str());
   y_axis->SetTitleOffset(y_off);
+  if (y_min != 0 and y_max != 0) { y_axis->SetRangeUser(y_min, y_max); }
 }
 
-std::pair<float, float> Alignment::GetMeanResiduals(unsigned short i_plane) { return std::make_pair(hResidual[i_plane].GetMean(1), hResidual[i_plane].GetMean(2)); }
-std::pair<float, float> Alignment::GetRMS(unsigned short i_plane) { return std::make_pair(hResidual[i_plane].GetRMS(1), hResidual[i_plane].GetRMS(2)); }
+void Alignment::SaveAllHistograms(int ind) {
+
+  for (auto i_plane: OrderedPlanes){
+    SaveHistograms(i_plane, ind);
+  }
+}
+
+void Alignment::PrintResiduals(const vector<unsigned short> & planes) {
+
+  cout << "\nRESIDUAL:  X         Y         aX         aY" << endl;
+  for (auto i_plane: planes) {
+    cout << " PLANE " << i_plane << ": " << Form("%+1.6f %+1.6f %+1.6f %+1.6f", fdX.at(i_plane).first, fdY.at(i_plane).first, fdA.at(i_plane).first, fdA.at(i_plane).second) << endl;
+  }
+}
+
+float Alignment::GetMaxResidual(const vector<pair<float, float>> & residuals) {
+  vector<float> tmp;
+  for (auto i_res: residuals){
+    tmp.emplace_back(fabs(i_res.first));
+  }
+  return *max_element(tmp.begin(), tmp.end());
+}
