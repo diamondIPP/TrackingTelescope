@@ -22,7 +22,7 @@ namespace tel {
     return elements;
   }
 
-  string trim(const string &str, string trim_characters) {
+  string trim(const string &str, const string & trim_characters) {
 
     size_t b = str.find_first_not_of(trim_characters);
     size_t e = str.find_last_not_of(trim_characters);
@@ -36,12 +36,14 @@ namespace tel {
     return sqrt(pow(p1.first - p2.first, 2) + pow(p1.second - p2.second, 2));
   }
 
-  ProgressBar::ProgressBar(uint32_t n_events, bool use_ETA, uint16_t update): nEvents(n_events), currentEvent(0), useETA(use_ETA), updateFrequency(update), lastTime(clock()),
+  ProgressBar::ProgressBar(uint32_t n_events, bool use_ETA, uint16_t update): nEvents(n_events), currentEvent(0), useETA(use_ETA), w(), updateFrequency(update), lastTime(clock()),
                                                                               nCycles(0), timePerCycle(0) {
     ioctl(0, TIOCGWINSZ, &w);
     uint8_t diff = not use_ETA ? uint8_t(26) : uint8_t(37);
     barLength = uint8_t(w.ws_col - diff);
   }
+
+   void critical(const std::string & msg) { std::cerr << std::endl << ERROR << "CRITICAL: " << ENDC << msg << std::endl; }
 
   void ProgressBar::update(uint32_t event) {
 
@@ -58,7 +60,7 @@ namespace tel {
       ss << setprecision(2) << setw(6) << setfill('0') << fixed << float(currentEvent) / nEvents * 100 << "%";
       if (useETA) {
         averageTime();
-        float tot = (nEvents - currentEvent) / updateFrequency * timePerCycle;
+        float tot = float(nEvents - currentEvent) / updateFrequency * timePerCycle;
         ss << setprecision(0) << " ETA: " << setw(2) << setfill('0') << tot / 60 << ":" << setw(2) << setfill('0') << tot - int(tot) / 60 * 60;
       }
       cout << ss.str() << flush;
@@ -82,5 +84,11 @@ namespace tel {
     else
       timePerCycle = float(.98) * timePerCycle + float(.02) * getTime();
     nCycles++;
+  }
+
+  ProgressBar & ProgressBar::operator++() {
+
+    update(++currentEvent);
+    return *this;
   }
 }

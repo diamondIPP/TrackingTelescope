@@ -19,6 +19,7 @@ class PSIBinaryFileReader : public PSIFileReader
 
     bool OpenFile ();
     void ResetFile ();
+    unsigned GetEntries() override { return 0; }
 
     bool ReadAddressesFromFile (std::string const);
 

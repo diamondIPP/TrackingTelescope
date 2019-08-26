@@ -3,11 +3,10 @@
 #include <map>
 #include <cstdlib>
 #include <PLTAlignment.h>
+#include "GetNames.h"
 
 
-PLTAlignment::PLTAlignment ()
-{
-  fIsGood = false;
+PLTAlignment::PLTAlignment (): ErrorsFromFile(false), fIsGood(false) {
 
   for (int i=0; i != 7; i++){// DA: TODO make error bars equal for all DUTs in X and Y
     fErrorsX.push_back(0.015);
@@ -25,10 +24,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
 {
   // So far so good..
   fIsGood = true;
-
-
   fTelescopeMap.clear();
-
 
   // Open file
   std::cout << "Opening " << InFileName << std::endl;
@@ -42,14 +38,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
   // Read each line in file
   int Channel, ROC;
   for (std::string InLine; std::getline(InFile, InLine); ) {
-    if (InLine.size() < 1) {
-      continue;
-    }
-    if (InLine.at(0) == '#') {
-      continue;
-    }
-
-    //std::cout << InLine << std::endl;
+    if (InLine.size() < 3 or InLine.at(0) == '#') { continue; }
     std::istringstream LineStream;
     LineStream.str(InLine);
 
@@ -57,16 +46,11 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
     std::pair<int, int> CHROC = std::make_pair(Channel, ROC);
 
     // read one line at a time
-    float R, RZ, RY, X, Y, Z;
-
+    float R, RZ, RY, X, Y, Z, dX(0), dY(0);
 
     // If the ROC is -1 it is telescope coords, 0,1,2 are ROCs, anything else is bad.
     if (ROC == -1) {
-      LineStream >> RZ
-                 >> RY
-                 >> X
-                 >> Y
-                 >> Z;
+      LineStream >> RZ >> RY >> X >> Y >> Z;
       fTelescopeMap[Channel].GRZ = RZ;
       fTelescopeMap[Channel].GRY = RY;
       fTelescopeMap[Channel].GX  = X;
@@ -78,10 +62,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
         throw;
       }
 
-      LineStream >> R
-                 >> X
-                 >> Y
-                 >> Z;
+      LineStream >> R >> X  >> Y >> Z >> dX >> dY;
 
       // Construct the alignment obj
       CP C;
@@ -101,6 +82,13 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
       std::cerr << "WARNING: Alignment file contains things I do not recognize: " << InLine << std::endl;
     }
 
+    /** try to read the errors from file */
+    if (dX > 0 and dY > 0){
+      ErrorsFromFile = true;
+      SetErrorX(ROC, dX);
+      SetErrorY(ROC, dY);
+    }
+
   }
 
   // Close input file
@@ -110,7 +98,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
 }
 
 
-void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int numRocs)
+void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int numRocs, bool writeErrors)
 {
     // Open output file
     ofstream f;
@@ -124,7 +112,8 @@ void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int 
     for (auto it:fTelescopeMap){
         int const Channel = it.first;
         TelescopeAlignmentStruct& Tele = it.second;
-        f << TString::Format("\n%2i  -1        %15E      %15E  %15E  %15E  %15E\n", Channel, Tele.GRZ, Tele.GRY, Tele.GX, Tele.GY, Tele.GZ);
+        f << "#CH ROC  RZ           RY           X            Y            Z           (dX)         (dY)\n";
+        f << TString::Format("%2i  -1 %+12.4E %+12.4E %+12.4E %+12.4E %+12.4E\n", Channel, Tele.GRZ, Tele.GRY, Tele.GX, Tele.GY, Tele.GZ);
         for (uint8_t iroc = 0; iroc < numRocs; iroc++){
             std::pair<int, int> ChROC = std::make_pair(Channel, int(iroc));
             if (!fConstantMap.count(ChROC)) {
@@ -132,18 +121,16 @@ void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int 
                 continue;
             }
             CP & C = fConstantMap[ChROC];
-            f << TString::Format("%2i   %1i        %15E                       %15E  %15E  %15E\n", Channel, iroc, C.LR, C.LX, C.LY, C.LZ);
+            f << TString::Format("%2i  %2i %+12.4E %+25.4E %+12.4E %+12.4E", Channel, iroc, C.LR, C.LX, C.LY, C.LZ);
+            if (writeErrors){
+              f << Form(" %+12.4E %+12.4E", GetErrorX(iroc), GetErrorY(iroc));
+            }
+            f << "\n";
         }
     }
 
     f.close();
     return;
-}
-
-
-bool PLTAlignment::IsGood ()
-{
-  return fIsGood;
 }
 
 
@@ -601,22 +588,15 @@ void PLTAlignment::AddToGZ (int const ch, float val)
 void PLTAlignment::SetErrors(int telescopeID, bool initial){
 
     uint8_t id = telescopeID;
-    if (initial){
-        SetErrorX( 0, 0.004);
-        SetErrorX( 1, 0.004);
-        SetErrorX( 2, 0.004);
-        SetErrorX( 3, 0.004);
-        SetErrorX( 4, 0.004);
-        SetErrorX( 5, 0.004);
-
-        SetErrorY( 0, 0.003);
-        SetErrorY( 1, 0.003);
-        SetErrorY( 2, 0.003);
-        SetErrorY( 3, 0.003);
-        SetErrorY( 4, 0.003);
-        SetErrorY( 5, 0.003);
-    }
-    else{
+    uint8_t n_planes = GetNumberOfROCS(telescopeID);
+    if (initial) { /** just use increased digital resolution for initial config */
+      for (auto i_plane(0); i_plane < n_planes; i_plane++){
+        SetErrorX(i_plane, PLTU::PIXELWIDTH / sqrt(12) * 2.5);
+        SetErrorY(i_plane, PLTU::PIXELHEIGHT / sqrt(12) * 2.5);
+      }
+    } else if (ErrorsFromFile) {
+      std::cout << "Already found errors in alignment file!" << std::endl;
+    } else {
         if (telescopeID == 1){
             SetErrorX( 0, 0.0138452);
             SetErrorX( 1, 0.0041562);

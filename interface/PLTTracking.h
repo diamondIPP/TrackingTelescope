@@ -35,7 +35,9 @@ class PLTTracking
     void SetAllPlanes(); // 222222
     void SetPlaneUnderTest(int); // 330333
     void SetPlanesUnderTest(unsigned, unsigned); // 330033
+    void SetPlanesUnderTest(const std::vector<unsigned short>&); // 330033
     void SetPlaneUnderTestSandwich(int); // 303000
+    bool IsPlaneUnderTest(unsigned i_plane) { return fUsePlanesForTracking.at(i_plane) == 0; }
 
     void RunTracking (PLTTelescope&);
 
