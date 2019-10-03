@@ -20,10 +20,11 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
   PlotsDir("plots/"),
   OutDir(PlotsDir + run_number),
   FileType(".png"),
-  AngleThreshold(.001),
-  ResThreshold(.0001),
+  AngleThreshold(.0005),
+  ResThreshold(.000025),
   Now(clock()),
-  MaximumSteps(14) {
+  MaximumSteps(100) {
+//  MaximumSteps(14) {
 
   gROOT->ProcessLine("gErrorIgnoreLevel = kError;");
   gStyle->SetOptStat(0);
@@ -38,7 +39,19 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
 //  MaxEventNumber = 20000;
   OrderedPlanes = GetOrderedPlanes();
   InnerPlanes = vector<unsigned short>(OrderedPlanes.begin() + 1, OrderedPlanes.end() - 1);
+    std::cout<<"orderedplanes "<<std::endl;
+    for(auto it=OrderedPlanes.cbegin(); it!=OrderedPlanes.cend(); it++)
+        cout<<*it<<" ";
+    cout<<endl;
+    std::cout<<"innrplanes "<<std::endl;
+    for(auto it=InnerPlanes.cbegin(); it!=InnerPlanes.cend(); it++)
+        cout<<*it<<" ";
+    cout<<endl;
   PlanesToAlign = AlignOnlyInnerPlanes ? InnerPlanes : vector<unsigned short>(OrderedPlanes.begin() + 1, OrderedPlanes.end());
+  std::cout<<"planestoalign "<<std::endl;
+  for(auto it=PlanesToAlign.cbegin(); it!=PlanesToAlign.cend(); it++)
+    cout<<*it<<" ";
+  cout<<endl;
   FR->GetAlignment()->ResetPlane(1, OrderedPlanes.at(0)); /** the first plane in z should be kept fixed */
   FR->GetAlignment()->SetErrorX(OrderedPlanes.at(0), 0); /** keep first plane as a fix point */
   FR->GetAlignment()->SetErrorY(OrderedPlanes.at(0), 0);
@@ -145,21 +158,34 @@ int Alignment::Align() {
     FR->ResetFile();
     FR->SetAllPlanes();
     EventLoop(PlanesToAlign); /** Loop over all events and fill histograms */
+    int alternate = i_align / int(5);
 
-    for (auto i_plane: PlanesToAlign) {
-      pair<float, float> dX(fdX.at(i_plane)), dY(fdY.at(i_plane)), dA(fdA.at(i_plane));
-      FR->GetAlignment()->AddToLR(1, i_plane, float(dA.first)); // DA: this was ... other_angle/3.
-      FR->GetAlignment()->AddToLX(1, i_plane, float(dX.first));
-      FR->GetAlignment()->AddToLY(1, i_plane, float(dY.first));
-      SaveHistograms(i_plane, i_align);
+    unsigned int elems(PlanesToAlign.size());
+//    for (auto i_plane: PlanesToAlign) {
+    for (unsigned int it=0; it<elems; it++) {
+//      pair<float, float> dX(fdX.at(i_plane)), dY(fdY.at(i_plane)), dA(fdA.at(i_plane));
+        unsigned int roc = PlanesToAlign.at(it);
+        pair<float, float> dX(fdX.at(roc)), dY(fdY.at(roc)), dA(fdA.at(roc));
+        if((it + alternate) % 2 == 0)
+//      FR->GetAlignment()->AddToLR(1, i_plane, float(dA.first)); // DA: this was ... other_angle/3.
+            FR->GetAlignment()->AddToLR(1, roc, float(dA.first - dA.second)/2.0); // DA: this was ... other_angle/3.
+        else {
+//      FR->GetAlignment()->AddToLX(1, i_plane, float(dX.first));
+            FR->GetAlignment()->AddToLX(1, roc, float(dX.first));
+//      FR->GetAlignment()->AddToLY(1, i_plane, float(dY.first));
+            FR->GetAlignment()->AddToLY(1, roc, float(dY.first));
+        }
+//      SaveHistograms(i_plane, i_align);
+      SaveHistograms(roc, i_align);
     }
 
     PrintResiduals(PlanesToAlign);
-    cout << "END ITERATION " << i_align + 1 << " OUT OF 14" << endl;
-    float dX_max(GetMaxResidual(fdX)), dY_max(GetMaxResidual(fdY)), dAX_max(GetMaxResidual(fdA));
-    cout << "Maximum Residuals in x, y and max angle: " << dX_max << ", " << dY_max << ", " << dAX_max << Form(" of (%f)", ResThreshold) << endl;
+    cout << "END ITERATION " << i_align + 1 << " OUT OF " << MaximumSteps << endl;
+//    float dX_max(GetMaxResidual(fdX)), dY_max(GetMaxResidual(fdY)), dAX_max(GetMaxAverageAngle(fdA));
+    float dRes_max(GetMaximumMagRes(fdX, fdY)), dAX_max(GetMaxAverageAngle(fdA));
+    cout << Form("Maximum Residuals magnitude = %f and Maximum Average Angle = %f  (ResMax->%f, AngleMax->%f)", dRes_max, dAX_max, ResThreshold, AngleThreshold) << endl;
 
-    if (dX_max < ResThreshold and dY_max < ResThreshold and dAX_max < AngleThreshold){
+    if (dRes_max < ResThreshold and dAX_max < AngleThreshold){
       SaveAllHistograms();
       cout << "Max angle is below " << AngleThreshold << " and max residuals are below " << ResThreshold << "=> stopping alignment." << endl;
       break;
@@ -175,9 +201,11 @@ int Alignment::Align() {
 void Alignment::InitHistograms() {
 
   for (uint8_t i_plane(0); i_plane != NPlanes; ++i_plane){
-    hResidual.emplace_back(        Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 400, -.5, .5, 400, -.5, .5);
-    hResidualXdY.emplace_back(TH2F(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 133, -1, 0.995, 400, -.5, .5));
-    hResidualYdX.emplace_back(TH2F(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 201, -1, 1, 400, -.5, .5));
+    hResidual.emplace_back(        Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 1600, -4, 4, 1600, -4, 4);
+//    hResidualXdY.emplace_back(TH2F(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 281, -2.1075, 2.1075, 801, -1.00125, 1.00125));
+    hResidualXdY.emplace_back(TProfile(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 281, -2.1075, 2.1075, -1, 1));
+//    hResidualYdX.emplace_back(TH2F(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 401, -2.005, 2.005, 800, -1.00125, 1.00125));
+    hResidualYdX.emplace_back(TProfile(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 401, -2.005, 2.005, -1, 1));
   }
 }
 
@@ -200,7 +228,7 @@ void Alignment::SaveHistograms(unsigned i_plane, int ind) {
   // 2D Residuals
   hResidual[i_plane].SetContour(1024);
   hResidual[i_plane].Draw("colz");
-  FormatHistogram(&hResidual[i_plane], "dX [cm]", 1, "dY [cm]", 1.3, -.2, .2, -.2, .2);
+  FormatHistogram(&hResidual[i_plane], "dX [cm]", 1, "dY [cm]", 1.3, -1, 1, -1, 1);
   Can.SaveAs(OutDir + Form("/%s/%s%s%s", sub_dir.c_str(), hResidual[i_plane].GetName(), suffix.c_str(), FileType.c_str()));
   // Residual X-Projection
   gStyle->SetOptStat(1111);
@@ -214,12 +242,16 @@ void Alignment::SaveHistograms(unsigned i_plane, int ind) {
   p_y->Draw();
   Can.SaveAs(OutDir + Form("/%s/%s_Y%s%s", sub_dir.c_str(), hResidual[i_plane].GetName(), suffix.c_str(), FileType.c_str()));
   // 2D Residuals X/dY
-  hResidualXdY[i_plane].SetContour(1024);
-  hResidualXdY[i_plane].Draw("colz");
+//  hResidualXdY[i_plane].SetContour(1024);
+    hResidualXdY[i_plane].GetXaxis()->SetRangeUser(-1, 1);
+    hResidualXdY[i_plane].GetYaxis()->SetRangeUser(-0.1, 0.1);
+  hResidualXdY[i_plane].Draw();
   Can.SaveAs(OutDir + Form("/%s/%s%s%s", sub_dir.c_str(), hResidualXdY[i_plane].GetName(), suffix.c_str(), FileType.c_str()));
   // 2D Residuals Y/dX
-  hResidualYdX[i_plane].SetContour(1024);
-  hResidualYdX[i_plane].Draw("colz");
+//  hResidualYdX[i_plane].SetContour(1024);
+    hResidualYdX[i_plane].GetXaxis()->SetRangeUser(-1, 1);
+    hResidualYdX[i_plane].GetYaxis()->SetRangeUser(-0.1, 0.1);
+    hResidualYdX[i_plane].Draw();
   Can.SaveAs(OutDir + Form("/%s/%s%s%s", sub_dir.c_str(), hResidualYdX[i_plane].GetName(), suffix.c_str(), FileType.c_str()));
 }
 
@@ -280,10 +312,19 @@ void Alignment::PrintResiduals(const vector<unsigned short> & planes) {
   }
 }
 
-float Alignment::GetMaxResidual(const vector<pair<float, float>> & residuals) {
+float Alignment::GetMaxAverageAngle(const vector<pair<float, float>> &residuals) {
   vector<float> tmp;
   for (auto i_res: residuals){
-    tmp.emplace_back(fabs(i_res.first));
+    tmp.emplace_back(fabs((i_res.first-i_res.second))/2.0);
   }
   return *max_element(tmp.begin(), tmp.end());
+}
+
+float Alignment::GetMaximumMagRes(const vector<pair<float, float>> & residualsx, const vector<pair<float, float>> & residualsy){
+    vector<float> tmp;
+    unsigned long elems = residualsx.size();
+    for (unsigned int i=0; i<elems; i++){
+        tmp.emplace_back(sqrt(residualsx.at(i).first * residualsx.at(i).first + residualsy.at(i).first * residualsy.at(i).first));
+    }
+    return *max_element(tmp.begin(), tmp.end());
 }

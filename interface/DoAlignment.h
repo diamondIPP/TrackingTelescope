@@ -9,6 +9,7 @@ namespace tel { class ProgressBar; }
 class TH2F;
 class TGraph;
 class TH1;
+class TProfile;
 
 class Alignment {
 
@@ -57,9 +58,12 @@ private:
       hResidualXdY: x=X  / y=dY
       hResidualYdX: x=Y  / y=dX  */
   std::vector<TH2F> hResidual;
-  std::vector<TH2F> hResidualXdY;
-  std::vector<TH2F> hResidualYdX;
-  static float GetMaxResidual(const std::vector<std::pair<float, float>>&);
+//  std::vector<TH2F> hResidualXdY;
+  std::vector<TProfile> hResidualXdY;
+//  std::vector<TH2F> hResidualYdX;
+  std::vector<TProfile> hResidualYdX;
+  static float GetMaxAverageAngle(const std::vector<std::pair<float, float>> &);
+  static float GetMaximumMagRes(const std::vector<std::pair<float, float>>&, const std::vector<std::pair<float, float>>&);
 };
 
 #endif // DoAlignment_h
