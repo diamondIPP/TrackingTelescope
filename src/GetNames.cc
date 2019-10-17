@@ -3,10 +3,10 @@
 
 using namespace std;
 
-uint16_t nTelescopes = 70;
-vector<int16_t> pixelIDs = {10, 13, 15, 21, 25, 29, 30, 34, 35, 69};
+uint16_t nTelescopes = 71;
+vector<int16_t> pixelIDs = {10, 13, 15, 21, 25, 29, 30, 34, 35, 69, 70};
 vector<int16_t> roc6IDs = {1, 2, 3, 8, 21, 25, 34};
-vector<int16_t> roc7IDs = {10, 13, 15, 29, 30, 35, 69};
+vector<int16_t> roc7IDs = {10, 13, 15, 29, 30, 35, 69, 70};
 vector<int16_t> bcmPrimeIDs = {36, 42};
 
 string GetMaskingFilename(int telescopeID){
@@ -20,6 +20,7 @@ string GetMaskingFilename(int telescopeID){
     else if (telescopeID == 9)  return "outer_pixel_masks/outerPixelMask_Telescope9.txt";
     else if (telescopeID == 21)  return "outer_pixel_masks/outerPixelMask_Telescope21.txt";
     else if (telescopeID == 69)  return "outer_pixel_masks/outerPixelMask_Telescope69.txt";
+    else if (telescopeID == 70)  return "outer_pixel_masks/outerPixelMask_Telescope69.txt";
     else if (telescopeID >= 25)  return "outer_pixel_masks/outerPixelMask_Telescope21.txt";
     else if (telescopeID >= 10)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
     else if (telescopeID == -1) return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
@@ -58,6 +59,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 35)  return "calibration_lists/GKCalibrationList_Telescope35.txt";
     else if (telescopeID == 36)  return "calibration_lists/GKCalibrationList_Telescope35.txt";
     else if (telescopeID == 69)  return "calibration_lists/GKCalibrationList_Telescope69.txt";
+    else if (telescopeID == 70)  return "calibration_lists/GKCalibrationList_Telescope70.txt";
     else if (telescopeID >= 10)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {

@@ -31,7 +31,9 @@ PSIRootFileReader::PSIRootFileReader (std::string const InFileName,
 PSIRootFileReader::~PSIRootFileReader ()
 {
   Clear();
-  delete fTree;
+    ClearVectors();
+    CloseFile();
+//  delete fTree;
 
   // Crashed when uncommented. Live with the memleak for now
   //delete fRootFile;
@@ -40,18 +42,26 @@ PSIRootFileReader::~PSIRootFileReader ()
 
 bool PSIRootFileReader::OpenFile ()
 {
-
+//    ClearVectors();
+    f_plane = 0;
+    f_col = 0;
+    f_row = 0;
+    f_adc = 0;
+    f_charge = 0;
+    cout << "Open File" << endl;
     fRootFile = new TFile(fFileName.c_str(), "READ");
 
     if (!fRootFile->IsOpen()) return false;
 
     fTree = (TTree*)fRootFile->Get("tree");
-    fMacro = (TMacro*)fRootFile->Get("region_information");// DA: TODO make validation in case it does not have this
+    if(fRootFile->FindObject("region_information")) {
+        fMacro = (TMacro *) fRootFile->Get("region_information");// DA: TODO make validation in case it does not have this
+    }
 
     fAtEntry = 0;
-    fNEntries = fTree->GetEntries();
+    fNEntries = int(fTree->GetEntries());
 
-    if (!(fNEntries>0)) return false;
+    if (fNEntries <= 0) return false;
 
     // Set Branch Addresses
     fTree->SetBranchAddress("event_number", &f_event_number);
@@ -62,34 +72,65 @@ bool PSIRootFileReader::OpenFile ()
     fTree->SetBranchAddress("row", &f_row);
     fTree->SetBranchAddress("adc", &f_adc);
     fTree->SetBranchAddress("charge", &f_charge);
-//    fTree->GetBranch("bla");
-    if (fTree->GetBranch(GetSignalBranchName() ))
-        fTree->SetBranchAddress(GetSignalBranchName(), &f_signal);
+//    if (fTree->FindBranch(GetSignalBranchName() ))
+//        fTree->SetBranchAddress(GetSignalBranchName(), &f_signal);
     return true;
+}
+
+void PSIRootFileReader::ClearVectors(){
+    if(!f_plane->empty())
+        f_plane->clear();
+    if(!f_col->empty())
+        f_col->clear();
+    if(!f_row->empty())
+        f_row->clear();
+    if(!f_adc->empty())
+        f_adc->clear();
+    if(!f_charge->empty())
+        f_charge->clear();
+//    if(fTree->FindBranch(GetSignalBranchName() )) {
+//        if(!f_signal->empty())
+//            f_signal->clear();
+//    }
+//    f_plane = 0;
+//    f_col = 0;
+//    f_row = 0;
+//    f_adc = 0;
+//    f_charge = 0;
+}
+
+void PSIRootFileReader::CloseFile() {
+    if(fRootFile->IsOpen()) {
+        fRootFile->Close();
+        cout << "Close File" << endl;
+    } else
+        cout << "File is closed" << endl;
+//    delete fTree;
+//    delete fRootFile;
 }
 
 void PSIRootFileReader::ResetFile ()
 {
-    delete fTree;
-    delete fRootFile;
+    CloseFile();
+//    delete fTree;
+//    delete fRootFile;
+    cout << "Reset File" << endl;
     OpenFile();
 }
 
 int PSIRootFileReader::GetNextEvent ()
 {
     Clear();
-    if ( !fOnlyAlign ){
-        if (fTree->GetBranch(GetSignalBranchName() )){
-            ClearSignal();
-            AddSignal(*f_signal);
-        }
+//    ClearVectors();
+
+    for (int i = 0; i != NMAXROCS; ++i) {
+        fPlaneMap.emplace(i, PLTPlane());
+        fPlaneMap[i].SetROC(i);
     }
 
-    for (int i = 0; i != NMAXROCS; ++i)
-        fPlaneMap[i].SetROC(i);
-
-    if (fAtEntry == fNEntries)
+    if (fAtEntry == fNEntries) {
         return -1;
+    }
 
     fTree->GetEntry(fAtEntry);
 
@@ -115,14 +156,16 @@ int PSIRootFileReader::GetNextEvent ()
             fAlignment.AlignHit(*Hit);
             fHits.push_back(Hit);
             fPlaneMap[Hit->ROC()].AddHit(Hit);
-            if ( fOnlyAlign )
-                for (uint8_t i = 0; i !=roc+1; i++)
-                    if (fPlaneMap[i].NHits() == 0) return 0; // CHECKS THAT THERE WERE HITS IN THE PREVIOUS ROCS IF NOT RETURN 0
+            if ( fOnlyAlign ) {
+                for (uint8_t i = 0; i !=roc+1; i++) {
+                    if (fPlaneMap[i].NHits() == 0) return 0;
+                }
+            } // CHECKS THAT THERE WERE HITS IN THE PREVIOUS ROCS IF NOT RETURN 0
         }
     }
 
     /** Loop over all planes and clusterize each one, then add each plane to the correct telescope (by channel number) */
-    for (std::map< int, PLTPlane>::iterator it = fPlaneMap.begin(); it != fPlaneMap.end(); ++it){
+    for (auto it = fPlaneMap.begin(); it != fPlaneMap.end(); it++){
         it->second.Clusterize(PLTPlane::kClustering_AllTouching, PLTPlane::kFiducialRegion_All);
         AddPlane( &(it->second) );
     }

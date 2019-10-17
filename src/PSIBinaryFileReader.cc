@@ -53,6 +53,10 @@ PSIBinaryFileReader::~PSIBinaryFileReader ()
   Clear();
 }
 
+void PSIBinaryFileReader::CloseFile() {
+  return;
+}
+
 
 bool PSIBinaryFileReader::OpenFile ()
 {

@@ -26,6 +26,8 @@ class PSIRootFileReader : public PSIFileReader
     bool OpenFile ();
     void ResetFile ();
     int GetNextEvent ();
+    void CloseFile();
+    void ClearVectors();
     unsigned GetEntries() override { return fTree->GetEntries(); }
 
     // Make tree accessible
@@ -45,7 +47,7 @@ class PSIRootFileReader : public PSIFileReader
     int fNEntries;
 
     // Scalar Branches
-    int f_event_number;
+    int32_t f_event_number;
     double f_time;
 
     // Vector Branches

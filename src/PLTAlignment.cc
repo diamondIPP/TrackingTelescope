@@ -136,12 +136,12 @@ void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int 
 
 float PLTAlignment::PXtoLX (int const px)
 {
-  return PLTU::PIXELWIDTH * ((px + 0.000001) - PLTU::DIACENTERX);
+  return PLTU::PIXELWIDTH * ((px + 0.0000000001) - PLTU::DIACENTERX);
 }
 
 float PLTAlignment::PYtoLY (int const py)
 {
-  return PLTU::PIXELHEIGHT * ((py + 0.000001) - PLTU::DIACENTERY);
+  return PLTU::PIXELHEIGHT * ((py + 0.0000000001) - PLTU::DIACENTERY);
 }
 
 int PLTAlignment::PXfromLX (float const lx)

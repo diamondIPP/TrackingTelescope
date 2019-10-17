@@ -1370,7 +1370,7 @@ int main (int argc, char* argv[]) {
   /** Tracking only on the telescope (only for digital telescope):
       0: Use All planes (default until September 2016.
       1: Use only the first 4 planes for tracking (telescope planes) */
-  bool trackOnlyTelescope = argc >= 5 && bool(strtoul(argv[4], nullptr, 10));
+  auto trackOnlyTelescope =  argc >= 5? int16_t(strtoul(argv[4], nullptr, 10)) : 0;
 
   cout << "Action = " << int(action) << action_str.at(action) << endl;
   cout << "TelescopeID = " << int(telescopeID) << endl;
@@ -1390,11 +1390,50 @@ int main (int argc, char* argv[]) {
   TFile out_f(TString::Format("plots/%s/histos.root", RunNumber.c_str()), "recreate"); /** Open a ROOT file to store histograms in. */
 
   if (action == 1) { /** ALIGNMENT */
-    Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope);
+    unsigned short maxSteps(20);
+      float maxRes(0.00001);
+      float maxAngle(0.01);
+      unsigned long maxEvents = 100000;
+      string temps = "";
+      cout << "Enter the maximum number of iterations for alignment (press enter to use default): ";
+      getline(cin, temps);
+//      tempc = cin.get();
+      if (temps != "") {
+          maxSteps = (unsigned short) stoi(temps);
+          cout << "using " << maxSteps << " steps" << endl;
+          temps = "";
+      } else
+          cout << "using default steps " << maxSteps << endl;
+      cout << "Enter the maximum residual threshold for alignment (press enter to use default): ";
+      getline(cin, temps);
+      if (temps != "") {
+          maxRes = stof(temps);
+          cout << "using " << maxRes << " max residual" << endl;
+          temps = "";
+      } else
+          cout << "using default max residual " << maxRes << endl;
+      cout << "Enter the maximum angle threshold for alignment (press enter to use default): ";
+      getline(cin, temps);
+      if (temps != "") {
+          maxAngle = stof(temps);
+          cout << "using " << maxAngle << " max angle" << endl;
+          temps = "";
+      } else
+          cout << "using default max angle " << maxAngle <<endl;
+      cout << "Enter the maximum number of events to align (press enter to use all the events in the file): ";
+      getline(cin, temps);
+      if (temps != "") {
+          maxEvents = (unsigned long) stol(temps);
+          cout << "using " << maxEvents << " events (0 means all)" << endl;
+          temps = "";
+      } else
+          cout << "using default events" << maxEvents << endl;
+//          cout << "using all events" << endl;
+    Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope, maxSteps, maxRes, maxAngle, maxEvents);
   } else if (action==2) { /** RESIDUAL CALCULATION */
     FindPlaneErrors(InFileName, RunNumber, telescopeID);
   } else { /** ANALYSIS */
-    PLTAnalysis Analysis(InFileName, &out_f, RunNumber, telescopeID, trackOnlyTelescope);
+    PLTAnalysis Analysis(InFileName, &out_f, RunNumber, telescopeID, bool(trackOnlyTelescope));
     Analysis.EventLoop();
     Analysis.FinishAnalysis();
   }
