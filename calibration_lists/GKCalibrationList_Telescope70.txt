@@ -1,0 +1,8 @@
+./Calibrations/telescope70
+phCalibrationGErfFit_C0.dat
+phCalibrationGErfFit_C1.dat
+phCalibrationGErfFit_C2.dat
+phCalibrationGErfFit_C3.dat
+phCalibrationFitErr30_C0.dat
+phCalibrationFitErr30_C1.dat
+phCalibrationFitErr30_C2.dat
