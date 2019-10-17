@@ -48,6 +48,7 @@ bool PSIRootFileReader::OpenFile ()
     f_row = 0;
     f_adc = 0;
     f_charge = 0;
+    f_signal = 0;
     cout << "Open File" << endl;
     fRootFile = new TFile(fFileName.c_str(), "READ");
 
@@ -72,8 +73,8 @@ bool PSIRootFileReader::OpenFile ()
     fTree->SetBranchAddress("row", &f_row);
     fTree->SetBranchAddress("adc", &f_adc);
     fTree->SetBranchAddress("charge", &f_charge);
-//    if (fTree->FindBranch(GetSignalBranchName() ))
-//        fTree->SetBranchAddress(GetSignalBranchName(), &f_signal);
+    if (fTree->FindBranch(GetSignalBranchName() ))
+        fTree->SetBranchAddress(GetSignalBranchName(), &f_signal);
     return true;
 }
 
@@ -88,10 +89,10 @@ void PSIRootFileReader::ClearVectors(){
         f_adc->clear();
     if(!f_charge->empty())
         f_charge->clear();
-//    if(fTree->FindBranch(GetSignalBranchName() )) {
-//        if(!f_signal->empty())
-//            f_signal->clear();
-//    }
+    if(fTree->FindBranch(GetSignalBranchName() )) {
+        if(!f_signal->empty())
+            f_signal->clear();
+    }
 //    f_plane = 0;
 //    f_col = 0;
 //    f_row = 0;
@@ -105,15 +106,11 @@ void PSIRootFileReader::CloseFile() {
         cout << "Close File" << endl;
     } else
         cout << "File is closed" << endl;
-//    delete fTree;
-//    delete fRootFile;
 }
 
 void PSIRootFileReader::ResetFile ()
 {
     CloseFile();
-//    delete fTree;
-//    delete fRootFile;
     cout << "Reset File" << endl;
     OpenFile();
 }
@@ -121,7 +118,12 @@ void PSIRootFileReader::ResetFile ()
 int PSIRootFileReader::GetNextEvent ()
 {
     Clear();
-//    ClearVectors();
+    if ( !fOnlyAlign ){
+        if (fTree->GetBranch(GetSignalBranchName() )){
+            ClearSignal();
+            AddSignal(*f_signal);
+        }
+    }
 
     for (int i = 0; i != NMAXROCS; ++i) {
         fPlaneMap.emplace(i, PLTPlane());

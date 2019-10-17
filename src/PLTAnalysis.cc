@@ -37,7 +37,7 @@ PLTAnalysis::~PLTAnalysis()
     FW->saveTree();
     delete FR;
     delete FW;
-    delete Histos;
+//    delete Histos; // This causes it to crash for some unknown reason...
 }
 
 
