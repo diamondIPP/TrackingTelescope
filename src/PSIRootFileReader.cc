@@ -89,10 +89,10 @@ void PSIRootFileReader::ClearVectors(){
         f_adc->clear();
     if(!f_charge->empty())
         f_charge->clear();
-    if(fTree->FindBranch(GetSignalBranchName() )) {
-        if(!f_signal->empty())
-            f_signal->clear();
-    }
+//    if(fTree->FindBranch(GetSignalBranchName() )) {
+//        if(!f_signal->empty())
+//            f_signal->clear();
+//    }
 //    f_plane = 0;
 //    f_col = 0;
 //    f_row = 0;

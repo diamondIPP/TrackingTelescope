@@ -14,14 +14,14 @@ class TProfile;
 class Alignment {
 
 public:
-  Alignment(std::string, const TString&, short, uint16_t=0, unsigned short=30, float=0.0005, float=0.005, unsigned long=0);
+  Alignment(std::string, const TString&, short, uint16_t=0, unsigned short=30, float=0.0005, float=0.005, unsigned long=0, short=-1);
   ~Alignment();
   short const TelescopeID;
   unsigned const NPlanes;
   uint16_t AlignMode = 0;
     uint16_t alignStep = 0;
     bool trackOnlyTelescope = true;
-  void PreAlign();
+//  void PreAlign();
   int Align();
   void InitHistograms();
   void ResetHistograms();
@@ -55,7 +55,6 @@ private:
   std::vector<unsigned short> InnerPlanes;
   std::vector<unsigned short> PlanesToAlign;
   std::vector<unsigned short> PlanesUnderTest; // No tracking for this planes
-  std::vector<unsigned short> PreAlignPlanes; // No tracking for this planes
   std::vector<unsigned short> TelescopePlanes; // No tracking for this planes
   /** Means (offsets) and RMS of the residual distributions */
   std::vector<std::pair<float, float>> fdX;

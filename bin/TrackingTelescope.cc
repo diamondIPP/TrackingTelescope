@@ -1342,10 +1342,13 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 
 int main (int argc, char* argv[]) {
 
-  if (argc != 5 and argc != 4) {
-    tel::critical("Wrong arguments");
-    std::cerr << "Usage: " << argv[0] << " <InFileName> <action> <telescopeID> (<TrackOnlyTelescope>=0)" << std::endl;
+  if (argc <= 2 or argc >= 10) {
+    tel::critical("Wrong arguments; Must supply at least 3 arguments and no more than 9: ");
+    std::cerr << "Usage: " << argv[0] << " <InFileName> <action> <telescopeID> (<TrackMode>=0) (<EventsAlignment>=100000) (<IterAlignStep>=20) (<MaxAlignRes(cm)>=0.00001) (<MaxAlignAngle(rad)>=0.001) (<SilDUT>=-1)" << std::endl;
     std::cerr << "action:\n  0: analysis\n  1: alignment\n  2: residuals" << std::endl;
+    std::cerr << "TrackMode:\n  0: AllPlanes\n  1: OnlyTelescope" << std::endl;
+    std::cerr << "EventsAlignment:\n  0: Use ALL events in file\n  <n>: Use only the first \"n\" events in the provided file. If file has less than \"n\", it will use all" << std::endl;
+    std::cerr << "SilDUT:\n  -1: No Silicon DUT, only diamonds\n  <i>: Roc position \"i\" where the Silicon DUT is" << std::endl;
     return 1;
   }
   gInterpreter->GenerateDictionary("vector<vector<Float_t> >;vector<vector<UShort_t> >");  // add root dicts for vector<vector> >
@@ -1370,11 +1373,38 @@ int main (int argc, char* argv[]) {
   /** Tracking only on the telescope (only for digital telescope):
       0: Use All planes (default until September 2016.
       1: Use only the first 4 planes for tracking (telescope planes) */
-  auto trackOnlyTelescope =  argc >= 5? int16_t(strtoul(argv[4], nullptr, 10)) : 0;
+  auto trackOnlyTelescope = argc >= 4? bool(strtoul(argv[4], nullptr, 10)) : false;
 
   cout << "Action = " << int(action) << action_str.at(action) << endl;
   cout << "TelescopeID = " << int(telescopeID) << endl;
   cout << "Track only analogue telescope: " << trackOnlyTelescope << "\n" << endl;
+    unsigned long maxAlignmentEvents = 100000;
+    unsigned short iterAlignSteps = 20;
+    float maxAlignRes(0.00001);
+    float maxAlignAngle(0.001);
+    short silRoc(-1);
+    if(argc >= 5){
+        maxAlignmentEvents = strtoul(argv[5], nullptr, 10);
+        cout << "Using " << maxAlignmentEvents << " for alignment (0 means all)" << endl;
+    }
+    if(argc >= 6){
+        iterAlignSteps = (unsigned short)strtoul(argv[6], nullptr, 10);
+        cout << "Using " << iterAlignSteps << " iteration per alignment step" << endl;
+    }
+    if(argc >= 7){
+        maxAlignRes = strtof(argv[7], nullptr);
+        cout << "Using " << maxAlignRes << " as maximum residuals threshold per alignment step" << endl;
+    }
+    if(argc >= 8){
+        maxAlignAngle = strtof(argv[8], nullptr);
+        cout << "Using " << maxAlignAngle << " as maximum angle threshold per alignment step" << endl;
+    }
+    if(argc == 9){
+        silRoc = (short)strtol(argv[9], nullptr, 10);
+        if(silRoc != -1) {
+            cout << "Using dut in roc " << silRoc << " as an extra silicon telescope plane" << endl;
+        }
+    }
 
   string const InFileName = argv[1];
   vector<std::string> x = tel::split(InFileName, '/');
@@ -1390,45 +1420,6 @@ int main (int argc, char* argv[]) {
   TFile out_f(TString::Format("plots/%s/histos.root", RunNumber.c_str()), "recreate"); /** Open a ROOT file to store histograms in. */
 
   if (action == 1) { /** ALIGNMENT */
-    unsigned short maxSteps(20);
-      float maxRes(0.00001);
-      float maxAngle(0.001);
-      unsigned long maxEvents = 100000;
-      string temps = "";
-      cout << "Enter the maximum number of iterations for alignment (press enter to use default): ";
-      getline(cin, temps);
-//      tempc = cin.get();
-      if (temps != "") {
-          maxSteps = (unsigned short) stoi(temps);
-          cout << "using " << maxSteps << " iterations per step" << endl;
-          temps = "";
-      } else
-          cout << "using default iteration steps: " << maxSteps << endl;
-      cout << "Enter the maximum residual threshold for alignment (press enter to use default): ";
-      getline(cin, temps);
-      if (temps != "") {
-          maxRes = stof(temps);
-          cout << "using " << maxRes << " as max residual" << endl;
-          temps = "";
-      } else
-          cout << "using default max residual: " << maxRes << endl;
-      cout << "Enter the maximum angle threshold for alignment (press enter to use default): ";
-      getline(cin, temps);
-      if (temps != "") {
-          maxAngle = stof(temps);
-          cout << "using " << maxAngle << " as max angle" << endl;
-          temps = "";
-      } else
-          cout << "using default max angle: " << maxAngle <<endl;
-      cout << "Enter the maximum number of events to align (press enter to use all the events in the file): ";
-      getline(cin, temps);
-      if (temps != "") {
-          maxEvents = (unsigned long) stol(temps);
-          cout << "using " << maxEvents << " events (0 means all)" << endl;
-          temps = "";
-      } else
-          cout << "using default events: " << maxEvents << endl;
-//          cout << "using all events" << endl;
     Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope, maxSteps, maxRes, maxAngle, maxEvents);
   } else if (action==2) { /** RESIDUAL CALCULATION */
     FindPlaneErrors(InFileName, RunNumber, telescopeID);
