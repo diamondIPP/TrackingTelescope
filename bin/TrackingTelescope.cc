@@ -1392,7 +1392,7 @@ int main (int argc, char* argv[]) {
   if (action == 1) { /** ALIGNMENT */
     unsigned short maxSteps(20);
       float maxRes(0.00001);
-      float maxAngle(0.01);
+      float maxAngle(0.001);
       unsigned long maxEvents = 100000;
       string temps = "";
       cout << "Enter the maximum number of iterations for alignment (press enter to use default): ";
@@ -1400,26 +1400,26 @@ int main (int argc, char* argv[]) {
 //      tempc = cin.get();
       if (temps != "") {
           maxSteps = (unsigned short) stoi(temps);
-          cout << "using " << maxSteps << " steps" << endl;
+          cout << "using " << maxSteps << " iterations per step" << endl;
           temps = "";
       } else
-          cout << "using default steps " << maxSteps << endl;
+          cout << "using default iteration steps: " << maxSteps << endl;
       cout << "Enter the maximum residual threshold for alignment (press enter to use default): ";
       getline(cin, temps);
       if (temps != "") {
           maxRes = stof(temps);
-          cout << "using " << maxRes << " max residual" << endl;
+          cout << "using " << maxRes << " as max residual" << endl;
           temps = "";
       } else
-          cout << "using default max residual " << maxRes << endl;
+          cout << "using default max residual: " << maxRes << endl;
       cout << "Enter the maximum angle threshold for alignment (press enter to use default): ";
       getline(cin, temps);
       if (temps != "") {
           maxAngle = stof(temps);
-          cout << "using " << maxAngle << " max angle" << endl;
+          cout << "using " << maxAngle << " as max angle" << endl;
           temps = "";
       } else
-          cout << "using default max angle " << maxAngle <<endl;
+          cout << "using default max angle: " << maxAngle <<endl;
       cout << "Enter the maximum number of events to align (press enter to use all the events in the file): ";
       getline(cin, temps);
       if (temps != "") {
@@ -1427,7 +1427,7 @@ int main (int argc, char* argv[]) {
           cout << "using " << maxEvents << " events (0 means all)" << endl;
           temps = "";
       } else
-          cout << "using default events" << maxEvents << endl;
+          cout << "using default events: " << maxEvents << endl;
 //          cout << "using all events" << endl;
     Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope, maxSteps, maxRes, maxAngle, maxEvents);
   } else if (action==2) { /** RESIDUAL CALCULATION */

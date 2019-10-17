@@ -42,7 +42,9 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
     alignStep = 0;
     while(not alignmentFinished) {
         FR = InitFileReader();
-        MaxEventNumber = (MaxEvents == 0) ? (unsigned long) FR->GetEntries() : MaxEvents;
+        maxResiduals.clear();
+        maxAngles.clear();
+        MaxEventNumber = (MaxEvents == 0 or MaxEvents > FR->GetEntries()) ? (unsigned long) FR->GetEntries() : MaxEvents;
         OrderedPlanes = GetOrderedPlanes();
         TelescopePlanes = GetTelescopePlanes();
         InnerPlanes = vector<unsigned short>(OrderedPlanes.begin() + 1, OrderedPlanes.end() - 1);
@@ -63,46 +65,72 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
             PlanesUnderTest = InnerPlanes;
             PreAlignPlanes = InnerPlanes;
         } else if (AlignMode == 2) {
-            if(alignStep == 0){
+            if(alignStep == 0) {
                 cout << "align 0" << endl;
                 PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 1, TelescopePlanes.end());
                 PreAlignPlanes = PlanesToAlign;
                 PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end());
-            } else if(alignStep == 1){
-                cout << "align 1" << endl;
-                PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 2, TelescopePlanes.end() - 1);
+            } else if(alignStep == 1) {
+                cout << "align 0 inclusive" << endl;
+                PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 1, TelescopePlanes.end());
                 PreAlignPlanes = PlanesToAlign;
                 PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
-            } else if(alignStep == 2){
-                cout << "align 2" << endl;
-                PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 3, TelescopePlanes.end() - 2);
+            } else if(alignStep == 2) {
+                cout << "align inner planes" << endl;
+                PlanesToAlign = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
                 PreAlignPlanes = PlanesToAlign;
-                PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 2);
+                PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
+//            } else if(alignStep == 1){
+//                cout << "align 1" << endl;
+//                PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 2, TelescopePlanes.end() - 1);
+//                PreAlignPlanes = PlanesToAlign;
+//                PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
+//            } else if(alignStep == 2){
+//                cout << "align 2" << endl;
+//                PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 3, TelescopePlanes.end() - 2);
+//                PreAlignPlanes = PlanesToAlign;
+//                PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 2);
             } else if(alignStep == 3){
-                cout << "align tel" << endl;
-                PlanesToAlign = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end());
+                cout << "align inner planes inclusive" << endl;
+                PlanesToAlign = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
                 PreAlignPlanes = PlanesToAlign;
                 PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 2);
+//            } else if(alignStep == 3){
+//                cout << "align tel" << endl;
+//                PlanesToAlign = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end());
+//                PreAlignPlanes = PlanesToAlign;
+//                PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 2);
             } else if(alignStep == 4){
                 cout << "align last dut" << endl;
                 PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 4, OrderedPlanes.end() - 2);
                 PreAlignPlanes = PlanesToAlign;
                 PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 2);
             } else if(alignStep == 5){
-                cout << "align middle dut" << endl;
-                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 3, OrderedPlanes.end() - 3);
+                cout << "align last dut inclusive" << endl;
+                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 4, OrderedPlanes.end() - 2);
                 PreAlignPlanes = PlanesToAlign;
                 PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 3);
-            } else if(alignStep == 6){
-                cout << "align first dut" << endl;
-                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 4);
+//            } else if(alignStep == 5){
+//                cout << "align middle dut" << endl;
+//                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 3, OrderedPlanes.end() - 3);
+//                PreAlignPlanes = PlanesToAlign;
+//                PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 3);
+            } else if(alignStep == 6) {
+                cout << "align diamond dut" << endl;
+                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 3);
                 PreAlignPlanes = PlanesToAlign;
-                PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 4);
+                PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 3);
+//            } else if(alignStep == 6){
+//                cout << "align first dut" << endl;
+//                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 4);
+//                PreAlignPlanes = PlanesToAlign;
+//                PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 4);
             } else{
-                cout << "align DUTs" << endl;
-                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 2);
-                PreAlignPlanes = PlanesToAlign;
-                PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 2);
+                cout << "Everything is aligned :)" << endl;
+//                cout << "align diamond DUTs inclusive" << endl;
+//                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 2);
+//                PreAlignPlanes = PlanesToAlign;
+//                PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 2);
             }
 
         } else {
@@ -132,9 +160,9 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
 
         cout << "Starting with Alignment: " << endl;
         PrintAlignment();
-        PreAlign();
+//        PreAlign();
         Align();
-        if (AlignMode == 2 and alignStep <= 6) {
+        if (AlignMode == 2 and alignStep <= 5) {
             alignStep++;
             trackOnlyTelescope = (alignStep < 4);
             FR->CloseFile();
@@ -247,8 +275,12 @@ int Alignment::Align() {
     FR->SetAllPlanes();
       if(not PlanesUnderTest.empty())
         FR->SetPlanesUnderTest(PlanesUnderTest);
-      nSigma = float(3. + 1. / (1. + exp((i_align - (MaximumSteps / 5.)) / (MaximumSteps / 20.))));
+//  nSigma shrinks with each iteration until only an ellipse of "3sigma" is used to exclude residual outliers.
+      nSigma = float(3. + 1. / (1. + exp((i_align - (MaximumSteps / 7.)) / (MaximumSteps / 25.))));
+//      nSigma = float(3. + 1. / (1. + exp((i_align - (MaximumSteps / 5.)) / (MaximumSteps / 20.))));
+      Now = clock();
     EventLoop(PlanesToAlign); /** Loop over all events and fill histograms */
+      cout << Form("\nLoop duration: %2.1f\n", (clock() - Now) / CLOCKS_PER_SEC) << endl;
 //    int alternate = i_align / int(2);
 
     unsigned int elems(PlanesToAlign.size());
@@ -275,13 +307,26 @@ int Alignment::Align() {
 //    float dX_max(GetMaxResidual(fdX)), dY_max(GetMaxResidual(fdY)), dAX_max(GetMaxAverageAngle(fdA));
     float dRes_max(GetMaximumMagRes(fdX, fdY, PlanesToAlign)), dAX_max(GetMaxAverageAngle(fdA, PlanesToAlign));
     cout << Form("Maximum Residuals magnitude = %f and Maximum Average Angle = %f  (ResMax->%f, AngleMax->%f)", dRes_max, dAX_max, ResThreshold, AngleThreshold) << endl;
+      maxResiduals.push_back(dRes_max);
+      maxAngles.push_back(dAX_max);
 
     if (dRes_max < ResThreshold and dAX_max < AngleThreshold){
       SaveAllHistograms();
-      cout << "Max angle is below " << AngleThreshold << " and max residuals are below " << ResThreshold << "=> stopping alignment." << endl;
+      cout << "Max angle is below " << AngleThreshold << " and max residuals are below " << ResThreshold << " => stopping alignment." << endl;
       break;
     }
-    cout << endl;
+      if(maxResiduals.size() > 1 and maxAngles.size() > 1){
+          float deltaResMax(fabs(maxResiduals.back() - maxResiduals.at(maxResiduals.size() - 2)));
+          float deltaAngleMax(fabs(maxAngles.back() - maxAngles.at(maxAngles.size() - 2)));
+          cout << Form("Maximum Residuals magnitude Delta = %f and Maximum Average Angle Delta = %f  (ResMaxDelta->%f, AngleMaxDelta->%f)", deltaResMax, deltaAngleMax, ResThreshold * 0.1, AngleThreshold * 0.1) << endl;
+          if((deltaResMax < 0.1 * ResThreshold) and (deltaAngleMax < 0.1 * AngleThreshold)){
+              SaveAllHistograms();
+              cout << "Angle correction is below " << AngleThreshold * 0.1 << " and max residuals correction is below " << 0.1 * ResThreshold << " => stopping alignment." << endl;
+              break;
+          }
+      }
+
+      cout << endl;
   } // end alignment loop
 
   cout << "Saving alignment file \"" << OutFileName << "\" with the following parameters:" << endl;
@@ -415,6 +460,7 @@ void Alignment::PrintResiduals(const vector<unsigned short> & planes) {
   }
 }
 
+// This method is necessary to find the plane with the maximum "angle deviation" for converging criteria
 float Alignment::GetMaxAverageAngle(const vector<pair<float, float>> &residuals, std::vector<unsigned short> alignplanes) {
   vector<float> tmp;
     unsigned long elems = residuals.size();
@@ -423,6 +469,7 @@ float Alignment::GetMaxAverageAngle(const vector<pair<float, float>> &residuals,
         if(std::find(alignplanes.begin(), alignplanes.end(), i) != alignplanes.end()){
 //            tmp[i] = float(fabs((residuals.at(i).first - residuals.at(i).second)) / 2.0);
             tmp[i] = fabs((residuals.at(i).first));
+            cout << "M A " << i << " : " << tmp[i] << endl;
         }
         else{
             tmp[i] = 0;
@@ -442,6 +489,7 @@ void Alignment::ClearVectors(){
     }
 }
 
+// This method is necessary to find the plane with the maximum "residual magnitude" for converging criteria
 float Alignment::GetMaximumMagRes(const vector<pair<float, float>> & residualsx, const vector<pair<float, float>> & residualsy, vector<unsigned short> alignplanes){
     vector<float> tmp;
     unsigned long elems = residualsx.size();
@@ -449,11 +497,11 @@ float Alignment::GetMaximumMagRes(const vector<pair<float, float>> & residualsx,
     for (unsigned int i=0; i<elems; i++){
         if(std::find(alignplanes.begin(), alignplanes.end(), i) != alignplanes.end()) {
             tmp[i] = sqrt(residualsx.at(i).first * residualsx.at(i).first + residualsy.at(i).first * residualsy.at(i).first);
+            cout << "M R " << i << " : " << tmp[i] << endl;
         }
         else{
             tmp[i] = 0;
         }
-        cout << "M R " << i << " : " << tmp[i] << endl;
     }
     return *max_element(tmp.begin(), tmp.end());
 }

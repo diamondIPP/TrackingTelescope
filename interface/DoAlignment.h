@@ -62,6 +62,8 @@ private:
   std::vector<std::pair<float, float>> fdY;
   std::vector<std::pair<float, float>> fdA;
     float nSigma = 10.;
+    std::vector<float_t> maxResiduals;
+    std::vector<float_t> maxAngles;
   /** Histograms
       hResidual:    x=dX / y=dY
       hResidualXdY: x=X  / y=dY
