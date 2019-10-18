@@ -1342,7 +1342,7 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 
 int main (int argc, char* argv[]) {
 
-  if (argc <= 2 or argc >= 10) {
+  if (argc <= 3 or argc >= 11) {
     tel::critical("Wrong arguments; Must supply at least 3 arguments and no more than 9: ");
     std::cerr << "Usage: " << argv[0] << " <InFileName> <action> <telescopeID> (<TrackMode>=0) (<EventsAlignment>=100000) (<IterAlignStep>=20) (<MaxAlignRes(cm)>=0.00001) (<MaxAlignAngle(rad)>=0.001) (<SilDUT>=-1)" << std::endl;
     std::cerr << "action:\n  0: analysis\n  1: alignment\n  2: residuals" << std::endl;
@@ -1373,7 +1373,7 @@ int main (int argc, char* argv[]) {
   /** Tracking only on the telescope (only for digital telescope):
       0: Use All planes (default until September 2016.
       1: Use only the first 4 planes for tracking (telescope planes) */
-  auto trackOnlyTelescope = argc >= 4? bool(strtoul(argv[4], nullptr, 10)) : false;
+  auto trackOnlyTelescope = argc >= 5? bool(strtoul(argv[4], nullptr, 10)) : false;
 
   cout << "Action = " << int(action) << action_str.at(action) << endl;
   cout << "TelescopeID = " << int(telescopeID) << endl;
@@ -1382,25 +1382,25 @@ int main (int argc, char* argv[]) {
     unsigned short iterAlignSteps = 20;
     float maxAlignRes(0.00001);
     float maxAlignAngle(0.001);
-    int8_t silRoc(-1);
-    if(argc >= 5){
+    short silRoc(-1);
+    if(argc >= 6){
         maxAlignmentEvents = strtoul(argv[5], nullptr, 10);
         cout << "Using " << maxAlignmentEvents << " for alignment (0 means all)" << endl;
     }
-    if(argc >= 6){
+    if(argc >= 7){
         iterAlignSteps = (unsigned short)strtoul(argv[6], nullptr, 10);
         cout << "Using " << iterAlignSteps << " iteration per alignment step" << endl;
     }
-    if(argc >= 7){
+    if(argc >= 8){
         maxAlignRes = strtof(argv[7], nullptr);
         cout << "Using " << maxAlignRes << " as maximum residuals threshold per alignment step" << endl;
     }
-    if(argc >= 8){
+    if(argc >= 9){
         maxAlignAngle = strtof(argv[8], nullptr);
         cout << "Using " << maxAlignAngle << " as maximum angle threshold per alignment step" << endl;
     }
-    if(argc == 9){
-        silRoc = (int8_t)strtol(argv[9], nullptr, 10);
+    if(argc == 10){
+        silRoc = (short)strtol(argv[9], nullptr, 10);
         if(silRoc != -1) {
             cout << "Using dut in roc " << silRoc << " as an extra silicon telescope plane" << endl;
         }

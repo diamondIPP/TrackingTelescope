@@ -11,7 +11,7 @@
 
 using namespace std;
 
-Alignment::Alignment(string in_file_name, const TString & run_number, short telescope_ID, bool onlyTel, unsigned short maxSteps, float maxRes, float maxAngle, unsigned long maxEvents, int8_t silDutRoc):
+Alignment::Alignment(string in_file_name, const TString & run_number, short telescope_ID, bool onlyTel, unsigned short maxSteps, float maxRes, float maxAngle, unsigned long maxEvents, int16_t silDutRoc):
     TelescopeID(telescope_ID),
     NPlanes(GetNumberOfROCS(telescope_ID)),
     AlignOnlyTelescope(onlyTel),
@@ -26,7 +26,7 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
     Now(clock()),
     MaximumSteps(maxSteps),
     silDUTRoc(silDutRoc){
-    trackOnlyTelescope = onlyTel;
+    trackOnlyTelescope = true;
 
     gROOT->ProcessLine("gErrorIgnoreLevel = kError;");
     gStyle->SetOptStat(0);
@@ -346,8 +346,8 @@ std::vector<unsigned short> Alignment::GetTelescopePlanes(){
 
 std::vector<unsigned short> Alignment::GetDiamondPlanes() {
     vector<unsigned short> tmp;
-    remove_copy_if(OrderedPlanes.begin(), OrderedPlanes.end(), back_inserter(tmp), [&TelescopePlanes](const unsigned short& arg){return (find(TelescopePlanes.begin(), TelescopePlanes.end(), arg) != TelescopePlanes.end());});
-    if(silDUTRoc == -1)
+    copy_if(OrderedPlanes.begin(), OrderedPlanes.end(), std::back_inserter(tmp), [=](unsigned short& arg){return (std::find(TelescopePlanes.begin(), TelescopePlanes.end(), arg) == TelescopePlanes.end());});
+    if(silDUTRoc != -1)
         tmp.erase(std::remove(tmp.begin(), tmp.end(), silDUTRoc), tmp.end());
     return tmp;
 }

@@ -14,15 +14,14 @@ class TProfile;
 class Alignment {
 
 public:
-  Alignment(std::string, const TString&, short, bool=false, unsigned short=30, float=0.0005, float=0.005, unsigned long=0, int8_t=-1);
+  Alignment(std::string, const TString&, short, bool=false, unsigned short=30, float=0.0005, float=0.005, unsigned long=0, short=-1);
   ~Alignment();
   short const TelescopeID;
   unsigned const NPlanes;
   bool AlignOnlyTelescope = false;
     uint16_t alignStep = 0;
-    int8_t silDUTRoc = -1;
     bool trackOnlyTelescope = true;
-    bool alignmentFinished = false;
+    bool alignmentFinished = true;
 //  void PreAlign();
   int Align();
   void InitHistograms();
@@ -54,12 +53,13 @@ private:
   tel::ProgressBar * ProgressBar;
   float Now;
   unsigned short const MaximumSteps;
+  short silDUTRoc = -1;
   std::vector<unsigned short> OrderedPlanes;
   std::vector<unsigned short> InnerPlanes;
   std::vector<unsigned short> PlanesToAlign;
   std::vector<unsigned short> PlanesUnderTest; // No tracking for this planes
-  std::vector<unsigned short> TelescopePlanes; // No tracking for this planes
-  std::vector<unsigned short> DiaPlanes; // No tracking for this planes
+    std::vector<unsigned short> TelescopePlanes;
+  std::vector<unsigned short> DiaPlanes;
   /** Means (offsets) and RMS of the residual distributions */
   std::vector<std::pair<float, float>> fdX;
   std::vector<std::pair<float, float>> fdY;
