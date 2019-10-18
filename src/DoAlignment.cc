@@ -74,11 +74,11 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
             PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 1, TelescopePlanes.end());
             PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
         } else if(alignStep == 2){
-            cout << "\n**************************************************\nAlign telescope inner planes Part 2 (w. tracking)\n**************************************************\n" << endl;
+            cout << "\n**************************************************\nAlign telescope inner planes (w. tracking)\n**************************************************\n" << endl;
             PlanesToAlign = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
             PlanesUnderTest.clear();
         } else if(alignStep == 3){
-            cout << "\n**************************************************\nAlign last DUT Part 2 (w. tracking)\n**************************************************\n" << endl;
+            cout << "\n**************************************************\nAlign Sil DUT (w. tracking)\n**************************************************\n" << endl;
             PlanesToAlign.clear();
             PlanesToAlign.push_back((unsigned short)silDUTRoc);
             PlanesUnderTest = vector<unsigned short>(DiaPlanes.begin(), DiaPlanes.end());
@@ -117,10 +117,11 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
 }
 
 void Alignment::SetNextAlignmentStep() {
-    alignStep++;
-    if(alignStep == 2 and silDUTRoc == -1)
-        alignStep++;
     alignmentFinished = (alignStep == 4) or (alignStep == 2 and AlignOnlyTelescope);
+    alignStep++;
+    if(alignStep == 2 and silDUTRoc == -1) {
+        alignStep++;
+    }
     FR->CloseFile();
     delete FR;
 }
