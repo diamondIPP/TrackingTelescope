@@ -11,10 +11,10 @@
 
 using namespace std;
 
-Alignment::Alignment(string in_file_name, const TString & run_number, short telescope_ID, uint16_t align_mode, unsigned short maxSteps, float maxRes, float maxAngle, unsigned long maxEvents, short silDutRoc):
+Alignment::Alignment(string in_file_name, const TString & run_number, short telescope_ID, bool onlyTel, unsigned short maxSteps, float maxRes, float maxAngle, unsigned long maxEvents, int8_t silDutRoc):
     TelescopeID(telescope_ID),
     NPlanes(GetNumberOfROCS(telescope_ID)),
-    AlignMode(align_mode),
+    AlignOnlyTelescope(onlyTel),
     InFileName(std::move(in_file_name)),
     OutFileName(Form("ALIGNMENT/telescope%i.dat", telescope_ID)),
     PlotsDir("plots/"),
@@ -24,8 +24,9 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
     ResThreshold(maxRes),
     MaxEvents(maxEvents),
     Now(clock()),
-    MaximumSteps(maxSteps) {
-    trackOnlyTelescope = (AlignMode == 2);
+    MaximumSteps(maxSteps),
+    silDUTRoc(silDutRoc){
+    trackOnlyTelescope = onlyTel;
 
     gROOT->ProcessLine("gErrorIgnoreLevel = kError;");
     gStyle->SetOptStat(0);
@@ -34,7 +35,7 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
     fdX.resize(NPlanes, make_pair(0, 0));
     fdY.resize(NPlanes, make_pair(0, 0));
     fdA.resize(NPlanes, make_pair(0, 0));
-    bool alignmentFinished = false;
+    alignmentFinished = false;
     alignStep = 0;
     while(not alignmentFinished) {
         FR = InitFileReader();
@@ -43,6 +44,7 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
         MaxEventNumber = (MaxEvents == 0 or MaxEvents > FR->GetEntries()) ? (unsigned long) FR->GetEntries() : MaxEvents;
         OrderedPlanes = GetOrderedPlanes();
         TelescopePlanes = GetTelescopePlanes();
+        DiaPlanes = GetDiamondPlanes();
         InnerPlanes = vector<unsigned short>(OrderedPlanes.begin() + 1, OrderedPlanes.end() - 1);
         std::cout << "Ordered planes: ";
         for (auto it = OrderedPlanes.cbegin(); it != OrderedPlanes.cend(); it++)
@@ -56,39 +58,39 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
         for (auto it = InnerPlanes.cbegin(); it != InnerPlanes.cend(); it++)
             cout << *it << " ";
         cout << endl;
-        if (AlignMode == 1) {
-            PlanesToAlign = InnerPlanes;
-            PlanesUnderTest = InnerPlanes;
-        } else if (AlignMode == 2) {
-            if(alignStep == 0) {
-                cout << "\n**************************************************\nAlign last telescope plane \"0\" Part 1\n**************************************************\n" << endl;
-                PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 1, TelescopePlanes.end());
-                PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end());
-            } else if(alignStep == 1) {
-                cout << "\n**************************************************\nAlign last telescope plane \"0\" Part 2 (w. tracking)\n**************************************************\n" << endl;
-                PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 1, TelescopePlanes.end());
-                PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
-            } else if(alignStep == 2){
-                cout << "\n**************************************************\nAlign telescope inner planes Part 2 (w. tracking)\n**************************************************\n" << endl;
-                PlanesToAlign = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
-                PlanesUnderTest.clear();
-            } else if(alignStep == 3){
-                cout << "\n**************************************************\nAlign last DUT Part 2 (w. tracking)\n**************************************************\n" << endl;
-                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 4, OrderedPlanes.end() - 2);
-                PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 3);
-            } else if(alignStep == 4) {
-                cout << "\n**************************************************\nAlign DUTs\n**************************************************\n" << endl;
-                PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 3);
-                PlanesUnderTest = vector<unsigned short>(OrderedPlanes.begin() + 2, OrderedPlanes.end() - 3);
-            } else{
-                cout << "Everything is aligned :)" << endl;
-                break;
-            }
+        std::cout << "Diamond planes: ";
+        for (auto it = DiaPlanes.cbegin(); it != DiaPlanes.cend(); it++)
+            cout << *it << " ";
+        cout << endl;
+        if(silDUTRoc != -1)
+            cout << "SilDut: " << silDUTRoc << endl;
 
-        } else {
-            PlanesToAlign = vector<unsigned short>(OrderedPlanes.begin() + 1, OrderedPlanes.end());
+        if(alignStep == 0) {
+            cout << "\n**************************************************\nAlign last telescope plane \"0\" Part 1\n**************************************************\n" << endl;
+            PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 1, TelescopePlanes.end());
+            PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end());
+        } else if(alignStep == 1) {
+            cout << "\n**************************************************\nAlign last telescope plane \"0\" Part 2 (w. tracking)\n**************************************************\n" << endl;
+            PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 1, TelescopePlanes.end());
+            PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
+        } else if(alignStep == 2){
+            cout << "\n**************************************************\nAlign telescope inner planes Part 2 (w. tracking)\n**************************************************\n" << endl;
+            PlanesToAlign = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
             PlanesUnderTest.clear();
+        } else if(alignStep == 3){
+            cout << "\n**************************************************\nAlign last DUT Part 2 (w. tracking)\n**************************************************\n" << endl;
+            PlanesToAlign.clear();
+            PlanesToAlign.push_back((unsigned short)silDUTRoc);
+            PlanesUnderTest = vector<unsigned short>(DiaPlanes.begin(), DiaPlanes.end());
+        } else if(alignStep == 4) {
+            cout << "\n**************************************************\nAlign DUTs\n**************************************************\n" << endl;
+            PlanesToAlign = vector<unsigned short>(DiaPlanes.begin(), DiaPlanes.end());
+            PlanesUnderTest = vector<unsigned short>(DiaPlanes.begin(), DiaPlanes.end());
+        } else{
+            cout << "Everything is aligned :)" << endl;
+            break;
         }
+
         std::cout << "Planes to align: ";
         for (auto it = PlanesToAlign.cbegin(); it != PlanesToAlign.cend(); it++)
             cout << *it << " ";
@@ -109,20 +111,18 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
         PrintAlignment();
 //        PreAlign();
         Align();
-        if (AlignMode == 2 and alignStep <= 5) {
-            if(alignStep == 1)
-                alignStep = 3;
-            else if(alignStep == 3)
-                alignStep = 5;
-            else
-                alignStep++;
-            trackOnlyTelescope = (alignStep < 4);
-            FR->CloseFile();
-            delete FR;
-        } else
-            alignmentFinished = true;
+        SetNextAlignmentStep();
     }
     cout << "\nSaved plots to: " << OutDir << endl;
+}
+
+void Alignment::SetNextAlignmentStep() {
+    alignStep++;
+    if(alignStep == 2 and silDUTRoc == -1)
+        alignStep++;
+    alignmentFinished = (alignStep == 4) or (alignStep == 2 and AlignOnlyTelescope);
+    FR->CloseFile();
+    delete FR;
 }
 
 PSIFileReader * Alignment::InitFileReader() {
@@ -180,39 +180,7 @@ void Alignment::EventLoop(const std::vector<unsigned short> & planes) {
       fdA.at(i_plane) = make_pair(atan(fX.GetParameter(1)), atan(fY.GetParameter(1)));
       cout << "Plane " << i_plane << " has X: " << fdX.at(i_plane).first << " +/- " << fdX.at(i_plane).second << "; Y: " << fdY.at(i_plane).first << " +/- " << fdY.at(i_plane).second << "; Angles: X " << fdA.at(i_plane).first << "; Y " << fdA.at(i_plane).second << endl;
   }
-
 } // end EventLoop
-
-//void Alignment::PreAlign() {
-//
-//  /** coarsely move the two inner planes to minimise the residuals without rotations */
-//  cout << "\n***************************\nPART ONE - COARSE ALIGNMENT\n***************************\n" << endl;
-//  FR->ResetFile();
-//    FR->SetAllPlanes();
-//    if(not PreAlignPlanes.empty())
-//        FR->SetPlanesUnderTest(PlanesUnderTest); /** ignore inner planes for tracking */
-//
-//    for (int i_align(0); i_align < 1; i_align++) {
-//        Now = clock();
-//        EventLoop(PreAlignPlanes); /** Loop over all events and fill histograms */
-//        cout << Form("\nLoop duration: %2.1f\n", (clock() - Now) / CLOCKS_PER_SEC) << endl;
-//
-//        for (auto i_plane: PreAlignPlanes) {
-//            pair<float, float> dX(fdX.at(i_plane)), dY(fdY.at(i_plane));
-//
-//            /** update the alignment */
-//            PLTAlignment *al = FR->GetAlignment();
-//            float lx(al->LX(1, i_plane)), ly(al->LY(1, i_plane));
-//            al->AddToLX(1, i_plane, float(dX.first));
-//            al->AddToLY(1, i_plane, float(dY.first));
-//            cout << Form("Changing alignment of plane %i in x: %+1.4f -> %+1.4f and in y: %+1.4f -> %+1.4f", i_plane,
-//                         lx, al->LX(1, i_plane), ly, al->LY(1, i_plane)) << endl;
-//
-//            SaveHistograms(i_plane);
-//        }
-//    }
-//  PrintResiduals(PreAlignPlanes);
-//}
 
 int Alignment::Align() {
 
@@ -233,7 +201,7 @@ int Alignment::Align() {
     for (unsigned int it=0; it<elems; it++) {
         unsigned int roc = PlanesToAlign.at(it);
         pair<float, float> dX(fdX.at(roc)), dY(fdY.at(roc)), dA(fdA.at(roc));
-            FR->GetAlignment()->AddToLR(1, roc, float(dA.first - dA.second)/2.0); // DA: this was ... other_angle/3.
+            FR->GetAlignment()->AddToLR(1, roc, float(dA.first - dA.second)/2.0); // DA: calculate an average value between both corrections in Xdy and Ydx
             FR->GetAlignment()->AddToLX(1, roc, float(dX.first));
             FR->GetAlignment()->AddToLY(1, roc, float(dY.first));
       SaveHistograms(roc, i_align);
@@ -241,7 +209,7 @@ int Alignment::Align() {
 
     PrintResiduals(PlanesToAlign);
     cout << "END ITERATION " << i_align + 1 << " OUT OF " << MaximumSteps << endl;
-    float dRes_max(GetMaximumMagRes(fdX, fdY, PlanesToAlign)), dAX_max(GetMaxAverageAngle(fdA, PlanesToAlign));
+    float dRes_max(GetMaximumMagRes(fdX, fdY, PlanesToAlign)), dAX_max(GetMaxAngle(fdA, PlanesToAlign));
     cout << Form("Maximum Residuals magnitude = %f and Maximum Average Angle = %f  (ResMax->%f, AngleMax->%f)", dRes_max, dAX_max, ResThreshold, AngleThreshold) << endl;
       maxResiduals.push_back(dRes_max);
       maxAngles.push_back(dAX_max);
@@ -271,7 +239,6 @@ int Alignment::Align() {
 }
 
 void Alignment::InitHistograms() {
-
   for (uint8_t i_plane(0); i_plane != NPlanes; ++i_plane){
     hResidual.emplace_back(TH2F(Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 801, -0.500625, 0.500625, 801, -0.500625, 0.500625));
     hResidualXdY.emplace_back(TProfile(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 135, -0.50625, 0.50625, -1, 1));
@@ -280,7 +247,6 @@ void Alignment::InitHistograms() {
 }
 
 void Alignment::ResetHistograms() {
-
   for (uint8_t i_plane(0); i_plane != NPlanes; ++i_plane){
     hResidual.at(i_plane).Reset();
     hResidualXdY.at(i_plane).Reset();
@@ -289,7 +255,6 @@ void Alignment::ResetHistograms() {
 }
 
 void Alignment::SaveHistograms(unsigned i_plane, int ind) {
-
   string sub_dir = (ind != -1) ? Form("ResROC%i/", i_plane) : "";
   string suffix = (ind != -1) ? Form("_%02i", ind) : "";
   gSystem->mkdir(OutDir + "/" + sub_dir, true);
@@ -340,7 +305,6 @@ void Alignment::PrintAlignment() {
   for (unsigned i_plane(0); i_plane < NPlanes; i_plane++)
     cout << Form("%2i %1i %15E %15E %15E %15E\n", 1, i_plane, al->LR(1, i_plane), al->LX(1, i_plane), al->LY(1, i_plane), al->LZ(1, i_plane));
   al->WriteAlignmentFile(OutFileName, FR->NMAXROCS);
-
 }
 
 std::vector<unsigned short> Alignment::GetOrderedPlanes() {
@@ -380,6 +344,14 @@ std::vector<unsigned short> Alignment::GetTelescopePlanes(){
     return tmp;
 }
 
+std::vector<unsigned short> Alignment::GetDiamondPlanes() {
+    vector<unsigned short> tmp;
+    remove_copy_if(OrderedPlanes.begin(), OrderedPlanes.end(), back_inserter(tmp), [&TelescopePlanes](const unsigned short& arg){return (find(TelescopePlanes.begin(), TelescopePlanes.end(), arg) != TelescopePlanes.end());});
+    if(silDUTRoc == -1)
+        tmp.erase(std::remove(tmp.begin(), tmp.end(), silDUTRoc), tmp.end());
+    return tmp;
+}
+
 void Alignment::SaveAllHistograms(int ind) {
 
   for (auto i_plane: OrderedPlanes){
@@ -396,7 +368,7 @@ void Alignment::PrintResiduals(const vector<unsigned short> & planes) {
 }
 
 // This method is necessary to find the plane with the maximum "angle deviation" for converging criteria
-float Alignment::GetMaxAverageAngle(const vector<pair<float, float>> &residuals, std::vector<unsigned short> alignplanes) {
+float Alignment::GetMaxAngle(const vector<pair<float, float>> &residuals, std::vector<unsigned short> alignplanes) {
   vector<float> tmp;
     unsigned long elems = residuals.size();
     tmp.resize(elems);
@@ -409,9 +381,6 @@ float Alignment::GetMaxAverageAngle(const vector<pair<float, float>> &residuals,
             tmp[i] = 0;
         }
     }
-//  for (auto i_res: residuals){
-//    tmp.emplace_back(fabs((i_res.first-i_res.second))/2.0);
-//  }
   return *max_element(tmp.begin(), tmp.end());
 }
 

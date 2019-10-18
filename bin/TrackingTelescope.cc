@@ -1382,7 +1382,7 @@ int main (int argc, char* argv[]) {
     unsigned short iterAlignSteps = 20;
     float maxAlignRes(0.00001);
     float maxAlignAngle(0.001);
-    short silRoc(-1);
+    int8_t silRoc(-1);
     if(argc >= 5){
         maxAlignmentEvents = strtoul(argv[5], nullptr, 10);
         cout << "Using " << maxAlignmentEvents << " for alignment (0 means all)" << endl;
@@ -1400,7 +1400,7 @@ int main (int argc, char* argv[]) {
         cout << "Using " << maxAlignAngle << " as maximum angle threshold per alignment step" << endl;
     }
     if(argc == 9){
-        silRoc = (short)strtol(argv[9], nullptr, 10);
+        silRoc = (int8_t)strtol(argv[9], nullptr, 10);
         if(silRoc != -1) {
             cout << "Using dut in roc " << silRoc << " as an extra silicon telescope plane" << endl;
         }
@@ -1420,7 +1420,7 @@ int main (int argc, char* argv[]) {
   TFile out_f(TString::Format("plots/%s/histos.root", RunNumber.c_str()), "recreate"); /** Open a ROOT file to store histograms in. */
 
   if (action == 1) { /** ALIGNMENT */
-    Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope, maxSteps, maxRes, maxAngle, maxEvents);
+    Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope, iterAlignSteps, maxAlignRes, maxAlignAngle, maxAlignmentEvents, silRoc);
   } else if (action==2) { /** RESIDUAL CALCULATION */
     FindPlaneErrors(InFileName, RunNumber, telescopeID);
   } else { /** ANALYSIS */
