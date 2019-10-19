@@ -217,13 +217,13 @@ int Alignment::Align() {
 
     if (dRes_max < ResThreshold and dAX_max < AngleThreshold){
       SaveAllHistograms();
-      cout << "Max residual is below " << ResThreshold << " and max angle is below " << AngleThreshold << " => stopping alignment." << endl;
+      cout << "\nMax residual is below " << ResThreshold << " and max angle is below " << AngleThreshold << " => stopping alignment.\n" << endl;
       break;
     }
       if(maxResiduals.size() > 1 and maxAngles.size() > 1){
           float deltaResMax(fabs(maxResiduals.back() - maxResiduals.at(maxResiduals.size() - 2)));
           float deltaAngleMax(fabs(maxAngles.back() - maxAngles.at(maxAngles.size() - 2)));
-          cout << Form("Maximum Residuals magnitude Delta = %f and Maximum Average Angle Delta = %f  (ResMaxDelta->%f, AngleMaxDelta->%f)", deltaResMax, deltaAngleMax, ResThreshold * 0.1, AngleThreshold * 0.1) << endl;
+          cout << Form("\nMaximum Residuals magnitude \u0394 = %f and Maximum Average Angle \u0394 = %f  (ResMaxDelta->%f, AngleMaxDelta->%f)\n", deltaResMax, deltaAngleMax, ResThreshold * 0.1, AngleThreshold * 0.1) << endl;
           if((deltaResMax < 0.1 * ResThreshold) and (deltaAngleMax < 0.1 * AngleThreshold)){
               SaveAllHistograms();
               cout << "Residual correction is below " << ResThreshold * 0.1 << " and max angle correction is below " << 0.1 * AngleThreshold << " => stopping alignment." << endl;
@@ -296,7 +296,7 @@ void Alignment::SaveHistograms(unsigned i_plane, int ind) {
 
 Alignment::~Alignment() {
 
-  delete FR;
+//  delete FR;
   gROOT->ProcessLine("gErrorIgnoreLevel = 0;");
 }
 
