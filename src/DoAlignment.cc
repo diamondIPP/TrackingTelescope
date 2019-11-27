@@ -11,7 +11,7 @@
 
 using namespace std;
 
-Alignment::Alignment(string in_file_name, const TString & run_number, short telescope_ID, bool onlyTel, unsigned short maxSteps, float maxRes, float maxAngle, unsigned long maxEvents, int16_t silDutRoc):
+Alignment::Alignment(string in_file_name, const TString & run_number, short telescope_ID, bool onlyTel, unsigned short maxSteps, float maxRes, float maxAngle, unsigned long maxEvents, short silDutRoc):
     TelescopeID(telescope_ID),
     NPlanes(GetNumberOfROCS(telescope_ID)),
     AlignOnlyTelescope(onlyTel),
@@ -37,6 +37,14 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
     fdA.resize(NPlanes, make_pair(0, 0));
     alignmentFinished = false;
     alignStep = 0;
+    gMeanRes.resize(NPlanes, 0);
+    gAngleRes.resize(NPlanes, 0);
+    for(size_t roc = 0; roc < NPlanes; roc++){
+        gMeanRes[int(roc)] = new TGraph();
+        gMeanRes[int(roc)]->SetNameTitle(TString::Format("ResMean_Roc%d", int(roc)).Data(), TString::Format("ResMean_Roc%d", int(roc)).Data());
+        gAngleRes[int(roc)] = new TGraph();
+        gAngleRes[int(roc)]->SetNameTitle(TString::Format("ResAngle_Roc%d", int(roc)).Data(), TString::Format("ResAngle_Roc%d", int(roc)).Data());
+    }
     while(not alignmentFinished) {
         FR = InitFileReader();
         maxResiduals.clear();
@@ -113,13 +121,45 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
         Align();
         SetNextAlignmentStep();
     }
+    for(unsigned roc = 0; roc < NPlanes; roc++){
+        string sub_dir = Form("ResROC%i/", int(roc));
+        gSystem->mkdir(OutDir + "/" + sub_dir, true);
+        TCanvas Can;
+        Can.cd();
+        Can.SetGridx();
+        Can.SetTickx();
+        Can.SetGridy();
+        Can.SetTicky();
+        Can.SetLogy();
+        gMeanRes.at(roc)->GetXaxis()->SetTitle("iteration");
+        gMeanRes.at(roc)->GetYaxis()->SetTitle("Residual Mean [cm]");
+        gMeanRes.at(roc)->GetYaxis()->SetTitleOffset(1.5);
+        gMeanRes.at(roc)->Draw("AL");
+        TString fileNameCan = OutDir + "/" + sub_dir + "/" + gMeanRes.at(roc)->GetTitle();
+        Can.SaveAs(Form("%s.root", fileNameCan.Data()));
+        Can.SaveAs(Form("%s.png", fileNameCan.Data()));
+        TCanvas Cana;
+        Cana.cd();
+        Cana.SetGridx();
+        Cana.SetTickx();
+        Cana.SetGridy();
+        Cana.SetTicky();
+        Cana.SetLogy();
+        gAngleRes.at(roc)->GetXaxis()->SetTitle("Iteration");
+        gAngleRes.at(roc)->GetYaxis()->SetTitle("Residual Angle [Rad]");
+        gAngleRes.at(roc)->GetYaxis()->SetTitleOffset(1.5);
+        gAngleRes.at(roc)->Draw("AL");
+        TString fileNameCana = OutDir + "/" + sub_dir + "/" + gAngleRes.at(roc)->GetTitle();
+        Cana.SaveAs(Form("%s.root", fileNameCana.Data()));
+        Cana.SaveAs(Form("%s.png", fileNameCana.Data()));
+    }
     cout << "\nSaved plots to: " << OutDir << endl;
 }
 
 void Alignment::SetNextAlignmentStep() {
     alignmentFinished = (alignStep == 4) or (alignStep == 2 and AlignOnlyTelescope);
     alignStep++;
-    if(alignStep == 2 and silDUTRoc == -1) {
+    if(alignStep == 3 and silDUTRoc == -1) {
         alignStep++;
     }
     FR->CloseFile();
@@ -205,6 +245,8 @@ int Alignment::Align() {
             FR->GetAlignment()->AddToLR(1, roc, float(dA.first - dA.second)/2.0); // DA: calculate an average value between both corrections in Xdy and Ydx
             FR->GetAlignment()->AddToLX(1, roc, float(dX.first));
             FR->GetAlignment()->AddToLY(1, roc, float(dY.first));
+        gMeanRes.at(roc)->SetPoint(i_align, i_align, fabs(sqrt(pow(dX.first, 2) + pow(dY.first, 2))));
+        gAngleRes.at(roc)->SetPoint(i_align, i_align, fabs((dA.first - dA.second)/2.0));
       SaveHistograms(roc, i_align);
     }
 

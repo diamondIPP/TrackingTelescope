@@ -78,6 +78,8 @@ private:
   std::vector<TProfile> hResidualXdY;
 //  std::vector<TH2F> hResidualYdX;
   std::vector<TProfile> hResidualYdX;
+    std::vector<TGraph*> gMeanRes;
+    std::vector<TGraph*> gAngleRes;
   static float GetMaxAngle(const std::vector<std::pair<float, float>> &, std::vector<unsigned short>);
   static float GetMaximumMagRes(const std::vector<std::pair<float, float>>&, const std::vector<std::pair<float, float>>&, std::vector<unsigned short>);
 };
