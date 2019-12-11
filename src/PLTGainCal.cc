@@ -123,7 +123,7 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
                 else if(vcal > 1785)
                     charge = 43.13 * 1785 + 333.0;
                 else
-                    charge = vcal < 0? 43.13 * vcal + 333.0;
+                    charge = 43.13 * vcal + 333.0;
             }
             else if (iroc == 5 && telescopeID == 22) {
                 vcal = fFitFunction.GetX(adc);
