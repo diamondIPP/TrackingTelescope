@@ -358,9 +358,9 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
   FunctionLine.ReplaceAll("par[", "[");
 
   // Set the root function
-  TF1 MyFunction("GainCalFitFunction", FunctionLine, -1000, 9000);
+  TF1 MyFunction("GainCalFitFunction", FunctionLine, -10, 1790);
   fFitFunction = MyFunction;
-    fFitFunction.SetNpx(10000);
+    fFitFunction.SetNpx(180);
 
   // Get blank line out of the way
   FunctionLine.ReadLine(f);
