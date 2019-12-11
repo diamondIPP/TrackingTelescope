@@ -104,6 +104,7 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
     }
 
     double charge = -9999;
+    Double_t vcal = 0;
 
     /** external calibration */
     if (fIsExternalFunction) {
@@ -115,17 +116,52 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
         if (UseDigitalCalibration(telescopeID)){
             if (not adc and iroc >= 4 and telescopeID == 22)
                 charge = -9999;
-            else if (iroc == 6)
-                charge = 43.13 * fFitFunction.GetX(adc) + 333.0;
-            else if (iroc == 5 && telescopeID == 22)
-                charge = 47.5 * fFitFunction.GetX(adc) - 427.4;
-            else if (iroc >= 4)
-                charge = 47 * fFitFunction.GetX(adc);
-            else
-                charge = 65. * fFitFunction.GetX(adc);
+            else if (iroc == 6 and (telescopeID != 35 and telescopeID != 69 and telescopeID != 70)){
+                vcal = fFitFunction.GetX(adc);
+                if(vcal < 0)
+                    charge = 333.0;
+                else if(vcal > 1785)
+                    charge = 43.13 * 1785 + 333.0;
+                else
+                    charge = vcal < 0? 43.13 * vcal + 333.0;
+            }
+            else if (iroc == 5 && telescopeID == 22) {
+                vcal = fFitFunction.GetX(adc);
+                if(vcal < 0)
+                    charge = 47.5 * 0 - 427.4;
+                else if(vcal > 1785)
+                    charge = 47.5 * 1785 - 427.4;
+                else
+                    charge = 47.5 * vcal - 427.4;
+            }
+            else if (iroc >= 4) {
+                vcal = fFitFunction.GetX(adc);
+                if(vcal < 0)
+                    charge = 47 * 0;
+                else if(vcal > 1785)
+                    charge = 47 * 1785;
+                else
+                    charge = 47 * vcal;
+            }
+            else {
+                vcal = fFitFunction.GetX(adc);
+                if(vcal < 0)
+                    charge = 65. * 0;
+                else if(vcal > 1785)
+                    charge = 65. * 1785;
+                else
+                    charge = 65. * vcal;
+            }
         }
-        else
-            charge = 65. * fFitFunction.GetX(adc);
+        else {
+            vcal = fFitFunction.GetX(adc);
+            if(vcal < 0)
+                charge = 65. * 0;
+            else if(vcal > 1785)
+                charge = 65. * 1785;
+            else
+                charge = 65. * vcal;
+        }
     }
     /** old calibration */
     else {
@@ -322,8 +358,9 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
   FunctionLine.ReplaceAll("par[", "[");
 
   // Set the root function
-  TF1 MyFunction("GainCalFitFunction", FunctionLine, -10000, 10000);
+  TF1 MyFunction("GainCalFitFunction", FunctionLine, -1000, 9000);
   fFitFunction = MyFunction;
+    fFitFunction.SetNpx(10000);
 
   // Get blank line out of the way
   FunctionLine.ReadLine(f);
