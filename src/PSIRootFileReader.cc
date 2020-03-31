@@ -43,20 +43,20 @@ PSIRootFileReader::~PSIRootFileReader ()
 bool PSIRootFileReader::OpenFile ()
 {
 //    ClearVectors();
-    f_plane = 0;
-    f_col = 0;
-    f_row = 0;
-    f_adc = 0;
-    f_charge = 0;
-    f_signal = 0;
-    cout << "Open File" << endl;
+    f_plane = nullptr;
+    f_col = nullptr;
+    f_row = nullptr;
+    f_adc = nullptr;
+    f_charge = nullptr;
+    f_signal = nullptr;
+    cout << "Open File " << fFileName << endl;
     fRootFile = new TFile(fFileName.c_str(), "READ");
 
-    if (!fRootFile->IsOpen()) return false;
+    if (!fRootFile->IsOpen()) { return false; }
 
-    fTree = (TTree*)fRootFile->Get("tree");
-    if(fRootFile->FindObject("region_information")) {
-        fMacro = (TMacro *) fRootFile->Get("region_information");// DA: TODO make validation in case it does not have this
+    fTree = dynamic_cast<TTree*>(fRootFile->Get("tree"));
+    if(fRootFile->FindKey("region_information") != nullptr) {
+        fMacro = dynamic_cast<TMacro *>(fRootFile->Get("region_information"));
     }
 
     fAtEntry = 0;
