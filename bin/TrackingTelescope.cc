@@ -1353,7 +1353,7 @@ int main (int argc, char* argv[]) {
     std::cerr << "SilDUT:\n  -1: No Silicon DUT, only diamonds\n  <i>: Roc position \"i\" where the Silicon DUT is" << std::endl;
     return 1;
   }
-  gInterpreter->GenerateDictionary("vector<vector<Float_t> >;vector<vector<UShort_t> >");  // add root dicts for vector<vector> >
+  gInterpreter->GenerateDictionary("vector<vector<float> >;vector<vector<UShort_t> >", "vector"); // add root dicts for vector<vector> >
 
   /** There three usage modes: analysis, alignment and residuals
       analysis: uses alignment and residuals for the given telescope to perform global and single plane studies
