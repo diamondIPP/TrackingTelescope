@@ -40,7 +40,7 @@ private:
     FileWriterTracking * FW;
     uint32_t stopAt;
     bool trackOnlyTelescope;
-    vector<float> * DiaZ;
+    std::vector<float> * DiaZ;
     tel::ProgressBar * PBar;
 
 public:
@@ -70,7 +70,7 @@ public:
     float getTime(float now, float & time);
     void SinglePlaneStudies();
     void InitFileReader();
-    vector<float> * getDiaZPositions();
+    std::vector<float> * getDiaZPositions();
     void WriteTrackingTree();
     void MakeAvgPH();
     void DrawTracks();

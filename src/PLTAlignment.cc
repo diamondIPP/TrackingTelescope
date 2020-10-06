@@ -101,7 +101,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
 void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int numRocs, bool writeErrors)
 {
     // Open output file
-    ofstream f;
+    std::ofstream f;
     f.open(OutFileName.c_str());
     if (!f){
         std::cerr << "ERROR: cannot open file: " << OutFileName << std::endl;

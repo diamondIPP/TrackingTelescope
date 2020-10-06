@@ -227,13 +227,6 @@ void FindPlaneErrors::AdjustErrors(unsigned short plane_under_test) {
 //  FR->GetAlignment()->SetErrorY(plane_under_test, FR->GetAlignment()->GetErrorY(plane_under_test) * (dChi2.second + 1));
 }
 
-void FindPlaneErrors::AdjustErrors(unsigned short plane_under_test, int tries) {
-
-  pair<float, float> dChi2(Chi2Res.at(plane_under_test).first * .5, Chi2Res.at(plane_under_test).second * .5);
-  FR->GetAlignment()->SetErrorX(plane_under_test, FR->GetAlignment()->GetErrorX(plane_under_test) * (dChi2.first + 1));
-  FR->GetAlignment()->SetErrorY(plane_under_test, FR->GetAlignment()->GetErrorY(plane_under_test) * (dChi2.second + 1));
-}
-
 
 PSIFileReader * FindPlaneErrors::InitFileReader() {
 

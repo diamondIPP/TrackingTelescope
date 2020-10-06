@@ -36,6 +36,8 @@
 
 #define DEBUG false
 
+using namespace std;
+
 template<typename T>
 void FillIth(TH3F *h, int px, int py, std::vector<T> values, int i, bool fill_when_too_small = true){
 /*

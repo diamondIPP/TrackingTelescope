@@ -59,7 +59,6 @@ private:
   void AdjustBiggestError();
   void AdjustErrors();
   void AdjustErrors(unsigned short);
-  void AdjustErrors(unsigned short, int);
 
 };
 
