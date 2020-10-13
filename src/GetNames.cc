@@ -4,9 +4,9 @@
 using namespace std;
 
 uint16_t nTelescopes = 60;
-vector<int16_t> pixelIDs = {10, 13, 15, 21, 25, 29, 30, 34, 35};
+vector<int16_t> pixelIDs = {10, 13, 15, 21, 25, 29, 30, 34, 35, 36, 51};
 vector<int16_t> roc6IDs = {1, 2, 3, 8, 21, 25, 34};
-vector<int16_t> roc7IDs = {10, 13, 15, 29, 30, 35};
+vector<int16_t> roc7IDs = {10, 13, 15, 29, 30, 35, 51};
 vector<int16_t> bcmPrimeIDs = {36, 42};
 
 string GetMaskingFilename(int telescopeID){
@@ -56,6 +56,7 @@ string GetCalibrationFilename(int telescopeID){
     else if (telescopeID == 34)  return "calibration_lists/GKCalibrationList_Telescope34.txt";
     else if (telescopeID == 35)  return "calibration_lists/GKCalibrationList_Telescope35.txt";
     else if (telescopeID == 36)  return "calibration_lists/GKCalibrationList_Telescope35.txt";
+    else if (telescopeID == 51)  return "calibration_lists/GKCalibrationList_Telescope51.txt";
     else if (telescopeID >= 10)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
     else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
     else {
