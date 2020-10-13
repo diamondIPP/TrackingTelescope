@@ -56,7 +56,7 @@ int PLTTracking::GetTrackingAlgorithm ()
 
 void PLTTracking::SetAllPlanes(){
 
-  fUsePlanesForTracking.resize(0);
+  fUsePlanesForTracking.clear();
   std::cout<<"Plane configuration for tracking: ";
   for (int i=0; i!=fNPlanes; i++) {
     if(i < 4 || !trackOnlyTelescope){
@@ -364,7 +364,8 @@ void PLTTracking::TrackFinder_AllPlanesHit (PLTTelescope& Telescope)
 
   // Make sure we have at least two planes with hits
   // otherwise it will be hard to make tracks
-  if (vd.size() < 2)
+//  if (vd.size() < 2)
+  if (vd.size() < 1)
     return;
 
   // Actual track creation
@@ -464,9 +465,7 @@ void PLTTracking::TrackFinder_ETH (PLTTelescope& Telescope)
     if ( (fUsePlanesForTracking[iPlane] > 0) && (Telescope.Plane(iPlane)->NClusters() > 0)){
 
         std::vector< PLTCluster* > VClusters;
-        for (size_t iCluster = 0;
-            iCluster != Telescope.Plane(iPlane)->NClusters();
-            ++iCluster) {
+        for (size_t iCluster = 0; iCluster != Telescope.Plane(iPlane)->NClusters(); ++iCluster) {
               VClusters.push_back( Telescope.Plane(iPlane)->Cluster(iCluster) );
         } // end: loop over clusters
 
@@ -491,7 +490,8 @@ void PLTTracking::TrackFinder_ETH (PLTTelescope& Telescope)
 
   // Make sure we have at least two planes with hits
   // otherwise it will be hard to make tracks
-  if (vd.size() < 2)
+//  if (vd.size() < 2)
+  if (vd.size() < 1)
     return;
 
   // Actual track creation

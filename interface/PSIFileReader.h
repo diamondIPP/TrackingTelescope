@@ -30,6 +30,7 @@ public:
 
     virtual int GetNextEvent () = 0;
     virtual unsigned GetEntries() = 0;
+    virtual void CloseFile() = 0;
 
     size_t NHits ();
     PLTHit* Hit (size_t);

@@ -53,6 +53,10 @@ PSIBinaryFileReader::~PSIBinaryFileReader ()
   Clear();
 }
 
+void PSIBinaryFileReader::CloseFile() {
+  return;
+}
+
 
 bool PSIBinaryFileReader::OpenFile ()
 {
@@ -337,7 +341,7 @@ int PSIBinaryFileReader::CalculateLevels (TString const OutDir)
     TSpectrum Spectrum(20);
     Spectrum.SetAverageWindow(30);//probably does nothing
     int const NPeaks = Spectrum.Search(hROCLevels[iroc]);
-    float * Peaks = Spectrum.GetPositionX();
+    double * Peaks = Spectrum.GetPositionX();
     std::sort(Peaks, Peaks + NPeaks);
 
     // Workaround for:

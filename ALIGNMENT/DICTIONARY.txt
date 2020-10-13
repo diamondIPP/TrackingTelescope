@@ -38,3 +38,5 @@ telescope 37 - PSI  Jul 18, pad
 telescope 38 - PSI  Jul 18, pad (4 plane Si -> S116, S83)
 telescope 39 - PSI  Jul 18, pad (4 plane Si -> S116, S125)
 telescope 43 - PSI  Jul 17-2, pad 1
+telescope 69 - PSI  Sep 19, pix (4 plane Si -> CMS01,  II6-73, D2)
+telescope 70 - PSI  Sep 19, pix (4 planes Si -> CMS02, II6-750, D2)

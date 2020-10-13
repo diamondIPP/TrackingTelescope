@@ -101,7 +101,7 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
 void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int numRocs, bool writeErrors)
 {
     // Open output file
-    ofstream f;
+    std::ofstream f;
     f.open(OutFileName.c_str());
     if (!f){
         std::cerr << "ERROR: cannot open file: " << OutFileName << std::endl;
@@ -136,12 +136,12 @@ void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int 
 
 float PLTAlignment::PXtoLX (int const px)
 {
-  return PLTU::PIXELWIDTH * ((px + 0.000001) - PLTU::DIACENTERX);
+  return PLTU::PIXELWIDTH * ((px + 0.0000000001) - PLTU::DIACENTERX);
 }
 
 float PLTAlignment::PYtoLY (int const py)
 {
-  return PLTU::PIXELHEIGHT * ((py + 0.000001) - PLTU::DIACENTERY);
+  return PLTU::PIXELHEIGHT * ((py + 0.0000000001) - PLTU::DIACENTERY);
 }
 
 int PLTAlignment::PXfromLX (float const lx)

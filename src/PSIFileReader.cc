@@ -89,7 +89,6 @@ void PSIFileReader::Clear()
     }
   }
   fHits.clear();
-
   fPlaneMap.clear();
   fPlanes.clear();
   fTracks.clear();

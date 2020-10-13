@@ -34,7 +34,8 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     std::cout << "Entering PLTTrack::MakeTrack. fClusters.size()= " << fClusters.size() << std::endl;
 
   // Check we have enough clusters
-  if (NClusters() < 2) {
+//  if (NClusters() < 2) {
+  if (NClusters() < 1) {
     std::cerr << "WARNING in PLTTrack::MakeTrack: Not enough clusters to make a track" << std::endl;
     return 0;
   }
@@ -63,16 +64,22 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
   fChi2X = 0;
   fChi2Y = 0;
 
-  /** For 2 points just use the direct line connecting them as a track */
-  if (NClusters() == 2) {
+  /** For 2 points or less just use the direct line connecting them as a track */
+  if (NClusters() <= 2) {
 
     // Vector components
-    VX = fClusters[1]->TX() - fClusters[0]->TX();
-    VY = fClusters[1]->TY() - fClusters[0]->TY();
-    VZ = fClusters[1]->TZ() - fClusters[0]->TZ();
+    VX = NClusters() == 2? fClusters[1]->TX() - fClusters[0]->TX() : 0;
+    VY = NClusters() == 2? fClusters[1]->TY() - fClusters[0]->TY() : 0;
+    VZ = NClusters() == 2? fClusters[1]->TZ() - fClusters[0]->TZ() : 0;
 
-    fSlopeX = VX / VZ;
-    fSlopeY = VY / VZ;
+    if(VZ!=0) {
+      fSlopeX = VX / VZ;
+      fSlopeY = VY / VZ;
+    } else{
+      fSlopeX = 0;
+      fSlopeY = 0;
+    }
+
     fOffsetX = fClusters[0]->TX() - fClusters[0]->TZ() * fSlopeX;
     fOffsetY = fClusters[0]->TY() - fClusters[0]->TZ() * fSlopeY;
 
@@ -80,9 +87,11 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     double const Mod = std::sqrt(VX*VX + VY*VY + VZ*VZ);
 
     // Normalize vectors
-    VX = VX / Mod;
-    VY = VY / Mod;
-    VZ = VZ / Mod;
+    if(Mod != 0) {
+      VX = VX / Mod;
+      VY = VY / Mod;
+      VZ = VZ / Mod;
+    }
 
     if (DEBUG) { printf("2P VXVYVZ %12.3f %12.3f %12.3f\n", VX, VY, VZ); }
 
@@ -195,10 +204,11 @@ int PLTTrack::MakeTrack (PLTAlignment& Alignment, int nPlanes)
     float const Mod = sqrt(VX*VX + VY*VY + VZ*VZ);
 
     // Normalize vectors
-    VX = VX / Mod;
-    VY = VY / Mod;
-    VZ = VZ / Mod;
-
+    if(Mod != 0) {
+      VX = VX / Mod;
+      VY = VY / Mod;
+      VZ = VZ / Mod;
+    }
 
     // Compute the points in telescope coords where line passes each plane
     for (int ip = 0; ip < nPlanes ; ++ip) {

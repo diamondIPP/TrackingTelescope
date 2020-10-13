@@ -27,6 +27,7 @@ class PSIBinaryFileReader : public PSIFileReader
     int nextBinaryHeader ();
     int decodeBinaryData ();
     int GetNextEvent ();
+	void CloseFile();
     int CalculateLevels (TString const OutDir = "plots/");
     int LevelInfo (int const Value, int const iroc);
     std::pair<int, int> fill_pixel_info(int* evt , int ctr, int iroc);
