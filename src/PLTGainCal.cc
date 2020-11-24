@@ -113,6 +113,8 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
         }
 
         /** change calibration factor for digital planes*/
+        if (adc > fFitFunction.GetMaximum() or adc < fFitFunction.GetMinimum()) {
+          return float(-999); }
         if (UseDigitalCalibration(telescopeID)){
             if (not adc and iroc >= 4 and telescopeID == 22)
                 charge = -9999;
@@ -358,7 +360,7 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
   FunctionLine.ReplaceAll("par[", "[");
 
   // Set the root function
-  TF1 MyFunction("GainCalFitFunction", FunctionLine, -10, 1790);
+  TF1 MyFunction("GainCalFitFunction", FunctionLine, -1700, 1700);
   fFitFunction = MyFunction;
     fFitFunction.SetNpx(180);
 
