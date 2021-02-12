@@ -19,15 +19,6 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # when building, don't use the install RPATH already (but later on when installing)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-# *ALTERNATIVELY*: USE RELATIVE PATHS
-# see http://www.semipol.de/archives/356
-# for all binaries created in a CMake project:
-#SET(CMAKE_INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/")
-# for certain targets
-#SET_TARGET_PROPERTIES(target 1 target2 ...
-#    PROPERTIES INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/")
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # the RPATH to be used when installing, but only if it's not a system directory
 LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
@@ -46,13 +37,9 @@ LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 FIND_PACKAGE(ROOT REQUIRED)
 INCLUDE_DIRECTORIES(SYSTEM ${ROOT_INCLUDE_DIR})
 MESSAGE(${CMAKE_CURRENT_BINARY_DIR})
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}" interface)
 
-#set(SOURCE_FILES bin/TrackingTelescope.cc)
-#add_executable(TrackingTelescope ${SOURCE_FILES})
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
-#include_directories(interface)
-add_subdirectory(src)
-add_subdirectory(bin)
-#ADD_CUSTOM_TARGET(bla COMMAND make -C Makefile_ubuntu)
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}" include)
+ADD_SUBDIRECTORY(src)
 ADD_CUSTOM_TARGET(link_target ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/bin/TrackingTelescope.exe ${PROJECT_SOURCE_DIR}/TrackingTelescope)

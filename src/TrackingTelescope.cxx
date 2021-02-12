@@ -1358,7 +1358,7 @@ int main (int argc, char* argv[]) {
   /** There three usage modes: analysis, alignment and residuals
       analysis: uses alignment and residuals for the given telescope to perform global and single plane studies
       alignment: starts with all alignment constants zero and does several iterations to minimize the residuals. All planes are shifted in x and y and rotated
-        around the z-axis. Residual plots of the last iteration are saved. As output the file NewAlignment.dat is produced.
+        around the z-axis. Residual plots of the last iteration are saved.
       residuals: tries to find the correct residuals for tracking
       action:
         0: Analysis
