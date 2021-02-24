@@ -1,6 +1,11 @@
 #include <PLTU.h>
 #include "GetNames.h"
 
+#include <iostream>
+#include <cstdlib>
+#include <vector>
+#include <algorithm>
+
 using namespace std;
 
 uint16_t nTelescopes = 60;
@@ -168,45 +173,14 @@ float GetDiamondZPosition(int16_t id, uint8_t diamond){
 }
 
 /** Get the correct alignment for a given telescope */
-string GetAlignmentFilename(int telescopeID, bool useInitial){
+string GetAlignmentFilename(){
 
-  /** Initial Alignment (start values for finding alignment) */
-  if (useInitial){
-    if ((telescopeID==1) || (telescopeID==2) ){
-      return "ALIGNMENT/Alignment_ETHTelescope_initial.dat";
-    }
-    else if (telescopeID==7){
-      return "ALIGNMENT/Alignment_ETHTelescope_initial_telescope7.dat";
-    }
-    else if (telescopeID==10){
-      return "ALIGNMENT/Alignment_ETHTelescope_initial_telescope10.dat";
-    }
-    else if ((telescopeID==5) || (telescopeID==6) || (telescopeID==-1)){
-      return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
-    }
-    else {
-      cout << "ERROR: No Initial-Alignment file for telescopeID=" << telescopeID << endl;
-      cout << "Exiting..." << endl;
-      exit(0);
-    }
-  }
+  return GetDir() + "data/alignments.txt";
+}
 
-    /** Real Alignment */
-  else{
-    if (telescopeID==1)         return "ALIGNMENT/Alignment_ETHTelescope_run316.dat";
-    if (telescopeID==2)         return "ALIGNMENT/Alignment_ETHTelescope_run466.dat";
-    else if (telescopeID==5)    return "ALIGNMENT/Alignment_ETHTelescope_4planes_run63.dat";
-    else if (telescopeID==6)    return "ALIGNMENT/Alignment_ETHTelescope_4planesCERN_run71.dat";
-    else if (telescopeID==7)    return "ALIGNMENT/Alignment_ETHTelescope_telescope7.dat";
-    else if (telescopeID==8)    return "ALIGNMENT/Alignment_ETHTelescope_telescope8.dat";
-    else if (telescopeID==9)    return "ALIGNMENT/Alignment_ETHTelescope_telescope9.dat";
-    else if (telescopeID >= 10)   return string(TString::Format("ALIGNMENT/telescope%d.dat", telescopeID));
-    else if (telescopeID==-1)   return "ALIGNMENT/Alignment_ETHTelescope_initial_4planes.dat";
+std::string GetDir() {
 
-    else{
-      cout << "ERROR: No Alignment file for telescopeID=" << telescopeID << endl;
-      cout << "Exiting..." << endl;
-      exit(0);
-    }
-  }
+  string d = __FILE__;
+  d = string(d, 0, d.find_last_of('/' ));
+  return string(d, 0, d.find_last_of('/' ) + 1);
 }
