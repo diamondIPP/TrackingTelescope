@@ -3,10 +3,10 @@
 //
 
 #include "Utils.h"
-#include <sstream>
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <algorithm>
 
 using namespace std;
 
@@ -34,6 +34,15 @@ namespace tel {
   double distance(std::pair<float, float> p1, std::pair<float, float> p2){
 
     return sqrt(pow(p1.first - p2.first, 2) + pow(p1.second - p2.second, 2));
+  }
+
+  void print_banner(const string & message, const char seperator, uint16_t max_lenght) {
+    vector<size_t> sizes;
+    for (const auto & i_str: tel::split(message, '\n')){
+      sizes.emplace_back(tel::trim(i_str, "\n").size());
+    }
+    string banner = string(*max_element(sizes.begin(), sizes.end()), seperator);
+    cout << "\n" << banner << "\n" << message << "\n" << banner << "\n" << endl;
   }
 
   ProgressBar::ProgressBar(uint32_t n_events, bool use_ETA, uint16_t update): nEvents(n_events), currentEvent(0), useETA(use_ETA), w(), updateFrequency(update), lastTime(clock()),

@@ -23,6 +23,8 @@ namespace tel{
   std::vector<std::string> split(const std::string &, const char & = '\t');
   double distance(std::pair<float, float>, std::pair<float, float>);
   void critical(const std::string & msg);
+  void print_banner(const std::string& message, char seperator = '=', uint16_t max_lenght = 100);
+
 
   class ProgressBar {
   private:
