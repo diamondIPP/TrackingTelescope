@@ -1,9 +1,3 @@
-telescope -1 - root file format testing
-telescope  1 - PSI  May 14, pad 1 	(Si, PolyA, PolyD, S86,  S105, Si)
-telescope  2 - PSI  May 14, pad 2 	(Si, PolyB, PolyD, S108, Si, Si)
-telescope  3 - PSI  Jul 14, pix  	(1 plane Si + 1 plane Dia)
-telescope  4 - PSI  Jul 14, pad 	(2 plane Si)
-telescope  5 - PSI  Sep 14, pad 	(4 plane Si)
 telescope  6 - CERN Oct 14, pad 	(4 plane Si)
 telescope  7 - PSI  May 15, pad 	(4 plane Si)
 telescope  9 - PSI  Aug 15, pad 	(4 plane Si)
@@ -38,5 +32,3 @@ telescope 37 - PSI  Jul 18, pad
 telescope 38 - PSI  Jul 18, pad (4 plane Si -> S116, S83)
 telescope 39 - PSI  Jul 18, pad (4 plane Si -> S116, S125)
 telescope 43 - PSI  Jul 17-2, pad 1
-telescope 69 - PSI  Sep 19, pix (4 plane Si -> CMS01,  II6-73, D2)
-telescope 70 - PSI  Sep 19, pix (4 planes Si -> CMS02, II6-750, D2)

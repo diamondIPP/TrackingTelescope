@@ -3,7 +3,6 @@ lib/
 bin/
 build/
 plots/
-python/debugplots
 cmake-build-relwithdebinfo
 
 # files
