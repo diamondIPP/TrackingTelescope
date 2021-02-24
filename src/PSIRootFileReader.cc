@@ -16,9 +16,7 @@ PSIRootFileReader::PSIRootFileReader (std::string const InFileName,
 				      bool const onlyAlign,
 				      uint8_t const TelescopeID,
                       bool TrackOnlyTelescope
-				      ) :   PSIFileReader(CalibrationList, AlignmentFileName, nrocs, useGainInterpolator, useExternalCalibrationFunction, TrackOnlyTelescope),
-                            fOnlyAlign(onlyAlign),
-							telescopeID(TelescopeID), trackOnlyTelescope(TrackOnlyTelescope)
+				      ) :   PSIFileReader(CalibrationList, AlignmentFileName, nrocs, useGainInterpolator, useExternalCalibrationFunction, TrackOnlyTelescope, TelescopeID), fOnlyAlign(onlyAlign)
 {
     fFileName = InFileName;
     if (!OpenFile()) {
@@ -152,7 +150,7 @@ int PSIRootFileReader::GetNextEvent ()
             PLTHit* Hit = new PLTHit(1, roc, col, row, adc);
 
             /** Gain calibration */
-            fGainCal.SetCharge(*Hit, telescopeID);
+            fGainCal.SetCharge(*Hit, telescope_id);
 
             /** Alignment */
             fAlignment.AlignHit(*Hit);

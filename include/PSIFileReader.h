@@ -14,7 +14,7 @@ class PSIFileReader : public PLTTelescope, public PLTTracking
 {
 
 public:
-    PSIFileReader (std::string const, std::string const, int const, bool const, bool const, bool);
+    PSIFileReader (std::string const&, const std::string&, int const, bool const, bool const, bool, const uint16_t&);
     virtual ~PSIFileReader (){};
 
     virtual bool OpenFile () = 0;
@@ -42,9 +42,10 @@ public:
     long long GetTime () {return fTime;}
 
     const uint8_t NMAXROCS;
+    bool trackOnlyTelescope;
+    const uint16_t telescope_id;
 
-
-  protected:
+protected:
 
     long long fTime;
 
@@ -56,7 +57,6 @@ public:
     PLTAlignment fAlignment;
 
     std::string fBinaryFileName;
-    bool trackOnlyTelescope;
 
     // Should we use the GainInterpolator instead of GainCal
     // -> Only for Telescope 2 from May 2014 testmeab for now

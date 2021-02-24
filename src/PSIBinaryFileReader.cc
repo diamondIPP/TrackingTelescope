@@ -24,7 +24,7 @@ PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
 							    nrocs,
 							    useGainInterpolator,
 							    useExternalCalibrationFunction,
-                                false
+                                false, 14
 							    )
 {
 

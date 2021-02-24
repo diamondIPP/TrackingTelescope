@@ -2,8 +2,9 @@
 
 #include <map>
 #include <cstdlib>
-#include <PLTAlignment.h>
 #include "GetNames.h"
+
+using namespace std;
 
 
 PLTAlignment::PLTAlignment (): ErrorsFromFile(false), fIsGood(false) {
@@ -15,13 +16,8 @@ PLTAlignment::PLTAlignment (): ErrorsFromFile(false), fIsGood(false) {
 }
 
 
-PLTAlignment::~PLTAlignment ()
-{
-}
+void PLTAlignment::ReadAlignmentFile (string const & InFileName, uint16_t const & id) {
 
-
-void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
-{
   // So far so good..
   fIsGood = true;
   fTelescopeMap.clear();
@@ -36,31 +32,36 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
   }
 
   // Read each line in file
-  int Channel, ROC;
+  int tid, channel, roc;
   for (std::string InLine; std::getline(InFile, InLine); ) {
     if (InLine.size() < 3 or InLine.at(0) == '#') { continue; }
     std::istringstream LineStream;
     LineStream.str(InLine);
 
-    LineStream >> Channel >> ROC;
-    std::pair<int, int> CHROC = std::make_pair(Channel, ROC);
+    LineStream >> tid >> channel >> roc;
+    if (tid != id) { continue; }
+
+    std::pair<int, int> CHROC = std::make_pair(channel, roc);
 
     // read one line at a time
     float R, RZ, RY, X, Y, Z, dX(0), dY(0);
 
     // If the ROC is -1 it is telescope coords, 0,1,2 are ROCs, anything else is bad.
-    if (ROC == -1) {
+    if (roc == 0 and fTelescopeMap.count(channel) == 0) { // use 0 if roc -1 is not in the data
+      fTelescopeMap[channel].GRZ = 0;
+      fTelescopeMap[channel].GRY = 0;
+      fTelescopeMap[channel].GX  = 0;
+      fTelescopeMap[channel].GY  = 0;
+      fTelescopeMap[channel].GZ  = 0;
+    }
+    if (roc == -1) {
       LineStream >> RZ >> RY >> X >> Y >> Z;
-      fTelescopeMap[Channel].GRZ = RZ;
-      fTelescopeMap[Channel].GRY = RY;
-      fTelescopeMap[Channel].GX  = X;
-      fTelescopeMap[Channel].GY  = Y;
-      fTelescopeMap[Channel].GZ  = Z;
-    } else if (ROC < 7) {
-      if (fTelescopeMap.count(Channel) == 0) {
-        std::cerr << "ERROR: Telescope coords not defined which must be defined before ROCs in alignment file" << std::endl;
-        throw;
-      }
+      fTelescopeMap[channel].GRZ = RZ;
+      fTelescopeMap[channel].GRY = RY;
+      fTelescopeMap[channel].GX  = X;
+      fTelescopeMap[channel].GY  = Y;
+      fTelescopeMap[channel].GZ  = Z;
+    } else if (roc < 7) {
 
       LineStream >> R >> X  >> Y >> Z >> dX >> dY;
 
@@ -70,11 +71,11 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
       C.LX = X;
       C.LY = Y;
       C.LZ = Z;
-      C.GRZ = fTelescopeMap[Channel].GRZ;
-      C.GRY = fTelescopeMap[Channel].GRY;
-      C.GX = fTelescopeMap[Channel].GX;
-      C.GY = fTelescopeMap[Channel].GY;
-      C.GZ = fTelescopeMap[Channel].GZ;
+      C.GRZ = fTelescopeMap[channel].GRZ;
+      C.GRY = fTelescopeMap[channel].GRY;
+      C.GX = fTelescopeMap[channel].GX;
+      C.GY = fTelescopeMap[channel].GY;
+      C.GZ = fTelescopeMap[channel].GZ;
 
       // Save this to alignment map
       fConstantMap[CHROC] = C;
@@ -85,8 +86,8 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
     /** try to read the errors from file */
     if (dX > 0 and dY > 0){
       ErrorsFromFile = true;
-      SetErrorX(ROC, dX);
-      SetErrorY(ROC, dY);
+      SetErrorX(roc, dX);
+      SetErrorY(roc, dY);
     }
 
   }
@@ -94,8 +95,11 @@ void PLTAlignment::ReadAlignmentFile (std::string const InFileName)
   // Close input file
   InFile.close();
 
-  return;
-}
+  if (fTelescopeMap.empty()){
+    cerr << "Did not find telescope " << id << " in the alignemnt file: " << InFileName << endl;
+    throw;
+  }
+} // end ReadAlignmentFile
 
 
 void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int numRocs, bool writeErrors)

@@ -31,7 +31,7 @@ int TestPlaneEfficiencySilicon (std::string const InFileName, TFile * out_f,
     if (GetUseRootInput(telescopeID)){
         FR = new PSIRootFileReader(InFileName,
                        GetCalibrationFilename(telescopeID),
-                       GetAlignmentFilename(telescopeID),
+                       GetAlignmentFilename(),
                        GetNumberOfROCS(telescopeID),
                        GetUseGainInterpolator(telescopeID),
                        GetUseExternalCalibrationFunction(telescopeID)
@@ -40,7 +40,7 @@ int TestPlaneEfficiencySilicon (std::string const InFileName, TFile * out_f,
     else {
         FR = new PSIBinaryFileReader(InFileName,
                      GetCalibrationFilename(telescopeID),
-                     GetAlignmentFilename(telescopeID),
+                     GetAlignmentFilename(),
                      GetNumberOfROCS(telescopeID),
                      GetUseGainInterpolator(telescopeID),
                      GetUseExternalCalibrationFunction(telescopeID)

@@ -18,10 +18,10 @@ using namespace std;
 /** ============================
  CONSTRUCTOR
  =================================*/
-PSIFileReader::PSIFileReader (string const CalibrationList, string const AlignmentFileName,
-    int const nrocs, bool const useGainInterpolator, bool const useExternalCalibrationFunction, bool TrackOnlyTelescope):
-        PLTTracking(nrocs, TrackOnlyTelescope), NMAXROCS(nrocs), fGainCal(nrocs, useExternalCalibrationFunction),
-        trackOnlyTelescope(TrackOnlyTelescope), fUseGainInterpolator(useGainInterpolator){
+PSIFileReader::PSIFileReader (string const& CalibrationList, string const & AlignmentFileName,
+    int const nrocs, bool const useGainInterpolator, bool const useExternalCalibrationFunction, bool TrackOnlyTelescope, uint16_t const & telescope_id):
+        PLTTracking(nrocs, TrackOnlyTelescope), NMAXROCS(nrocs), trackOnlyTelescope(TrackOnlyTelescope), telescope_id(telescope_id),
+        fGainCal(nrocs, useExternalCalibrationFunction), fUseGainInterpolator(useGainInterpolator) {
 
    /** Initialize fCalibrationFile and fRawCalibrationFile with empty strings */
     for (int i_roc=0; i_roc != NMAXROCS; i_roc++) {
@@ -51,7 +51,7 @@ PSIFileReader::PSIFileReader (string const CalibrationList, string const Alignme
             fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[i_roc], i_roc);
     }
 
-    fAlignment.ReadAlignmentFile(AlignmentFileName);// TODO: DA: make condition to skip this in case there is not analysis but only alignment?
+    fAlignment.ReadAlignmentFile(AlignmentFileName, telescope_id);// TODO: DA: make condition to skip this in case there is not analysis but only alignment?
     SetTrackingAlignment(&fAlignment);
 
     if(!trackOnlyTelescope) {

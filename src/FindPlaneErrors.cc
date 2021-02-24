@@ -232,11 +232,11 @@ PSIFileReader * FindPlaneErrors::InitFileReader() {
 
   PSIFileReader * tmp;
   if (GetUseRootInput(TelescopeID)){
-    tmp = new PSIRootFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(TelescopeID), NPlanes, GetUseGainInterpolator(TelescopeID),
+    tmp = new PSIRootFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(), NPlanes, GetUseGainInterpolator(TelescopeID),
                                 GetUseExternalCalibrationFunction(TelescopeID), false, uint8_t(TelescopeID));
   }
   else {
-    tmp = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(TelescopeID), NPlanes, GetUseGainInterpolator(TelescopeID),
+    tmp = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(), NPlanes, GetUseGainInterpolator(TelescopeID),
                                   GetUseExternalCalibrationFunction(TelescopeID));
   }
   tmp->GetAlignment()->SetErrors(TelescopeID, true);

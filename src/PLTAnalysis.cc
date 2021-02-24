@@ -238,11 +238,11 @@ void PLTAnalysis::SinglePlaneStudies(){
 void PLTAnalysis::InitFileReader(){
 
     if (GetUseRootInput(telescopeID)){
-        FR = new PSIRootFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
+        FR = new PSIRootFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(),
             GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID), false, telescopeID, trackOnlyTelescope);
     }
     else {
-        FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(telescopeID),
+        FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(),
             GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID));
         ((PSIBinaryFileReader*) FR)->CalculateLevels(Histos->getOutDir());
     }

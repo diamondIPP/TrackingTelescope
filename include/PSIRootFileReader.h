@@ -39,8 +39,6 @@ class PSIRootFileReader : public PSIFileReader
     std::string fFileName;
 
     const bool fOnlyAlign;
-    uint8_t telescopeID;
-    bool trackOnlyTelescope;
 
     //  Current entry and total number of entries
     int fAtEntry;

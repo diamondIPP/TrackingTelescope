@@ -17,9 +17,9 @@ class PLTAlignment
 {
   public:
     PLTAlignment ();
-    ~PLTAlignment ();
+    ~PLTAlignment () = default;
 
-    void ReadAlignmentFile (std::string const);
+    void ReadAlignmentFile (const std::string&, const uint16_t&);
     void WriteAlignmentFile (std::string const, const int numRocs, bool writeErrors=false);
     void AlignHit (PLTHit&);
     bool ErrorsFromFile;
