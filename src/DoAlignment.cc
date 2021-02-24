@@ -11,42 +11,41 @@
 
 using namespace std;
 
-Alignment::Alignment(string in_file_name, const TString & run_number, short telescope_ID, bool onlyTel, unsigned short maxSteps, float maxRes, float maxAngle, unsigned long maxEvents, short silDutRoc):
-    TelescopeID(telescope_ID),
-    NPlanes(GetNumberOfROCS(telescope_ID)),
-    AlignOnlyTelescope(onlyTel),
-    InFileName(std::move(in_file_name)),
-    OutFileName(Form("ALIGNMENT/telescope%i.dat", telescope_ID)),
-    PlotsDir("plots/"),
-    OutDir(PlotsDir + run_number),
-    FileType(".png"),
-    AngleThreshold(maxAngle),
-    ResThreshold(maxRes),
-    MaxEvents(maxEvents),
-    Now(clock()),
-    MaximumSteps(maxSteps),
-    silDUTRoc(silDutRoc){
-    trackOnlyTelescope = true;
+Alignment::Alignment(const string & in_file_name, const TString & run_number, uint16_t telescope_id, bool onlyTel, uint16_t maxSteps, float maxRes, float maxAngle, unsigned long maxEvents, short silDutRoc):
+  telescope_id_(telescope_id),
+  n_planes_(GetNumberOfROCS(telescope_id)),
+  align_only_telescope_(onlyTel),
+  OutFileName(Form("ALIGNMENT/telescope%i.dat", telescope_id)),
+  PlotsDir("plots/"),
+  OutDir(PlotsDir + run_number),
+  FileType(".png"),
+  AngleThreshold(maxAngle),
+  ResThreshold(maxRes),
+  MaxEvents(maxEvents),
+  Now(clock()),
+  MaximumSteps(maxSteps),
+  silDUTRoc(silDutRoc),
+  n_sigma_(10.) {
 
     gROOT->ProcessLine("gErrorIgnoreLevel = kError;");
     gStyle->SetOptStat(0);
     gStyle->SetPalette(53);
 
-    fdX.resize(NPlanes, make_pair(0, 0));
-    fdY.resize(NPlanes, make_pair(0, 0));
-    fdA.resize(NPlanes, make_pair(0, 0));
-    alignmentFinished = false;
-    alignStep = 0;
-    gMeanRes.resize(NPlanes, 0);
-    gAngleRes.resize(NPlanes, 0);
-    for(size_t roc = 0; roc < NPlanes; roc++){
+    fdX.resize(n_planes_, make_pair(0, 0));
+    fdY.resize(n_planes_, make_pair(0, 0));
+    fdA.resize(n_planes_, make_pair(0, 0));
+  alignment_finished_ = false;
+  align_step_ = 0;
+    gMeanRes.resize(n_planes_, 0);
+    gAngleRes.resize(n_planes_, 0);
+    for(size_t roc = 0; roc < n_planes_; roc++){
         gMeanRes[int(roc)] = new TGraph();
         gMeanRes[int(roc)]->SetNameTitle(TString::Format("ResMean_Roc%d", int(roc)).Data(), TString::Format("ResMean_Roc%d", int(roc)).Data());
         gAngleRes[int(roc)] = new TGraph();
         gAngleRes[int(roc)]->SetNameTitle(TString::Format("ResAngle_Roc%d", int(roc)).Data(), TString::Format("ResAngle_Roc%d", int(roc)).Data());
     }
-    while(not alignmentFinished) {
-        FR = InitFileReader();
+    while(not alignment_finished_) {
+        FR = InitFileReader(in_file_name);
         maxResiduals.clear();
         maxAngles.clear();
         MaxEventNumber = (MaxEvents == 0 or MaxEvents > FR->GetEntries()) ? (unsigned long) FR->GetEntries() : MaxEvents;
@@ -73,24 +72,24 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
         if(silDUTRoc != -1)
             cout << "SilDut: " << silDUTRoc << endl;
 
-        if(alignStep == 0) {
+        if(align_step_ == 0) {
             cout << "\n**************************************************\nAlign last telescope plane \"0\" Part 1\n**************************************************\n" << endl;
             PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 1, TelescopePlanes.end());
             PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end());
-        } else if(alignStep == 1) {
+        } else if(align_step_ == 1) {
             cout << "\n**************************************************\nAlign last telescope plane \"0\" Part 2 (w. tracking)\n**************************************************\n" << endl;
             PlanesToAlign = vector<unsigned short>(TelescopePlanes.end() - 1, TelescopePlanes.end());
             PlanesUnderTest = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
-        } else if(alignStep == 2){
+        } else if(align_step_ == 2){
             cout << "\n**************************************************\nAlign telescope inner planes (w. tracking)\n**************************************************\n" << endl;
             PlanesToAlign = vector<unsigned short>(TelescopePlanes.begin() + 1, TelescopePlanes.end() - 1);
             PlanesUnderTest.clear();
-        } else if(alignStep == 3){
+        } else if(align_step_ == 3){
             cout << "\n**************************************************\nAlign Sil DUT (w. tracking)\n**************************************************\n" << endl;
             PlanesToAlign.clear();
             PlanesToAlign.push_back((unsigned short)silDUTRoc);
             PlanesUnderTest = vector<unsigned short>(DiaPlanes.begin(), DiaPlanes.end());
-        } else if(alignStep == 4) {
+        } else if(align_step_ == 4) {
             cout << "\n**************************************************\nAlign DUTs\n**************************************************\n" << endl;
             PlanesToAlign = vector<unsigned short>(DiaPlanes.begin(), DiaPlanes.end());
             PlanesUnderTest = vector<unsigned short>(DiaPlanes.begin(), DiaPlanes.end());
@@ -112,16 +111,15 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
         FR->GetAlignment()->SetErrorY(OrderedPlanes.at(0), 0);
         ProgressBar = new tel::ProgressBar(MaxEventNumber);
         /** Apply Masking */
-        FR->ReadPixelMask(GetMaskingFilename(TelescopeID));
+        FR->ReadPixelMask(GetMaskingFilename(telescope_id_));
         InitHistograms();
 
         cout << "Starting with Alignment: " << endl;
         PrintAlignment();
-//        PreAlign();
         Align();
         SetNextAlignmentStep();
     }
-    for(unsigned roc = 0; roc < NPlanes; roc++){
+    for(unsigned roc = 0; roc < n_planes_; roc++){
         string sub_dir = Form("ResROC%i/", int(roc));
         gSystem->mkdir(OutDir + "/" + sub_dir, true);
         TCanvas Can;
@@ -157,26 +155,26 @@ Alignment::Alignment(string in_file_name, const TString & run_number, short tele
 }
 
 void Alignment::SetNextAlignmentStep() {
-    alignmentFinished = (alignStep == 4) or (alignStep == 2 and AlignOnlyTelescope);
-    alignStep++;
-    if(alignStep == 3 and silDUTRoc == -1) {
-        alignStep++;
+  alignment_finished_ = (align_step_ == 4) or (align_step_ == 2 and align_only_telescope_);
+    align_step_++;
+    if(align_step_ == 3 and silDUTRoc == -1) {
+        align_step_++;
     }
     FR->CloseFile();
     delete FR;
 }
 
-PSIFileReader * Alignment::InitFileReader() {
+PSIFileReader * Alignment::InitFileReader(const string & file_name) {
   PSIFileReader * tmp;
-    if (GetUseRootInput(TelescopeID)){
-        tmp = new PSIRootFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(), NPlanes, GetUseGainInterpolator(TelescopeID),
-      GetUseExternalCalibrationFunction(TelescopeID), false, uint8_t(TelescopeID), trackOnlyTelescope);
+    if (GetUseRootInput(telescope_id_)){
+        tmp = new PSIRootFileReader(file_name, GetCalibrationFilename(telescope_id_), GetAlignmentFilename(), n_planes_, GetUseGainInterpolator(telescope_id_),
+                                    GetUseExternalCalibrationFunction(telescope_id_), false, uint8_t(telescope_id_), track_only_telescope_);
     }
   else {
-        tmp = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(), NPlanes, GetUseGainInterpolator(TelescopeID),
-      GetUseExternalCalibrationFunction(TelescopeID));
+        tmp = new PSIBinaryFileReader(file_name, GetCalibrationFilename(telescope_id_), GetAlignmentFilename(), n_planes_, GetUseGainInterpolator(telescope_id_),
+                                      GetUseExternalCalibrationFunction(telescope_id_));
     }
-    tmp->GetAlignment()->SetErrors(TelescopeID, true);
+    tmp->GetAlignment()->SetErrors(telescope_id_, true);
     FILE * f = fopen("MyGainCal.dat", "w");
     tmp->GetGainCal()->PrintGainCal(f);
     fclose(f);
@@ -204,7 +202,7 @@ void Alignment::EventLoop(const std::vector<unsigned short> & planes) {
       if (fabs(dR.first) >= 0.5 or fabs(dR.second) >= 0.5) continue; /** only proceed if the residual is smaller than 10mm in x or y */
       if (fabs(pow(dR.first, 2) + pow(dR.second, 2)) >= pow(0.5,2)) continue; /** only proceed if the residual is smaller than 5mm */
 
-      if(fabs(pow((0 - dR.first) * fdY.at(i_plane).second, 2) + pow((0 - dR.second) * fdX.at(i_plane).second, 2)) > pow(nSigma * fdX.at(i_plane).second * fdY.at(i_plane).second, 2)) continue;
+      if(fabs(pow((0 - dR.first) * fdY.at(i_plane).second, 2) + pow((0 - dR.second) * fdX.at(i_plane).second, 2)) > pow(n_sigma_ * fdX.at(i_plane).second * fdY.at(i_plane).second, 2)) continue;
 
       hResidual[i_plane].Fill(dR.first, dR.second); // dX vs dY
       hResidualXdY[i_plane].Fill(Cluster->LX(), dR.second); // X vs dY
@@ -233,7 +231,7 @@ int Alignment::Align() {
       if(not PlanesUnderTest.empty())
         FR->SetPlanesUnderTest(PlanesUnderTest);
 //  nSigma shrinks with each iteration until only an ellipse of "3sigma" is used to exclude residual outliers.
-      nSigma = float(3. + 1. / (1. + exp((i_align - (MaximumSteps / 7.)) / (MaximumSteps / 25.))));
+      n_sigma_ = float(3. + 1. / (1. + exp((i_align - (MaximumSteps / 7.)) / (MaximumSteps / 25.))));
       Now = clock();
     EventLoop(PlanesToAlign); /** Loop over all events and fill histograms */
       cout << Form("\nLoop duration: %2.1f\n", (clock() - Now) / CLOCKS_PER_SEC) << endl;
@@ -282,7 +280,7 @@ int Alignment::Align() {
 }
 
 void Alignment::InitHistograms() {
-  for (uint8_t i_plane(0); i_plane != NPlanes; ++i_plane){
+  for (uint8_t i_plane(0); i_plane != n_planes_; ++i_plane){
     hResidual.emplace_back(TH2F(Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 801, -0.500625, 0.500625, 801, -0.500625, 0.500625));
     hResidualXdY.emplace_back(TProfile(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 135, -0.50625, 0.50625, -1, 1));
     hResidualYdX.emplace_back(TProfile(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 201, -0.5025, 0.5025, -1, 1));
@@ -290,7 +288,7 @@ void Alignment::InitHistograms() {
 }
 
 void Alignment::ResetHistograms() {
-  for (uint8_t i_plane(0); i_plane != NPlanes; ++i_plane){
+  for (uint8_t i_plane(0); i_plane != n_planes_; ++i_plane){
     hResidual.at(i_plane).Reset();
     hResidualXdY.at(i_plane).Reset();
     hResidualYdX.at(i_plane).Reset();
@@ -345,7 +343,7 @@ Alignment::~Alignment() {
 void Alignment::PrintAlignment() {
 
   PLTAlignment * al = FR->GetAlignment();
-  for (unsigned i_plane(0); i_plane < NPlanes; i_plane++)
+  for (unsigned i_plane(0); i_plane < n_planes_; i_plane++)
     cout << Form("%2i %1i %15E %15E %15E %15E\n", 1, i_plane, al->LR(1, i_plane), al->LX(1, i_plane), al->LY(1, i_plane), al->LZ(1, i_plane));
   al->WriteAlignmentFile(OutFileName, FR->NMAXROCS);
 }
@@ -354,9 +352,9 @@ std::vector<unsigned short> Alignment::GetOrderedPlanes() {
 
   vector<unsigned short> tmp;
   vector<float> z_pos;
-  for (unsigned i_plane(0); i_plane < NPlanes; i_plane++)
+  for (unsigned i_plane(0); i_plane < n_planes_; i_plane++)
     z_pos.emplace_back(FR->GetAlignment()->LZ(1, i_plane));
-  for (unsigned i_plane(0); i_plane < NPlanes; i_plane++){
+  for (unsigned i_plane(0); i_plane < n_planes_; i_plane++){
     auto result = min_element(z_pos.begin(), z_pos.end());
     auto index = distance(z_pos.begin(), result);
     tmp.emplace_back(index);
