@@ -9,6 +9,7 @@
 #include <vector>
 #include <sys/ioctl.h>
 #include <iostream>
+#include <sstream>
 
 /** terminal output colors */
 #define ERROR "\033[91m"
@@ -45,6 +46,18 @@ namespace tel{
     void setNEvents(uint32_t n_events) { nEvents = n_events; }
     ProgressBar & operator++();
   };
+
+  template <typename Q>
+  inline std::string to_string(const std::vector<Q> & vec){
+    std::ostringstream s;
+    s << "[";
+    for (int word: vec){
+      s << word;
+      s << (word == vec.back() ? "" : ", ");
+    }
+    s << "]";
+    return s.str();
+  }
 }
 
 #endif //TRACKINGTELESCOPE_UTILS_H
