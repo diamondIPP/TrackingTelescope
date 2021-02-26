@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -182,4 +184,17 @@ std::string GetDir() {
   string d = __FILE__;
   d = string(d, 0, d.find_last_of('/' ));
   return string(d, 0, d.find_last_of('/' ) + 1);
+}
+
+uint16_t GetMaxTel() {
+  /** @returns highest used telescope number */
+  vector<uint16_t> numbers;
+  ifstream f(GetAlignmentFilename());
+  int tel;
+  for (string line; getline(f, line);){
+    istringstream s;
+    s >> tel;
+    numbers.emplace_back(tel);
+  }
+  return *max_element(numbers.begin(), numbers.end());
 }
