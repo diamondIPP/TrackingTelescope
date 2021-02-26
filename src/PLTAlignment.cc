@@ -102,39 +102,66 @@ void PLTAlignment::ReadAlignmentFile (string const & InFileName, uint16_t const 
 } // end ReadAlignmentFile
 
 
-void PLTAlignment::WriteAlignmentFile (std::string const OutFileName, const int numRocs, bool writeErrors)
-{
-    // Open output file
-    std::ofstream f;
-    f.open(OutFileName.c_str());
-    if (!f){
-        std::cerr << "ERROR: cannot open file: " << OutFileName << std::endl;
-        throw;
-    }
+string PLTAlignment::GetAlignment(uint16_t telescope_id, uint16_t n_rocs, bool write_errors) {
 
-    // Writing the information
-    for (auto it:fTelescopeMap){
-        int const Channel = it.first;
-        TelescopeAlignmentStruct& Tele = it.second;
-        f << "#CH ROC  RZ           RY           X            Y            Z           (dX)         (dY)\n";
-        f << TString::Format("%2i  -1 %+12.4E %+12.4E %+12.4E %+12.4E %+12.4E\n", Channel, Tele.GRZ, Tele.GRY, Tele.GX, Tele.GY, Tele.GZ);
-        for (uint8_t iroc = 0; iroc < numRocs; iroc++){
-            std::pair<int, int> ChROC = std::make_pair(Channel, int(iroc));
-            if (!fConstantMap.count(ChROC)) {
-                std::cerr << "ERROR: No entry in fConstantMap for Ch ROC: " << Channel << " " << iroc << std::endl;
-                continue;
-            }
-            CP & C = fConstantMap[ChROC];
-            f << TString::Format("%2i  %2i %+12.4E %+25.4E %+12.4E %+12.4E", Channel, iroc, C.LR, C.LX, C.LY, C.LZ);
-            if (writeErrors){
-              f << Form(" %+12.4E %+12.4E", GetErrorX(iroc), GetErrorY(iroc));
-            }
-            f << "\n";
-        }
+  ostringstream os;
+  for (auto it: fTelescopeMap){
+    int const channel = it.first;
+    TelescopeAlignmentStruct & tel = it.second;
+    if (tel.GRZ != 0){
+      os << Form("% 3i% 4i  -1 %+1.4E  %+1.4E  %+1.4E  %+1.4E  %+1.4E", telescope_id, channel, tel.GRZ, tel.GRY, tel.GX, tel.GY, tel.GZ) << endl;
     }
+    for (int iroc = 0; iroc < n_rocs; iroc++){
+      pair<int, int> ch_roc = make_pair(channel, iroc);
+      if (fConstantMap.count(ch_roc) == 0) {
+        std::cerr << "ERROR: No entry in fConstantMap for Ch ROC: " << channel << " " << iroc << endl;
+        continue;
+      }
+      CP & C = fConstantMap[ch_roc];
+      os << Form("% 3i% 4i% 4i  %+1.4E  %+24.4E  %+1.4E  %+1.4E", telescope_id, channel, iroc, C.LR, C.LX, C.LY, C.LZ);
+      if (write_errors) { os << Form("  %+1.4E  %+1.4E", GetErrorX(iroc), GetErrorY(iroc)); }
+      os << endl;
+    }
+  }
+  return os.str();
+}
 
-    f.close();
-    return;
+
+void PLTAlignment::WriteAlignmentFile (const uint16_t telescop_id, const uint16_t n_rocs, bool write_errors) {
+  /** read alignmnent file, overwrite settings if already existing, create new entry if not existing */
+  // get lines from file
+  vector<string> lines;
+  string line_str;
+  ifstream in(GetAlignmentFilename());
+  if (!in) {
+    std::cerr << "ERROR: cannot open file: " << GetAlignmentFilename() << endl;
+    throw;
+  }
+  while (getline(in, line_str)) { lines.emplace_back(line_str); }
+  in.close();
+  // write new settings
+  ofstream out("test.txt");
+//  ofstream out(GetAlignmentFilename());
+  bool wrote_data(false);
+  for (const auto & line: lines) {
+    if (line.find('#') != string::npos) {
+      out << line << endl;
+      continue; }
+    istringstream s(line);
+    int tel, ch, roc;
+    float rz, x, y, z, dx(0), dy(0);
+    s >> tel >> ch >> roc >> rz >> x >> y >> z >> dx >> dy;
+    if (tel != telescop_id) { out << line << endl; }
+    else {
+      SetErrorX(roc, dx); SetErrorY(roc, dy);
+      if (not wrote_data and roc == n_rocs - 1){
+        out << GetAlignment(telescop_id, n_rocs, (dx > 0 and dy > 0) or write_errors); // we have an existing alignment
+        wrote_data = true;
+      }
+    }
+  }
+  if (not wrote_data) { out << GetAlignment(telescop_id, n_rocs, write_errors); }  // we have a new alignment
+  out.close();
 }
 
 

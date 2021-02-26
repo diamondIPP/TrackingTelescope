@@ -251,7 +251,7 @@ void FindPlaneErrors::SaveErrors() {
 
   cout << "Saving alignment file \"" << OutFileName << "\" with the following parameters:\n" << endl;
   PrintErrors();
-  FR->GetAlignment()->WriteAlignmentFile(OutFileName, NPlanes, true);
+  FR->GetAlignment()->WriteAlignmentFile(TelescopeID, NPlanes, true);
 }
 
 void FindPlaneErrors::PrintErrors() {
