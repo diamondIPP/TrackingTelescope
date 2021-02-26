@@ -1,12 +1,12 @@
-#include <PLTU.h>
-#include "GetNames.h"
+#include "Utils.h"
 
+#include "GetNames.h"
 #include <iostream>
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
 #include <fstream>
-#include <sstream>
+#include "TString.h"
 
 using namespace std;
 
@@ -16,14 +16,73 @@ vector<int16_t> roc6IDs = {1, 2, 3, 8, 21, 25, 34};
 vector<int16_t> roc7IDs = {10, 13, 15, 29, 30, 35, 51};
 vector<int16_t> bcmPrimeIDs = {36, 42};
 
+
+std::string GetDir() {
+
+  string d = __FILE__;
+  d = string(d, 0, d.find_last_of('/' ));
+  return string(d, 0, d.find_last_of('/' ) + 1);
+}
+
+namespace tel {
+
+int16_t Config::telescope_id_;
+uint16_t Config::n_rocs_, Config::mask_, Config::calibration_, Config::year_;
+vector<float> Config::dia_z_pos_;
+
+int Config::Read(int16_t tel_id) {
+  /** read the main.txt config file */
+  ifstream f(GetDir() + "config/main.txt");
+  int id, zpos_number;
+  bool configured = false;
+  for (string line; getline(f, line);) {
+    istringstream s(line);
+    s >> id;
+    if (id == tel_id){
+      Config::telescope_id_ = id;
+      s >> Config::n_rocs_ >> Config::mask_ >> Config::calibration_ >> zpos_number >> Config::year_;
+      configured = true;
+    }
+  }
+  if (not configured){
+    critical(Form("Could not find telescope %i in config file %s", tel_id, "config/main.txt"));
+    return 0;
+  }
+  Config::dia_z_pos_ = GetZPos(zpos_number);
+  return 1;
+}
+
+vector<float> Config::GetZPos(uint16_t zpos_number) {
+  /** read diamond z positions from config/z_pos.txt */
+  ifstream f(GetDir() + "config/z_pos.txt");
+  int n;
+  vector<float> tmp;
+  for (string line; getline(f, line);) {
+    if (line.find('#') < 3) { continue; }
+    line = string(line.begin(), line.begin() + line.find('#'));
+    cout << line << endl;
+    istringstream s(line);
+    s >> n;
+    if (n == zpos_number){
+      auto v = split(trim(s.str()), ' ');
+      for (const auto & word: vector<string>(v.begin() + 1, v.end())) { tmp.emplace_back(stof(word)); }
+      return tmp;
+    }
+  }
+  return tmp;
+}
+
+} // end tel namespace
+
+
 string GetMaskingFilename(int telescopeID){
 
-    if      (telescopeID == 1)  return "outer_pixel_masks/outerPixelMask_Telescope1.txt";
-    else if (telescopeID == 2)  return "outer_pixel_masks/outerPixelMask_Telescope2.txt";
-    else if (telescopeID == 5)  return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
-    else if (telescopeID == 6)  return "outer_pixel_masks/outerPixelMask_Telescope6.txt";
-    else if (telescopeID == 7)  return "outer_pixel_masks/outerPixelMask_Telescope7.txt";
-    else if (telescopeID == 8)  return "outer_pixel_masks/outerPixelMask_Telescope8.txt";
+    if        (telescopeID == 1) {  return "outer_pixel_masks/outerPixelMask_Telescope1.txt";
+    } else if (telescopeID == 2) {  return "outer_pixel_masks/outerPixelMask_Telescope2.txt";
+    } else if (telescopeID == 5) {  return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
+    } else if (telescopeID == 6) {  return "outer_pixel_masks/outerPixelMask_Telescope6.txt";
+    } else if (telescopeID == 7) {  return "outer_pixel_masks/outerPixelMask_Telescope7.txt";
+    } else if (telescopeID == 8)  return "outer_pixel_masks/outerPixelMask_Telescope8.txt";
     else if (telescopeID == 9)  return "outer_pixel_masks/outerPixelMask_Telescope9.txt";
     else if (telescopeID == 21)  return "outer_pixel_masks/outerPixelMask_Telescope21.txt";
     else if (telescopeID == 69)  return "outer_pixel_masks/outerPixelMask_Telescope69.txt";
@@ -155,35 +214,11 @@ bool in(T num, vector<T> ids){
     return find(ids.begin(), ids.end(), num ) != ids.end();
 }
 
-float GetDiamondZPosition(int16_t id, uint8_t diamond){
-
-    uint8_t tel = 0;
-    if (id > 16 && id < 22)
-        tel = 1;
-    else if (in(id, bcmPrimeIDs))
-        tel = 4;
-    else if (id == 28 or id == 31)
-        tel = 3;
-    else if (id > 22)
-        tel = 2;
-    if (diamond == 0)
-        return PLTU::DIA1Z[tel];
-    if (diamond == 1)
-        return PLTU::DIA2Z[tel];
-    return -1;
-}
 
 /** Get the correct alignment for a given telescope */
 string GetAlignmentFilename(){
 
   return GetDir() + "data/alignments.txt";
-}
-
-std::string GetDir() {
-
-  string d = __FILE__;
-  d = string(d, 0, d.find_last_of('/' ));
-  return string(d, 0, d.find_last_of('/' ) + 1);
 }
 
 uint16_t GetMaxTel() {
