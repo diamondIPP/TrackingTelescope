@@ -77,7 +77,6 @@ string GetCalibrationFilename(int telescopeID){
 
 uint8_t GetNumberOfROCS(int16_t telescopeID){
 
-
     int16_t id = telescopeID;
     if (in(id, roc6IDs))
         return 6;
