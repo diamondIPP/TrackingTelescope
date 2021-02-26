@@ -29,4 +29,3 @@ for name in file_names:
 
 with open('alignments.txt', 'w') as f:
     f.writelines(lines)
-
