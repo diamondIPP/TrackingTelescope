@@ -17,6 +17,7 @@ lines = ['#TEL CH ROC  RZ           RY           X            Y            Z    
 for name in file_names:
     with open(name) as f:
         tel_id = remove_letters(name).rjust(3)
+        lines.append('# TELESCOPE {} {}\n'.format(tel_id.strip(), '-' * 88))
         for line in f.readlines():
             if len(line) > 10 and not line.startswith('#'):
                 data = line.split()
@@ -25,7 +26,6 @@ for name in file_names:
                 align = ['{:+1.4e}'.format(float(word)) for word in data[2:]]
                 info = '{}   {}'.format(tel_id, '   '.join(data[:2]))
                 lines.append('{}  {}  {}{}\n'.format(info, align[0], ' ' * 13 if len(align) in [4, 6] else '', '  '.join(align[1:])))
-        lines.append('# TELESCOPE {} {}\n'.format(tel_id.strip(), '-' * 88))
 
 with open('alignments.txt', 'w') as f:
     f.writelines(lines)
