@@ -188,13 +188,21 @@ std::string GetDir() {
 
 uint16_t GetMaxTel() {
   /** @returns highest used telescope number */
-  vector<uint16_t> numbers;
+  vector<int16_t> numbers;
   ifstream f(GetAlignmentFilename());
   int tel;
   for (string line; getline(f, line);){
-    istringstream s;
+    istringstream s(line);
     s >> tel;
     numbers.emplace_back(tel);
   }
   return *max_element(numbers.begin(), numbers.end());
+}
+
+int16_t GetRawAlignTel(uint16_t n_planes) {
+
+  if (n_planes == 4) { return -2; }
+  else if (n_planes == 6) { return -3; }
+  else if (n_planes == 7) { return -4; }
+  else { return 0; }
 }

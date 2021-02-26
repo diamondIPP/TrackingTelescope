@@ -7,6 +7,7 @@ std::string GetCalibrationFilename(int telescopeID);
 std::string GetAlignmentFilename();
 std::string GetDir();
 uint16_t GetMaxTel();
+int16_t GetRawAlignTel(uint16_t);
 std::string GetMaskingFilename(int telescopeID);
 const char * GetSignalBranchName();
 uint8_t GetNumberOfROCS(int16_t);
