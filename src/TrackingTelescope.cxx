@@ -12,18 +12,14 @@
 // numeric is needed to compile with make in certain systems
 #include <numeric>
 #include <algorithm>
-#include <sstream>
 #include <zconf.h>
 
 #include "TLegend.h"
-#include "TLegendEntry.h"
 #include "TSystem.h"
 #include "TFile.h"
-#include "TGraphErrors.h"
 #include "TH3F.h"
 #include "TProfile2D.h"
 #include "TParameter.h"
-#include "TTree.h"
 #include "TInterpreter.h"
 
 #include "PLTAnalysis.h"
