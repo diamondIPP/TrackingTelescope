@@ -13,6 +13,7 @@
 
 /** terminal output colors */
 #define ERROR "\033[91m"
+#define WARN "\033[1;93m"
 #define ENDC "\033[0m"
 
 struct winsize;
@@ -23,6 +24,7 @@ namespace tel{
   std::vector<std::string> split(const std::string &, const char & = '\t');
   double distance(std::pair<float, float>, std::pair<float, float>);
   void critical(const std::string & msg);
+  void warning(const std::string & msg);
   void print_banner(const std::string& message, char seperator = '=', uint16_t max_lenght = 100);
 
 

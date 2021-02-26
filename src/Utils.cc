@@ -17,8 +17,10 @@ namespace tel {
     stringstream ss(s);
     string item;
     vector<string> elements;
-    while (getline(ss, item, deliminator))
+    while (getline(ss, item, deliminator)){
+      if (item.empty()) { continue; }
       elements.push_back(item);
+    }
     return elements;
   }
 
@@ -53,6 +55,8 @@ namespace tel {
   }
 
    void critical(const std::string & msg) { std::cerr << std::endl << ERROR << "CRITICAL: " << ENDC << msg << std::endl; }
+
+   void warning(const string & msg) { cerr << endl << WARN << "WARNING: " << ENDC << msg << endl; }
 
   void ProgressBar::update(uint32_t event) {
 
