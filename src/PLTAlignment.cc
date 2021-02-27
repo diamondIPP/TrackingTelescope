@@ -3,6 +3,7 @@
 #include <map>
 #include <cstdlib>
 #include "GetNames.h"
+#include "Utils.h"
 
 using namespace std;
 
@@ -137,11 +138,11 @@ void PLTAlignment::WriteAlignmentFile (const uint16_t telescop_id, const uint16_
     std::cerr << "ERROR: cannot open file: " << GetAlignmentFilename() << endl;
     throw;
   }
+  cout << "Writing aligment to file " << GetAlignmentFilename() << endl;
   while (getline(in, line_str)) { lines.emplace_back(line_str); }
   in.close();
   // write new settings
-  ofstream out("test.txt");
-//  ofstream out(GetAlignmentFilename());
+  ofstream out(GetAlignmentFilename());
   bool wrote_data(false);
   for (const auto & line: lines) {
     if (line.find('#') != string::npos) {

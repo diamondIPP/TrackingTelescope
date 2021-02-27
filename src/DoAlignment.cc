@@ -8,7 +8,6 @@
 #include "GetNames.h"
 #include "TestPlaneEfficiencySilicon.h"
 #include "PLTPlane.h"
-#include "PLTAlignment.h"
 
 using namespace std;
 
@@ -221,8 +220,8 @@ int Alignment::Align() {
 
   SaveAllHistograms();
 
-//  cout << "Saving alignment file \"" << OutFileName << "\" with the following parameters:" << endl;
   PrintAlignment();
+  FR->GetAlignment()->WriteAlignmentFile(telescope_id_, n_planes_);
   return 0;
 }
 
@@ -234,12 +233,8 @@ float Alignment::ReduceSigma(uint16_t step) const {
 }
 void Alignment::PrintAlignment() {
 
-  PLTAlignment * al = FR->GetAlignment();
-  cout << "CH ROC  RZ              X               Y               Z" << endl;
-  for (unsigned i_plane(0); i_plane < n_planes_; i_plane++) {
-    cout << Form("%2i %1i %+15E %+15E %+15E %+15E\n", 1, i_plane, al->LR(1, i_plane), al->LX(1, i_plane), al->LY(1, i_plane), al->LZ(1, i_plane));
-  }
-//  al->WriteAlignmentFile(OutFileName, FR->NMAXROCS);
+  cout << " TEL  CH ROC  RZ                             X               Y               Z" << endl;
+  cout << FR->GetAlignment()->GetAlignment(telescope_id_, n_planes_) << endl;
 }
 
 void Alignment::PrintResiduals(const vector<uint16_t> & planes) {
@@ -262,7 +257,7 @@ void Alignment::PrintResiduals(const vector<uint16_t> & planes) {
 }
 
 std::vector<uint16_t> Alignment::GetOrderedPlanes() {
-  /** return the planes in the correct order wrt the beam, using the z-positions from the alignment file */
+  /** @returns the planes in the correct order wrt the beam, using the z-positions from the alignment file */
   vector<float> z_pos;
   for (unsigned i_plane(0); i_plane < n_planes_; i_plane++) {
     z_pos.emplace_back(FR->GetAlignment()->LZ(1, i_plane));
