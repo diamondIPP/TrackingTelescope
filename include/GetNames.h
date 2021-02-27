@@ -15,6 +15,7 @@ public:
   static uint16_t calibration_;
   static uint16_t year_;
   static std::vector<float> dia_z_pos_;
+  static std::string plot_dir_;
   static int Read(int16_t);
 
 private:
@@ -32,6 +33,7 @@ struct AlignSettings {
 };
 
 AlignSettings ReadAlignSettings(std::vector<std::string>, uint16_t n_actions);
+void ValidateDirectories(const std::string&);
 std::string GetCalibrationFilename(int telescopeID);
 std::string GetAlignmentFilename();
 std::string GetDir();

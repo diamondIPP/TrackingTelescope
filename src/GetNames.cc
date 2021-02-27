@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <fstream>
 #include "TString.h"
+#include "TSystem.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ namespace tel {
 int16_t Config::telescope_id_;
 uint16_t Config::n_rocs_, Config::mask_, Config::calibration_, Config::year_;
 vector<float> Config::dia_z_pos_;
+string Config::plot_dir_ = GetDir() + "/plots";
 
 int Config::Read(int16_t tel_id) {
   /** read the telescopes.txt config file */
@@ -262,4 +264,15 @@ int16_t GetRawAlignTel(uint16_t n_planes) {
   else if (n_planes == 6) { return -3; }
   else if (n_planes == 7) { return -4; }
   else { return 0; }
+}
+
+void ValidateDirectories(const string & run_number) {
+  /** check if all required directories exist and create them if not */
+  TString plot_dir = tel::Config::plot_dir_.c_str();
+  if (gSystem->OpenDirectory(plot_dir) == nullptr) {
+    gSystem->mkdir(plot_dir);
+  }
+  if (gSystem->OpenDirectory(plot_dir + "/" + run_number) == nullptr) {
+    gSystem->mkdir(plot_dir + "/" + run_number);
+  }
 }
