@@ -1,8 +1,0 @@
-./Calibrations/telescope35
-phCalibrationGErfFit_C0.dat
-phCalibrationGErfFit_C1.dat
-phCalibrationGErfFit_C2.dat
-phCalibrationGErfFit_C3.dat
-phCalibrationFitErf_C4_20191211_15_25.dat
-phCalibrationFitErf_C5.dat
-phCalibrationFitErf_C6.dat
