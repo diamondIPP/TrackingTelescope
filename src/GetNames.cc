@@ -99,26 +99,14 @@ AlignSettings ReadAlignSettings(vector<string> args, uint16_t n_actions) {
   return AS;
 }
 
-string GetMaskingFilename(int telescopeID){
-
-    if        (telescopeID == 1) {  return "outer_pixel_masks/outerPixelMask_Telescope1.txt";
-    } else if (telescopeID == 2) {  return "outer_pixel_masks/outerPixelMask_Telescope2.txt";
-    } else if (telescopeID == 5) {  return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
-    } else if (telescopeID == 6) {  return "outer_pixel_masks/outerPixelMask_Telescope6.txt";
-    } else if (telescopeID == 7) {  return "outer_pixel_masks/outerPixelMask_Telescope7.txt";
-    } else if (telescopeID == 8)  return "outer_pixel_masks/outerPixelMask_Telescope8.txt";
-    else if (telescopeID == 9)  return "outer_pixel_masks/outerPixelMask_Telescope9.txt";
-    else if (telescopeID == 21)  return "outer_pixel_masks/outerPixelMask_Telescope21.txt";
-    else if (telescopeID == 69)  return "outer_pixel_masks/outerPixelMask_Telescope69.txt";
-    else if (telescopeID == 70)  return "outer_pixel_masks/outerPixelMask_Telescope69.txt";
-    else if (telescopeID >= 25)  return "outer_pixel_masks/outerPixelMask_Telescope21.txt";
-    else if (telescopeID >= 10)  return "outer_pixel_masks/outerPixelMask_Telescope10.txt";
-    else if (telescopeID == -1) return "outer_pixel_masks/outerPixelMask_Telescope5.txt";
-    else {
-        cout << "ERROR: No Masking file for telescopeID=" << telescopeID << endl;
-        cout << "Exiting.." << endl;
-        exit(0);
-    }
+string GetMaskingFilename(){
+  /** @returns: path to the outer pixel mask file */
+  string path = GetDir() + Form("data/outer_pixel_masks/%i.txt", tel::Config::mask_);
+  if (gSystem->AccessPathName(path.c_str())) {
+    tel::critical(Form("The mask file \"%s\" does not exist!", tel::split(path, '/').back().c_str()));
+    throw;
+  }
+  return path;
 }
 
 string GetCalibrationFilename(int telescopeID){
@@ -243,27 +231,6 @@ bool in(T num, vector<T> ids){
 string GetAlignmentFilename(){
 
   return GetDir() + "data/alignments.txt";
-}
-
-uint16_t GetMaxTel() {
-  /** @returns highest used telescope number */
-  vector<int16_t> numbers;
-  ifstream f(GetAlignmentFilename());
-  int tel;
-  for (string line; getline(f, line);){
-    istringstream s(line);
-    s >> tel;
-    numbers.emplace_back(tel);
-  }
-  return *max_element(numbers.begin(), numbers.end());
-}
-
-int16_t GetRawAlignTel(uint16_t n_planes) {
-
-  if (n_planes == 4) { return -2; }
-  else if (n_planes == 6) { return -3; }
-  else if (n_planes == 7) { return -4; }
-  else { return 0; }
 }
 
 void ValidateDirectories(const string & run_number) {

@@ -66,7 +66,7 @@ Alignment::Alignment(const string & in_file_name, const TString & run_number, ui
       ProgressBar = new tel::ProgressBar(max_event_number_);
 
       /** Apply Masking */
-      FR->ReadPixelMask(GetMaskingFilename(telescope_id_));
+      FR->ReadPixelMask(GetMaskingFilename());
       InitHistograms();
 
       cout << "\nStarting with Alignment: " << endl;

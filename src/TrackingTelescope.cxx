@@ -369,7 +369,7 @@ void TestPlaneEfficiency (std::string const InFileName,
   FR->SetPlaneUnderTest(plane_under_test);
 
   // Apply Masking
-  FR->ReadPixelMask(GetMaskingFilename(telescopeID));
+  FR->ReadPixelMask(GetMaskingFilename());
 
   // Prepare Occupancy histograms
   // Telescope coordinates

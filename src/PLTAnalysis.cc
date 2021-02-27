@@ -21,7 +21,7 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     stopAt = nEntries;
 //    stopAt = 1e4;
     /** apply masking */
-    FR->ReadPixelMask(GetMaskingFilename(telescopeID));
+    FR->ReadPixelMask(GetMaskingFilename());
     /** init histos */
     Histos = new RootItems(telescopeID, RunNumber);
     DiaZ = getDiaZPositions();

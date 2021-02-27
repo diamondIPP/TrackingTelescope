@@ -34,7 +34,7 @@ FindPlaneErrors::FindPlaneErrors(string in_file_name, const TString & run_number
   RealChi2Res.assign(NPlanes, make_pair(1, 1));
 
   FR = InitFileReader();
-  FR->ReadPixelMask(GetMaskingFilename(TelescopeID)); /** Apply Masking */
+  FR->ReadPixelMask(GetMaskingFilename()); /** Apply Masking */
   OrderedPlanes = GetOrderedPlanes();
   MaxEventNumber = (FR->GetEntries() > 50000) ? 10000 : unsigned(FR->GetEntries());
   ProgressBar = new tel::ProgressBar(MaxEventNumber - 1);
