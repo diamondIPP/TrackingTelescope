@@ -60,7 +60,6 @@ vector<float> Config::GetZPos(uint16_t zpos_number) {
   for (string line; getline(f, line);) {
     if (line.find('#') < 3) { continue; }
     line = string(line.begin(), line.begin() + line.find('#'));
-    cout << line << endl;
     istringstream s(line);
     s >> n;
     if (n == zpos_number){
@@ -74,6 +73,29 @@ vector<float> Config::GetZPos(uint16_t zpos_number) {
 
 } // end tel namespace
 
+
+AlignSettings ReadAlignSettings(vector<string> args, uint16_t n_actions) {
+  /** read defualt alignment settings from config/align.txt and overwrite if args are given*/
+  ifstream f(GetDir() + "config/align.txt");
+  string line;
+  getline(f, line); // skip first line with comments
+  getline(f, line);
+  istringstream s(line);
+
+  struct AlignSettings AS;
+  // read default
+  s >> AS.max_events_ >> AS.n_iterations_ >> AS.res_thresh_ >> AS.angle_thresh_ >> AS.sil_roc_;
+  // overwrite default if argument is provided
+  uint16_t i = n_actions + 2;
+  tel::warning(to_string(i));
+  if (args.size() > i) {AS.max_events_ = stoi(args.at(i++));   cout << Form("Using %i events", AS.max_events_) << endl;}
+  if (args.size() > i) {AS.n_iterations_ = stoi(args.at(i++)); cout << Form("Using %i iterations", AS.n_iterations_) << endl;}
+  if (args.size() > i) {AS.res_thresh_ = stof(args.at(i++));   cout << Form("Using %1.2e as residual threshold", AS.res_thresh_) << endl;}
+  if (args.size() > i) {AS.angle_thresh_ = stof(args.at(i++)); cout << Form("Using %1.2e as angle threshold", AS.angle_thresh_) << endl;}
+  if (args.size() > i) {AS.sil_roc_ = stoi(args.at(i++));      cout << Form("Using plane %i as SIL DUT", AS.sil_roc_) << endl;}
+
+  return AS;
+}
 
 string GetMaskingFilename(int telescopeID){
 

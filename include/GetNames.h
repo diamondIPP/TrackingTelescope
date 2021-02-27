@@ -23,6 +23,15 @@ private:
 
 } // end tel namespace
 
+struct AlignSettings {
+  uint32_t max_events_ = 0;
+  uint16_t n_iterations_ = 0;
+  float res_thresh_ = 0;
+  float angle_thresh_ = 0;
+  int16_t sil_roc_ = -1;
+};
+
+AlignSettings ReadAlignSettings(std::vector<std::string>, uint16_t n_actions);
 std::string GetCalibrationFilename(int telescopeID);
 std::string GetAlignmentFilename();
 std::string GetDir();
