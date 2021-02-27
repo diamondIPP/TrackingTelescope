@@ -15,9 +15,8 @@ namespace tel {
   vector<string> split(const string & s, const char & deliminator) {
 
     stringstream ss(s);
-    string item;
     vector<string> elements;
-    while (getline(ss, item, deliminator)){
+    for (string item; getline(ss, item, deliminator);){
       if (item.empty()) { continue; }
       elements.push_back(item);
     }
@@ -54,9 +53,9 @@ namespace tel {
     barLength = uint8_t(w.ws_col - diff);
   }
 
-   void critical(const std::string & msg) { std::cerr << std::endl << ERROR << "CRITICAL: " << ENDC << msg << std::endl; }
+   void critical(const std::string & msg) { cerr << ERROR << "CRITICAL: " << ENDC << msg << std::endl; }
 
-   void warning(const string & msg) { cerr << endl << WARN << "WARNING: " << ENDC << msg << endl; }
+   void warning(const string & msg) { cerr <<  WARN << "WARNING: " << ENDC << msg << endl; }
 
   void ProgressBar::update(uint32_t event) {
 

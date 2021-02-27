@@ -12,7 +12,7 @@
 #include <sstream>
 
 /** terminal output colors */
-#define ERROR "\033[91m"
+#define ERROR "\033[1;91m"
 #define WARN "\033[1;93m"
 #define ENDC "\033[0m"
 
