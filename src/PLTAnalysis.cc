@@ -156,8 +156,8 @@ PLTAnalysis::~PLTAnalysis()
 //		    if (telescopeID == 9 || telescopeID == 8 || telescopeID ==7) {
 		      if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
                         for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
-              float dia1z = GetDiamondZPosition(telescopeID, 1);
-              float dia2z = GetDiamondZPosition(telescopeID, 2);
+              float dia1z = tel::Config::dia_z_pos_.at(0);
+              float dia2z = tel::Config::dia_z_pos_.at(1);
 			  if (iSig < 2)
 			    Histos->SignalDisto()[iSig]->Fill(Track->ExtrapolateX(dia1z), Track->ExtrapolateY(dia1z), FR->SignalDiamond(iSig) );
 			  else
@@ -412,7 +412,7 @@ vector<float> * PLTAnalysis::getDiaZPositions(){
     auto * tmp = new vector<float>;
     size_t n_dut_planes = UseDigitalCalibration(telescopeID) ? size_t(FR->NMAXROCS - 4) : 2;
     for (uint8_t i_dut(0); i_dut < n_dut_planes; i_dut++){
-      float pos = UseDigitalCalibration(telescopeID) ? FR->GetAlignment()->LZ(1, 4 + i_dut) : GetDiamondZPosition(telescopeID, i_dut);
+      float pos = UseDigitalCalibration(telescopeID) ? FR->GetAlignment()->LZ(1, 4 + i_dut) : tel::Config::dia_z_pos_.at(i_dut);
       cout << "z-position of diamond " << int(i_dut) << ": " << pos << endl;
       tmp->push_back(pos);
     }
