@@ -29,6 +29,7 @@
 #include "DoAlignment.h"
 #include "FindPlaneErrors.h"
 #include "Utils.h"
+#include "GetNames.h"
 
 #define DEBUG false
 
@@ -1338,18 +1339,25 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 }
 
 
+void PrintUsage(const string & name) {
+  cerr << "Usage: " << name << " <InFileName> <action> <telescopeID> ";
+  cerr << "optional arguments: (<TrackMode>=0) (<EventsAlignment>=100000) (<IterAlignStep>=20) (<MaxAlignRes(cm)>=0.00001) (<MaxAlignAngle(rad)>=0.001) (<SilDUT>=-1)" << endl;
+  cerr << "action:\n  0: analysis\n  1: alignment\n  2: residuals" << endl;
+  cerr << "TrackMode:\n  0: AllPlanes\n  1: OnlyTelescope" << endl;
+  cerr << "EventsAlignment:\n  0: Use ALL events in file\n  <n>: Use only the first \"n\" events in the provided file." << endl;
+  cerr << "SilDUT:\n  -1: No Silicon DUT, only diamonds\n  <i>: Roc position \"i\" where the Silicon DUT is" << endl;
+}
+
+
 int main (int argc, char* argv[]) {
 
   if (argc <= 3 or argc >= 11) {
     tel::critical("Wrong arguments; Must supply at least 3 arguments and no more than 9: ");
-    std::cerr << "Usage: " << argv[0] << " <InFileName> <action> <telescopeID> (<TrackMode>=0) (<EventsAlignment>=100000) (<IterAlignStep>=20) (<MaxAlignRes(cm)>=0.00001) (<MaxAlignAngle(rad)>=0.001) (<SilDUT>=-1)" << std::endl;
-    std::cerr << "action:\n  0: analysis\n  1: alignment\n  2: residuals" << std::endl;
-    std::cerr << "TrackMode:\n  0: AllPlanes\n  1: OnlyTelescope" << std::endl;
-    std::cerr << "EventsAlignment:\n  0: Use ALL events in file\n  <n>: Use only the first \"n\" events in the provided file. If file has less than \"n\", it will use all" << std::endl;
-    std::cerr << "SilDUT:\n  -1: No Silicon DUT, only diamonds\n  <i>: Roc position \"i\" where the Silicon DUT is" << std::endl;
+    PrintUsage(argv[0]);
     return 1;
   }
   gInterpreter->GenerateDictionary("vector<vector<float> >;vector<vector<UShort_t> >", "vector"); // add root dicts for vector<vector> >
+  gROOT->ProcessLine("#include <vector>");
 
   /** There three usage modes: analysis, alignment and residuals
       analysis: uses alignment and residuals for the given telescope to perform global and single plane studies
@@ -1360,69 +1368,42 @@ int main (int argc, char* argv[]) {
         0: Analysis
         1: Alignment
         2: Residuals */
-  vector<string> action_str = {" (Analysis)", " (Alignment)", " (Residuals)"};
-  auto action = strtoul(argv[2], nullptr, 10);
+  auto action = stoi(argv[2]);
+  auto telescope_id = stoi(argv[3]); /** see data/alignments.txt file */
+  /** Tracking only on the telescope (only for digital telescope):
+      0: Use All planes (default until September 2016.
+      1: Use only the first 4 planes for tracking (telescope planes) */
+  auto track_only_telescope = argc >= 5 and bool(stoi(argv[4]));
+
   if (action > 3) {
     tel::critical("Wrong action argument: " + to_string(action));
     return 2;
   }
-  auto telescopeID = int16_t(strtol(argv[3], nullptr, 10)); /** see ALIGNMENT/DICTIONARY.txt file */
-
-  /** Tracking only on the telescope (only for digital telescope):
-      0: Use All planes (default until September 2016.
-      1: Use only the first 4 planes for tracking (telescope planes) */
-  auto trackOnlyTelescope = argc >= 5? bool(strtoul(argv[4], nullptr, 10)) : false;
-
+  vector<string> action_str = {" (Analysis)", " (Alignment)", " (Residuals)"};
   cout << "Action = " << int(action) << action_str.at(action) << endl;
-  cout << "TelescopeID = " << int(telescopeID) << endl;
-  cout << "Track only analogue telescope: " << trackOnlyTelescope << "\n" << endl;
-    unsigned long maxAlignmentEvents = 100000;
-    unsigned short iterAlignSteps = 20;
-    float maxAlignRes(0.00001);
-    float maxAlignAngle(0.001);
-    short silRoc(-1);
-    if(argc >= 6){
-        maxAlignmentEvents = strtoul(argv[5], nullptr, 10);
-        cout << "Using " << maxAlignmentEvents << " for alignment (0 means all)" << endl;
-    }
-    if(argc >= 7){
-        iterAlignSteps = (unsigned short)strtoul(argv[6], nullptr, 10);
-        cout << "Using " << iterAlignSteps << " iteration per alignment step" << endl;
-    }
-    if(argc >= 8){
-        maxAlignRes = strtof(argv[7], nullptr);
-        cout << "Using " << maxAlignRes << " as maximum residuals threshold per alignment step" << endl;
-    }
-    if(argc >= 9){
-        maxAlignAngle = strtof(argv[8], nullptr);
-        cout << "Using " << maxAlignAngle << " as maximum angle threshold per alignment step" << endl;
-    }
-    if(argc == 10){
-        silRoc = (short)strtol(argv[9], nullptr, 10);
-        if(silRoc != -1) {
-            cout << "Using dut in roc " << silRoc << " as an extra silicon telescope plane" << endl;
-        }
-    }
+  cout << "TelescopeID = " << int(telescope_id) << endl;
+  cout << "Track only analogue telescope: " << track_only_telescope << endl << endl;
 
-  string const InFileName = argv[1];
-  vector<std::string> x = tel::split(InFileName, '/');
-  string RunNumber = tel::trim(tel::trim(x.back(), "estroot0"), ".");
-  // validate existence of directory plots
-  if (gSystem->OpenDirectory("./plots") == nullptr) {
-    gSystem->mkdir("./plots");
-    gSystem->OpenDirectory("..");
-  }
-  gSystem->mkdir("./plots/" + TString(RunNumber));
-  gROOT->ProcessLine("#include <vector>");
+  /** read config */
+  if (tel::Config::Read(telescope_id) == 0) { return 3; }
 
-  TFile out_f(TString::Format("plots/%s/histos.root", RunNumber.c_str()), "recreate"); /** Open a ROOT file to store histograms in. */
+  /** optional settings */
+  AlignSettings AS = ReadAlignSettings(vector<string>(argv, argv + argc), action_str.size());
+
+  const string in_file_name = argv[1];
+  const string run_number = tel::trim(tel::trim(tel::split(in_file_name, '/').back(), "estro0"), ".");
+
+  ValidateDirectories(run_number);
+
+  /** Open a ROOT file to store histograms in. */
+  TFile out_f(Form("%s/plots/%s/histos.root", GetDir().c_str(), run_number.c_str()), "recreate");
 
   if (action == 1) { /** ALIGNMENT */
-    Alignment(InFileName, RunNumber, telescopeID, trackOnlyTelescope, iterAlignSteps, maxAlignRes, maxAlignAngle, maxAlignmentEvents, silRoc);
+    Alignment(in_file_name, run_number, telescope_id, track_only_telescope, AS.n_iterations_, AS.res_thresh_, AS.angle_thresh_, AS.max_events_, AS.sil_roc_);
   } else if (action==2) { /** RESIDUAL CALCULATION */
-    FindPlaneErrors(InFileName, RunNumber, telescopeID);
+    FindPlaneErrors(in_file_name, run_number, telescope_id);
   } else { /** ANALYSIS */
-    PLTAnalysis Analysis(InFileName, &out_f, RunNumber, telescopeID, bool(trackOnlyTelescope));
+    PLTAnalysis Analysis(in_file_name, &out_f, run_number, telescope_id, bool(track_only_telescope));
     Analysis.EventLoop();
     Analysis.FinishAnalysis();
   }
