@@ -31,8 +31,8 @@ uint16_t Config::n_rocs_, Config::mask_, Config::calibration_, Config::year_;
 vector<float> Config::dia_z_pos_;
 
 int Config::Read(int16_t tel_id) {
-  /** read the main.txt config file */
-  ifstream f(GetDir() + "config/main.txt");
+  /** read the telescopes.txt config file */
+  ifstream f(GetDir() + "config/telescopes.txt");
   int id, zpos_number;
   bool configured = false;
   for (string line; getline(f, line);) {
@@ -45,7 +45,7 @@ int Config::Read(int16_t tel_id) {
     }
   }
   if (not configured){
-    critical(Form("Could not find telescope %i in config file %s", tel_id, "config/main.txt"));
+    critical(Form("Could not find telescope %i in config file %s", tel_id, "config/telescopes.txt"));
     return 0;
   }
   Config::dia_z_pos_ = GetZPos(zpos_number);

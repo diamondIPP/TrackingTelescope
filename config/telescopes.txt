@@ -1,0 +1,12 @@
+# TEL NROCS MASK CALIB ZPOS YEAR COMMENT
+# ----------------------------------
+ 14   4       0   12     0  2015 # SEP Pad
+ 15   4       0   15     1  2016 # Oct Pad
+ 16   4       0   16     2  2017 # bla
+ 28   4       0   16     3  2017 # Aug Pad
+ 31   4       0   16     3  2017 # Aug Pad
+ 36   4       0   16     4  2018 # Jul BCM'
+ 42   4       0   16     4  2018 # Jul BCM'
+
+# >16<22 ->1
+# >22 ->2

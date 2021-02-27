@@ -1,0 +1,2 @@
+# MAXEVENTS N_ITERATION RES_THRESH ANG_TRESH SIL_ROC
+  100001    20          1e-5       1e-3      -1
