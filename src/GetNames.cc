@@ -109,12 +109,12 @@ string GetMaskingFilename(){
 
 string GetCalibrationPath(){
   /** @returns: path to the calibration directory */
-  string path = GetDir() + Form("data/calibration/telescope%i.txt", tel::Config::calibration_);
-  if (gSystem->AccessPathName(path.c_str())) {
+  string path = GetDir() + Form("data/calibrations/telescope%i/", tel::Config::calibration_);
+  if (gSystem->OpenDirectory(path.c_str()) == nullptr) {
     tel::critical(Form("The calibration path \"%s\" does not exist!", tel::split(path, '/').back().c_str()));
     throw;
   }
-  return path;
+  return path + '/';
 }
 
 uint16_t GetNPlanes(){
