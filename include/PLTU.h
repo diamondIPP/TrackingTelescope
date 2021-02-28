@@ -12,7 +12,6 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TStyle.h"
-#include "TROOT.h"
 #include <vector>
 
 
