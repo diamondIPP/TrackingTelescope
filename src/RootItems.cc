@@ -5,9 +5,9 @@ using namespace std;
 /** ============================
  CONSTRUCTOR
  =================================*/
-RootItems::RootItems(uint8_t telescopeID, TString const RunNumber):
-    nRoc(GetNumberOfROCS(telescopeID)),
-    nSig(GetNumberOfSignals(telescopeID)),
+RootItems::RootItems(TString const RunNumber) :
+    nRoc(GetNPlanes()),
+    nSig(GetNSignals()),
     PlotsDir("plots/"),
     OutDir(PlotsDir + RunNumber + "/"),
     FileType(".png"),

@@ -345,23 +345,11 @@ void TestPlaneEfficiency (std::string const InFileName,
   // Initialize Reader
   PSIFileReader * FR;
 
-  if (GetUseRootInput(telescopeID)){
-    FR = new PSIRootFileReader(InFileName,
-			       GetCalibrationFilename(telescopeID),
-			       GetAlignmentFilename(),
-			       GetNumberOfROCS(telescopeID),
-			       GetUseGainInterpolator(telescopeID),
-			       GetUseExternalCalibrationFunction(telescopeID)
-			       );
+  if (IsROOTFile(InFileName)){
+    FR = new PSIRootFileReader(InFileName, 0, false);
   }
   else{
-    FR = new PSIBinaryFileReader(InFileName,
-				 GetCalibrationFilename(telescopeID),
-				 GetAlignmentFilename(),
-				 GetNumberOfROCS(telescopeID),
-				 GetUseGainInterpolator(telescopeID),
-				 GetUseExternalCalibrationFunction(telescopeID)
-				 );
+    FR = new PSIBinaryFileReader(InFileName);
     ((PSIBinaryFileReader*) FR)->CalculateLevels(OutDir);
   }
 
@@ -1092,7 +1080,7 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
   }
   fCL.close();
 
-  int nplanes = GetNumberOfROCS(telescopeID);
+  int nplanes = GetNPlanes();
 
   // LEVELS
   //f << "<hr />\n";
@@ -1201,9 +1189,9 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
   f << "<br>\n";
 
     /** Signal Distribution */
-    if (GetNumberOfSignals(telescopeID) > 0){
+    if (GetNSignals() > 0){
 
-        uint8_t nSig = GetNumberOfSignals(telescopeID);
+        uint8_t nSig = GetNSignals();
         f << "<hr />\n";
         f << "<h2>Signal Distribution</h2>\n";
         for (uint8_t iSig = 0; iSig != nSig; iSig++)

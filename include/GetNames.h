@@ -14,8 +14,8 @@ public:
   static uint16_t n_rocs_;
   static uint16_t calibration_;
   static uint16_t year_;
+  static std::string type_;
   static std::vector<float> dia_z_pos_;
-  static std::string plot_dir_;
   static int Read(int16_t);
 
 private:
@@ -33,20 +33,22 @@ struct AlignSettings {
 };
 
 AlignSettings ReadAlignSettings(std::vector<std::string>, uint16_t n_actions);
-void ValidateDirectories(const std::string&);
-std::string GetCalibrationFilename(int telescopeID);
-std::string GetAlignmentFilename();
 std::string GetDir();
+std::string GetPlotDir();
+void ValidateDirectories(const std::string&);
+std::string GetCalibrationPath();
+std::string GetAlignmentFilename();
 std::string GetMaskingFilename();
 const char * GetSignalBranchName();
-uint8_t GetNumberOfROCS(int16_t);
-int GetNumberOfSignals(int16_t);
-bool GetUseGainInterpolator(int telescopeID);
-bool GetUseExternalCalibrationFunction(int telescopeID);
-bool GetUseRootInput(int telescopeID);
-bool UseFileWriter(uint8_t);
-bool FillSignalHistos(uint8_t);
-bool UseDigitalCalibration(int16_t);
+uint16_t GetNPlanes();
+
+int GetNSignals();
+bool UseGainInterpolator();
+bool UseExternalCalibrationFunction();
+bool IsROOTFile(const std::string& filename);
+bool UseFileWriter();
+bool FillSignalHistos();
+bool UseDigitalCalibration();
 template <typename T>
 bool in(T , std::vector<T>);
 

@@ -12,15 +12,7 @@
 class PSIRootFileReader : public PSIFileReader
 {
   public:
-    PSIRootFileReader(  std::string const,
-                        std::string const,
-                        std::string const,
-                        int const,
-                        bool const,
-                        bool const,
-                        bool const onlyAlign = false,
-                        uint8_t const TelescopeID=0,
-                        bool TrackOnlyTelescope=false);
+    PSIRootFileReader(std::string in_file_name, bool const only_align, bool track_only_telescope);
     ~PSIRootFileReader ();
 
     bool OpenFile () override;

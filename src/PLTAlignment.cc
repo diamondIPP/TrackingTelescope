@@ -17,7 +17,7 @@ PLTAlignment::PLTAlignment (): ErrorsFromFile(false), fIsGood(false) {
 }
 
 
-void PLTAlignment::ReadAlignmentFile (string const & InFileName, uint16_t const & id) {
+void PLTAlignment::ReadAlignmentFile(string const & InFileName) {
 
   // So far so good..
   fIsGood = true;
@@ -40,7 +40,7 @@ void PLTAlignment::ReadAlignmentFile (string const & InFileName, uint16_t const 
     LineStream.str(InLine);
 
     LineStream >> tid >> channel >> roc;
-    if (tid != id) { continue; }
+    if (tid != tel::Config::telescope_id_) { continue; }
 
     std::pair<int, int> CHROC = std::make_pair(channel, roc);
 
@@ -97,7 +97,7 @@ void PLTAlignment::ReadAlignmentFile (string const & InFileName, uint16_t const 
   InFile.close();
 
   if (fTelescopeMap.empty()){
-    cerr << "Did not find telescope " << id << " in the alignemnt file: " << InFileName << endl;
+    cerr << "Did not find telescope " << tel::Config::telescope_id_ << " in the alignemnt file: " << InFileName << endl;
     throw;
   }
 } // end ReadAlignmentFile
@@ -620,7 +620,7 @@ void PLTAlignment::AddToGZ (int const ch, float val)
 void PLTAlignment::SetErrors(int telescopeID, bool initial){
 
     uint8_t id = telescopeID;
-    uint8_t n_planes = GetNumberOfROCS(telescopeID);
+    uint8_t n_planes = GetNPlanes();
     if (initial) { /** just use increased digital resolution for initial config */
       for (auto i_plane(0); i_plane < n_planes; i_plane++){
         SetErrorX(i_plane, PLTU::PIXELWIDTH / sqrt(12) * 2.5);

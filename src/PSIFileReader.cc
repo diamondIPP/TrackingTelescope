@@ -2,66 +2,48 @@
 
 #include <iostream>
 #include <string>
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 
 #include "TGraph.h"
 #include "TString.h"
-#include "TH1F.h"
 #include "TCanvas.h"
-#include "TSpectrum.h"
-#include "TMarker.h"
 #include "TLine.h"
+#include "GetNames.h"
 
 using namespace std;
 
 /** ============================
  CONSTRUCTOR
  =================================*/
-PSIFileReader::PSIFileReader (string const& CalibrationList, string const & AlignmentFileName,
-    int const nrocs, bool const useGainInterpolator, bool const useExternalCalibrationFunction, bool TrackOnlyTelescope, uint16_t const & telescope_id):
-        PLTTracking(nrocs, TrackOnlyTelescope), NMAXROCS(nrocs), trackOnlyTelescope(TrackOnlyTelescope), telescope_id(telescope_id),
-        fGainCal(nrocs, useExternalCalibrationFunction), fUseGainInterpolator(useGainInterpolator) {
+PSIFileReader::PSIFileReader(bool track_only_telescope):
+  PLTTracking(GetNPlanes(), track_only_telescope),
+  fGainCal(fNPlanes, UseExternalCalibrationFunction()) {
 
-   /** Initialize fCalibrationFile and fRawCalibrationFile with empty strings */
-    for (int i_roc=0; i_roc != NMAXROCS; i_roc++) {
-        fCalibrationFile.push_back("");
-        fRawCalibrationFile.push_back("");
+    /** Set and read in gain calibration files */
+    for (int i_roc=0; i_roc != fNPlanes; i_roc++) {
+      string file_name = GetCalibrationPath() + Form("ROC%i.txt", i_roc);
+      fCalibrationFile.emplace_back(file_name);
+      fRawCalibrationFile.emplace_back(GetCalibrationPath() + Form("ph_Calibration_C%i.dat", i_roc));
+      fGainCal.ReadGainCalFile(file_name, i_roc);
     }
-    std::ifstream fCL(CalibrationList.c_str());
-    if (!fCL.is_open()) {
-        std::cerr << "ERROR: cannot open calibration list file: " << CalibrationList << std::endl;
-        throw;
-    }
-    fCL >> fBaseCalDir;
-    for (int i_roc=0; i_roc != NMAXROCS; i_roc++) fCL >> fCalibrationFile[i_roc];
-
-    /** look for additional files if we want to use the GainInterpolator */
-    if (useGainInterpolator) {
-        for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
-            fCL >> fRawCalibrationFile[i_roc];
-    }
-
-    for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
-        fGainCal.ReadGainCalFile(fBaseCalDir + "/" + fCalibrationFile[i_roc], i_roc);
-
     /** read-in additional files if we want to use the GainInterpolator */
-    if (useGainInterpolator) {
-        for (int i_roc=0; i_roc != NMAXROCS; i_roc++)
-            fGainInterpolator.ReadFile(fBaseCalDir + "/" + fRawCalibrationFile[i_roc], i_roc);
+    if (UseGainInterpolator()) {
+      for (int i_roc=0; i_roc != fNPlanes; i_roc++) {
+        fGainInterpolator.ReadFile(fRawCalibrationFile[i_roc], i_roc);
+      }
     }
 
-    fAlignment.ReadAlignmentFile(AlignmentFileName, telescope_id);// TODO: DA: make condition to skip this in case there is not analysis but only alignment?
-    SetTrackingAlignment(&fAlignment);
+  fAlignment.ReadAlignmentFile(GetAlignmentFilename());// TODO: DA: make condition to skip this in case there is not analysis but only alignment?
+  SetTrackingAlignment(&fAlignment);
 
-    if(!trackOnlyTelescope) {
-        std::cout << "Setting reader's tracking algorithm to: All plane " << std::endl;
-        SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
-    }
-    else {
-        std::cout <<"Setting reader's tracking algorithm to: ETH" << std::endl;
-        SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_ETH);
-    }
+  if(!trackOnlyTelescope) {
+      std::cout << "Setting reader's tracking algorithm to: All plane " << std::endl;
+      SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_6PlanesHit);
+  } else {
+    std::cout <<"Setting reader's tracking algorithm to: ETH" << std::endl;
+    SetTrackingAlgorithm(PLTTracking::kTrackingAlgorithm_ETH);
+  }
 }
 
 

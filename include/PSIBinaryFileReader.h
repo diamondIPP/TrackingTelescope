@@ -9,12 +9,7 @@
 class PSIBinaryFileReader : public PSIFileReader
 {
   public:
-    PSIBinaryFileReader (std::string const, 
-			 std::string const, 
-			 std::string const,
-			 int const,
-			 bool const,
-			 bool const);
+    PSIBinaryFileReader(std::string const InFileName);
     ~PSIBinaryFileReader ();
 
     bool OpenFile ();

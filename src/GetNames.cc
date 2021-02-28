@@ -8,21 +8,19 @@
 #include <fstream>
 #include "TString.h"
 #include "TSystem.h"
+#include "TFile.h"
 
 using namespace std;
 
-uint16_t nTelescopes = 60;
-vector<int16_t> pixelIDs = {10, 13, 15, 21, 25, 29, 30, 34, 35, 36, 51};
-vector<int16_t> roc6IDs = {1, 2, 3, 8, 21, 25, 34};
-vector<int16_t> roc7IDs = {10, 13, 15, 29, 30, 35, 51};
-vector<int16_t> bcmPrimeIDs = {36, 42};
-
-
-std::string GetDir() {
-
+string GetDir() {
+  /** @returns: the main directory of this program */
   string d = __FILE__;
   d = string(d, 0, d.find_last_of('/' ));
   return string(d, 0, d.find_last_of('/' ) + 1);
+}
+
+string GetPlotDir() {
+  return GetDir() + "plots";
 }
 
 namespace tel {
@@ -30,7 +28,7 @@ namespace tel {
 int16_t Config::telescope_id_;
 uint16_t Config::n_rocs_, Config::mask_, Config::calibration_, Config::year_;
 vector<float> Config::dia_z_pos_;
-string Config::plot_dir_ = GetDir() + "/plots";
+string Config::type_;
 
 int Config::Read(int16_t tel_id) {
   /** read the telescopes.txt config file */
@@ -42,7 +40,7 @@ int Config::Read(int16_t tel_id) {
     s >> id;
     if (id == tel_id){
       Config::telescope_id_ = id;
-      s >> Config::n_rocs_ >> Config::mask_ >> Config::calibration_ >> zpos_number >> Config::year_;
+      s >> Config::n_rocs_ >> Config::mask_ >> Config::calibration_ >> zpos_number >> Config::year_ >> Config::type_;
       configured = true;
     }
   }
@@ -109,110 +107,55 @@ string GetMaskingFilename(){
   return path;
 }
 
-string GetCalibrationFilename(int telescopeID){
-
-    if      (telescopeID == 1)  return "calibration_lists/GKCalibrationList.txt";
-    else if (telescopeID == 2)  return "calibration_lists/GKCalibrationList_Telescope2.txt";
-    else if (telescopeID == 5)  return "calibration_lists/GKCalibrationList_Telescope5.txt";
-    else if (telescopeID == 6)  return "calibration_lists/GKCalibrationList_Telescope6.txt";
-    else if (telescopeID == 7)  return "calibration_lists/GKCalibrationList_Telescope7.txt";
-    else if (telescopeID == 8)  return "calibration_lists/GKCalibrationList_Telescope8.txt";
-    else if (telescopeID == 9)  return "calibration_lists/GKCalibrationList_Telescope9.txt";
-    else if (telescopeID == 10)  return "calibration_lists/GKCalibrationList_Telescope10.txt";
-    else if (telescopeID == 11)  return "calibration_lists/GKCalibrationList_Telescope9.txt";
-    else if (telescopeID == 12)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == 13)  return "calibration_lists/GKCalibrationList_Telescope13.txt";
-    else if (telescopeID == 14)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == 15)  return "calibration_lists/GKCalibrationList_Telescope13.txt";
-    else if (telescopeID == 16)  return "calibration_lists/GKCalibrationList_Telescope7.txt";
-    else if (telescopeID == 17)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == 18)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == 19)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == 20)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == 21)  return "calibration_lists/GKCalibrationList_Telescope21.txt";
-    else if (telescopeID == 25)  return "calibration_lists/GKCalibrationList_Telescope25.txt";
-    else if (telescopeID == 29)  return "calibration_lists/GKCalibrationList_Telescope29.txt";
-    else if (telescopeID == 30)  return "calibration_lists/GKCalibrationList_Telescope29.txt";
-    else if (telescopeID == 34)  return "calibration_lists/GKCalibrationList_Telescope34.txt";
-    else if (telescopeID == 35)  return "calibration_lists/GKCalibrationList_Telescope35.txt";
-    else if (telescopeID == 36)  return "calibration_lists/GKCalibrationList_Telescope35.txt";
-    else if (telescopeID == 51)  return "calibration_lists/GKCalibrationList_Telescope51.txt";
-    else if (telescopeID == 69)  return "calibration_lists/GKCalibrationList_Telescope69.txt";
-    else if (telescopeID == 70)  return "calibration_lists/GKCalibrationList_Telescope70.txt";
-    else if (telescopeID >= 10)  return "calibration_lists/GKCalibrationList_Telescope12.txt";
-    else if (telescopeID == -1) return "calibration_lists/GKCalibrationList_Telescope5.txt";
-    else {
-        cout << "ERROR: No Calibration file for telescopeID=" << telescopeID << endl;
-        cout << "Exiting.." << endl;
-        exit(0);
-    }
+string GetCalibrationPath(){
+  /** @returns: path to the calibration directory */
+  string path = GetDir() + Form("data/calibration/telescope%i.txt", tel::Config::calibration_);
+  if (gSystem->AccessPathName(path.c_str())) {
+    tel::critical(Form("The calibration path \"%s\" does not exist!", tel::split(path, '/').back().c_str()));
+    throw;
+  }
+  return path;
 }
 
-uint8_t GetNumberOfROCS(int16_t telescopeID){
-
-    int16_t id = telescopeID;
-    if (in(id, roc6IDs))
-        return 6;
-    else if (id == 4)
-        return 2;
-    else if (in(id, roc7IDs))
-        return 7;
-    else if ((id == -1) || (id >= 9))
-        return 4;
-    else {
-        cout << "ERROR: Number of ROCs not defined for telescopeID=" << telescopeID << endl;
-        cout << "Exiting.." << endl;
-        exit(0);
-    }
+uint16_t GetNPlanes(){
+  /** @returns: the number of the planes specified in the telescope config */
+  return tel::Config::n_rocs_;
 }
 
-bool GetUseGainInterpolator(int telescopeID){
-
-    return telescopeID == 2;
+bool UseExternalCalibrationFunction() {
+  /** @returns: whether to use the function given in the calibration files or not */
+  return UseFileWriter();
 }
 
-bool GetUseExternalCalibrationFunction(int telescopeID){
-
-    return telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11;
+bool IsROOTFile(const string & filename) {
+  /** @returns: whether the file is a ROOT file or not */
+  TFile f(filename.c_str());
+  bool is_root_file = not f.IsZombie();
+  f.Close();
+  return is_root_file;
 }
 
-bool GetUseRootInput(int telescopeID){
-
-    return (telescopeID == -1) || (telescopeID == 7) || telescopeID == 8 || telescopeID == 9 || telescopeID == 10 || telescopeID >= 11;
+bool UseFileWriter(){
+  /** @returns: whether to write the a root file or not */
+  const int first_psi_tel = 7;
+  return tel::Config::telescope_id_ >= first_psi_tel;
 }
 
-bool UseFileWriter(uint8_t telescopeID){
-
-    vector<uint8_t> ids;
-    for (uint8_t id = 7; id <= nTelescopes; id++)
-        ids.push_back(id);
-    return in(telescopeID, ids);
+bool FillSignalHistos(){
+  /** @returns: whether to fill the signal histos or not */
+  const vector<int16_t> ids = {7, 8, 9};
+  return in(tel::Config::telescope_id_, ids);
 }
 
-bool FillSignalHistos(uint8_t telescopeID){
-
-    vector<uint8_t> ids = {7, 8, 9};
-    return in(telescopeID, ids);
+bool UseDigitalCalibration() {
+  /** @returns: whether there is a pixel DUT or not */
+  string type = tel::Config::type_;
+  return type.find("PIX") != string::npos or type.find("Pix") != string::npos or type.find("pix") != string::npos;
 }
 
-bool UseDigitalCalibration(int16_t telescopeID){
-
-    return in(telescopeID, pixelIDs);
-
-}
-
-int GetNumberOfSignals(int16_t telescopeID){
-
-    int16_t id = telescopeID;
-    if (in(id, pixelIDs))
-        return 0;
-    else if ((id == 7) || (id == 8) || (id == 9) || id >= 11)
-        return 4;
-    else {
-        cerr << "ERROR: Number of Signals is not defined for telescopeID=" << telescopeID << endl;
-        cout << "Exiting.." << endl;
-        exit(0);
-    }
+int GetNSignals() {
+  /** @returns: the number of signals to show in the signal distribution. */
+  return UseDigitalCalibration() ? 0 : GetNPlanes();
 }
 
 const char * GetSignalBranchName(){
@@ -235,7 +178,7 @@ string GetAlignmentFilename(){
 
 void ValidateDirectories(const string & run_number) {
   /** check if all required directories exist and create them if not */
-  TString plot_dir = tel::Config::plot_dir_.c_str();
+  TString plot_dir = GetPlotDir().c_str();
   if (gSystem->OpenDirectory(plot_dir) == nullptr) {
     gSystem->mkdir(plot_dir);
   }
@@ -243,3 +186,5 @@ void ValidateDirectories(const string & run_number) {
     gSystem->mkdir(plot_dir + "/" + run_number);
   }
 }
+
+bool UseGainInterpolator() { return false; }

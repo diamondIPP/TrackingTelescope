@@ -13,22 +13,8 @@
 #include "TMarker.h"
 #include "TLine.h"
 
-PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
-                                          std::string const CalibrationList,
-                                          std::string const AlignmentFileName,
-					  int const nrocs,
-					  bool const useGainInterpolator,
-					  bool const useExternalCalibrationFunction
-					  ) : PSIFileReader(CalibrationList,
-							    AlignmentFileName,
-							    nrocs,
-							    useGainInterpolator,
-							    useExternalCalibrationFunction,
-                                false, 14
-							    )
+PSIBinaryFileReader::PSIBinaryFileReader(std::string const InFileName) : PSIFileReader(false)
 {
-
- // constructor
   fEOF = 0;
   fBinaryFileName = InFileName;
   if (!OpenFile()) {
@@ -37,7 +23,7 @@ PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
   }
 
   // Initialize fLevelsROC with zeros
-  for (int i_roc=0; i_roc != NMAXROCS; i_roc++){
+  for (int i_roc=0; i_roc != fNPlanes; i_roc++){
     std::vector<float> tmp;
     for (int i_lev=0; i_lev != 6; i_lev++){
       tmp.push_back(0.);
@@ -45,7 +31,7 @@ PSIBinaryFileReader::PSIBinaryFileReader (std::string const InFileName,
     fLevelsROC.push_back(tmp);
   }
 
-}
+}// end constructor
 
 
 PSIBinaryFileReader::~PSIBinaryFileReader ()
@@ -181,7 +167,6 @@ int PSIBinaryFileReader::decodeBinaryData()
     unsigned short t2 = fBuffer[2];
     fUpperTime = t0;
     fLowerTime = (t1 << 16) | t2;
-    fTime = (((long long int) fUpperTime)<<32) + ((long long int)fLowerTime);
     //    cout << Form(" Event at time  %04x/%08x with Header %d", fUpperTime, fLowerTime, fHeader) << endl;
     //    cout << Form(" Event at time  %04d/%08d with Header %d", fUpperTime, fLowerTime, fHeader) << endl;
   } else  {
@@ -226,7 +211,7 @@ int PSIBinaryFileReader::GetNextEvent ()
 
   Clear();
 
-  for (int i = 0; i != NMAXROCS; ++i) {
+  for (int i = 0; i != fNPlanes; ++i) {
     fPlaneMap[i].SetROC(i);;
   }
 
@@ -285,7 +270,7 @@ int PSIBinaryFileReader::CalculateLevels (TString const OutDir)
     int const NROCs = UBCount - 5;
     //std::cout << "fBufferSize: " << fBufferSize << std::endl;
     //std::cout << "NROCs: " << NROCs << std::endl;
-    if (NROCs != NMAXROCS) {
+    if (NROCs != fNPlanes) {
       std::cerr << "WARNING: NROCs != NMAXROCS in levels calculation.  Skipping event" << std::endl;
       continue;
     }
@@ -420,11 +405,11 @@ void PSIBinaryFileReader::DecodeHits ()
   //std::cout << "NROCs: " << NROCs << std::endl;
   //static int iBadData = 0;
   //static int iGoodData = 0;
-  if (NROCs > NMAXROCS) {
+  if (NROCs > fNPlanes) {
     //DrawWaveform(TString::Format("BadWave_%i.png", iBadData++));
     std::cerr << "WARNING: NROCs > NMAXROCS.  Too many UBs.  Skipping this event" << std::endl;
     return;
-  } else if (NROCs != NMAXROCS) {
+  } else if (NROCs != fNPlanes) {
     //DrawWaveform(TString::Format("BadWave_%i.png", iBadData++));
     std::cerr << "WARNING: NROCs != NMAXROCS.  Skipping this event" << std::endl;
     return;
@@ -456,7 +441,7 @@ void PSIBinaryFileReader::DecodeHits ()
         //printf("Hit iroc %2i  col %2i  row %2i  PH: %4i\n", iroc, colrow.first, colrow.second, fData[ UBPosition[3 + iroc] + 2 + 6 + ihit * 6 ]);
         PLTHit* Hit = new PLTHit(1, iroc, colrow.first, colrow.second, fData[ UBPosition[3 + iroc] + 2 + 6 + ihit * 6 ]);
 
-	if (fUseGainInterpolator)
+	if (UseGainInterpolator())
 	  fGainInterpolator.SetCharge(*Hit);
 	else
 	  fGainCal.SetCharge(*Hit);

@@ -9,14 +9,15 @@
 #include "TF1.h"
 #include "Utils.h"
 #include "TH1F.h"
+#include "TROOT.h"
 
 using namespace std;
 
-FindPlaneErrors::FindPlaneErrors(string in_file_name, const TString & run_number, short telescope_ID):
+FindPlaneErrors::FindPlaneErrors(const string & in_file_name, const TString & run_number, int16_t telescope_ID):
+  Action(in_file_name, run_number),
   TelescopeID(telescope_ID),
-  NPlanes(GetNumberOfROCS(telescope_ID)),
+  NPlanes(GetNPlanes()),
   Threshold(.01),
-  InFileName(std::move(in_file_name)),
   OutFileName(Form("ALIGNMENT/telescope%i.dat", telescope_ID)),
   PlotsDir("plots/"),
   OutDir(PlotsDir + run_number),
@@ -225,26 +226,6 @@ void FindPlaneErrors::AdjustErrors(unsigned short plane_under_test) {
   }
 //  FR->GetAlignment()->SetErrorX(plane_under_test, FR->GetAlignment()->GetErrorX(plane_under_test) * (dChi2.first + 1));
 //  FR->GetAlignment()->SetErrorY(plane_under_test, FR->GetAlignment()->GetErrorY(plane_under_test) * (dChi2.second + 1));
-}
-
-
-PSIFileReader * FindPlaneErrors::InitFileReader() {
-
-  PSIFileReader * tmp;
-  if (GetUseRootInput(TelescopeID)){
-    tmp = new PSIRootFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(), NPlanes, GetUseGainInterpolator(TelescopeID),
-                                GetUseExternalCalibrationFunction(TelescopeID), false, uint8_t(TelescopeID));
-  }
-  else {
-    tmp = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(TelescopeID), GetAlignmentFilename(), NPlanes, GetUseGainInterpolator(TelescopeID),
-                                  GetUseExternalCalibrationFunction(TelescopeID));
-  }
-  tmp->GetAlignment()->SetErrors(TelescopeID, true);
-//  tmp->GetAlignment()->SetErrors(TelescopeID);
-  FILE * f = fopen("MyGainCal.dat", "w");
-  tmp->GetGainCal()->PrintGainCal(f);
-  fclose(f);
-  return tmp;
 }
 
 void FindPlaneErrors::SaveErrors() {

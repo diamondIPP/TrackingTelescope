@@ -2,23 +2,13 @@
 
 #include <iostream>
 #include <string>
-#include <stdint.h>
-#include <stdlib.h>
+#include <utility>
+#include <cstdint>
 
 using namespace std;
 
-PSIRootFileReader::PSIRootFileReader (std::string const InFileName,
-				      std::string const CalibrationList,
-				      std::string const AlignmentFileName,
-				      int const nrocs,
-				      bool const useGainInterpolator,
-				      bool const useExternalCalibrationFunction,
-				      bool const onlyAlign,
-				      uint8_t const TelescopeID,
-                      bool TrackOnlyTelescope
-				      ) :   PSIFileReader(CalibrationList, AlignmentFileName, nrocs, useGainInterpolator, useExternalCalibrationFunction, TrackOnlyTelescope, TelescopeID), fOnlyAlign(onlyAlign)
-{
-    fFileName = InFileName;
+PSIRootFileReader::PSIRootFileReader(string in_file_name, bool const only_align, bool track_only_telescope):
+  PSIFileReader(track_only_telescope), fFileName(move(in_file_name)), fOnlyAlign(only_align) {
     if (!OpenFile()) {
         std::cerr << "ERROR: cannot open input file: " << fFileName << std::endl;
     throw;
@@ -123,7 +113,7 @@ int PSIRootFileReader::GetNextEvent ()
         }
     }
 
-    for (int i = 0; i != NMAXROCS; ++i) {
+    for (int i = 0; i != fNPlanes; ++i) {
         fPlaneMap.emplace(i, PLTPlane());
         fPlaneMap[i].SetROC(i);
     }
@@ -150,7 +140,7 @@ int PSIRootFileReader::GetNextEvent ()
             PLTHit* Hit = new PLTHit(1, roc, col, row, adc);
 
             /** Gain calibration */
-            fGainCal.SetCharge(*Hit, telescope_id);
+            fGainCal.SetCharge(*Hit, tel::Config::telescope_id_);
 
             /** Alignment */
             fAlignment.AlignHit(*Hit);

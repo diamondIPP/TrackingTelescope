@@ -115,7 +115,7 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
         /** change calibration factor for digital planes*/
         if (adc > fFitFunction.GetMaximum() or adc < fFitFunction.GetMinimum()) {
           return float(-999); }
-        if (UseDigitalCalibration(telescopeID)){
+        if (UseDigitalCalibration()){
             if (not adc and iroc >= 4 and telescopeID == 22)
                 charge = -9999;
             else if (iroc == 6 and (telescopeID != 35 and telescopeID != 69 and telescopeID != 70)){

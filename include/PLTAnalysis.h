@@ -7,23 +7,19 @@
 #include "TestPlaneEfficiencySilicon.h"
 #include "RootItems.h"
 #include "FileWriterTracking.h"
+#include "Action.h"
 
-namespace tel{
-    class ProgressBar;
-}
+namespace tel{ class ProgressBar; }
 
 #define verbose 0
 
 /** ============================
  DEFAULT ANALYSIS CLASS
  =================================*/
-class PLTAnalysis
-{
+class PLTAnalysis : public Action {
 
 private:
     uint8_t const telescopeID;
-    std::string const InFileName, SignalBranchName;
-    TString const RunNumber;
     TFile * out_f;
     /** measure elapsed time */
     float now, now1, now2, loop, startProg, endProg, allProg, averTime, speed;
@@ -33,8 +29,8 @@ private:
     uint16_t NGraphPoints;
     /** miscellaneous */
     uint32_t const PHThreshold;
+    bool is_root_file_;
     bool do_slope;
-    PSIFileReader * FR;
     uint32_t nEntries;
     RootItems * Histos;
     FileWriterTracking * FW;
@@ -48,7 +44,7 @@ public:
     /** ============================
      CONSTRUCTOR // DECONSTRUCTOR
      =================================*/
-    PLTAnalysis(std::string const inFileName, TFile * Out_f,  TString const runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope=false);
+    PLTAnalysis(std::string const& inFileName, TFile * Out_f,  TString const& runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope=false);
     ~PLTAnalysis();
 
 
@@ -69,7 +65,6 @@ public:
      =================================*/
     float getTime(float now, float & time);
     void SinglePlaneStudies();
-    void InitFileReader();
     std::vector<float> * getDiaZPositions();
     void WriteTrackingTree();
     void MakeAvgPH();

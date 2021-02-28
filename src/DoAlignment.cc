@@ -3,8 +3,6 @@
 
 #include <Utils.h>
 #include <DoAlignment.h>
-#include "PSIBinaryFileReader.h"
-#include "PSIRootFileReader.h"
 #include "GetNames.h"
 #include "TestPlaneEfficiencySilicon.h"
 #include "PLTPlane.h"
@@ -13,8 +11,9 @@ using namespace std;
 
 Alignment::Alignment(const string & in_file_name, const TString & run_number, uint16_t telescope_id, bool only_tel, uint16_t max_steps,
                      float max_res, float max_angle, uint32_t max_events, int16_t sil_dut_roc):
+  Action(in_file_name, run_number),
   telescope_id_(telescope_id),
-  n_planes_(GetNumberOfROCS(telescope_id)),
+  n_planes_(GetNPlanes()),
   align_only_telescope_(only_tel),
   at_step_(0),
   alignment_finished_(false),
@@ -35,7 +34,7 @@ Alignment::Alignment(const string & in_file_name, const TString & run_number, ui
     fdA.resize(n_planes_, make_pair(0, 1));
 
     /** set the correct order of planes */
-    FR = InitFileReader(in_file_name);
+    FR = InitFileReader();
     max_event_number_ = max_events == 0 ? FR->GetEntries() : min(max_events, FR->GetEntries());
     cout << endl << "Found plane configuration: " << endl;
     ordered_planes_ = GetOrderedPlanes();
@@ -53,7 +52,7 @@ Alignment::Alignment(const string & in_file_name, const TString & run_number, ui
         continue;
       }
 
-      FR = InitFileReader(in_file_name);
+      FR = InitFileReader();
       last_max_res_ = make_pair(0, 0);
       delta_max_res_ = make_pair(0, 0);
 
@@ -120,23 +119,6 @@ void Alignment::SetNextAlignmentStep() {
 
   alignment_finished_ = (at_step_ == 4) or (at_step_ == 2 and align_only_telescope_);
   at_step_++;
-}
-
-PSIFileReader * Alignment::InitFileReader(const string & file_name) const {
-  PSIFileReader * tmp;
-  if (GetUseRootInput(telescope_id_)){
-    tmp = new PSIRootFileReader(file_name, GetCalibrationFilename(telescope_id_), GetAlignmentFilename(), n_planes_, GetUseGainInterpolator(telescope_id_),
-                                GetUseExternalCalibrationFunction(telescope_id_), false, uint8_t(telescope_id_), true);
-    }
-  else {
-    tmp = new PSIBinaryFileReader(file_name, GetCalibrationFilename(telescope_id_), GetAlignmentFilename(), n_planes_, GetUseGainInterpolator(telescope_id_),
-                                  GetUseExternalCalibrationFunction(telescope_id_));
-    }
-    tmp->GetAlignment()->SetErrors(telescope_id_, true);
-    FILE * f = fopen("MyGainCal.dat", "w");
-    tmp->GetGainCal()->PrintGainCal(f);
-    fclose(f);
-    return tmp;
 }
 
 void Alignment::EventLoop(const std::vector<uint16_t> & planes) {

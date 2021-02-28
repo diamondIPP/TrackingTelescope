@@ -3,11 +3,12 @@
 
 using namespace std;
 
-PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope):
-    telescopeID(TelescopeID), InFileName(inFileName), RunNumber(runNumber),
+PLTAnalysis::PLTAnalysis(string const & inFileName, TFile * Out_f,  TString const & runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope):
+    Action(inFileName, runNumber),
+    telescopeID(TelescopeID),
     now1(clock()), now2(clock()), loop(0), startProg(0), endProg(0), allProg(0), averTime(0),
     TimeWidth(20000), StartTime(0), NGraphPoints(0),
-    PHThreshold(3e5), trackOnlyTelescope(TrackOnlyTelescope)
+    PHThreshold(3e5), is_root_file_(IsROOTFile(inFileName)), trackOnlyTelescope(TrackOnlyTelescope)
 {
     out_f = Out_f;
     /** set up root */
@@ -16,26 +17,28 @@ PLTAnalysis::PLTAnalysis(string const inFileName, TFile * Out_f,  TString const 
     /** single plane studies */
     SinglePlaneStudies();
     /** init file reader */
-    InitFileReader();
-    if (GetUseRootInput(telescopeID)) nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
+    FR = InitFileReader();
+    if (is_root_file_) nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
     stopAt = nEntries;
 //    stopAt = 1e4;
     /** apply masking */
     FR->ReadPixelMask(GetMaskingFilename());
     /** init histos */
-    Histos = new RootItems(telescopeID, RunNumber);
+    Histos = new RootItems(run_number_);
     DiaZ = getDiaZPositions();
     cout << "Output directory: " << Histos->getOutDir() << endl;
     /** init file writer */
-    if (UseFileWriter(telescopeID))
-      FW = new FileWriterTracking(InFileName, telescopeID, FR);
+    if (UseFileWriter())
+      FW = new FileWriterTracking(in_file_name_, telescopeID, FR);
     PBar = new tel::ProgressBar(stopAt - 1);
 }
 
 PLTAnalysis::~PLTAnalysis()
 {
+  if (UseFileWriter()) {
     FW->saveTree();
     delete FR;
+  }
     delete FW;
 //    delete Histos; // This causes it to crash for some unknown reason...
 }
@@ -56,7 +59,7 @@ PLTAnalysis::~PLTAnalysis()
 
         PBar->update(ievent);
         /** file writer */
-        if (GetUseRootInput(telescopeID)) WriteTrackingTree();
+        if (is_root_file_) { WriteTrackingTree(); }
 
         /** fill coincidence map */
         Histos->CoincidenceMap()->Fill(FR->HitPlaneBits() );
@@ -103,7 +106,7 @@ PLTAnalysis::~PLTAnalysis()
 
 
 //        cout << "Number of Tracks: " << FR->NTracks() << endl;
-        if (UseFileWriter(telescopeID) && FR->NTracks() == 1 && ((FR->Track(0)->NClusters() == Histos->NRoc()  && !trackOnlyTelescope) || (FR->Track(0)->NClusters() >= 4  && trackOnlyTelescope))){
+        if (UseFileWriter() && FR->NTracks() == 1 && ((FR->Track(0)->NClusters() == Histos->NRoc()  && !trackOnlyTelescope) || (FR->Track(0)->NClusters() >= 4  && trackOnlyTelescope))){
 //		if ((telescopeID == 7 || telescopeID == 8 || telescopeID == 9 || telescopeID >= 10) && FR->NTracks() == 1 && FR->Track(0)->NClusters() == Histos->NRoc() ){
 
 		  do_slope = true;
@@ -152,7 +155,7 @@ PLTAnalysis::~PLTAnalysis()
 		    //                }
 
 		    /** fill signal histos */
-		    if (FillSignalHistos(telescopeID)) {
+		    if (FillSignalHistos()) {
 //		    if (telescopeID == 9 || telescopeID == 8 || telescopeID ==7) {
 		      if (ievent > 0 && FW->InTree()->GetBranch(GetSignalBranchName())){
                         for (uint8_t iSig = 0; iSig != Histos->NSig(); iSig++){
@@ -207,7 +210,7 @@ PLTAnalysis::~PLTAnalysis()
     Histos->SaveAllHistos();
 
     /** make index.html as overview */
-	WriteHTML(Histos->getPlotsDir() + RunNumber, GetCalibrationFilename(telescopeID), telescopeID);
+	WriteHTML(Histos->getPlotsDir() + run_number_, GetCalibrationPath(), telescopeID);
 
     getTime(now1, endProg);
     getTime(now2, allProg);
@@ -228,29 +231,14 @@ PLTAnalysis::~PLTAnalysis()
 void PLTAnalysis::SinglePlaneStudies(){
 
     if ((telescopeID == 1) || (telescopeID == 2)){
-        int n_events = TestPlaneEfficiencySilicon(InFileName, out_f, RunNumber, telescopeID);
+        int n_events = TestPlaneEfficiencySilicon(in_file_name_, out_f, run_number_, telescopeID);
         for (uint8_t iplane = 1; iplane != 5; iplane++){
             cout << "Going to call TestPlaneEfficiency " << iplane << endl;
-            TestPlaneEfficiency(InFileName, out_f, RunNumber, iplane, n_events, telescopeID);
+            TestPlaneEfficiency(in_file_name_, out_f, run_number_, iplane, n_events, telescopeID);
         }
     }
 }
-void PLTAnalysis::InitFileReader(){
 
-    if (GetUseRootInput(telescopeID)){
-        FR = new PSIRootFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(),
-            GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID), false, telescopeID, trackOnlyTelescope);
-    }
-    else {
-        FR = new PSIBinaryFileReader(InFileName, GetCalibrationFilename(telescopeID), GetAlignmentFilename(),
-            GetNumberOfROCS(telescopeID), GetUseGainInterpolator(telescopeID), GetUseExternalCalibrationFunction(telescopeID));
-        ((PSIBinaryFileReader*) FR)->CalculateLevels(Histos->getOutDir());
-    }
-    FR->GetAlignment()->SetErrors(telescopeID);
-    FILE * f = fopen("MyGainCal.dat", "w");
-    FR->GetGainCal()->PrintGainCal(f);
-    fclose(f);
-}
 float PLTAnalysis::getTime(float now, float & time){
 
     time += (clock() - now) / CLOCKS_PER_SEC;
@@ -410,9 +398,9 @@ void PLTAnalysis::FillOfflinePH(PLTTrack * Track, PLTCluster * Cluster){
 vector<float> * PLTAnalysis::getDiaZPositions(){
 
     auto * tmp = new vector<float>;
-    size_t n_dut_planes = UseDigitalCalibration(telescopeID) ? size_t(FR->NMAXROCS - 4) : 2;
+    size_t n_dut_planes = UseDigitalCalibration() ? size_t(GetNPlanes() - 4) : 2;
     for (uint8_t i_dut(0); i_dut < n_dut_planes; i_dut++){
-      float pos = UseDigitalCalibration(telescopeID) ? FR->GetAlignment()->LZ(1, 4 + i_dut) : tel::Config::dia_z_pos_.at(i_dut);
+      float pos = UseDigitalCalibration() ? FR->GetAlignment()->LZ(1, 4 + i_dut) : tel::Config::dia_z_pos_.at(i_dut);
       cout << "z-position of diamond " << int(i_dut) << ": " << pos << endl;
       tmp->push_back(pos);
     }

@@ -6,7 +6,7 @@ using std::cout; using std::string; using std::stringstream; using std::vector; 
  CONSTRUCTOR
  =================================*/
 FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, PSIFileReader * FR):
-  nRoc(GetNumberOfROCS(telescopeID)), nHits(4), TelescopeID(telescopeID) {
+  nRoc(GetNPlanes()), nHits(4), TelescopeID(telescopeID) {
 
   NewFileName = getFileName(InFileName);
   intree = ((PSIRootFileReader*) FR)->fTree;

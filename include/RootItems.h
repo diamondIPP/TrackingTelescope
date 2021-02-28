@@ -101,7 +101,7 @@ public:
     /** ============================
      CONSTRUCTOR
      =================================*/
-    RootItems(uint8_t telescopeID, TString const RunNumber);
+    RootItems(TString const RunNumber);
     ~RootItems();
 
 

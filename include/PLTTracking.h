@@ -73,9 +73,9 @@ class PLTTracking
 
     static bool const DEBUG = false;
 
-    int const fNPlanes;
-    bool trackOnlyTelescope;
-
+protected:
+  int const fNPlanes;
+  bool trackOnlyTelescope;
 };
 
 

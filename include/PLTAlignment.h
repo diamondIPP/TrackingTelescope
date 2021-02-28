@@ -19,7 +19,7 @@ class PLTAlignment
     PLTAlignment ();
     ~PLTAlignment () = default;
 
-    void ReadAlignmentFile (const std::string&, const uint16_t&);
+    void ReadAlignmentFile(std::string const &InFileName);
     void WriteAlignmentFile (uint16_t, uint16_t, bool=false);
     std::string GetAlignment(uint16_t, uint16_t, bool=false);
     void AlignHit (PLTHit&);

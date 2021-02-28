@@ -5,17 +5,15 @@
 #ifndef TRACKINGTELESCOPE_FINDPLANEERRORS_H
 #define TRACKINGTELESCOPE_FINDPLANEERRORS_H
 
-#include <string.h>
-#include <TString.h>
-class PSIFileReader;
+#include "Action.h"
 class TF1;
 class TH1F;
 namespace tel { class ProgressBar; }
 
-class FindPlaneErrors {
+class FindPlaneErrors : public Action {
 
 public:
-  FindPlaneErrors(std::string, const TString &, short);
+  FindPlaneErrors(const std::string & in_file_name, const TString & run_number, int16_t telescope_ID);
   ~FindPlaneErrors();
   short const TelescopeID;
   unsigned const NPlanes;
@@ -28,13 +26,10 @@ public:
   std::vector<unsigned short> GetOrderedPlanes();
 
 private:
-  std::string InFileName;
   std::string OutFileName;
   TString const PlotsDir;
   TString const OutDir;
   std::string FileType;
-  PSIFileReader * FR;
-  PSIFileReader * InitFileReader();
   std::vector<unsigned short> OrderedPlanes;
   unsigned MaxEventNumber;
   tel::ProgressBar * ProgressBar;

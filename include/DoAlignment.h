@@ -1,20 +1,17 @@
 #ifndef DoAlignment_h
 #define DoAlignment_h
 
-
-#include <string>
-#include <TString.h>
-class PSIFileReader;
+#include "Action.h"
 namespace tel { class ProgressBar; }
 class TH2F;
 class TGraph;
 class TH1;
 class TProfile;
 
-class Alignment {
+class Alignment: public Action {
 
 public:
-  Alignment(const std::string&, const TString&, uint16_t, bool=false, uint16_t=30, float=0.0005, float=0.005, uint32_t=0, int16_t =-1);
+  Alignment(const std::string& in_file_name, const TString &run_number, uint16_t telescope_id, bool only_tel, uint16_t max_steps, float max_res, float max_angle, uint32_t max_events, int16_t sil_dut_roc);
   ~Alignment();
 
   /** variables */
@@ -45,8 +42,6 @@ private:
   float const angle_thresh_;
   float const res_thresh_;
   float const delta_fac_ = .1;
-  PSIFileReader * FR;
-  PSIFileReader * InitFileReader(const std::string&) const;
   void EventLoop(const std::vector<uint16_t>&);
   uint64_t max_event_number_;
   tel::ProgressBar * ProgressBar;
@@ -84,7 +79,6 @@ private:
   void CalcMaxResiduals();
   float GetMaxRes();
   float GetMaxAngle();
-  static float GetMaximumMagRes(const std::vector<std::pair<float, float>>&, const std::vector<std::pair<float, float>>&, std::vector<uint16_t>);
   static void ConfigROOT();
   void SaveGraphs();
   void InitGraphs();
