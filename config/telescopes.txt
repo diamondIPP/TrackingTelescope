@@ -1,12 +1,43 @@
+# TEL NROCS MASK CALIB ZPOS YEAR TYPE COMMENT
+# 2015 ----------------------------------
+  7   4       0    7     0  2015 PAD  # May
+  9   4       0    9     0  2015 PAD  # Aug
+ 10   7       0   10     0  2015 PIX  # Aug
+ 11   4       0    9     0  2015 PAD  # Aug
+ 12   4       0   12     0  2015 PAD  # Oct
+ 13   7       0   13     0  2015 PIX  # Oct
+ 14   4       0   12     0  2015 PAD  # Oct
+ 15   7       0   13     0  2015 PIX  # Oct (Calibration?)
+ 16   4       0    7     0  2015 PAD  # May
 # TEL NROCS MASK CALIB ZPOS YEAR COMMENT
-# ----------------------------------
- 14   4       0   12     0  2015 # SEP Pad
- 15   4       0   15     1  2016 # Oct Pad
- 16   4       0   16     2  2017 # bla
- 28   4       0   16     3  2017 # Aug Pad
- 31   4       0   16     3  2017 # Aug Pad
- 36   4       0   16     4  2018 # Jul BCM'
- 42   4       0   16     4  2018 # Jul BCM'
-
-# >16<22 ->1
-# >22 ->2
+# 2016 ----------------------------------
+ 17   4       0   12     1  2016 PAD  # Aug (check calibration)
+ 18   4       0   12     1  2016 PAD  # Aug
+ 19   4       0   12     1  2016 PAD  # Oct (check calibration)
+ 20   4       0   12     1  2016 PAD  # Oct
+ 21   6       0   21     1  2016 PIX  # Oct
+ 22   6       0   21     1  2016 PIX  # Oct
+# TEL NROCS MASK CALIB ZPOS YEAR COMMENT
+# 2017 ----------------------------------
+ 23   4       0   12     2  2017 PAD  # May
+ 24   4       0   12     2  2017 PAD  # May
+ 25   6       0   25     2  2017 PIX  # May
+ 26   4       0   12     2  2017 PAD  # Jul
+ 27   4       0   12     2  2017 PAD  # Jul
+ 28   4       0   12     3  2017 PAD  # Aug
+ 29   7       0   29     2  2017 PIX  # Aug
+ 30   7       0   29     2  2017 PIX  # Aug-2
+ 31   4       0   12     3  2017 PAD  # Aug-2
+ 43   4       0   12     2  2017 PAD  # Jul-2
+# TEL NROCS MASK CALIB ZPOS YEAR COMMENT
+# 2018 ----------------------------------
+ 32   4       0   12     2  2018 PAD  # Jul
+ 33   4       0   12     2  2018 PAD  # Jul
+ 34   6       0   34     2  2018 PIX  # Oct
+ 35   7       0   35     2  2018 PIX  # Oct
+ 36   4       0   12     4  2018 BCM  # Jul BCM'
+ 37   4       0   12     2  2018 PAD  # Jul
+ 38   4       0   12     2  2018 PAD  # Jul
+ 39   4       0   12     2  2018 PAD  # Jul
+ 42   4       0   12     4  2018 BCM  # Jul BCM' (check calibration)
+ 51   7       0   51     2  2018 PIX  # ???
