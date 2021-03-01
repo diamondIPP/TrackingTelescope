@@ -152,6 +152,19 @@ bool UseDigitalCalibration() {
   return type.find("PIX") != string::npos or type.find("Pix") != string::npos or type.find("pix") != string::npos;
 }
 
+int16_t GetRawID() {
+  /** @returns: the raw telescope id, which contains only the z positions */
+  const int16_t pl6(6), pl7(7), year_of_change(2016);
+  if (UseDigitalCalibration()) {
+    if      (tel::Config::n_rocs_ == pl6) { return -3; }
+    else if (tel::Config::n_rocs_ == pl7) { return -4; }
+    else    { tel::critical(Form("There is pixel raw alignment for %i planes!", tel::Config::n_rocs_)); throw; }
+  } else {
+    if (tel::Config::year_ < year_of_change ) { return -1; }
+    else                                      { return -2; }
+  }
+}
+
 int GetNSignals() {
   /** @returns: the number of signals to show in the signal distribution. */
   return UseDigitalCalibration() ? 0 : GetNPlanes();

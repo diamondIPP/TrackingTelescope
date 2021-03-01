@@ -42,6 +42,7 @@ std::string GetMaskingFilename();
 const char * GetSignalBranchName();
 uint16_t GetNPlanes();
 
+int16_t GetRawID();
 int GetNSignals();
 bool UseGainInterpolator();
 bool UseExternalCalibrationFunction();
