@@ -40,8 +40,9 @@ def save_config(filename, n_rocs):
     year = int(input('Enter the year (YYYY): '))
     z_pos = get_z_pos(year)
     cmt = input('Enter a comment (Month, DUT, ...): ')
+    type_ = ['PAD', 'PIX', 'BCM'][int(input('Enter the type of the DUT (0 for Pad, 1 for Pixel and 2 for BCM\':'))]
     with open(filename, 'a') as f:
-        f.write('\n{: 3d}{: 4d}{: 8d}{: 5d}{: 6d}{: 6d} # {}'.format(tel, n_rocs, mask, cal, z_pos, year, cmt))
+        f.write('\n{: 3d}{: 4d}{: 8d}{: 5d}{: 6d}{: 6d} {}  # {}'.format(tel, n_rocs, mask, cal, z_pos, year, type_, cmt))
 
 
 if __name__ == '__main__':
@@ -52,5 +53,5 @@ if __name__ == '__main__':
     p.add_argument('run')
     args = p.parse_args()
 
-    config = join(d, 'config', 'main.txt')
+    config = join(d, 'config', 'telescopes.txt')
     save_config(config, get_n_rocs(args.run))
