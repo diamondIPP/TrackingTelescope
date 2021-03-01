@@ -17,7 +17,7 @@ def get_n_rocs(filename):
 
 def get_last_tel(filename):
     with open(filename) as f:
-        return max([int(line.split()[0]) for line in f.readlines() if not line.startswith('#')])
+        return max([int(line.split()[0]) for line in f.readlines() if not line.startswith('#') and len(line) > 5])
 
 
 def get_z_pos(year):
