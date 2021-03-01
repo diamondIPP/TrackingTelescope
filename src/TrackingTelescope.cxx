@@ -1339,7 +1339,8 @@ void PrintUsage(const string & name) {
 
 int main (int argc, char* argv[]) {
 
-  if (argc <= 3 or argc >= 11) {
+  const uint16_t max_args = 11;
+  if (argc <= 3 or argc >= max_args) {
     tel::critical("Wrong arguments; Must supply at least 3 arguments and no more than 9: ");
     PrintUsage(argv[0]);
     return 1;

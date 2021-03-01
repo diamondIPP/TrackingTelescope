@@ -87,7 +87,6 @@ AlignSettings ReadAlignSettings(vector<string> args, uint16_t n_actions) {
   s >> AS.max_events_ >> AS.n_iterations_ >> AS.res_thresh_ >> AS.angle_thresh_ >> AS.sil_roc_;
   // overwrite default if argument is provided
   uint16_t i = n_actions + 2;
-  tel::warning(to_string(i));
   if (args.size() > i) {AS.max_events_ = stoi(args.at(i++));   cout << Form("Using %i events", AS.max_events_) << endl;}
   if (args.size() > i) {AS.n_iterations_ = stoi(args.at(i++)); cout << Form("Using %i iterations", AS.n_iterations_) << endl;}
   if (args.size() > i) {AS.res_thresh_ = stof(args.at(i++));   cout << Form("Using %1.2e as residual threshold", AS.res_thresh_) << endl;}
