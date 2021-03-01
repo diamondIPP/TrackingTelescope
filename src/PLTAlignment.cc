@@ -17,18 +17,24 @@ PLTAlignment::PLTAlignment (): ErrorsFromFile(false), fIsGood(false) {
 }
 
 
-void PLTAlignment::ReadAlignmentFile(string const & InFileName) {
+void PLTAlignment::ReadAlignmentFile(const string & in_file_name, bool use_raw) {
 
   // So far so good..
   fIsGood = true;
   fTelescopeMap.clear();
+  /** if use raw alignmnent, use raw telescope id */
+  int16_t telescope_id(tel::Config::telescope_id_);
+  if (use_raw) {
+    telescope_id = GetRawID();
+    tel::warning(Form("Using raw alignment with telescope ID %i", telescope_id));
+  }
 
   // Open file
-  std::cout << "Opening " << InFileName << std::endl;
-  std::ifstream InFile(InFileName.c_str());
+  std::cout << "Opening " << in_file_name << std::endl;
+  std::ifstream InFile(in_file_name.c_str());
   if (!InFile.is_open()) {
     fIsGood = false;
-    std::cerr << "ERROR: cannot open alignment constants filename: " << InFileName << std::endl;
+    std::cerr << "ERROR: cannot open alignment constants filename: " << in_file_name << std::endl;
     throw;
   }
 
@@ -40,7 +46,7 @@ void PLTAlignment::ReadAlignmentFile(string const & InFileName) {
     LineStream.str(InLine);
 
     LineStream >> tid >> channel >> roc;
-    if (tid != tel::Config::telescope_id_) { continue; }
+    if (tid != telescope_id) { continue; }  // only fill the data for the correct telescope id
 
     std::pair<int, int> CHROC = std::make_pair(channel, roc);
 
@@ -97,8 +103,8 @@ void PLTAlignment::ReadAlignmentFile(string const & InFileName) {
   InFile.close();
 
   if (fTelescopeMap.empty()){
-    cerr << "Did not find telescope " << tel::Config::telescope_id_ << " in the alignemnt file: " << InFileName << endl;
-    throw;
+    tel::warning(Form("Did not find telescope %i in the alignments file %s", tel::Config::telescope_id_, tel::split(in_file_name, '/').back().c_str()));
+    ReadAlignmentFile(in_file_name, true);
   }
 } // end ReadAlignmentFile
 
@@ -161,7 +167,11 @@ void PLTAlignment::WriteAlignmentFile (const uint16_t telescop_id, const uint16_
       }
     }
   }
-  if (not wrote_data) { out << GetAlignment(telescop_id, n_rocs, write_errors); }  // we have a new alignment
+  if (not wrote_data) {  // we have a new alignment
+    const int comment_length = 88;
+    out << Form("# TELESCOPE % 2i ", tel::Config::telescope_id_) << string(comment_length, '-') << endl;
+    out << GetAlignment(telescop_id, n_rocs, write_errors);
+  }
   out.close();
 }
 
