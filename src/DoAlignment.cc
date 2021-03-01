@@ -89,8 +89,10 @@ void Alignment::SetPlanes() {
   planes_to_align_.clear();
   planes_under_test_.clear();
   if(at_step_ == 0) {
-    tel::print_banner("PART I: Align last telescope plane");
-    planes_to_align_ = vector<uint16_t>(telescope_planes_.end() - 1, telescope_planes_.end());
+//    tel::print_banner("PART I: Align last telescope plane");
+    tel::print_banner("PART I: Translate all planes relative to first plane in beam");
+//    planes_to_align_ = vector<uint16_t>(telescope_planes_.end() - 1, telescope_planes_.end());
+    planes_to_align_ = vector<uint16_t>(ordered_planes_.begin() + 1, ordered_planes_.end());
     planes_under_test_ = vector<uint16_t>(telescope_planes_.begin() + 1, telescope_planes_.end());
   } else if(at_step_ == 1) {
     tel::print_banner("PART II: Align last telescope plane (w. tracking)");
