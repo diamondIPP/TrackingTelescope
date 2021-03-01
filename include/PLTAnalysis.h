@@ -82,5 +82,5 @@ void TestPlaneEfficiency (std::string const InFileName,
                           int n_events,
                           int telescopeID);
 
-void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID);
+void WriteHTML(TString const& OutDir, int telescopeID);
 #endif // PLTANALYSIS_H

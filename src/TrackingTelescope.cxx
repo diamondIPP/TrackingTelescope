@@ -1041,7 +1041,7 @@ void TestPlaneEfficiency (std::string const InFileName,
 }
 
 
-void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
+void WriteHTML(TString const & OutDir, int telescopeID)
 {
   // This function to write the HTML output for a run
 

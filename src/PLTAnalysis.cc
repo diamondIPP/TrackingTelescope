@@ -210,7 +210,7 @@ PLTAnalysis::~PLTAnalysis()
     Histos->SaveAllHistos();
 
     /** make index.html as overview */
-	WriteHTML(Histos->getPlotsDir() + run_number_, GetCalibrationPath(), telescopeID);
+  WriteHTML(Histos->getPlotsDir() + run_number_, telescopeID);
 
     getTime(now1, endProg);
     getTime(now2, allProg);
