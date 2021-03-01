@@ -25,8 +25,9 @@ public:
   /** methods */
   int Align();
   void InitHistograms();
+  void ResizeHistograms();
   void ResetHistograms();
-  void SaveHistograms(unsigned, int=-1);
+  void SaveHistograms(unsigned, int=-1, int16_t=-1);
   void SaveAllHistograms(int=-1);
   void PrintAlignment();
   void PrintResiduals(const std::vector<uint16_t>&);
@@ -74,6 +75,7 @@ private:
   std::vector<TH2F> hResidual;
   std::vector<TProfile> hResidualXdY;
   std::vector<TProfile> hResidualYdX;
+  std::pair <std::pair<float, float>, std::pair<float, float>> GetFitRange(uint16_t plane);
   std::vector<TGraph*> g_res_mean_;
   std::vector<TGraph*> g_res_angle_;
   void CalcMaxResiduals();

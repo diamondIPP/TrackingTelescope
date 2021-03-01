@@ -154,9 +154,10 @@ void Alignment::EventLoop(const std::vector<uint16_t> & planes) {
     fdX.at(i_plane) = make_pair(hResidual.at(i_plane).GetMean(1), hResidual.at(i_plane).GetRMS(1));
     fdY.at(i_plane) = make_pair(hResidual.at(i_plane).GetMean(2), hResidual.at(i_plane).GetRMS(2));
 
+    pair<pair<float, float>, pair<float, float>> range = GetFitRange(i_plane);
     TF1 fX = TF1("fX", "pol1"), fY = TF1("fY", "pol1");
-    hResidualXdY[i_plane].Fit(&fX, "q");
-    hResidualYdX[i_plane].Fit(&fY, "q");
+    hResidualXdY[i_plane].Fit(&fX, "q", "", range.first.first, range.first.second);
+    hResidualYdX[i_plane].Fit(&fY, "q", "", range.second.first, range.second.second);
     fdA.at(i_plane) = make_pair(atan(fX.GetParameter(1)), atan(fY.GetParameter(1)));
   }
 } // end EventLoop
@@ -173,30 +174,32 @@ int Alignment::Align() {
 
     n_sigma_ = ReduceSigma(i_align);
 
-    EventLoop(planes_to_align_); /** Loop over all events and fill histograms */
+    EventLoop(ordered_planes_); /** Loop over all events and fill histograms */
     cout << Form("\nLoop duration: %2.1f", (clock() - now_) / CLOCKS_PER_SEC) << endl;
 
     for (auto roc: planes_to_align_) {
-      FR->GetAlignment()->AddToLR(1, roc, (fdA.at(roc).first + fdA.at(roc).second) / 2); // take average of XdY and YdX
+      FR->GetAlignment()->AddToLR(1, roc, (fdA.at(roc).first - fdA.at(roc).second) / 2); // take average of XdY and YdX
       FR->GetAlignment()->AddToLX(1, roc, fdX.at(roc).first);
       FR->GetAlignment()->AddToLY(1, roc, fdY.at(roc).first);
       g_res_mean_.at(roc)->SetPoint(i_align, i_align, sqrt(pow(fdX.at(roc).first, 2) + pow(fdY.at(roc).first, 2)));
-      g_res_angle_.at(roc)->SetPoint(i_align, i_align, fabs((fdA.at(roc).first + fdA.at(roc).second) / 2));
-      SaveHistograms(roc, i_align);
+      g_res_angle_.at(roc)->SetPoint(i_align, i_align, fabs((fdA.at(roc).first - fdA.at(roc).second) / 2));
     }
+    for (auto ipl:ordered_planes_) { SaveHistograms(ipl, i_align, at_step_); }
 
     CalcMaxResiduals();
     PrintResiduals(planes_to_align_);
     cout << "END ITERATION " << i_align + 1 << " OUT OF " << maximum_steps_ << endl << endl;
 
+    if (at_step_ == 1 and i_align == 0) { ResizeHistograms(); }  // resize histograms after first real tracking
+
     /** Stopping criteria: max_res/angle < res/angle_thresh or the change wrt to the previous step is smaller than delta_fac * thresh*/
     if (at_step_ == 0) { // step 0 is only a translation without fit...
       break;
     } else if (GetMaxRes() < res_thresh_ and GetMaxAngle() < angle_thresh_) {
-      cout << "\nSTOPPING ALIGNMENT:  max residual < " << res_thresh_ << " and max angle < " << angle_thresh_ << endl;
+      tel::warning(Form("STOPPING ALIGNMENT:  max residual < %1.1e and max angle < %1.1e\n", res_thresh_, angle_thresh_));
       break;
     } else if (delta_max_res_.first < delta_fac_ * res_thresh_ and delta_max_res_.second < delta_fac_ * angle_thresh_) {
-      cout << "\nSTOPPING ALIGNMENT:  res correction \u0394  < " << delta_fac_ * res_thresh_ << " and angle correction \u0394 < " << delta_fac_ * angle_thresh_ << endl;
+      tel::warning(Form("STOPPING ALIGNMENT: res correction \u0394 < %1.1e and angle correction \u0394 < %1.1e\n", delta_fac_ * res_thresh_, delta_fac_ * angle_thresh_));
       break;
     }
   } // end alignment loop
@@ -214,6 +217,7 @@ float Alignment::ReduceSigma(uint16_t step) const {
   float off_par(7), stretch_par(25); // tailored values
   return min_sigma_ + max_sigma_ / (1. + exp((step - (maximum_steps_ / off_par)) * (stretch_par / maximum_steps_)));
 }
+
 void Alignment::PrintAlignment() {
 
   cout << " TEL  CH ROC  RZ                             X               Y               Z" << endl;
@@ -280,9 +284,20 @@ std::vector<uint16_t> Alignment::GetDiamondPlanes() {
 
 void Alignment::InitHistograms() {
   for (uint8_t i_plane(0); i_plane != n_planes_; ++i_plane){
-    hResidual.emplace_back(TH2F(Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 801, -0.500625, 0.500625, 801, -0.500625, 0.500625));
-    hResidualXdY.emplace_back(TProfile(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 135, -0.50625, 0.50625, -1, 1));
-    hResidualYdX.emplace_back(TProfile(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 201, -0.5025, 0.5025, -1, 1));
+    hResidual.emplace_back(TH2F(Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 200, -1, 1, 300, -1, 1));
+    TH2F h = hResidual.at(0);
+    hResidualXdY.emplace_back(TProfile(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 135, -.5, .5, -1, 1));
+    hResidualYdX.emplace_back(TProfile(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 201, -.5, .5, -1, 1));
+  }
+}
+
+void Alignment::ResizeHistograms() {
+
+  float xmax = fdX.at(inner_planes_.back()).second * (max_sigma_ + 1);
+  float ymax = fdY.at(inner_planes_.back()).second * (max_sigma_ + 1);
+  hResidual.clear();
+  for (auto ipl: ordered_planes_) {
+    hResidual.emplace_back(TH2F(Form("h%i", ipl), Form("Residual_ROC%i", ipl), 400, -xmax, xmax, 600, -ymax, ymax));
   }
 }
 
@@ -294,10 +309,12 @@ void Alignment::ResetHistograms() {
   }
 }
 
-void Alignment::SaveHistograms(unsigned i_plane, int ind) {
-  string sub_dir = (ind != -1) ? Form("ResROC%i/", i_plane) : "";
+void Alignment::SaveHistograms(unsigned i_plane, int ind, int16_t step) {
+  TString sub_dir = (ind != -1) ? Form("ResROC%i/", i_plane) : "";
+  TString step_dir = (step != -1) ? Form("step%i/", step) : "";
   string suffix = (ind != -1) ? Form("_%02i", ind) : "";
-  gSystem->mkdir(plots_dir_ + "/" + sub_dir, true);
+  TString save_dir = plots_dir_ + "/" + step_dir + sub_dir;
+  gSystem->mkdir(save_dir, true);
   TCanvas Can;
   Can.cd();
   // 2D Residuals
@@ -305,32 +322,32 @@ void Alignment::SaveHistograms(unsigned i_plane, int ind) {
   Can.SetGridx(); Can.SetGridy();
   hResidual[i_plane].Draw("colz");
   FormatHistogram(&hResidual[i_plane], "dX [cm]", 1, "dY [cm]", 1.3, -1, 1, -1, 1);
-  Can.SaveAs(plots_dir_ + Form("/%s/%s%s%s", sub_dir.c_str(), hResidual[i_plane].GetName(), suffix.c_str(), file_type_.c_str()));
+  Can.SaveAs(save_dir + Form("%s%s%s", hResidual[i_plane].GetTitle(), suffix.c_str(), file_type_.c_str()));
   // Residual X-Projection
   gStyle->SetOptStat(1111);
   auto p_x = hResidual[i_plane].ProjectionX();
   FormatHistogram(p_x, "dX [cm]", 1, "Number of Entries", 1.3);
   p_x->Draw();
-  Can.SaveAs(plots_dir_ + Form("/%s/%s_X%s%s", sub_dir.c_str(), hResidual[i_plane].GetName(), suffix.c_str(), file_type_.c_str()));
+  Can.SaveAs(save_dir + Form("%s_X%s%s", hResidual[i_plane].GetTitle(), suffix.c_str(), file_type_.c_str()));
   // Residual Y-Projection
   auto p_y = hResidual[i_plane].ProjectionY();
   FormatHistogram(p_y, "dY [cm]", 1, "Number of Entries", 1.3);
   p_y->Draw();
-  Can.SaveAs(plots_dir_ + Form("/%s/%s_Y%s%s", sub_dir.c_str(), hResidual[i_plane].GetName(), suffix.c_str(), file_type_.c_str()));
+  Can.SaveAs(save_dir + Form("%s_Y%s%s", hResidual[i_plane].GetTitle(), suffix.c_str(), file_type_.c_str()));
   // 2D Residuals X/dY
 //  hResidualXdY[i_plane].SetContour(1024);
   hResidualXdY[i_plane].GetXaxis()->SetRangeUser(-0.5, 0.5);
   hResidualXdY[i_plane].GetYaxis()->SetRangeUser(-0.1, 0.1);
   hResidualXdY[i_plane].Draw();
   Can.SetGridx(); Can.SetGridy();
-  Can.SaveAs(plots_dir_ + Form("/%s/%s%s%s", sub_dir.c_str(), hResidualXdY[i_plane].GetName(), suffix.c_str(), file_type_.c_str()));
+  Can.SaveAs(save_dir + Form("%s%s%s", hResidualXdY[i_plane].GetTitle(), suffix.c_str(), file_type_.c_str()));
   // 2D Residuals Y/dX
 //  hResidualYdX[i_plane].SetContour(1024);
   hResidualYdX[i_plane].GetXaxis()->SetRangeUser(-0.5, 0.5);
   hResidualYdX[i_plane].GetYaxis()->SetRangeUser(-0.1, 0.1);
   hResidualYdX[i_plane].Draw();
   Can.SetGridx(); Can.SetGridy();
-  Can.SaveAs(plots_dir_ + Form("/%s/%s%s%s", sub_dir.c_str(), hResidualYdX[i_plane].GetName(), suffix.c_str(), file_type_.c_str()));
+  Can.SaveAs(save_dir + Form("%s%s%s", hResidualYdX[i_plane].GetTitle(), suffix.c_str(), file_type_.c_str()));
 }
 
 template <typename Q>
@@ -348,7 +365,7 @@ void Alignment::FormatHistogram(Q * h, const string & x_tit, float x_off, const 
 
 void Alignment::SaveAllHistograms(int ind) {
 
-  for (auto i_plane: ordered_planes_){
+  for (auto i_plane: planes_to_align_){
     SaveHistograms(i_plane, ind);
   }
 }
@@ -399,8 +416,7 @@ void Alignment::InitGraphs() {
 void Alignment::SaveGraphs() {
 
   for(unsigned roc = 0; roc < n_planes_; roc++){
-    string sub_dir = Form("ResROC%i/", int(roc));
-    gSystem->mkdir(plots_dir_ + "/" + sub_dir, true);
+    gSystem->mkdir(plots_dir_, true);
     TCanvas Can;
     Can.cd();
     Can.SetGridx();
@@ -412,7 +428,7 @@ void Alignment::SaveGraphs() {
     g_res_mean_.at(roc)->GetYaxis()->SetTitle("Residual Mean [cm]");
     g_res_mean_.at(roc)->GetYaxis()->SetTitleOffset(1.5);
     g_res_mean_.at(roc)->Draw("AL");
-    TString fileNameCan = plots_dir_ + "/" + sub_dir + "/" + g_res_mean_.at(roc)->GetTitle();
+    TString fileNameCan = plots_dir_ + "/" + g_res_mean_.at(roc)->GetTitle();
     Can.SaveAs(Form("%s.root", fileNameCan.Data()));
     Can.SaveAs(Form("%s.png", fileNameCan.Data()));
     TCanvas Cana;
@@ -426,10 +442,24 @@ void Alignment::SaveGraphs() {
     g_res_angle_.at(roc)->GetYaxis()->SetTitle("Residual Angle [Rad]");
     g_res_angle_.at(roc)->GetYaxis()->SetTitleOffset(1.5);
     g_res_angle_.at(roc)->Draw("AL");
-    TString fileNameCana = plots_dir_ + "/" + sub_dir + "/" + g_res_angle_.at(roc)->GetTitle();
+    TString fileNameCana = plots_dir_ + "/" + g_res_angle_.at(roc)->GetTitle();
     Cana.SaveAs(Form("%s.root", fileNameCana.Data()));
     Cana.SaveAs(Form("%s.png", fileNameCana.Data()));
   }
   cout << "\nSaved plots to: " << plots_dir_ << endl;
+}
+
+pair<pair<float, float>, pair<float, float>> Alignment::GetFitRange(uint16_t plane) {
+  /** set range of profiles so that there are at least 50 entries in every bin */
+  const int min_entries = 50;
+  vector<float> values;
+  for (const auto & p: {hResidualXdY.at(plane), hResidualYdX.at(plane)}) {
+    float xmin(p.GetBinContent(1)), xmax(p.GetBinContent(p.GetNbinsX()));
+    for (auto ibin(1); ibin < p.GetNbinsX(); ibin++) { if (p.GetBinEntries(ibin) > min_entries) { xmin = p.GetBinCenter(ibin); break; } }
+    for (auto ibin(p.GetNbinsX()); ibin > 1; ibin--) { if (p.GetBinEntries(ibin) > min_entries) { xmax = p.GetBinCenter(ibin); break; } }
+    values.emplace_back(xmin);
+    values.emplace_back(xmax);
+  }
+  return make_pair(make_pair(values.at(0), values.at(1)), make_pair(values.at(0), values.at(1)));
 }
 
