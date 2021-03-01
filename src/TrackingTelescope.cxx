@@ -1068,17 +1068,6 @@ void WriteHTML (TString const OutDir, TString const CalFile, int telescopeID)
 
   // RUN SUMMARY
   f << "<h1>Run Summary: </h1>\n";
-  std::ifstream fCL(CalFile.Data());
-  if (!fCL.is_open()) {
-      std::cerr << "ERROR: cannot open calibratin list: " << CalFile << std::endl;
-      throw;
-  }
-  std::string line;
-  while (!fCL.eof()) {
-      std::getline(fCL, line);
-    f << line << "<br>\n";
-  }
-  fCL.close();
 
   int nplanes = GetNPlanes();
 
