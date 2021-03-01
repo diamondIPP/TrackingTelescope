@@ -1,4 +1,5 @@
 #include "PLTGainCal.h"
+#include "Utils.h"
 
 using namespace std;
 
@@ -200,7 +201,7 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc) {
   std::ifstream InFile(GainCalFileName.c_str());
 //  std::cout << std::getline(InFile, line) << std::endl;
   if (!InFile.is_open()) {
-    std::cerr << "ERROR: cannot open gaincal file: " << GainCalFileName << std::endl;
+    tel::critical(Form("Cannot open gaincal file: %s", GainCalFileName.c_str()));
     throw;
   }
   TString CheckFirstLine;
