@@ -1,5 +1,6 @@
 #include "PLTTelescope.h"
-
+#include <algorithm>
+#include <memory>
 
 PLTTelescope::PLTTelescope ()
 {
@@ -390,4 +391,9 @@ bool PLTTelescope::HaveOneCluster(uint16_t nplanes) {
     if (Plane(iplane)->NClusters() != 1)
       return false;
   return true;
+}
+
+bool PLTTelescope::HaveOneCluster(const std::vector<uint16_t> & planes) {
+  /** @returns: whether all given [planes] have exactly one cluster */
+  return std::all_of(planes.begin(), planes.end(), [&](uint16_t ipl) { return fPlanes.at(ipl)->NClusters() == 1; });
 }

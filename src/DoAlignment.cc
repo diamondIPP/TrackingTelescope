@@ -128,12 +128,11 @@ void Alignment::EventLoop(const std::vector<uint16_t> & planes) {
     if (i_event >= max_event_number_) { break; }
     ++*ProgressBar; /** print progress */
 
-    if (FR->NTracks() != 1) { continue; } /** proceed only if we have exactly one track */
+    if (not FR->HaveOneCluster(telescope_planes_)) { continue; } /** proceed only if all telescope planes have one track */
     PLTTrack * Track = FR->Track(0);
 
     for (auto i_plane: planes) {
       PLTPlane * Plane = FR->Plane(i_plane);
-      if (Plane->NClusters() != 1) { continue; } /** proceed only if there is exactly one cluster */
 
       PLTCluster * Cluster = Plane->Cluster(0);
       /** if the plane is under test, calculate the residuals otherwise just take them from the track */

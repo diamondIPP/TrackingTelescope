@@ -37,6 +37,7 @@ class PLTTelescope
     float     SignalDiamond(uint8_t);
     std::vector<float> Signal() { return fSignal; }
     bool HaveOneCluster(uint16_t);
+    bool HaveOneCluster(const std::vector<uint16_t>&);
 
   protected:
     std::vector<PLTPlane*> fPlanes;
