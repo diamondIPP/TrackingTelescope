@@ -101,7 +101,7 @@ void Alignment::SetPlanes() {
   } else if(at_step_ == 2){
     tel::print_banner("PART III: Align inner telescope planes (w. tracking)");
     planes_to_align_ = vector<uint16_t>(telescope_planes_.begin() + 1, telescope_planes_.end() - 1);
-    planes_under_test_.clear();
+    planes_under_test_ = dia_planes_;
   } else if(at_step_ == 3){
     tel::print_banner("PART IV: Align Sil DUT (w. tracking)");
     if (sil_dut_roc_ != -1) {
@@ -111,7 +111,7 @@ void Alignment::SetPlanes() {
   } else if(at_step_ == 4) {
     tel::print_banner("PART V: Align DUTs");
     planes_to_align_ = vector<uint16_t>(dia_planes_.begin(), dia_planes_.end());
-    planes_under_test_ = vector<uint16_t>(dia_planes_.begin(), dia_planes_.end());
+    planes_under_test_ = dia_planes_;
   }
   cout << "Planes to align: " << tel::to_string(planes_to_align_) << endl;
   cout << "Planes under test : " << tel::to_string(planes_under_test_) << endl;
