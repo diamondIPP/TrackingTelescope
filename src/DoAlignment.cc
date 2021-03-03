@@ -453,12 +453,12 @@ void Alignment::SaveGraphs() {
 
 pair<pair<float, float>, pair<float, float>> Alignment::GetFitRange(uint16_t plane) {
   /** set range of profiles so that there are at least 50 entries in every bin */
-  const int min_entries = 50;
+  const float min = .05;
   vector<float> values;
   for (const auto & p: {hResidualXdY.at(plane), hResidualYdX.at(plane)}) {
     float xmin(p.GetBinContent(1)), xmax(p.GetBinContent(p.GetNbinsX()));
-    for (auto ibin(1); ibin < p.GetNbinsX(); ibin++) { if (p.GetBinEntries(ibin) > min_entries) { xmin = p.GetBinCenter(ibin); break; } }
-    for (auto ibin(p.GetNbinsX()); ibin > 1; ibin--) { if (p.GetBinEntries(ibin) > min_entries) { xmax = p.GetBinCenter(ibin); break; } }
+    for (auto ibin(1); ibin < p.GetNbinsX(); ibin++) { if (p.GetBinEntries(ibin) > min * p.GetEntries()) { xmin = p.GetBinCenter(ibin); break; } }
+    for (auto ibin(p.GetNbinsX()); ibin > 1; ibin--) { if (p.GetBinEntries(ibin) > min * p.GetEntries()) { xmax = p.GetBinCenter(ibin); break; } }
     values.emplace_back(xmin);
     values.emplace_back(xmax);
   }
