@@ -9,7 +9,7 @@
  14   4       0   12     0  2015 PAD  # Oct
  15   7       0   13     0  2015 PIX  # Oct (Calibration?)
  16   4       0    7     0  2015 PAD  # May
-# TEL NROCS MASK CALIB ZPOS YEAR COMMENT
+# TEL NROCS MASK CALIB ZPOS YEAR TYPE COMMENT
 # 2016 ----------------------------------
  17   4       0   12     1  2016 PAD  # Aug (check calibration)
  18   4       0   12     1  2016 PAD  # Aug
@@ -17,7 +17,7 @@
  20   4       0   12     1  2016 PAD  # Oct
  21   6       0   21     1  2016 PIX  # Oct
  22   6       0   21     1  2016 PIX  # Oct
-# TEL NROCS MASK CALIB ZPOS YEAR COMMENT
+# TEL NROCS MASK CALIB ZPOS YEAR TYPE COMMENT
 # 2017 ----------------------------------
  23   4       0   12     2  2017 PAD  # May
  24   4       0   12     2  2017 PAD  # May
@@ -30,7 +30,7 @@
  31   4       0   12     3  2017 PAD  # Aug-2
  43   4       0   12     2  2017 PAD  # Jul-2
  44   4       0   12     2  2017 PAD  # Jul-2
-# TEL NROCS MASK CALIB ZPOS YEAR COMMENT
+# TEL NROCS MASK CALIB ZPOS YEAR TYPE COMMENT
 # 2018 ----------------------------------
  32   4       0   12     2  2018 PAD  # Jul
  33   4       0   12     2  2018 PAD  # Jul
@@ -43,13 +43,13 @@
  41   4       0   12     2  2018 PAD  # Oct
  42   4       0   12     4  2018 BCM  # Oct BCM' (check calibration)
  45   4       0   12     2  2018 PAD  # Oct
-# TEL NROCS MASK CALIB ZPOS YEAR COMMENT
+# TEL NROCS MASK CALIB ZPOS YEAR TYPE COMMENT
 # 2019 ----------------------------------
  49   4       0   12     2  2019 PAD  # Aug (runs 0-86)
  50   4       0   12     2  2019 PAD  # Aug (runs 87+)
  51   7       0   51     2  2019 PIX  # Sep
  69   7       0   69     2  2019 PIX  # Sep
  70   7       0   70     2  2019 PIX  # Sep
-# TEL NROCS MASK CALIB ZPOS YEAR COMMENT
+# TEL NROCS MASK CALIB ZPOS YEAR TYPE COMMENT
 # 2020 ----------------------------------
  52   7       0   ??     2  2020 PIX  # Sep (mostly test runs)
