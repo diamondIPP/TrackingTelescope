@@ -22,15 +22,23 @@ The software requires ROOT TTrees with the following branches (1D arrays)
 Each branch has the to have the same length and the "plane" branch indicates from which plane each entry is.
 
 ##Usage
-There are three usage options:
-0) tracking (with filewriter)
-1) alignment
-2) error analyser
 
-The software creates (1) and reads (0,2) alignment data, that contain the rotations and translations of the planes. 
-Based on these alignments, either tracking information is added to the ROOT file (0) or the fit uncertainties of each plane can be calculated (2).  
-The alignment data is automatically stored in [data/alignments.txt](data/alignments).  
-Each seperate alignment used a "telescope_id".
+General usage:
+
+```shell 
+.TrackingTelescope <run_file> <action> <tel_id> <only_tel=0>
+```
+- run_file: name of the file to align/track
+- action: usage option (0, 1 or 2)
+- tel_id: telescope ID
+- only_tel: track only the telscope (and not the DUT)
+  
+There are three usage options:
+0. tracking: fit the tracks with a straight line bases on alignment and adds tracking data
+1. alignment: creates the alignment data with rotations and translations of the planes (stored in [data/alignments.txt](data/alignments))
+2. error analyser: calculate the fit uncertainties of each plane
+
+**Each seperate alignment uses a "telescope_id".**
 
 ###Create new alignment
 Either create new entry in [config/telescopes.txt](config/telescopes.txt) manually or use
