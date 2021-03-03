@@ -25,7 +25,7 @@ namespace tel{
   double distance(std::pair<float, float>, std::pair<float, float>);
   void critical(const std::string & msg);
   void warning(const std::string & msg);
-  void print_banner(const std::string& message, char seperator = '=', uint16_t max_lenght = 100);
+  void print_banner(const std::string &message, const char seperator);
 
 
   class ProgressBar {

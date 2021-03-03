@@ -37,7 +37,7 @@ namespace tel {
     return sqrt(pow(p1.first - p2.first, 2) + pow(p1.second - p2.second, 2));
   }
 
-  void print_banner(const string & message, const char seperator, uint16_t max_lenght) {
+  void print_banner(const string &message, const char seperator) {
     vector<size_t> sizes;
     for (const auto & i_str: tel::split(message, '\n')){
       sizes.emplace_back(tel::trim(i_str, "\n").size());

@@ -90,26 +90,26 @@ void Alignment::SetPlanes() {
   planes_under_test_.clear();
   if(at_step_ == 0) {
 //    tel::print_banner("PART I: Align last telescope plane");
-    tel::print_banner("PART I: Translate all planes relative to first plane in beam");
+    tel::print_banner("PART I: Translate all planes relative to first plane in beam", 0);
 //    planes_to_align_ = vector<uint16_t>(telescope_planes_.end() - 1, telescope_planes_.end());
     planes_to_align_ = vector<uint16_t>(ordered_planes_.begin() + 1, ordered_planes_.end());
     planes_under_test_ = vector<uint16_t>(telescope_planes_.begin() + 1, telescope_planes_.end());
   } else if(at_step_ == 1) {
-    tel::print_banner("PART II: Align last telescope plane (w. tracking)");
+    tel::print_banner("PART II: Align last telescope plane (w. tracking)", 0);
     planes_to_align_ = vector<uint16_t>(telescope_planes_.end() - 1, telescope_planes_.end());
     planes_under_test_ = vector<uint16_t>(telescope_planes_.begin() + 1, telescope_planes_.end() - 1);
   } else if(at_step_ == 2){
-    tel::print_banner("PART III: Align inner telescope planes (w. tracking)");
+    tel::print_banner("PART III: Align inner telescope planes (w. tracking)", 0);
     planes_to_align_ = vector<uint16_t>(telescope_planes_.begin() + 1, telescope_planes_.end() - 1);
     planes_under_test_ = dia_planes_;
   } else if(at_step_ == 3){
-    tel::print_banner("PART IV: Align Sil DUT (w. tracking)");
+    tel::print_banner("PART IV: Align Sil DUT (w. tracking)", 0);
     if (sil_dut_roc_ != -1) {
       planes_to_align_.push_back(uint16_t(sil_dut_roc_));
       planes_under_test_ = vector<uint16_t>(dia_planes_.begin(), dia_planes_.end());
     }
   } else if(at_step_ == 4) {
-    tel::print_banner("PART V: Align DUTs");
+    tel::print_banner("PART V: Align DUTs", 0);
     planes_to_align_ = vector<uint16_t>(dia_planes_.begin(), dia_planes_.end());
     planes_under_test_ = dia_planes_;
   }
