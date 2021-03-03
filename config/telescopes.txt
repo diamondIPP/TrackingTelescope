@@ -48,6 +48,8 @@
  49   4       0   12     2  2019 PAD  # Aug (runs 0-86)
  50   4       0   12     2  2019 PAD  # Aug (runs 87+)
  51   7       0   51     2  2019 PIX  # Sep
+ 69   7       0   69     2  2019 PIX  # Sep
+ 70   7       0   70     2  2019 PIX  # Sep
 # TEL NROCS MASK CALIB ZPOS YEAR COMMENT
 # 2020 ----------------------------------
  52   7       0   ??     2  2020 PIX  # Sep (mostly test runs)
