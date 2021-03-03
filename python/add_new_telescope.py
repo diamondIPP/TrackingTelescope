@@ -50,7 +50,7 @@ if __name__ == '__main__':
     d = dirname(dirname(realpath(__file__)))
 
     p = ArgumentParser()
-    p.add_argument('run')
+    p.add_argument('run', help='path to the ROOT file that is used for alignment')
     args = p.parse_args()
 
     config = join(d, 'config', 'telescopes.txt')
