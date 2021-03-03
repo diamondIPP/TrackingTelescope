@@ -3,7 +3,7 @@ Tracking Telescope
 A tracking and alignment framework for EUDAQ type files  
 Developed for the ETH CMS Pixel Telescope used at PSI
 
-##Installation
+## Installation
 CMake
 ```shell
 mkdir build
@@ -21,7 +21,7 @@ The software requires ROOT TTrees with the following branches (1D arrays)
 
 Each branch has the to have the same length and the "plane" branch indicates from which plane each entry is.
 
-##Usage
+## Usage
 
 General usage:
 
@@ -40,7 +40,7 @@ There are three usage options:
 
 **Each seperate alignment uses a "telescope_id".**
 
-###Create new alignment
+### Create new alignment
 Either create new entry in [config/telescopes.txt](config/telescopes.txt) manually or use
 ```shell
 .add_new_telescope <run_path>
@@ -68,7 +68,7 @@ Now run:
 
 All arguments in paretheses are optional and the default values are taken from [config/align.txt](config/align.txt)
 
-###Add new calibration
+### Add new calibration
 - relates to the pulse height calibration of the CMS pixel chips 
 - always add new calibration for each telescope ID (recommended)
 - move the phCalibration fit files to [data/calibrations/telescope\<ID>](data/calibrations)
