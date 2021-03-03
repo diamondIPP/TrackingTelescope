@@ -4,7 +4,9 @@ A tracking and alignment framework for EUDAQ type files
 Developed for the ETH CMS Pixel Telescope used at PSI
 
 ## Installation
-CMake
+Requirements:
+- Cmake3.3+
+- ROOT6+
 ```shell
 mkdir build
 cd build
