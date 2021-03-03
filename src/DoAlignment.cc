@@ -135,6 +135,7 @@ void Alignment::EventLoop(const std::vector<uint16_t> & planes) {
 
     for (auto i_plane: planes) {
       PLTPlane * Plane = FR->Plane(i_plane);
+      if (Plane->NClusters() != 1) { continue; } /** proceed only, if the plane has one cluster */
 
       PLTCluster * Cluster = Plane->Cluster(0);
       /** if the plane is under test, calculate the residuals otherwise just take them from the track */
@@ -285,7 +286,6 @@ std::vector<uint16_t> Alignment::GetDiamondPlanes() {
 void Alignment::InitHistograms() {
   for (uint8_t i_plane(0); i_plane != n_planes_; ++i_plane){
     hResidual.emplace_back(TH2F(Form("Residual_ROC%i", i_plane),    Form("Residual_ROC%i",    i_plane), 200, -1, 1, 300, -1, 1));
-    TH2F h = hResidual.at(0);
     hResidualXdY.emplace_back(TProfile(Form("ResidualXdY_ROC%i", i_plane), Form("ResidualXdY_ROC%i", i_plane), 135, -.5, .5, -1, 1));
     hResidualYdX.emplace_back(TProfile(Form("ResidualYdX_ROC%i", i_plane), Form("ResidualYdX_ROC%i", i_plane), 201, -.5, .5, -1, 1));
   }
@@ -295,9 +295,11 @@ void Alignment::ResizeHistograms() {
 
   float xmax = fdX.at(inner_planes_.back()).second * (max_sigma_ + 1);
   float ymax = fdY.at(inner_planes_.back()).second * (max_sigma_ + 1);
-  hResidual.clear();
-  for (auto ipl: ordered_planes_) {
-    hResidual.emplace_back(TH2F(Form("h%i", ipl), Form("Residual_ROC%i", ipl), 400, -xmax, xmax, 600, -ymax, ymax));
+  for (auto ipl: telescope_planes_) {
+    hResidual.at(ipl) = TH2F(Form("h%i", ipl), Form("Residual_ROC%i", ipl), 400, -xmax, xmax, 600, -ymax, ymax);
+  }
+  for (auto ipl: dia_planes_) {
+    hResidual.at(ipl) = TH2F(Form("h%i", ipl), Form("Residual_ROC%i", ipl), 200, -xmax * 2, xmax * 2, 300, -ymax * 2, ymax * 2);
   }
 }
 
