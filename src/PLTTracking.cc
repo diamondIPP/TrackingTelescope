@@ -1,16 +1,16 @@
 
 #include <PLTTracking.h>
 
-// Types to hold vector-of-clusters (Vc) and vector-of-vector-of-clusters (Vvc)
-using Vc = std::vector<PLTCluster *>;
-using Vvc = std::vector<Vc>;
+// Types to hold vector-of-clusters (ClusterVector) and vector-of-vector-of-clusters (VectorClusterVectors)
+using ClusterVector = std::vector<PLTCluster *>;
+using VectorClusterVectors = std::vector<ClusterVector>;
 
 // Use a vector of iterators
 // which iterate over the individual vector<clusters>s.
 struct Digits {
-    Vc::const_iterator begin;
-    Vc::const_iterator end;
-    Vc::const_iterator me;
+    ClusterVector::const_iterator begin;
+    ClusterVector::const_iterator end;
+    ClusterVector::const_iterator me;
 };
 using Vd = std::vector<Digits>;
 
@@ -351,9 +351,9 @@ void PLTTracking::TrackFinder_AllPlanesHit (PLTTelescope& Telescope)
   // loop over a vector<cluster*>.
   // Start all of the iterators at the beginning.
   Vd vd;
-  for(Vvc::const_iterator it = ClustersForTracking.begin();
+  for(VectorClusterVectors::const_iterator it = ClustersForTracking.begin();
     it != ClustersForTracking.end();
-    ++it) {
+      ++it) {
     Digits d = {(*it).begin(), (*it).end(), (*it).begin()};
     vd.push_back(d);
   } // end of initializing the digits
@@ -479,7 +479,7 @@ void PLTTracking::TrackFinder_ETH (PLTTelescope& Telescope)
   // loop over a vector<cluster*>.
   // Start all of the iterators at the beginning.
   Vd vd;
-  for (Vvc::const_iterator it = ClustersForTracking.begin(); it != ClustersForTracking.end(); ++it) {
+  for (VectorClusterVectors::const_iterator it = ClustersForTracking.begin(); it != ClustersForTracking.end(); ++it) {
     Digits d = {(*it).begin(), (*it).end(), (*it).begin()};
     vd.push_back(d);
   } // end of initializing the digits
