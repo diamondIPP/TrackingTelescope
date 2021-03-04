@@ -1,10 +1,6 @@
 
 #include <PLTTracking.h>
 
-#include "PLTTracking.h"
-
-// Needed these for the track-creation loop
-
 // Types to hold vector-of-clusters (Vc) and vector-of-vector-of-clusters (Vvc)
 using Vc = std::vector<PLTCluster *>;
 using Vvc = std::vector<Vc>;
