@@ -6,8 +6,8 @@
 // Needed these for the track-creation loop
 
 // Types to hold vector-of-clusters (Vc) and vector-of-vector-of-clusters (Vvc)
-typedef std::vector<PLTCluster*> Vc;
-typedef std::vector<Vc> Vvc;
+using Vc = std::vector<PLTCluster *>;
+using Vvc = std::vector<Vc>;
 
 // Use a vector of iterators
 // which iterate over the individual vector<clusters>s.
@@ -16,7 +16,7 @@ struct Digits {
     Vc::const_iterator end;
     Vc::const_iterator me;
 };
-typedef std::vector<Digits> Vd;
+using Vd = std::vector<Digits>;
 
 
 PLTTracking::PLTTracking (int nplanes, bool TrackOnlyTelescope) : fNPlanes(nplanes), trackOnlyTelescope(TrackOnlyTelescope)
