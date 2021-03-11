@@ -140,7 +140,8 @@ void Alignment::EventLoop(const std::vector<uint16_t> & planes) {
       PLTCluster * Cluster = Plane->Cluster(0);
       /** if the plane is under test, calculate the residuals otherwise just take them from the track */
       pair<float, float> dR = (FR->IsPlaneUnderTest(i_plane)) ? Track->GetResiduals(*Cluster, *FR->GetAlignment()) : Track->GetResiduals(i_plane);
-      if (sqrt(pow(dR.first, 2) + pow(dR.second, 2)) >= 0.5) { continue; } /** only proceed if the residual is smaller than 5mm */
+      const float res_thresh = .5; // 5mm
+      if (sqrt(pow(dR.first, 2) + pow(dR.second, 2)) >= res_thresh) { continue; } /** only proceed if the residual is smaller than 5mm */
 
       /** the point (dX, dY) has to be within the ellipsis of a=n*sig_x and b=n*sig_y: x²/a² + y²/b² <= 1 */
       if (fdX.at(i_plane).second > 0 and fdY.at(i_plane).second > 0) {  // only check if the mean residual is not 0
@@ -215,7 +216,7 @@ int Alignment::Align() {
 float Alignment::ReduceSigma(uint16_t step) const {
   /** reduce n_sigma_ with each iteration until only an ellipse of "3sigma" is used to exclude residual outliers.
    *  the function n(x) = a + b / (1 + exp((x-max_steps/7) * (25 / max_steps))) is tailored to fall from b to a within ~25% of the max_steps */
-  float off_par(7), stretch_par(25); // tailored values
+  const float off_par(7), stretch_par(25); // tailored values
   return min_sigma_ + max_sigma_ / (1. + exp((step - (maximum_steps_ / off_par)) * (stretch_par / maximum_steps_)));
 }
 
