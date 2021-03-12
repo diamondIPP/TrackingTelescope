@@ -29,9 +29,9 @@ def get_z_pos(year):
         return 2
 
 
-def save_config(filename, n_rocs):
+def save_config(filename, n_rocs, tel_id):
     last_tel = get_last_tel(filename)
-    new_tel = input('Enter the telescope number, press enter for default ({}): '.format(last_tel + 1))
+    new_tel = input('Enter the telescope number, press enter for default ({}): '.format(last_tel + 1)) if tel_id is None else tel_id
     tel = last_tel + 1 if not new_tel else int(new_tel)
     mask = input('Enter the outer mask file number, press enter for default: ')
     mask = 0 if not mask else int(mask)
@@ -40,7 +40,7 @@ def save_config(filename, n_rocs):
     year = int(input('Enter the year (YYYY): '))
     z_pos = get_z_pos(year)
     cmt = input('Enter a comment (Month, DUT, ...): ')
-    type_ = ['PAD', 'PIX', 'BCM'][int(input('Enter the type of the DUT (0 for Pad, 1 for Pixel and 2 for BCM\':'))]
+    type_ = ['PAD', 'PIX', 'BCM'][int(input('Enter the type of the DUT (0 for Pad, 1 for Pixel and 2 for BCM\': '))]
     with open(filename, 'a') as f:
         f.write('\n{: 3d}{: 4d}{: 8d}{: 5d}{: 6d}{: 6d} {}  # {}'.format(tel, n_rocs, mask, cal, z_pos, year, type_, cmt))
 
@@ -51,7 +51,8 @@ if __name__ == '__main__':
 
     p = ArgumentParser()
     p.add_argument('run', help='path to the ROOT file that is used for alignment')
+    p.add_argument('id', nargs='?', help='telescope id', default=None)
     args = p.parse_args()
 
     config = join(d, 'config', 'telescopes.txt')
-    save_config(config, get_n_rocs(args.run))
+    save_config(config, get_n_rocs(args.run), args.id)
