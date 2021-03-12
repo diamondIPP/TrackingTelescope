@@ -9,6 +9,7 @@
  14   4       0   12     0  2015 PAD  # Oct
  15   7       0   13     0  2015 PIX  # Oct (Calibration?)
  16   4       0    7     0  2015 PAD  # May
+  5   4       0   12     0  2015 PAD  # Oct
 # TEL NROCS MASK CALIB ZPOS YEAR TYPE COMMENT
 # 2016 ----------------------------------
  17   4       0   12     1  2016 PAD  # Aug (check calibration)
