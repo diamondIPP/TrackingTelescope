@@ -1,45 +1,53 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.15)
+CMAKE_POLICY(SET CMP0012 NEW)
+CMAKE_POLICY(SET CMP0025 NEW)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.11.0")
+    CMAKE_POLICY(SET CMP0072 NEW)
+endif()
+#============================================================
 project(TrackingTelescope)
+SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+#=========================================================
+# Help function to debug CMake
+MACRO (DD in)
+    MESSAGE(${in}=[${${in}}])
+ENDMACRO(DD)
+#=========================================================
+# Locate sources and headers for this project
+FILE(GLOB sources
+        ${PROJECT_SOURCE_DIR}/src/*.cc)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    MESSAGE(STATUS "Setting build type to 'RelWithDebInfo' as none was specified.")
-    SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build." FORCE)
+FILE(GLOB headers
+        ${PROJECT_SOURCE_DIR}/include/*.h)
+#=========================================================
+# Setup include directory for this project
+INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
+#=========================================================
+# Option for Root use
+SET(USE_ROOT ON)
+#=========================================================
+# ROOT
+IF(USE_ROOT)
+    FIND_PACKAGE(ROOT REQUIRED COMPONENTS TSpectrum)
+    INCLUDE_DIRECTORIES(${ROOT_INCLUDE_DIR})
+    SET(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR})
+    #MESSAGE("Found Root in ${ROOT_INCLUDE_DIR} ${ROOT_LIBRARY_DIR} ${ROOT_LIBRARIES}")
+    #IF(ROOT_INCLUDE_DIR)
+    #MESSAGE("Your current Root version is ${ROOT_VERSION}")
+    #ELSE()
+    IF(NOT ROOT_INCLUDE_DIR)
+        MESSAGE("Root not found! Please install Root and make it available in PATH")
+    ENDIF()
 ENDIF()
+#=========================================================
+# Add the executable, and link it to the Geant4/ROOT/CLHEP/ITK libraries
+ADD_LIBRARY(TrackingTelescopeLib OBJECT ${sources} ${headers})
+ADD_EXECUTABLE(TrackingTelescope ${PROJECT_SOURCE_DIR}/src/TrackingTelescope.cxx
+        $<TARGET_OBJECTS:TrackingTelescopeLib> )
+TARGET_LINK_LIBRARIES(TrackingTelescope ${ROOT_LIBRARIES})
 
-SET(INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" CACHE PATH "Prefix prepended to install directories")
-SET(CMAKE_INSTALL_PREFIX "${INSTALL_PREFIX}" CACHE INTERNAL "Prefix prepended to install directories" FORCE)
-
-MESSAGE( STATUS "Build Type: " ${CMAKE_BUILD_TYPE} )
-MESSAGE( STATUS "Installing to: " ${CMAKE_INSTALL_PREFIX} )
-
-# use, i.e. don't skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-# when building, don't use the install RPATH already (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-# the RPATH to be used when installing, but only if it's not a system directory
-LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-IF("${isSystemDir}" STREQUAL "-1")
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-ENDIF("${isSystemDir}" STREQUAL "-1")
-
-# some macros are redefined to keep compatability with CMake 2.6
-include(${PROJECT_SOURCE_DIR}/cmake/CMakeCompatibility.cmake)
-include(cmake/Platform.cmake)
-
-# Additional packages to be searched for by cmake
-LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
-
-# find ROOT
-FIND_PACKAGE(ROOT REQUIRED)
-INCLUDE_DIRECTORIES(SYSTEM ${ROOT_INCLUDE_DIR})
-MESSAGE(${CMAKE_CURRENT_BINARY_DIR})
-
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
-
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}" include)
-ADD_SUBDIRECTORY(src)
-ADD_CUSTOM_TARGET(link_target ALL COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/bin/TrackingTelescope.exe ${PROJECT_SOURCE_DIR}/TrackingTelescope)
+#=========================================================
+# We remove the warning option "shadow", because there are tons of
+# such warning related to clhep/g4 system of units.
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-shadow  -std=c++14")
