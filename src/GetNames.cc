@@ -20,7 +20,7 @@ string GetDir() {
 }
 
 string GetPlotDir() {
-  return GetDir() + "plots";
+  return GetDir() + "plots/";
 }
 
 namespace tel {
@@ -136,7 +136,7 @@ bool IsROOTFile(const string & filename) {
 
 bool UseFileWriter(){
   /** @returns: whether to write the a root file or not */
-  const int first_psi_tel = 7;
+  const int first_psi_tel = 5;
   return tel::Config::telescope_id_ >= first_psi_tel;
 }
 

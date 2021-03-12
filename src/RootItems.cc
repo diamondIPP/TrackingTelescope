@@ -8,7 +8,7 @@ using namespace std;
 RootItems::RootItems(TString const RunNumber) :
     nRoc(GetNPlanes()),
     nSig(GetNSignals()),
-    PlotsDir("plots/"),
+    PlotsDir(GetPlotDir()),
     OutDir(PlotsDir + RunNumber + "/"),
     FileType(".png"),
     HistColors {1, 4, 28, 2 },

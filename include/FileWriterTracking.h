@@ -17,8 +17,8 @@ class FileWriterTracking{
 
 private:
     /** constants */
-    uint8_t const nRoc;
-    size_t const nHits;
+    const uint16_t nRoc;
+    const size_t nHits;
 
     /** keep track */
     TTree * intree;

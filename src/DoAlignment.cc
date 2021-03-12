@@ -17,7 +17,7 @@ Alignment::Alignment(const string & in_file_name, const TString & run_number, ui
   align_only_telescope_(only_tel),
   at_step_(0),
   alignment_finished_(false),
-  plots_dir_("plots/" + run_number),
+  plots_dir_(GetPlotDir() + run_number),
   file_type_(".png"),
   angle_thresh_(max_angle),
   res_thresh_(max_res),
