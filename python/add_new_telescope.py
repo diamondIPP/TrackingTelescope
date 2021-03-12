@@ -11,6 +11,7 @@ from os.path import dirname, realpath, join
 def get_n_rocs(filename):
     f = TFile(filename)
     t = f.Get('tree')
+    t.SetEstimate(10 * t.GetEntries())
     n = t.Draw('plane', '', 'goff')
     return int(max(frombuffer(t.GetVal(0), count=n)) + 1)
 
