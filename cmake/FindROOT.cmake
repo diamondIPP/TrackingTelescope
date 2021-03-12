@@ -49,7 +49,7 @@ else()
 endif()
 
 
-include(CMakeMacroParseArguments)
+#include(CMakeMacroParseArguments)
 find_program(ROOTCINT_EXECUTABLE rootcint PATHS $ENV{ROOTSYS}/bin)
 
 #----------------------------------------------------------------------------
