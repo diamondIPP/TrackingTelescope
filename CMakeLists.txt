@@ -20,16 +20,12 @@ IF(USE_ROOT)
     FIND_PACKAGE(ROOT REQUIRED COMPONENTS TSpectrum)
     INCLUDE_DIRECTORIES(${ROOT_INCLUDE_DIR})
     SET(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR})
-    #MESSAGE("Found Root in ${ROOT_INCLUDE_DIR} ${ROOT_LIBRARY_DIR} ${ROOT_LIBRARIES}")
-    #IF(ROOT_INCLUDE_DIR)
-    #MESSAGE("Your current Root version is ${ROOT_VERSION}")
-    #ELSE()
     IF(NOT ROOT_INCLUDE_DIR)
         MESSAGE("Root not found! Please install Root and make it available in PATH")
     ENDIF()
 ENDIF()
 #=========================================================
-# Add the executable, and link it to the Geant4/ROOT/CLHEP/ITK libraries
+# Add the executable, and link it to the ROOT libraries
 ADD_LIBRARY(TrackingTelescopeLib OBJECT ${sources} ${headers})
 ADD_EXECUTABLE(${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/src/TrackingTelescope.cxx $<TARGET_OBJECTS:TrackingTelescopeLib> )
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")  # put exe to project dir
