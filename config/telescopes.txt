@@ -54,3 +54,4 @@
 # TEL NROCS MASK CALIB ZPOS YEAR TYPE COMMENT
 # 2020 ----------------------------------
  52   7       0   ??     2  2020 PIX  # Sep (mostly test runs)
+ 66   4       0   12     0  2015 PAD  # Oct
