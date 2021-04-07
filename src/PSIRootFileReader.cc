@@ -5,6 +5,8 @@
 #include <utility>
 #include <cstdint>
 
+#define MAX_SIZE 255
+
 using namespace std;
 
 PSIRootFileReader::PSIRootFileReader(string in_file_name, bool const only_align, bool track_only_telescope):
@@ -19,9 +21,14 @@ PSIRootFileReader::PSIRootFileReader(string in_file_name, bool const only_align,
 PSIRootFileReader::~PSIRootFileReader ()
 {
   Clear();
-    ClearVectors();
-    CloseFile();
+  CloseFile();
 //  delete fTree;
+  delete [] f_plane;
+  delete [] f_col;
+  delete [] f_row;
+  delete [] f_adc;
+  delete [] f_charge;
+  delete [] f_signal;
 
   // Crashed when uncommented. Live with the memleak for now
   //delete fRootFile;
@@ -30,13 +37,13 @@ PSIRootFileReader::~PSIRootFileReader ()
 
 bool PSIRootFileReader::OpenFile ()
 {
-//    ClearVectors();
-    f_plane = nullptr;
-    f_col = nullptr;
-    f_row = nullptr;
-    f_adc = nullptr;
-    f_charge = nullptr;
-    f_signal = nullptr;
+    f_n_hits = 0;
+    f_plane = new uint8_t[MAX_SIZE];
+    f_col = new uint8_t[MAX_SIZE];
+    f_row = new uint8_t[MAX_SIZE];
+    f_adc = new int16_t[MAX_SIZE];
+    f_charge = new float[MAX_SIZE];
+    f_signal = new float[MAX_SIZE];
     cout << "Open File " << fFileName << endl;
     fRootFile = new TFile(fFileName.c_str(), "READ");
 
@@ -53,39 +60,18 @@ bool PSIRootFileReader::OpenFile ()
     if (fNEntries <= 0) return false;
 
     // Set Branch Addresses
+    fTree->SetBranchAddress("n_hits_tot", &f_n_hits);
     fTree->SetBranchAddress("event_number", &f_event_number);
     fTree->SetBranchAddress("time", &f_time);
 
-    fTree->SetBranchAddress("plane", &f_plane);
-    fTree->SetBranchAddress("col", &f_col);
-    fTree->SetBranchAddress("row", &f_row);
-    fTree->SetBranchAddress("adc", &f_adc);
-    fTree->SetBranchAddress("charge", &f_charge);
+    fTree->SetBranchAddress("plane", f_plane);
+    fTree->SetBranchAddress("col", f_col);
+    fTree->SetBranchAddress("row", f_row);
+    fTree->SetBranchAddress("adc", f_adc);
+    fTree->SetBranchAddress("charge", f_charge);
     if (fTree->FindBranch(GetSignalBranchName() ))
-        fTree->SetBranchAddress(GetSignalBranchName(), &f_signal);
+        fTree->SetBranchAddress(GetSignalBranchName(), f_signal);
     return true;
-}
-
-void PSIRootFileReader::ClearVectors(){
-    if(!f_plane->empty())
-        f_plane->clear();
-    if(!f_col->empty())
-        f_col->clear();
-    if(!f_row->empty())
-        f_row->clear();
-    if(!f_adc->empty())
-        f_adc->clear();
-    if(!f_charge->empty())
-        f_charge->clear();
-//    if(fTree->FindBranch(GetSignalBranchName() )) {
-//        if(!f_signal->empty())
-//            f_signal->clear();
-//    }
-//    f_plane = 0;
-//    f_col = 0;
-//    f_row = 0;
-//    f_adc = 0;
-//    f_charge = 0;
 }
 
 void PSIRootFileReader::CloseFile() {
@@ -108,8 +94,7 @@ int PSIRootFileReader::GetNextEvent ()
     Clear();
     if ( !fOnlyAlign ){
         if (fTree->GetBranch(GetSignalBranchName() )){
-            ClearSignal();
-            AddSignal(*f_signal);
+            AddSignal(f_signal, f_n_hits);
         }
     }
 
@@ -125,19 +110,16 @@ int PSIRootFileReader::GetNextEvent ()
     fTree->GetEntry(fAtEntry);
 
     fAtEntry++;
-    if(f_plane->size()>255){
-        cout << endl;
-        cout << "f_plane->size() = " << f_plane->size() << endl;
-    }
+    if (f_n_hits > 255) { cout << endl<< "f_plane->size() = " << f_n_hits << endl; }
 
-    for (uint16_t iHit = 0; iHit != f_plane->size(); iHit++){
-        uint8_t roc = (*f_plane)[iHit];
-        uint8_t col = (*f_col)[iHit];
-        uint8_t row = (*f_row)[iHit];
-        int16_t adc = (*f_adc)[iHit];
+    for (auto i_hit = 0; i_hit != f_n_hits; i_hit++){
+        uint8_t roc = f_plane[i_hit];
+        uint8_t col = f_col[i_hit];
+        uint8_t row = f_row[i_hit];
+        int16_t adc = f_adc[i_hit];
 
         if (!IsPixelMasked( 1*100000 + roc*10000 + col*100 + row)){
-            PLTHit* Hit = new PLTHit(1, roc, col, row, adc);
+            auto * Hit = new PLTHit(1, roc, col, row, adc);
 
             /** Gain calibration */
             fGainCal.SetCharge(*Hit, tel::Config::telescope_id_);
@@ -155,9 +137,9 @@ int PSIRootFileReader::GetNextEvent ()
     }
 
     /** Loop over all planes and clusterize each one, then add each plane to the correct telescope (by channel number) */
-    for (auto it = fPlaneMap.begin(); it != fPlaneMap.end(); it++){
-        it->second.Clusterize(PLTPlane::kClustering_AllTouching, PLTPlane::kFiducialRegion_All);
-        AddPlane( &(it->second) );
+    for (auto & it : fPlaneMap){
+        it.second.Clusterize(PLTPlane::kClustering_AllTouching, PLTPlane::kFiducialRegion_All);
+        AddPlane( &(it.second) );
     }
 
     /** If we are doing single plane-efficiencies:

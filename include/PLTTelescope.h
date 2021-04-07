@@ -32,8 +32,7 @@ class PLTTelescope
     int       NHitPlanes ();
     void      AddTrack (PLTTrack*);
     void      FillAndOrderTelescope ();
-    void      AddSignal (std::vector<float>);
-    void      ClearSignal() { fSignal.clear(); }
+    void      AddSignal (float*, uint8_t);
     float     SignalDiamond(uint8_t);
     std::vector<float> Signal() { return fSignal; }
     bool HaveOneCluster(uint16_t);

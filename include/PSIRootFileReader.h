@@ -12,14 +12,13 @@
 class PSIRootFileReader : public PSIFileReader
 {
   public:
-    PSIRootFileReader(std::string in_file_name, bool const only_align, bool track_only_telescope);
-    ~PSIRootFileReader ();
+    PSIRootFileReader(std::string in_file_name, bool only_align, bool track_only_telescope);
+    ~PSIRootFileReader () override;
 
     bool OpenFile () override;
     void ResetFile () override;
     int GetNextEvent () override;
     void CloseFile() override;
-    void ClearVectors();
     unsigned GetEntries() override { return fTree->GetEntries(); }
 
     // Make tree accessible
@@ -41,12 +40,13 @@ class PSIRootFileReader : public PSIFileReader
     double f_time;
 
     // Vector Branches
-    std::vector<uint16_t> * f_plane;
-    std::vector<uint16_t> * f_col;
-    std::vector<uint16_t> * f_row;
-    std::vector<int16_t> * f_adc;
-    std::vector<uint32_t> * f_charge;
-    std::vector<float> * f_signal;
+    uint8_t f_n_hits;
+    uint8_t * f_plane;
+    uint8_t * f_col;
+    uint8_t * f_row;
+    int16_t * f_adc;
+    float * f_charge;
+    float * f_signal;
 };
 
 #endif

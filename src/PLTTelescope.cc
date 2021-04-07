@@ -368,9 +368,9 @@ void PLTTelescope::FillAndOrderTelescope ()
   return;
 }
 
-void PLTTelescope::AddSignal(std::vector<float> sig){
+void PLTTelescope::AddSignal(float * sig, uint8_t n){
 
-    for (uint8_t iSig = 0; iSig < sig.size(); iSig++)
+    for (uint8_t iSig = 0; iSig < n; iSig++)
         fSignal.push_back((sig[iSig]));
 }
 
