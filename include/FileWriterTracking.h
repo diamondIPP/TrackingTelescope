@@ -49,7 +49,6 @@ private:
     std::vector<std::vector<float> > * br_track_x, * br_track_y;
 
     /** cluster numbers */
-    uint16_t br_total_hits;
     std::vector<uint16_t> br_n_hits;
     uint8_t br_total_clusters;
     std::vector<uint8_t> br_n_clusters;
@@ -116,7 +115,6 @@ public:
     void setTrackPos(uint8_t iRoc, float x, float y) { br_track_x->at(iRoc).push_back(x); br_track_x->at(iRoc).push_back(y); }
     /** cluster numbers */
     void setTotalClusters(uint8_t value) { br_total_clusters = value; }
-    void setTotalHits(uint16_t value) { br_total_hits = value; }
     void setNHits(uint8_t iRoc, uint16_t value) { br_n_hits.at(iRoc) = value; }
     void setNClusters(uint8_t iRoc, uint8_t value) { br_n_clusters.at(iRoc) = value; }
     void setClusterSize(uint8_t iRoc, int value) { br_cluster_size->at(iRoc).push_back(value); }

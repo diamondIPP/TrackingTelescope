@@ -253,7 +253,6 @@ void PLTAnalysis::WriteTrackingTree(){
     FW->setHitPlaneBits(uint16_t(FR->HitPlaneBits()) );
     FW->setNTracks(uint8_t(FR->NTracks()) );
     FW->setTotalClusters(uint8_t(FR->NClusters()) );
-    FW->setTotalHits(uint16_t(FR->NHits()) );
 
     for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
       PLTPlane * Plane = FR->Plane(iplane);
