@@ -85,7 +85,7 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("cluster_size", &br_cluster_size);
   newtree->Branch("track_x", &br_track_x);
   newtree->Branch("track_y", &br_track_y);
-  newtree->Branch("aligned", &br_aligned);
+//  newtree->Branch("aligned", &br_aligned);
 }
 
 void FileWriterTracking::fillTree(){
