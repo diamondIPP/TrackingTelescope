@@ -160,8 +160,7 @@ int16_t GetRawID() {
     else if (tel::Config::n_rocs_ == pl7) { return -4; }
     else    { tel::critical(Form("There is pixel raw alignment for %i planes!", tel::Config::n_rocs_)); throw; }
   } else {
-    if (tel::Config::year_ < year_of_change ) { return -1; }
-    else                                      { return -2; }
+    return tel::Config::year_ < year_of_change ? -1 : (tel::Config::year_ > 2020 ? -5 : -2);
   }
 }
 

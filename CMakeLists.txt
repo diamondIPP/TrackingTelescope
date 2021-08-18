@@ -21,7 +21,7 @@ IF(USE_ROOT)
     INCLUDE_DIRECTORIES(${ROOT_INCLUDE_DIR})
     SET(LINK_DIRECTORIES ${ROOT_LIBRARY_DIR})
     IF(NOT ROOT_INCLUDE_DIR)
-        MESSAGE("Root not found! Please install Root and make it available in PATH")
+        MESSAGE(FATAL_ERROR "Root not found! Please install Root and make it available in PATH")
     ENDIF()
 ENDIF()
 #=========================================================
