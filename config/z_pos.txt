@@ -1,8 +1,9 @@
 # z-positions in [cm] of the diamond pad detectors relative to the first plane hit by the beam
-# N   Z1   Z2
-  0  3.2  5.1   # pad until 2016
-  1  6.7  8.2   # pad from 2016
-  2  5.8  7.5   # pad from 2017
-  3  5.8  7.7   # exception
-  4  4.8  4.8   # bcm prime
+# N   Z1   Z2   Z3
+  0  3.2  5.1       # pad until 2016
+  1  6.7  8.2       # pad from 2016
+  2  5.8  7.5       # pad from 2017
+  3  5.8  7.7       # exception
+  4  4.8  4.8       # bcm prime
+  5  4.8  4.8  4.8  # calypso
 
