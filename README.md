@@ -11,7 +11,7 @@ Requirements:
 mkdir build
 cd build
 cmake ..
-make install
+make
 ```
 
 ## Raw files
@@ -21,7 +21,7 @@ The software requires ROOT TTrees with the following branches (1D arrays)
 - plane
 - adc
 
-Each branch has the to have the same length and the "plane" branch indicates from which plane each entry is.
+Each branch has to have the same number of entries and the "plane" branch indicates from which plane each entry is.
 
 ## Usage
 
@@ -37,7 +37,7 @@ General usage:
   
 There are three usage options:
 
-0. tracking: fit the tracks with a straight line bases on alignment and adds tracking data
+0. tracking: fit the tracks with a straight line based on the alignment and adds tracking data
 1. alignment: creates the alignment data with rotations and translations of the planes (stored in [data/alignments.txt](data/alignments.txt))
 2. error analyser: calculate the fit uncertainties of each plane
 
