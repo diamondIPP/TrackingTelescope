@@ -22,8 +22,5 @@ PSIFileReader * Action::InitFileReader() const {
     tmp = new PSIBinaryFileReader(in_file_name_);
   }
   tmp->GetAlignment()->SetErrors(tel::Config::telescope_id_, true);
-  FILE * f = fopen("MyGainCal.dat", "w");
-  tmp->GetGainCal()->PrintGainCal(f);
-  fclose(f);
   return tmp;
 }

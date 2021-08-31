@@ -9,11 +9,8 @@ cmake-build-relwithdebinfo
 .*
 *~
 *.out
-python/*.png
-MyGainCal.dat
 *.root
 crashlog.txt
 *.bak
-Vector*
 TrackingTelescope
 AutoDict*
