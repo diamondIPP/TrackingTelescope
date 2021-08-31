@@ -36,8 +36,9 @@ General usage:
 - only_tel: track only the telscope (and not the DUT)
   
 There are three usage options:
+
 0. tracking: fit the tracks with a straight line bases on alignment and adds tracking data
-1. alignment: creates the alignment data with rotations and translations of the planes (stored in [data/alignments.txt](data/alignments))
+1. alignment: creates the alignment data with rotations and translations of the planes (stored in [data/alignments.txt](data/alignments.txt))
 2. error analyser: calculate the fit uncertainties of each plane
 
 **Each seperate alignment uses a "telescope_id".**
