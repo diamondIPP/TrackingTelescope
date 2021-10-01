@@ -73,7 +73,7 @@ namespace tel {
       if (useETA) {
         averageTime();
         float tot = float(nEvents - currentEvent) / updateFrequency * timePerCycle;
-        ss << setprecision(0) << " ETA: " << setw(2) << setfill('0') << tot / 60 << ":" << setw(2) << setfill('0') << tot - int(tot) / 60 * 60;
+        ss << setprecision(0) << " ETA: " << setw(2) << setfill('0') << int(tot) / 60 << ":" << setw(2) << setfill('0') << tot - int(tot) / 60 * 60;
       }
       cout << ss.str() << flush;
     }
