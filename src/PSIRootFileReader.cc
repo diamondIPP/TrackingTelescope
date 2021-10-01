@@ -5,8 +5,6 @@
 #include <utility>
 #include <cstdint>
 
-#define MAX_SIZE 255
-
 using namespace std;
 
 PSIRootFileReader::PSIRootFileReader(string in_file_name, bool const only_align, bool track_only_telescope):
@@ -22,14 +20,7 @@ PSIRootFileReader::~PSIRootFileReader ()
 {
   Clear();
   CloseFile();
-//  delete fTree;
-  delete [] f_plane;
-  delete [] f_col;
-  delete [] f_row;
-  delete [] f_adc;
-  delete [] f_charge;
-  delete [] f_signal;
-
+  //  delete fTree;
   // Crashed when uncommented. Live with the memleak for now
   //delete fRootFile;
 }
@@ -38,12 +29,6 @@ PSIRootFileReader::~PSIRootFileReader ()
 bool PSIRootFileReader::OpenFile ()
 {
     f_n_hits = 0;
-    f_plane = new uint8_t[MAX_SIZE];
-    f_col = new uint8_t[MAX_SIZE];
-    f_row = new uint8_t[MAX_SIZE];
-    f_adc = new int16_t[MAX_SIZE];
-    f_charge = new float[MAX_SIZE];
-    f_signal = new float[MAX_SIZE];
     cout << "Open File " << fFileName << endl;
     fRootFile = new TFile(fFileName.c_str(), "READ");
 

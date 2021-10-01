@@ -40,13 +40,13 @@ class PSIRootFileReader : public PSIFileReader
     double f_time;
 
     // Vector Branches
-    uint8_t f_n_hits;
-    uint8_t * f_plane;
-    uint8_t * f_col;
-    uint8_t * f_row;
-    int16_t * f_adc;
-    float * f_charge;
-    float * f_signal;
+    UShort_t f_n_hits;
+    uint8_t f_plane[UINT8_MAX + 1] {};
+    uint8_t f_col[UINT8_MAX + 1] {};
+    uint8_t f_row[UINT8_MAX + 1] {};
+    int16_t f_adc[UINT8_MAX + 1] {};
+    float f_charge[UINT8_MAX + 1] {};
+    float f_signal[UINT8_MAX + 1] {};
 };
 
 #endif
