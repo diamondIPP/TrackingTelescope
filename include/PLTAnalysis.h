@@ -44,7 +44,7 @@ public:
     /** ============================
      CONSTRUCTOR // DECONSTRUCTOR
      =================================*/
-    PLTAnalysis(std::string const& inFileName, TFile * Out_f,  TString const& runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope=false);
+    PLTAnalysis(std::string const& inFileName, TFile * Out_f,  TString const& runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope=false, uint64_t max_event_nr=0);
     ~PLTAnalysis();
 
 

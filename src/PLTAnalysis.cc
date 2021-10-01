@@ -3,7 +3,7 @@
 
 using namespace std;
 
-PLTAnalysis::PLTAnalysis(string const & inFileName, TFile * Out_f,  TString const & runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope):
+PLTAnalysis::PLTAnalysis(string const & inFileName, TFile * Out_f,  TString const & runNumber, uint8_t const TelescopeID, bool TrackOnlyTelescope, uint64_t max_event_nr):
     Action(inFileName, runNumber),
     telescopeID(TelescopeID),
     now1(clock()), now2(clock()), loop(0), startProg(0), endProg(0), allProg(0), averTime(0),
@@ -19,8 +19,7 @@ PLTAnalysis::PLTAnalysis(string const & inFileName, TFile * Out_f,  TString cons
     /** init file reader */
     FR = InitFileReader();
     if (is_root_file_) nEntries = ((PSIRootFileReader*) FR)->fTree->GetEntries();
-    stopAt = nEntries;
-//    stopAt = 1e4;
+    stopAt = max_event_nr ? max_event_nr : nEntries;
     /** apply masking */
     FR->ReadPixelMask(GetMaskingFilename());
     /** init histos */
