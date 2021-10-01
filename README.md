@@ -59,7 +59,11 @@ Each entry looks like this:
 - CALIB: number of the calibration dir ("12" == "telescope12") in  [data/calibrations](data/calibrations) (see next section for more info)
 - ZPOS: zposition of the DUT as in [config/z_pos.txt](config/z_pos.txt) (automatically set in the script)
 - YEAR: year of the beam test
-- TYPE: type of the DUT (PIX, PAD or BCM)  
+- TYPE: type of the DUT (PIX, PAD or BCM)
+  
+<ins>Initial z-positions of the telescope planes:</ins>
+- stored in [data/alignments.txt](data/alignments.txt) as negative telescope numbers
+- chosen by default as defined in [src/GetNames.cc:GetRawId()](src/GetNames.cc)
  
 Now run:
 ```shell 
