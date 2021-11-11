@@ -1381,7 +1381,7 @@ int main (int argc, char* argv[]) {
   } else if (action==2) { /** RESIDUAL CALCULATION */
     FindPlaneErrors(in_file_name, run_number, telescope_id);
   } else { /** ANALYSIS */
-    PLTAnalysis Analysis(in_file_name, &out_f, run_number, telescope_id, bool(track_only_telescope), AS.max_events_);
+    PLTAnalysis Analysis(in_file_name, &out_f, run_number, telescope_id, bool(track_only_telescope));
     Analysis.EventLoop();
     Analysis.FinishAnalysis();
   }
