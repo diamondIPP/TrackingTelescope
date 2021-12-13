@@ -121,6 +121,11 @@ uint16_t GetNPlanes(){
   return tel::Config::n_rocs_;
 }
 
+uint8_t GetNDUTs(){
+  /** @returns: the number DUTs */
+  return UseDigitalCalibration() ? size_t(GetNPlanes() - 4) : tel::Config::dia_z_pos_.size();
+}
+
 bool UseExternalCalibrationFunction() {
   /** @returns: whether to use the function given in the calibration files or not */
   return UseFileWriter();

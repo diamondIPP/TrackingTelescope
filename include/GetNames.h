@@ -41,6 +41,7 @@ std::string GetAlignmentFilename();
 std::string GetMaskingFilename();
 const char * GetSignalBranchName();
 uint16_t GetNPlanes();
+uint8_t GetNDUTs();
 
 int16_t GetRawID();
 int GetNSignals();
