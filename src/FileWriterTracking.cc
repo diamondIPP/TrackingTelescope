@@ -1,4 +1,6 @@
 #include "FileWriterTracking.h"
+#include "Utils.h"
+#define DEF_RES -999
 
 using std::cout; using std::string; using std::stringstream; using std::vector; using std::endl;
 
@@ -6,7 +8,7 @@ using std::cout; using std::string; using std::stringstream; using std::vector; 
  CONSTRUCTOR
  =================================*/
 FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, PSIFileReader * FR):
-  nRoc(GetNPlanes()), nHits(4), TelescopeID(telescopeID) {
+  nRoc(GetNPlanes()), n_dut_(GetNDUTs()), nHits(4), TelescopeID(telescopeID), FR_(FR) {
 
   NewFileName = getFileName(InFileName);
   intree = ((PSIRootFileReader*) FR)->fTree;
@@ -15,15 +17,17 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   newtree = intree->CloneTree(0);
 
   /** init vectors */
-  br_dia_track_pos_x = new vector<float>;
-  br_dia_track_pos_y = new vector<float>;
-  br_dia_track_pos_x_loc = new vector<float>;
-  br_dia_track_pos_y_loc = new vector<float>;
-  br_dist_to_dia = new vector<float>;
+  br_dia_track_pos_x = new float[n_dut_];
+  br_dia_track_pos_y = new float[n_dut_];
+  br_dia_track_pos_x_loc = new float[n_dut_];
+  br_dia_track_pos_y_loc = new float[n_dut_];
+  br_dist_to_dia = new float[n_dut_];
   br_residuals_x = new vector<vector<float> >;
   br_residuals_y = new vector<vector<float> >;
   br_residuals = new vector<vector<float> >;
-  br_single_cluster_residuals = new vector<float>;
+  br_sres = new float[nRoc];
+  br_sres_x = new float[nRoc];
+  br_sres_y = new float[nRoc];
   br_track_x = new vector<vector<float> >;
   br_track_y = new vector<vector<float> >;
 
@@ -56,11 +60,11 @@ string FileWriterTracking::getFileName(string & InFileName){
 void FileWriterTracking::addBranches(){
 
   newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
-  newtree->Branch("dia_track_x", &br_dia_track_pos_x);
-  newtree->Branch("dia_track_y", &br_dia_track_pos_y);
-  newtree->Branch("dia_track_x_local", &br_dia_track_pos_x_loc);
-  newtree->Branch("dia_track_y_local", &br_dia_track_pos_y_loc);
-  newtree->Branch("dist_to_dia", &br_dist_to_dia);
+  newtree->Branch("dia_track_x", br_dia_track_pos_x, Form("dia_track_x[%d]/F", n_dut_));
+  newtree->Branch("dia_track_y", br_dia_track_pos_y, Form("dia_track_y[%d]/F", n_dut_));
+  newtree->Branch("dia_track_x_local", br_dia_track_pos_x_loc, Form("dia_track_x_local[%d]/F", n_dut_));
+  newtree->Branch("dia_track_y_local", br_dia_track_pos_y_loc, Form("dia_track_Y_local[%d]/F", n_dut_));
+  newtree->Branch("dist_to_dia", br_dist_to_dia, Form("dist_to_dia[%d]/F", n_dut_));
   newtree->Branch("chi2_tracks", &br_chi2);
   newtree->Branch("chi2_x", &br_chi2_x);
   newtree->Branch("chi2_y", &br_chi2_y);
@@ -69,7 +73,6 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("n_tracks", &br_n_tracks);
   newtree->Branch("total_clusters", &br_total_clusters);
   newtree->Branch("n_clusters", &br_n_clusters);
-//  newtree->Branch("cluster_plane", &br_cluster_plane);
   newtree->Branch("cluster_col", &br_cluster_col);
   newtree->Branch("cluster_row", &br_cluster_row);
   newtree->Branch("cluster_charge", &br_cluster_charge);
@@ -81,11 +84,12 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("residuals_x", &br_residuals_x);
   newtree->Branch("residuals_y", &br_residuals_y);
   newtree->Branch("residuals", &br_residuals);
-  newtree->Branch("s_residuals", &br_single_cluster_residuals);
+  newtree->Branch("sres", br_sres, Form("sres[%d]/F", nRoc));
+  newtree->Branch("sres_x", br_sres_x, Form("sres_x[%d]/F", nRoc));
+  newtree->Branch("sres_y", br_sres_y, Form("sres_y[%d]/F", nRoc));
   newtree->Branch("cluster_size", &br_cluster_size);
   newtree->Branch("track_x", &br_track_x);
   newtree->Branch("track_y", &br_track_y);
-//  newtree->Branch("aligned", &br_aligned);
 }
 
 void FileWriterTracking::fillTree(){
@@ -96,8 +100,8 @@ void FileWriterTracking::saveTree(){
 
   newfile->cd();
   newtree->Write();
-  if (names != nullptr)
-    names->Write();
+  if (names != nullptr) {
+    names->Write(); }
   newfile->Write();
   newfile->Close();
   delete newfile;
@@ -105,7 +109,6 @@ void FileWriterTracking::saveTree(){
 
 void FileWriterTracking::clearVectors(){
 
-//  br_cluster_plane.clear();
   for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++) {
     br_cluster_col->at(iRoc).clear();
     br_cluster_row->at(iRoc).clear();
@@ -121,11 +124,6 @@ void FileWriterTracking::clearVectors(){
     br_track_x->at(iRoc).clear();
     br_track_y->at(iRoc).clear();
   }
-  br_dia_track_pos_x->clear();
-  br_dia_track_pos_y->clear();
-  br_dia_track_pos_x_loc->clear();
-  br_dia_track_pos_y_loc->clear();
-  br_dist_to_dia->clear();
 }
 
 void FileWriterTracking::resizeVectors() {
@@ -133,7 +131,6 @@ void FileWriterTracking::resizeVectors() {
   br_residuals_x->resize(nRoc);
   br_residuals_y->resize(nRoc);
   br_residuals->resize(nRoc);
-  br_single_cluster_residuals->resize(nRoc);
   br_track_x->resize(nRoc);
   br_track_y->resize(nRoc);
 
@@ -151,5 +148,30 @@ void FileWriterTracking::resizeVectors() {
   br_cluster_charge->resize(nRoc);
   is_aligned->resize(nRoc, true);
   br_aligned->resize(nRoc, true);
+}
+
+void FileWriterTracking::setSResidual(uint8_t iRoc, bool def) {
+  /** Fill the single cluster residuals. */
+  br_sres_x[iRoc] = def ? br_residuals_x->at(iRoc).at(0) : DEF_RES;
+  br_sres_y[iRoc] = def ? br_residuals_y->at(iRoc).at(0) : DEF_RES;
+  br_sres[iRoc] = def ? br_residuals->at(iRoc).at(0) : DEF_RES;
+}
+
+void FileWriterTracking::set_dut_tracks(const vector<float> * z_dut) {
+  /** Fill the intersection of the tracks with the DUT planes */
+  if (FR_->NTracks() == 1) {
+    auto * track = FR_->Track(0);
+    for (uint8_t i(0); i < z_dut->size(); i++) {
+      float x_pos(track->ExtrapolateX(z_dut->at(i))), y_pos(track->ExtrapolateY(z_dut->at(i)));
+      br_dia_track_pos_x[i] = x_pos; br_dia_track_pos_y[i] = y_pos;
+      auto pos_loc = FR_->GetAlignment()->TtoLXY(x_pos, y_pos, FR_->Channel(), int(nRoc - n_dut_ + i));
+      br_dia_track_pos_x_loc[i] = pos_loc.first; br_dia_track_pos_y_loc[i] = pos_loc.second;
+      br_dist_to_dia[i] = sqrt(x_pos * x_pos + y_pos * y_pos);
+    }
+  } else {
+    for (uint8_t i(0); i < n_dut_; i++) {
+      br_dia_track_pos_x[i]=br_dia_track_pos_y[i]=br_dia_track_pos_x_loc[i]=br_dia_track_pos_y_loc[i]=DEF_RES;
+    }
+  }
 }
 

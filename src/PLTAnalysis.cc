@@ -266,31 +266,22 @@ void PLTAnalysis::WriteTrackingTree(){
         FW->setClusterSize(iplane, int(Cluster->NHits()));
       }
     }
+    FW->set_dut_tracks(DiaZ); /** set extrapolated position of the track at the diamond position */
     if (FR->NTracks() > 0){
         PLTTrack * Track = FR->Track(0);
         FW->setChi2(Track->Chi2(), Track->Chi2X(), Track->Chi2Y() );
         FW->setAngle(Track->fAngleX, Track->fAngleY);
-        /** set extrapolated position of the track at the diamond position */
-        for (uint8_t i(0); i < DiaZ->size(); i++){
-            float x_pos = Track->ExtrapolateX(DiaZ->at(i));
-            float y_pos = Track->ExtrapolateY(DiaZ->at(i));
-            FW->setDiaTracks(x_pos, y_pos);
-            FW->setDiaTracksLocal(FR->GetAlignment()->TtoLXY(x_pos, y_pos, FR->Channel(), int(FR->NPlanes() - DiaZ->size() + i)));
-            FW->setDistDia(x_pos, y_pos);
-        }
         for (uint8_t iplane = 0; iplane != FR->NPlanes(); ++iplane) {
             PLTPlane * Plane = FR->Plane(iplane);
-            FW->setSResidual(iplane, -999);
             for (size_t icluster = 0; icluster != Plane->NClusters(); icluster++) {
                 PLTCluster * Cluster = Plane->Cluster(icluster);
                 float xl = FR->GetAlignment()->TtoLX(Track->ExtrapolateX(Cluster->TZ()), Track->ExtrapolateY(Cluster->TZ()), Cluster->Channel(), iplane);
                 float yl = FR->GetAlignment()->TtoLY(Track->ExtrapolateX(Cluster->TZ()), Track->ExtrapolateY(Cluster->TZ()), Cluster->Channel(), iplane);
-                FW->setSResidual(iplane, (Plane->NClusters() == 1 ? float(tel::distance(make_pair(xl, yl), make_pair(Cluster->LX(), Cluster->LY()))) : -999));
                 FW->setResidualXY(iplane, xl - Cluster->LX(), yl - Cluster->LY() );
                 FW->setResidual(iplane, float(tel::distance(make_pair(xl, yl), make_pair(Cluster->LX(), Cluster->LY()))) );
-//                FW->setClusterPlane(iplane);
                 FW->setTrackPos(iplane, Track->ExtrapolateX(Plane->TZ()), Track->ExtrapolateY(Plane->TZ()) );
             }
+            FW->setSResidual(iplane, Plane->NClusters() == 1);
         }
     }
     else {
@@ -396,8 +387,7 @@ void PLTAnalysis::FillOfflinePH(PLTTrack * Track, PLTCluster * Cluster){
 vector<float> * PLTAnalysis::getDiaZPositions(){
 
     auto * tmp = new vector<float>;
-    size_t n_dut_planes = UseDigitalCalibration() ? size_t(GetNPlanes() - 4) : tel::Config::dia_z_pos_.size();
-    for (uint8_t i_dut(0); i_dut < n_dut_planes; i_dut++){
+    for (uint8_t i_dut(0); i_dut < GetNDUTs(); i_dut++){
       float pos = UseDigitalCalibration() ? FR->GetAlignment()->LZ(1, 4 + i_dut) : tel::Config::dia_z_pos_.at(i_dut);
       cout << "z-position of DUT " << int(i_dut) << ": " << pos << endl;
       tmp->push_back(pos);
