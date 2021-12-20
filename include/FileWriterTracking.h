@@ -13,7 +13,7 @@
 
 #include "PSIRootFileReader.h"
 
-#define NCLUSTER_MAX 20
+#define DEF_VAL -999
 
 class FileWriterTracking{
 
@@ -21,9 +21,8 @@ private:
     PSIFileReader * FR_;
 
     /** constants */
-    const uint16_t nRoc;
-    const uint8_t n_dut_;
-    const size_t nHits;
+    const uint16_t n_rocs_;
+    const uint8_t n_duts_;
 
     /** keep track */
     TTree * intree;
@@ -32,29 +31,27 @@ private:
     TMacro * names;
     std::string NewFileName;
 
-    int16_t TelescopeID;
-
     /** ============================
         BRANCH VARIABLES
      =================================*/
-    uint16_t br_hit_plane_bits;
+    uint16_t br_hit_plane_bits = 0;
     std::vector<bool> * is_aligned;
     std::vector<bool> * br_aligned;
 
     /** tracks */
-    uint8_t br_n_tracks;
-    float *br_dia_track_pos_x, *br_dia_track_pos_y, *br_dia_track_pos_x_loc, *br_dia_track_pos_y_loc, *br_dist_to_dia ;
-    float br_chi2, br_chi2_x, br_chi2_y;
-    float br_angle_x, br_angle_y;
+    uint8_t br_n_tracks = 0;
+    float *br_dia_track_pos_x, *br_dia_track_pos_y, *br_dia_track_pos_x_loc, *br_dia_track_pos_y_loc, *br_dist_to_dia;
+    float br_chi2 = DEF_VAL, br_chi2_x = DEF_VAL, br_chi2_y = DEF_VAL;
+    float br_angle_x = DEF_VAL, br_angle_y = DEF_VAL;
     std::vector<std::vector<float> > * br_residuals_x, * br_residuals_y;
     std::vector<std::vector<float> > * br_residuals;
     float *br_sres_x, *br_sres_y, *br_sres;
     std::vector<std::vector<float> > * br_track_x, * br_track_y;
 
-    /** cluster numbers */
-    std::vector<uint16_t> br_n_hits;
-    uint8_t br_total_clusters;
-    std::vector<uint8_t> br_n_clusters;
+  /** cluster numbers */
+    uint8_t br_total_clusters = 0;
+    uint16_t * br_n_hits;
+    uint8_t * br_n_clusters;
     std::vector<std::vector<uint16_t> > * br_cluster_size;
 
     /** cluster positions */
@@ -73,28 +70,14 @@ public:
     /** ============================
      CONSTRUCTOR
      =================================*/
-    FileWriterTracking(std::string, uint8_t, PSIFileReader * FR);
-    ~FileWriterTracking();
+    FileWriterTracking(std::string, PSIFileReader * FR);
 
 
     /** ============================
      GET-FUNCTIONS
      =================================*/
-    std::string FileName() {return NewFileName; }
     TTree * InTree() { return intree; }
-    uint16_t HitPlaneBits() { return br_hit_plane_bits; }
-    uint8_t nTracks() { return br_n_tracks; }
-    uint8_t nClusters() { return br_total_clusters; }
-    float   AngleX() { return br_angle_x; }
-    float   AngleY() { return br_angle_y; }
-    float   Chi2() { return br_chi2; }
-    float   Chi2X() { return br_chi2_x; }
-    float   Chi2Y() { return br_chi2_y; }
-    std::vector<std::vector<uint16_t> > * ClusterSize() { return br_cluster_size; }
-    std::vector<uint16_t> GetNHits() { return br_n_hits; }
-    std::vector<std::vector<float> > * ResidualX() { return br_residuals_x; }
-    std::vector<std::vector<float> > * ResidualY() { return br_residuals_y; }
-    bool lastIsAligned(uint8_t iRoc) { return is_aligned->at(iRoc); }
+    uint8_t nClusters() const { return br_total_clusters; }
 
     /** ============================
         SETTER METHODS
@@ -111,8 +94,8 @@ public:
     void setTrackPos(uint8_t iRoc, float x, float y) { br_track_x->at(iRoc).push_back(x); br_track_x->at(iRoc).push_back(y); }
     /** cluster numbers */
     void setTotalClusters(uint8_t value) { br_total_clusters = value; }
-    void setNHits(uint8_t iRoc, uint16_t value) { br_n_hits.at(iRoc) = value; }
-    void setNClusters(uint8_t iRoc, uint8_t value) { br_n_clusters.at(iRoc) = value; }
+    void setNHits(uint8_t i_roc, uint16_t value) { br_n_hits[i_roc] = value; }
+    void setNClusters(uint8_t i_roc, uint8_t value) { br_n_clusters[i_roc] = value; }
     void setClusterSize(uint8_t iRoc, int value) { br_cluster_size->at(iRoc).push_back(value); }
     /** cluster positions */
     void setClusterPos(uint8_t iRoc, int col, int row) { br_cluster_col->at(iRoc).push_back(col); br_cluster_row->at(iRoc).push_back(row);}

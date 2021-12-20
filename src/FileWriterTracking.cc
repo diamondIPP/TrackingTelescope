@@ -1,14 +1,13 @@
 #include "FileWriterTracking.h"
 #include "Utils.h"
-#define DEF_RES -999
 
 using std::cout; using std::string; using std::stringstream; using std::vector; using std::endl;
 
 /** ============================
  CONSTRUCTOR
  =================================*/
-FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, PSIFileReader * FR):
-  nRoc(GetNPlanes()), n_dut_(GetNDUTs()), nHits(4), TelescopeID(telescopeID), FR_(FR) {
+FileWriterTracking::FileWriterTracking(string InFileName, PSIFileReader * FR):
+  n_rocs_(GetNPlanes()), n_duts_(GetNDUTs()), FR_(FR) {
 
   NewFileName = getFileName(InFileName);
   intree = ((PSIRootFileReader*) FR)->fTree;
@@ -16,18 +15,22 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   newfile = new TFile(NewFileName.c_str(), "RECREATE");
   newtree = intree->CloneTree(0);
 
+  /** init arrays */
+  br_dia_track_pos_x = new float[n_duts_];
+  br_dia_track_pos_y = new float[n_duts_];
+  br_dia_track_pos_x_loc = new float[n_duts_];
+  br_dia_track_pos_y_loc = new float[n_duts_];
+  br_dist_to_dia = new float[n_duts_];
+  br_n_hits = new uint16_t[n_rocs_];
+  br_n_clusters = new uint8_t[n_rocs_];
+  br_sres = new float[n_rocs_];
+  br_sres_x = new float[n_rocs_];
+  br_sres_y = new float[n_rocs_];
+
   /** init vectors */
-  br_dia_track_pos_x = new float[n_dut_];
-  br_dia_track_pos_y = new float[n_dut_];
-  br_dia_track_pos_x_loc = new float[n_dut_];
-  br_dia_track_pos_y_loc = new float[n_dut_];
-  br_dist_to_dia = new float[n_dut_];
   br_residuals_x = new vector<vector<float> >;
   br_residuals_y = new vector<vector<float> >;
   br_residuals = new vector<vector<float> >;
-  br_sres = new float[nRoc];
-  br_sres_x = new float[nRoc];
-  br_sres_y = new float[nRoc];
   br_track_x = new vector<vector<float> >;
   br_track_y = new vector<vector<float> >;
 
@@ -45,7 +48,6 @@ FileWriterTracking::FileWriterTracking(string InFileName, uint8_t telescopeID, P
   resizeVectors();
   addBranches();
 }
-FileWriterTracking::~FileWriterTracking() = default;
 
 /** ============================
  AUXILIARY FUNCTIONS
@@ -60,11 +62,18 @@ string FileWriterTracking::getFileName(string & InFileName){
 void FileWriterTracking::addBranches(){
 
   newtree->Branch("hit_plane_bits", &br_hit_plane_bits);
-  newtree->Branch("dia_track_x", br_dia_track_pos_x, Form("dia_track_x[%d]/F", n_dut_));
-  newtree->Branch("dia_track_y", br_dia_track_pos_y, Form("dia_track_y[%d]/F", n_dut_));
-  newtree->Branch("dia_track_x_local", br_dia_track_pos_x_loc, Form("dia_track_x_local[%d]/F", n_dut_));
-  newtree->Branch("dia_track_y_local", br_dia_track_pos_y_loc, Form("dia_track_Y_local[%d]/F", n_dut_));
-  newtree->Branch("dist_to_dia", br_dist_to_dia, Form("dist_to_dia[%d]/F", n_dut_));
+  /** arrays */
+  newtree->Branch("dia_track_x", br_dia_track_pos_x, Form("dia_track_x[%d]/F", n_duts_));
+  newtree->Branch("dia_track_y", br_dia_track_pos_y, Form("dia_track_y[%d]/F", n_duts_));
+  newtree->Branch("dia_track_x_local", br_dia_track_pos_x_loc, Form("dia_track_x_local[%d]/F", n_duts_));
+  newtree->Branch("dia_track_y_local", br_dia_track_pos_y_loc, Form("dia_track_Y_local[%d]/F", n_duts_));
+  newtree->Branch("dist_to_dia", br_dist_to_dia, Form("dist_to_dia[%d]/F", n_duts_));
+  newtree->Branch("n_hits", br_n_hits, Form("n_hits[%d]/s", n_rocs_));
+  newtree->Branch("n_clusters", br_n_clusters, Form("n_clusters[%d]/b", n_rocs_));
+  newtree->Branch("sres", br_sres, Form("sres[%d]/F", n_rocs_));
+  newtree->Branch("sres_x", br_sres_x, Form("sres_x[%d]/F", n_rocs_));
+  newtree->Branch("sres_y", br_sres_y, Form("sres_y[%d]/F", n_rocs_));
+  /** vectors */
   newtree->Branch("chi2_tracks", &br_chi2);
   newtree->Branch("chi2_x", &br_chi2_x);
   newtree->Branch("chi2_y", &br_chi2_y);
@@ -72,7 +81,6 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("angle_y", &br_angle_y);
   newtree->Branch("n_tracks", &br_n_tracks);
   newtree->Branch("total_clusters", &br_total_clusters);
-  newtree->Branch("n_clusters", &br_n_clusters);
   newtree->Branch("cluster_col", &br_cluster_col);
   newtree->Branch("cluster_row", &br_cluster_row);
   newtree->Branch("cluster_charge", &br_cluster_charge);
@@ -80,13 +88,9 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("cluster_ypos_tel", &br_cluster_ypos_tel);
   newtree->Branch("cluster_xpos_local", &br_cluster_xpos_local);
   newtree->Branch("cluster_ypos_local", &br_cluster_ypos_local);
-  newtree->Branch("n_hits", &br_n_hits);
   newtree->Branch("residuals_x", &br_residuals_x);
   newtree->Branch("residuals_y", &br_residuals_y);
   newtree->Branch("residuals", &br_residuals);
-  newtree->Branch("sres", br_sres, Form("sres[%d]/F", nRoc));
-  newtree->Branch("sres_x", br_sres_x, Form("sres_x[%d]/F", nRoc));
-  newtree->Branch("sres_y", br_sres_y, Form("sres_y[%d]/F", nRoc));
   newtree->Branch("cluster_size", &br_cluster_size);
   newtree->Branch("track_x", &br_track_x);
   newtree->Branch("track_y", &br_track_y);
@@ -109,7 +113,7 @@ void FileWriterTracking::saveTree(){
 
 void FileWriterTracking::clearVectors(){
 
-  for (uint8_t iRoc = 0; iRoc != nRoc; iRoc++) {
+  for (uint8_t iRoc = 0; iRoc != n_rocs_; iRoc++) {
     br_cluster_col->at(iRoc).clear();
     br_cluster_row->at(iRoc).clear();
     br_cluster_xpos_tel->at(iRoc).clear();
@@ -128,33 +132,31 @@ void FileWriterTracking::clearVectors(){
 
 void FileWriterTracking::resizeVectors() {
 
-  br_residuals_x->resize(nRoc);
-  br_residuals_y->resize(nRoc);
-  br_residuals->resize(nRoc);
-  br_track_x->resize(nRoc);
-  br_track_y->resize(nRoc);
+  br_residuals_x->resize(n_rocs_);
+  br_residuals_y->resize(n_rocs_);
+  br_residuals->resize(n_rocs_);
+  br_track_x->resize(n_rocs_);
+  br_track_y->resize(n_rocs_);
 
-  br_n_clusters.resize(nRoc);
-  br_n_hits.resize(nRoc);
-  br_cluster_size->resize(nRoc);
+  br_cluster_size->resize(n_rocs_);
 
-  br_cluster_col->resize(nRoc);
-  br_cluster_row->resize(nRoc);
-  br_cluster_xpos_tel->resize(nRoc);
-  br_cluster_ypos_tel->resize(nRoc);
-  br_cluster_xpos_local->resize(nRoc);
-  br_cluster_ypos_local->resize(nRoc);
+  br_cluster_col->resize(n_rocs_);
+  br_cluster_row->resize(n_rocs_);
+  br_cluster_xpos_tel->resize(n_rocs_);
+  br_cluster_ypos_tel->resize(n_rocs_);
+  br_cluster_xpos_local->resize(n_rocs_);
+  br_cluster_ypos_local->resize(n_rocs_);
 
-  br_cluster_charge->resize(nRoc);
-  is_aligned->resize(nRoc, true);
-  br_aligned->resize(nRoc, true);
+  br_cluster_charge->resize(n_rocs_);
+  is_aligned->resize(n_rocs_, true);
+  br_aligned->resize(n_rocs_, true);
 }
 
 void FileWriterTracking::setSResidual(uint8_t iRoc, bool def) {
   /** Fill the single cluster residuals. */
-  br_sres_x[iRoc] = def ? br_residuals_x->at(iRoc).at(0) : DEF_RES;
-  br_sres_y[iRoc] = def ? br_residuals_y->at(iRoc).at(0) : DEF_RES;
-  br_sres[iRoc] = def ? br_residuals->at(iRoc).at(0) : DEF_RES;
+  br_sres_x[iRoc] = def ? br_residuals_x->at(iRoc).at(0) : DEF_VAL;
+  br_sres_y[iRoc] = def ? br_residuals_y->at(iRoc).at(0) : DEF_VAL;
+  br_sres[iRoc] = def ? br_residuals->at(iRoc).at(0) : DEF_VAL;
 }
 
 void FileWriterTracking::set_dut_tracks(const vector<float> * z_dut) {
@@ -164,13 +166,13 @@ void FileWriterTracking::set_dut_tracks(const vector<float> * z_dut) {
     for (uint8_t i(0); i < z_dut->size(); i++) {
       float x_pos(track->ExtrapolateX(z_dut->at(i))), y_pos(track->ExtrapolateY(z_dut->at(i)));
       br_dia_track_pos_x[i] = x_pos; br_dia_track_pos_y[i] = y_pos;
-      auto pos_loc = FR_->GetAlignment()->TtoLXY(x_pos, y_pos, FR_->Channel(), int(nRoc - n_dut_ + i));
+      auto pos_loc = FR_->GetAlignment()->TtoLXY(x_pos, y_pos, FR_->Channel(), int(n_rocs_ - n_duts_ + i));
       br_dia_track_pos_x_loc[i] = pos_loc.first; br_dia_track_pos_y_loc[i] = pos_loc.second;
       br_dist_to_dia[i] = sqrt(x_pos * x_pos + y_pos * y_pos);
     }
   } else {
-    for (uint8_t i(0); i < n_dut_; i++) {
-      br_dia_track_pos_x[i]=br_dia_track_pos_y[i]=br_dia_track_pos_x_loc[i]=br_dia_track_pos_y_loc[i]=DEF_RES;
+    for (uint8_t i(0); i < n_duts_; i++) {
+      br_dia_track_pos_x[i]=br_dia_track_pos_y[i]=br_dia_track_pos_x_loc[i]=br_dia_track_pos_y_loc[i]=DEF_VAL;
     }
   }
 }

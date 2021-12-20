@@ -28,7 +28,7 @@ PLTAnalysis::PLTAnalysis(string const & inFileName, TFile * Out_f,  TString cons
     cout << "Output directory: " << Histos->getOutDir() << endl;
     /** init file writer */
     if (UseFileWriter())
-      FW = new FileWriterTracking(in_file_name_, telescopeID, FR);
+      FW = new FileWriterTracking(in_file_name_, FR);
     PBar = new tel::ProgressBar(stopAt - 1);
 }
 
