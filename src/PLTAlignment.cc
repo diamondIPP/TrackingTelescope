@@ -186,16 +186,6 @@ float PLTAlignment::PYtoLY (int const py)
   return PLTU::PIXELHEIGHT * ((py + 0.0000000001) - PLTU::DIACENTERY);
 }
 
-int PLTAlignment::PXfromLX (float const lx)
-{
-  return (int) (lx / PLTU::PIXELWIDTH - PLTU::DIACENTERX);
-}
-
-int PLTAlignment::PYfromLY (float const ly)
-{
-  return (int) (ly /  PLTU::PIXELHEIGHT - PLTU::DIACENTERY);
-}
-
 std::pair<int, int> PLTAlignment::PXYfromLXY (std::pair<float, float> const& LXY)
 {
   return std::make_pair( PXfromLX(LXY.first), PYfromLY(LXY.second));

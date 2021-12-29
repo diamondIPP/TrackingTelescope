@@ -26,24 +26,26 @@ class PLTAlignment
     bool ErrorsFromFile;
     bool IsGood () { return fIsGood; }
 
-    float TtoLX (float const, float const, int const, int const);
-    float TtoLY (float const, float const, int const, int const);
-    std::pair<float, float> TtoLXY (float, float, int const, int const);
+    float TtoLX (float , float, int, int);
+    float TtoLY (float, float, int, int);
+    std::pair<float, float> TtoLXY (float, float, int, int);
+    static float LX2PX(float lx) { return lx / PLTU::PIXELWIDTH + PLTU::DIACENTERX; }
+    static float LY2PY(float ly) { return ly / PLTU::PIXELHEIGHT + PLTU::DIACENTERY; }
 
 
-    void LtoTXYZ (std::vector<float>&, float const, float const, int const, int const);
-    void LtoGXYZ (std::vector<float>&, float const, float const, int const, int const);
-    void TtoGXYZ (std::vector<float>&, float const, float const, float const, int const, int const);
-    void GtoTXYZ (std::vector<float>&, float const, float const, float const, int const, int const);
-    void VTtoVGXYZ (std::vector<float>&, float const, float const, float const, int const, int const);
-    float GetTZ (int const, int const);
+    void LtoTXYZ (std::vector<float>&, float, float, int, int);
+    void LtoGXYZ (std::vector<float>&, float, float, int, int);
+    void TtoGXYZ (std::vector<float>&, float, float, float, int, int);
+    void GtoTXYZ (std::vector<float>&, float, float, float, int, int);
+    void VTtoVGXYZ (std::vector<float>&, float, float, float, int, int);
+    float GetTZ (int, int);
 
-    float PXtoLX (int const);
-    float PYtoLY (int const);
+    float PXtoLX (int);
+    float PYtoLY (int);
 
 
-    int PXfromLX (float const);
-    int PYfromLY (float const);
+    static int PXfromLX(float lx) { return int(lx / PLTU::PIXELWIDTH + PLTU::DIACENTERX); }
+    static int PYfromLY(float ly) { return int(ly / PLTU::PIXELHEIGHT + PLTU::DIACENTERY); }
     std::pair<int, int> PXYfromLXY (std::pair<float, float> const&);
     std::pair<float, float> PXYDistFromLXYDist (std::pair<float, float> const&);
 
@@ -57,15 +59,15 @@ class PLTAlignment
 
     //GetPXPY (LX, LY, ch, ROC);
 
-    float LR  (int const, int const);
-    float LX  (int const, int const);
-    float LY  (int const, int const);
-    float LZ  (int const, int const);
-    float GRZ (int const, int const);
-    float GRY (int const, int const);
-    float GX  (int const, int const);
-    float GY  (int const, int const);
-    float GZ  (int const, int const);
+    float LR  (int, int);
+    float LX  (int, int);
+    float LY  (int, int);
+    float LZ  (int, int);
+    float GRZ (int, int);
+    float GRY (int, int);
+    float GX  (int, int);
+    float GY  (int, int);
+    float GZ  (int, int);
 
     struct CP {
       // All constants refer to planes as though we were looking FROM the IP
@@ -80,7 +82,7 @@ class PLTAlignment
       float GZ;  // Global Z translation
     };
 
-    CP* GetCP (int const, int const);
+    CP* GetCP (int, int);
     CP* GetCP (std::pair<int, int> const&);
 
     std::vector< std::pair<int, int> > GetListOfChannelROCs ();
@@ -91,15 +93,15 @@ class PLTAlignment
       float GRZ, GRY, GX, GY, GZ;
     };
 
-    void AddToLR (int const, int const, float);
-    void AddToLX (int const, int const, float);
-    void AddToLY (int const, int const, float);
-    void AddToLZ (int const, int const, float);
-    void AddToGX (int const, float);
-    void AddToGY (int const, float);
-    void AddToGZ (int const, float);
+    void AddToLR (int, int, float);
+    void AddToLX (int, int, float);
+    void AddToLY (int, int, float);
+    void AddToLZ (int, int, float);
+    void AddToGX (int, float);
+    void AddToGY (int, float);
+    void AddToGZ (int, float);
 
-    void ResetPlane(int const, int const);
+    void ResetPlane(int, int);
 
     float GetErrorX(int plane){ return fErrorsX[plane];};
     float GetErrorY(int plane){ return fErrorsY[plane];};
