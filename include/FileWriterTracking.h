@@ -41,6 +41,7 @@ private:
     /** tracks */
     uint8_t br_n_tracks = 0;
     float *br_dia_track_pos_x, *br_dia_track_pos_y, *br_dia_track_pos_x_loc, *br_dia_track_pos_y_loc, *br_dist_to_dia;
+    float *br_track_col, *br_track_row;
     float br_chi2 = DEF_VAL, br_chi2_x = DEF_VAL, br_chi2_y = DEF_VAL;
     float br_angle_x = DEF_VAL, br_angle_y = DEF_VAL;
     std::vector<std::vector<float> > * br_residuals_x, * br_residuals_y;

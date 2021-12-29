@@ -20,6 +20,8 @@ FileWriterTracking::FileWriterTracking(string InFileName, PSIFileReader * FR):
   br_dia_track_pos_y = new float[n_duts_];
   br_dia_track_pos_x_loc = new float[n_duts_];
   br_dia_track_pos_y_loc = new float[n_duts_];
+  br_track_col = new float[n_duts_];
+  br_track_row = new float[n_duts_];
   br_dist_to_dia = new float[n_duts_];
   br_n_hits = new uint16_t[n_rocs_];
   br_n_clusters = new uint8_t[n_rocs_];
@@ -56,7 +58,8 @@ string FileWriterTracking::getFileName(string & InFileName){
 
   stringstream ss(InFileName);
   while (getline(ss, NewFileName, '/') ){}
-  NewFileName.insert(unsigned(NewFileName.length() - 5), "_withTracks");
+  const uint8_t ending_size(5);  // .root
+  NewFileName.insert(unsigned(NewFileName.length() - ending_size), "_withTracks");
   return NewFileName;
 }
 void FileWriterTracking::addBranches(){
@@ -66,7 +69,9 @@ void FileWriterTracking::addBranches(){
   newtree->Branch("dia_track_x", br_dia_track_pos_x, Form("dia_track_x[%d]/F", n_duts_));
   newtree->Branch("dia_track_y", br_dia_track_pos_y, Form("dia_track_y[%d]/F", n_duts_));
   newtree->Branch("dia_track_x_local", br_dia_track_pos_x_loc, Form("dia_track_x_local[%d]/F", n_duts_));
-  newtree->Branch("dia_track_y_local", br_dia_track_pos_y_loc, Form("dia_track_Y_local[%d]/F", n_duts_));
+  newtree->Branch("dia_track_y_local", br_dia_track_pos_y_loc, Form("dia_track_y_local[%d]/F", n_duts_));
+  newtree->Branch("dia_track_col", br_track_col, Form("dia_track_col[%d]/F", n_duts_));
+  newtree->Branch("dia_track_row", br_track_row, Form("dia_track_row[%d]/F", n_duts_));
   newtree->Branch("dist_to_dia", br_dist_to_dia, Form("dist_to_dia[%d]/F", n_duts_));
   newtree->Branch("n_hits", br_n_hits, Form("n_hits[%d]/s", n_rocs_));
   newtree->Branch("n_clusters", br_n_clusters, Form("n_clusters[%d]/b", n_rocs_));
@@ -168,11 +173,12 @@ void FileWriterTracking::set_dut_tracks(const vector<float> * z_dut) {
       br_dia_track_pos_x[i] = x_pos; br_dia_track_pos_y[i] = y_pos;
       auto pos_loc = FR_->GetAlignment()->TtoLXY(x_pos, y_pos, FR_->Channel(), int(n_rocs_ - n_duts_ + i));
       br_dia_track_pos_x_loc[i] = pos_loc.first; br_dia_track_pos_y_loc[i] = pos_loc.second;
+      br_track_col[i] = PLTAlignment::LX2PX(pos_loc.first); br_track_row[i] = PLTAlignment::LY2PY(pos_loc.second);
       br_dist_to_dia[i] = sqrt(x_pos * x_pos + y_pos * y_pos);
     }
   } else {
     for (uint8_t i(0); i < n_duts_; i++) {
-      br_dia_track_pos_x[i]=br_dia_track_pos_y[i]=br_dia_track_pos_x_loc[i]=br_dia_track_pos_y_loc[i]=DEF_VAL;
+      br_dia_track_pos_x[i] = br_dia_track_pos_y[i] = br_dia_track_pos_x_loc[i] = br_dia_track_pos_y_loc[i] = br_track_col[i] = br_track_row[i] = DEF_VAL;
     }
   }
 }
