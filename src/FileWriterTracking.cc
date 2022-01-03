@@ -171,7 +171,7 @@ void FileWriterTracking::set_dut_tracks(const vector<float> * z_dut) {
     for (uint8_t i(0); i < z_dut->size(); i++) {
       float x_pos(track->ExtrapolateX(z_dut->at(i))), y_pos(track->ExtrapolateY(z_dut->at(i)));
       br_dia_track_pos_x[i] = x_pos; br_dia_track_pos_y[i] = y_pos;
-      auto pos_loc = FR_->GetAlignment()->TtoLXY(x_pos, y_pos, FR_->Channel(), int(n_rocs_ - n_duts_ + i));
+      auto pos_loc = FR_->GetAlignment()->TtoLXY(x_pos, y_pos, 1, int(n_rocs_ - n_duts_ + i));
       br_dia_track_pos_x_loc[i] = pos_loc.first; br_dia_track_pos_y_loc[i] = pos_loc.second;
       br_track_col[i] = PLTAlignment::LX2PX(pos_loc.first); br_track_row[i] = PLTAlignment::LY2PY(pos_loc.second);
       br_dist_to_dia[i] = sqrt(x_pos * x_pos + y_pos * y_pos);
