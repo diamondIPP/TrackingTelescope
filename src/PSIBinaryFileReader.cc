@@ -444,7 +444,7 @@ void PSIBinaryFileReader::DecodeHits ()
 	if (UseGainInterpolator())
 	  fGainInterpolator.SetCharge(*Hit);
 	else
-	  fGainCal.SetCharge(*Hit);
+    fGainCal.SetCharge(*Hit);
 
         fAlignment.AlignHit(*Hit);
         fHits.push_back(Hit);

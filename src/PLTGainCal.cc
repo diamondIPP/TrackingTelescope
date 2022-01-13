@@ -8,90 +8,23 @@
 using namespace std;
 
 
-PLTGainCal::PLTGainCal (): NROCS(6)
-{
+PLTGainCal::PLTGainCal () {
   ResetGC();
-  fIsGood = false;
-  fIsExternalFunction = false;
 }
 
 PLTGainCal::PLTGainCal (int nrocs, bool isExternalFunction ): NROCS(nrocs) {
   ResetGC();
-  fIsGood = false;
   fIsExternalFunction = isExternalFunction;
   ReadVcalCal();
 }
 
-PLTGainCal::PLTGainCal (std::string const GainCalFileName, int const NParams): NROCS(6)
-{
-    ResetGC();
-    fIsGood = false;
-    fIsExternalFunction = false;
-    fNParams = NParams;
-    if (NParams == 5)
-        ReadGainCalFile5(GainCalFileName);
-    else if (NParams == 3)
-        ReadGainCalFile3(GainCalFileName);
-    else {
-        std::cerr << "ERROR: I have no idea how many params you have" << std::endl;
-        throw;
-    }
+PLTGainCal::PLTGainCal (std::string const & GainCalFileName, int const NParams): fNParams(NParams) {
+  ResetGC();
+  ReadGainCalFile(GainCalFileName);
 }
 
 
-PLTGainCal::~PLTGainCal ()
-{
-}
-
-
-int PLTGainCal::RowIndex (int const i)
-{
-  return i - PLTU::FIRSTROW;
-}
-
-
-int PLTGainCal::ColIndex (int const i)
-{
-  return i - PLTU::FIRSTCOL;
-}
-
-
-int PLTGainCal::ChIndex (int const i)
-{
-  return i - 1;
-}
-
-
-int PLTGainCal::RocIndex (int const i)
-{
-  return i;
-}
-
-
-float PLTGainCal::GetCoef(int const i, int const ch, int const roc, int const col, int const row)
-{
-  // Get a coef, note roc number is 0, 1, 2
-  int irow = RowIndex(row);
-  int icol = ColIndex(col);
-  int ich  = ChIndex(ch);
-  int iroc = RocIndex(roc);
-  if (irow < 0 || icol < 0 || ich < 0 || iroc < 0) {
-    return -9999;
-  }
-
-  return GC[ich][iroc][icol][irow][i];
-}
-
-
-void PLTGainCal::SetCharge (PLTHit& Hit, uint8_t telescopeID)
-{
-  Hit.SetCharge( GetCharge(Hit.Channel(), telescopeID, Hit.ROC(), Hit.Column(), Hit.Row(), Hit.ADC()) );
-}
-
-
-
-float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int const col, int const row, int adc)
-{
+float PLTGainCal::GetCharge(int const ch, int const roc, int const col, int const row, int adc) {
   /** Get charge, note roc number is 0, 1, 2... */
   if (ChIndex(ch)   >= MAXCHNS) { printf("ERROR: over MAXCHNS: %i\n", ch); };
   if (RowIndex(row) >= PLTU::NROW) { printf("ERROR: over MAXROWS: %i\n", row); };
@@ -100,11 +33,11 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
   int16_t irow = RowIndex(row), icol = ColIndex(col), ich  = ChIndex(ch), iroc = RocIndex(roc);
   if (irow < 0 || icol < 0 || ich < 0 || iroc < 0) { return DEF_CHARGE; }
 
-  double vcal(0);
+  double vcal;
 
   if (fIsExternalFunction) {  /** external calibration */
     for (int ipar = 0; ipar < fNParams; ++ipar) { fFitFunction.SetParameter(ipar, GC[ich][iroc][icol][irow][ipar]);}
-    if (adc > fFitFunction.GetMaximum() or adc < fFitFunction.GetMinimum() or adc == 0 and telescopeID == 22) { return DEF_CHARGE; }
+    if (adc + 1 > fFitFunction.GetMaximum() or adc - 1 < fFitFunction.GetMinimum() or adc == 0 and tel::Config::telescope_id_ == 22) { return DEF_CHARGE; }
     vcal = min(max(fFitFunction.GetX(adc), 0.), double(MAX_VCAL));  // contain vcal in range [0, MAX_VCAL]
   }
   else {  /** old calibration */
@@ -114,64 +47,43 @@ float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int co
     else { tel::critical(Form("ERROR: PLTGainCal::GetCharge() I do not know of that number of fit parameters: %d", fNParams)); exit(1);}
   }
 
-  if (PLTGainCal::DEBUGLEVEL) { printf("%2i %1i %2i %2i %4i %10.1f\n", ch, roc, col, row, adc, vcal); }
+  if (PLTGainCal::DEBUGLEVEL) { printf("%2i %1i %2i %2i %4i %6.1f %8.1f\n", ch, roc, col, row, adc, vcal, VC.at(iroc).first * vcal + VC.at(iroc).second); }
 
   return VC.at(iroc).first * vcal + VC.at(iroc).second;
 }
 
-void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc) {
+void PLTGainCal::ReadGainCalFile (const string & GainCalFileName, int roc) {
 
-  if (GainCalFileName == "") {
+  if (GainCalFileName.empty()) {
     fIsGood = false;
     return;
   }
 
-  std::ifstream InFile(GainCalFileName.c_str());
-  if (!InFile.is_open()) {
+  ifstream f(GainCalFileName.c_str());
+  if (!f.is_open()) {
     tel::critical(Form("Cannot open gaincal file: %s", GainCalFileName.c_str()));
     throw;
   }
-  TString CheckFirstLine;
-  CheckFirstLine.ReadLine(InFile);
 
-  if (CheckFirstLine.BeginsWith("Parameters of the vcal vs. pulse height fits")) {// DA: TODO else condition?
-    fIsExternalFunction = true;
-  }
-
-  // Loop over header lines in the input data file
   std::string line;
-  for (std::string line; std::getline(InFile, line); ) {
-    if (line == "") {
-      break;
-    }
-  }
+  getline(f, line);  // read first line
+  fIsExternalFunction = line.find("Parameters of the vcal vs. pulse height fits") != string::npos;
 
+  for (; std::getline(f, line); ) { if (line.empty() ) { break; } }  // Loop over header lines in the input data file
 
-
-
-  //std::string line;
-  std::getline(InFile, line);
-  std::istringstream linestream;
-  linestream.str(line);
-  int i = 0;
-  if (fIsExternalFunction) {
-  } else {
-   i -= 4;
-  }
-  for (float junk; linestream >> junk; ++i) {
-  }
-  InFile.close();
+  getline(f, line);
+  istringstream linestream(line);
+  int i = fIsExternalFunction ? 0 : -4;
+  for (float junk; linestream >> junk; ++i) { }
+  f.close();
   fNParams = i;
 
-  if (fIsExternalFunction) {
-    ReadGainCalFileExt(GainCalFileName, roc);
-  } else {
-    if (fNParams == 5) {
-      ReadGainCalFile5(GainCalFileName);
-    } else if (fNParams == 3) {
-      ReadGainCalFile3(GainCalFileName);
-    } else {
-      std::cerr << "ERROR: I have no idea how many params you have" << std::endl;
+  if (fIsExternalFunction) { ReadGainCalFileExt(GainCalFileName, roc); }
+  else {
+    if (fNParams == 5) { ReadGainCalFile5(GainCalFileName); }
+    else if (fNParams == 3) { ReadGainCalFile3(GainCalFileName); }
+    else {
+      tel::critical("ERROR: I have no idea how many params you have");
       throw;
     }
   }
@@ -182,7 +94,7 @@ int PLTGainCal::GetHardwareID (int const Channel)
   return fHardwareMap[Channel];
 }
 
-void PLTGainCal::ReadGainCalFile5 (std::string const GainCalFileName)
+void PLTGainCal::ReadGainCalFile5 (const string & GainCalFileName)
 {
   int ch, row, col, roc;
   int irow;
@@ -264,7 +176,7 @@ void PLTGainCal::ReadGainCalFile5 (std::string const GainCalFileName)
 }
 
 
-void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int const roc)
+void PLTGainCal::ReadGainCalFileExt (const string & GainCalFileName, int const roc)
 {
   int const ch = 1;
   int row, col;
@@ -288,7 +200,7 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
   FunctionLine.ReplaceAll("par[", "[");
 
   // Set the root function
-  TF1 MyFunction("GainCalFitFunction", FunctionLine, -1700, 1700);
+  TF1 MyFunction("GainCalFitFunction", FunctionLine, -MAX_VCAL, MAX_VCAL);
   fFitFunction = MyFunction;
   fFitFunction.SetNpx(180);
 
@@ -444,7 +356,7 @@ void PLTGainCal::PrintGainCal (FILE* f)
   return;
 }
 
-void PLTGainCal::ReadGainCalFile3 (std::string const GainCalFileName)
+void PLTGainCal::ReadGainCalFile3 (const string & GainCalFileName)
 {
   int mFec, mFecChannel, hubAddress;
   int ch(1), row, col, roc;

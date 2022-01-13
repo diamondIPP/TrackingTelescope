@@ -18,71 +18,64 @@
 #include "GetNames.h"
 
 
-class PLTGainCal
-{
-  public:
-    PLTGainCal ();
-    PLTGainCal (int, bool); // number of ROCs, isExternalFunction
-    PLTGainCal (std::string const, int const NParams=5);
-    ~PLTGainCal ();
+class PLTGainCal {
+
+public:
+  PLTGainCal ();
+  PLTGainCal (int, bool); // number of ROCs, isExternalFunction
+  PLTGainCal (const std::string&, int);
+  ~PLTGainCal () = default;
+
+  static int const DEBUGLEVEL = 0;
+
+  void SetCharge(PLTHit &Hit) { Hit.SetCharge(GetCharge(Hit.Channel(), Hit.ROC(), Hit.Column(), Hit.Row(), Hit.ADC())); }
+  float GetCharge(int ch, int roc, int col, int row, int adc);
+
+  void ReadGainCalFile (const std::string & GainCalFileName, int=0);
+  void ReadGainCalFile3 (const std::string & GainCalFileName);
+  void ReadGainCalFile5 (const std::string & GainCalFileName);
+  void ReadGainCalFileExt (const std::string & GainCalFileName, int roc=0);
+  void ReadTesterGainCalFile (std::string const GainCalFileName);
+  void ReadVcalCal();
+
+  void CheckGainCalFile (std::string const GainCalFileName, int const Channel);
+  void PrintGainCal5 ();
+  void PrintGainCal (FILE* f = 0x0);
+
+  static int RowIndex (const int row) { return row - PLTU::FIRSTROW; }
+  static int ColIndex (const int col) { return col - PLTU::FIRSTCOL; }
+  static int ChIndex (const int ch) { return ch - 1; }
+  static int RocIndex (const int roc) { return roc; }
+
+  bool IsGood () { return fIsGood; }
+  int GetHardwareID (int const);
+
+  void ResetGC ();
 
 
-    static int const DEBUGLEVEL = 0;
+private:
+  bool fIsGood = false;
+  bool fIsExternalFunction = false;
 
-    void SetCharge ( PLTHit&, uint8_t telescopeID=10);
-    float GetCharge(int const ch, int const telescopeID, int const roc, int const col, int const row, int adc);
+  int  fNParams {}; // how many parameters for this gaincal
+  TF1 fFitFunction;
 
-    void ReadGainCalFile (std::string const GainCalFileName, int roc);
-    void ReadGainCalFile3 (std::string const GainCalFileName);
-    void ReadGainCalFile5 (std::string const GainCalFileName);
-    void ReadGainCalFileExt (std::string const GainCalFileName, int const roc=0);
-    void ReadTesterGainCalFile (std::string const GainCalFileName);
-    void ReadVcalCal();
+  static int const MAXCHNS =   1;
+  static int const MAXROWS =  80;
+  static int const MAXCOLS =  52;
+  static int const MAXROCS =   6;
 
-    void CheckGainCalFile (std::string const GainCalFileName, int const Channel);
+  static int const NCHNS =   1;
 
-    void PrintGainCal5 ();
-    void PrintGainCal (FILE* f = 0x0);
+  int const NROCS = 6;
 
-    static int RowIndex (int const);
-    static int ColIndex (int const);
-    static int ChIndex (int const);
-    static int RocIndex (int const);
-
-    float GetCoef(int const, int const, int const, int const, int const);
-
-    bool IsGood () { return fIsGood; }
-
-    int GetHardwareID (int const);
-
-    void ResetGC ();
+  // Switched from float GC[NCHNS][NROCS][NCOLS][NROWS][6]
+  std::vector<std::vector<std::vector<std::vector<std::vector<float > > > > > GC;
+  std::vector<std::pair<float, float>> VC;  // VCal Calibration
 
 
-
-  private:
-    bool fIsGood;
-    bool fIsExternalFunction;
-
-    int  fNParams {}; // how many parameters for this gaincal
-    TF1 fFitFunction;
-
-    static int const MAXCHNS =   1;
-    static int const MAXROWS =  80;
-    static int const MAXCOLS =  52;
-    static int const MAXROCS =   6;
-
-    static int const NCHNS =   1;
-
-    int const NROCS;
-
-    // Switched from
-    // float GC[NCHNS][NROCS][NCOLS][NROWS][6]
-    std::vector<std::vector<std::vector<std::vector<std::vector<float > > > > > GC;
-    std::vector<std::pair<float, float>> VC;  // VCal Calibration
-
-
-    // Map for hardware locations by fed channel
-    std::map<int, int> fHardwareMap;
+  // Map for hardware locations by fed channel
+  std::map<int, int> fHardwareMap;
 
 };
 
