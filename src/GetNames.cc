@@ -123,7 +123,7 @@ uint16_t GetNPlanes(){
 
 uint8_t GetNDUTs(){
   /** @returns: the number DUTs */
-  return UseDigitalCalibration() ? size_t(GetNPlanes() - 4) : tel::Config::dia_z_pos_.size();
+  return UseDigitalCalibration() ? size_t(GetNPlanes() - tel::Config::n_tel_planes_) : tel::Config::dia_z_pos_.size();
 }
 
 bool UseExternalCalibrationFunction() {

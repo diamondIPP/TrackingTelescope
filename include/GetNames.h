@@ -12,6 +12,7 @@ public:
   static int16_t telescope_id_;
   static uint16_t mask_;
   static uint16_t n_rocs_;
+  static const uint16_t n_tel_planes_ = 4;
   static uint16_t calibration_;
   static uint16_t year_;
   static std::string type_;
