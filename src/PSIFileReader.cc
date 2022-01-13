@@ -1,4 +1,5 @@
 #include "PSIFileReader.h"
+#include "Utils.h"
 
 #include <iostream>
 #include <string>
@@ -21,6 +22,7 @@ PSIFileReader::PSIFileReader(bool track_only_telescope):
   fGainCal(fNPlanes, UseExternalCalibrationFunction()) {
 
     /** Set and read in gain calibration files */
+    tel::info("Reading calibration files from " + GetCalibrationPath());
     for (int i_roc=0; i_roc != fNPlanes; i_roc++) {
       string file_name = GetCalibrationPath() + Form("ROC%i.txt", i_roc);
       fCalibrationFile.emplace_back(file_name);
