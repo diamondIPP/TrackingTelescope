@@ -14,6 +14,7 @@
 /** terminal output colors */
 #define ERROR "\033[1;91m"
 #define WARN "\033[1;93m"
+#define INFO "\033[92m"
 #define ENDC "\033[0m"
 
 struct winsize;
@@ -25,9 +26,10 @@ namespace tel{
   double distance(std::pair<float, float>, std::pair<float, float>);
   void critical(const std::string & msg);
   void warning(const std::string & msg);
+  void info(const std::string & msg);
   void print_banner(const std::string &message, char seperator='-');
   static size_t count_ = 0;
-  void print_debug(bool reset=false, uint8_t n=4);
+  void print_debug(std::string="", bool=false, uint8_t=4);
 
 
   class ProgressBar {

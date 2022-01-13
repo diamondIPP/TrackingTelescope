@@ -46,9 +46,9 @@ namespace tel {
     cout << "\n" << banner << "\n" << message << "\n" << banner << "\n" << endl;
   }
 
-  void print_debug(bool reset, uint8_t n) {
+  void print_debug(string what, bool reset, uint8_t n) {
     if (reset) { count_ = 0;}
-    cout << string(n, '=') << count_++ << string(n, '=') << endl;
+    cout << string(n, '=') << " " << (what.empty() ? std::to_string(count_++) : what) << " " << string(n, '=') << endl;
   }
 
   ProgressBar::ProgressBar(uint32_t n_events, bool use_ETA, uint16_t update): nEvents(n_events), currentEvent(0), useETA(use_ETA), w(), updateFrequency(update), lastTime(clock()),
@@ -61,6 +61,8 @@ namespace tel {
    void critical(const std::string & msg) { cerr << ERROR << "CRITICAL: " << ENDC << msg << std::endl; }
 
    void warning(const string & msg) { cerr <<  WARN << "WARNING: " << ENDC << msg << endl; }
+
+   void info(const string & msg) { cout <<  INFO << "INFO: " << ENDC << msg << endl; }
 
   void ProgressBar::update(uint32_t event) {
 
