@@ -29,13 +29,15 @@ class PLTGainCal
 
     static int const DEBUGLEVEL = 0;
 
-    void  SetCharge ( PLTHit&, uint8_t telescopeID=10);
+    void SetCharge ( PLTHit&, uint8_t telescopeID=10);
     float GetCharge(int const ch, int const telescopeID, int const roc, int const col, int const row, int adc);
-    void  ReadGainCalFile (std::string const GainCalFileName, int roc);
-    void  ReadGainCalFile3 (std::string const GainCalFileName);
-    void  ReadGainCalFile5 (std::string const GainCalFileName);
-    void  ReadGainCalFileExt (std::string const GainCalFileName, int const roc=0);
-    void  ReadTesterGainCalFile (std::string const GainCalFileName);
+
+    void ReadGainCalFile (std::string const GainCalFileName, int roc);
+    void ReadGainCalFile3 (std::string const GainCalFileName);
+    void ReadGainCalFile5 (std::string const GainCalFileName);
+    void ReadGainCalFileExt (std::string const GainCalFileName, int const roc=0);
+    void ReadTesterGainCalFile (std::string const GainCalFileName);
+    void ReadVcalCal();
 
     void CheckGainCalFile (std::string const GainCalFileName, int const Channel);
 
@@ -61,7 +63,7 @@ class PLTGainCal
     bool fIsGood;
     bool fIsExternalFunction;
 
-    int  fNParams; // how many parameters for this gaincal
+    int  fNParams {}; // how many parameters for this gaincal
     TF1 fFitFunction;
 
     static int const MAXCHNS =   1;
@@ -70,19 +72,13 @@ class PLTGainCal
     static int const MAXROCS =   6;
 
     static int const NCHNS =   1;
-    static int const NROWS =  PLTU::NROW;
-    static int const NCOLS =  PLTU::NCOL;
 
     int const NROCS;
-
-    static int const IROWMIN = PLTU::FIRSTCOL;
-    static int const IROWMAX = PLTU::LASTCOL;
-    static int const ICOLMIN = PLTU::FIRSTROW;
-    static int const ICOLMAX = PLTU::LASTROW;
 
     // Switched from
     // float GC[NCHNS][NROCS][NCOLS][NROWS][6]
     std::vector<std::vector<std::vector<std::vector<std::vector<float > > > > > GC;
+    std::vector<std::pair<float, float>> VC;  // VCal Calibration
 
 
     // Map for hardware locations by fed channel

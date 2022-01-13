@@ -1,5 +1,9 @@
 #include "PLTGainCal.h"
 #include "Utils.h"
+#include <algorithm>
+
+#define DEF_CHARGE -9999
+#define MAX_VCAL 7 * 255
 
 using namespace std;
 
@@ -11,12 +15,11 @@ PLTGainCal::PLTGainCal (): NROCS(6)
   fIsExternalFunction = false;
 }
 
-PLTGainCal::PLTGainCal (int nrocs,
-			bool isExternalFunction ): NROCS(nrocs)
-{
+PLTGainCal::PLTGainCal (int nrocs, bool isExternalFunction ): NROCS(nrocs) {
   ResetGC();
   fIsGood = false;
   fIsExternalFunction = isExternalFunction;
+  ReadVcalCal();
 }
 
 PLTGainCal::PLTGainCal (std::string const GainCalFileName, int const NParams): NROCS(6)
@@ -83,112 +86,37 @@ float PLTGainCal::GetCoef(int const i, int const ch, int const roc, int const co
 void PLTGainCal::SetCharge (PLTHit& Hit, uint8_t telescopeID)
 {
   Hit.SetCharge( GetCharge(Hit.Channel(), telescopeID, Hit.ROC(), Hit.Column(), Hit.Row(), Hit.ADC()) );
-  return;
 }
 
 
 
-float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int const col, int const row, int INadc)
+float PLTGainCal::GetCharge(int const ch, int telescopeID, int const roc, int const col, int const row, int adc)
 {
-    /** Get charge, note roc number is 0, 1, 2... */
-    int const adc = INadc;
-    if (ChIndex(ch)   >= MAXCHNS) { printf("ERROR: over MAXCHNS: %i\n", ch); };
-    if (RowIndex(row) >= MAXROWS) { printf("ERROR: over MAXROWS: %i\n", row); };
-    if (ColIndex(col) >= MAXCOLS) { printf("ERROR: over MAXCOLS: %i\n", col); };
+  /** Get charge, note roc number is 0, 1, 2... */
+  if (ChIndex(ch)   >= MAXCHNS) { printf("ERROR: over MAXCHNS: %i\n", ch); };
+  if (RowIndex(row) >= PLTU::NROW) { printf("ERROR: over MAXROWS: %i\n", row); };
+  if (ColIndex(col) >= PLTU::NCOL) { printf("ERROR: over MAXCOLS: %i\n", col); };
 
-    int16_t irow = RowIndex(row);
-    int16_t icol = ColIndex(col);
-    int16_t ich  = ChIndex(ch);
-    int16_t iroc = RocIndex(roc);
-    if (irow < 0 || icol < 0 || ich < 0 || iroc < 0) {
-        return -9999;
-    }
+  int16_t irow = RowIndex(row), icol = ColIndex(col), ich  = ChIndex(ch), iroc = RocIndex(roc);
+  if (irow < 0 || icol < 0 || ich < 0 || iroc < 0) { return DEF_CHARGE; }
 
-    double charge = -9999;
-    Double_t vcal = 0;
+  double vcal(0);
 
-    /** external calibration */
-    if (fIsExternalFunction) {
-        for (int ipar = 0; ipar < fNParams; ++ipar) {
-            fFitFunction.SetParameter(ipar, GC[ich][iroc][icol][irow][ipar]);
-        }
+  if (fIsExternalFunction) {  /** external calibration */
+    for (int ipar = 0; ipar < fNParams; ++ipar) { fFitFunction.SetParameter(ipar, GC[ich][iroc][icol][irow][ipar]);}
+    if (adc > fFitFunction.GetMaximum() or adc < fFitFunction.GetMinimum() or adc == 0 and telescopeID == 22) { return DEF_CHARGE; }
+    vcal = min(max(fFitFunction.GetX(adc), 0.), double(MAX_VCAL));  // contain vcal in range [0, MAX_VCAL]
+  }
+  else {  /** old calibration */
+    if (fNParams == 3) { vcal = float(adc * adc) * GC[ich][iroc][icol][irow][2] + float(adc) * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][0]; }
+    else if (fNParams == 5) { vcal = (TMath::Power( (float) adc, 2) * GC[ich][iroc][icol][irow][0] + (float) adc * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][2]
+                                   + (GC[ich][iroc][icol][irow][4] != 0 ? TMath::Exp( (adc - GC[ich][iroc][icol][irow][3]) / GC[ich][iroc][icol][irow][4] ) : 0) ); }
+    else { tel::critical(Form("ERROR: PLTGainCal::GetCharge() I do not know of that number of fit parameters: %d", fNParams)); exit(1);}
+  }
 
-        /** change calibration factor for digital planes*/
-        if (adc > fFitFunction.GetMaximum() or adc < fFitFunction.GetMinimum()) {
-          return float(-999); }
-        if (UseDigitalCalibration()){
-            if (not adc and iroc >= 4 and telescopeID == 22)
-                charge = -9999;
-            else if (iroc == 6 and (telescopeID != 35 and telescopeID != 69 and telescopeID != 70)){
-                vcal = fFitFunction.GetX(adc);
-                if(vcal < 0)
-                    charge = 333.0;
-                else if(vcal > 1785)
-                    charge = 43.13 * 1785 + 333.0;
-                else
-                    charge = 43.13 * vcal + 333.0;
-            }
-            else if (iroc == 5 && telescopeID == 22) {
-                vcal = fFitFunction.GetX(adc);
-                if(vcal < 0)
-                    charge = 47.5 * 0 - 427.4;
-                else if(vcal > 1785)
-                    charge = 47.5 * 1785 - 427.4;
-                else
-                    charge = 47.5 * vcal - 427.4;
-            }
-            else if (iroc >= 4) {
-                vcal = fFitFunction.GetX(adc);
-                if(vcal < 0)
-                    charge = 47 * 0;
-                else if(vcal > 1785)
-                    charge = 47 * 1785;
-                else
-                    charge = 47 * vcal;
-            }
-            else {
-                vcal = fFitFunction.GetX(adc);
-                if(vcal < 0)
-                    charge = 65. * 0;
-                else if(vcal > 1785)
-                    charge = 65. * 1785;
-                else
-                    charge = 65. * vcal;
-            }
-        }
-        else {
-            vcal = fFitFunction.GetX(adc);
-            if(vcal < 0)
-                charge = 65. * 0;
-            else if(vcal > 1785)
-                charge = 65. * 1785;
-            else
-                charge = 65. * vcal;
-        }
-    }
-    /** old calibration */
-    else {
-        if (fNParams == 3) {
-            charge = 65. * (float(adc * adc) * GC[ich][iroc][icol][irow][2] + float(adc) * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][0]);
+  if (PLTGainCal::DEBUGLEVEL) { printf("%2i %1i %2i %2i %4i %10.1f\n", ch, roc, col, row, adc, vcal); }
 
-        }
-        else if (fNParams == 5) {
-            charge = 65. * (TMath::Power( (float) adc, 2) * GC[ich][iroc][icol][irow][0] + (float) adc * GC[ich][iroc][icol][irow][1] + GC[ich][iroc][icol][irow][2]
-              + (GC[ich][iroc][icol][irow][4] != 0 ? TMath::Exp( (adc - GC[ich][iroc][icol][irow][3]) / GC[ich][iroc][icol][irow][4] ) : 0)
-              );
-        }
-        else {
-            std::cerr << "ERROR: PLTGainCal::GetCharge() I do not know of that number of fNParams: " << fNParams << std::endl;
-            exit(1);
-        }
-    }
-
-    /** Printing */
-    if (PLTGainCal::DEBUGLEVEL) {
-            printf("%2i %1i %2i %2i %4i %10.1f\n", ch, roc, col, row, adc, charge);
-    }
-
-    return float(charge);
+  return VC.at(iroc).first * vcal + VC.at(iroc).second;
 }
 
 void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc) {
@@ -199,7 +127,6 @@ void PLTGainCal::ReadGainCalFile (std::string const GainCalFileName, int roc) {
   }
 
   std::ifstream InFile(GainCalFileName.c_str());
-//  std::cout << std::getline(InFile, line) << std::endl;
   if (!InFile.is_open()) {
     tel::critical(Form("Cannot open gaincal file: %s", GainCalFileName.c_str()));
     throw;
@@ -363,7 +290,7 @@ void PLTGainCal::ReadGainCalFileExt (std::string const GainCalFileName, int cons
   // Set the root function
   TF1 MyFunction("GainCalFitFunction", FunctionLine, -1700, 1700);
   fFitFunction = MyFunction;
-    fFitFunction.SetNpx(180);
+  fFitFunction.SetNpx(180);
 
   // Get blank line out of the way
   FunctionLine.ReadLine(f);
@@ -701,4 +628,21 @@ void PLTGainCal::ResetGC ()
   GC.push_back(tmp_4d);
   }
   return;
+}
+
+void PLTGainCal::ReadVcalCal() {
+  ifstream f(GetDir() + "data/vcal_calibrations.txt");
+  int t_id, roc;
+  float gain, offset;
+  map<pair<int, int>, pair<float, float>> tmp;
+  for (string line; getline(f, line);) {
+    istringstream s(line);
+    s >> t_id >> roc >> gain >> offset;
+    tmp[make_pair(t_id, roc)] = make_pair(gain, offset);
+  }
+  for (uint8_t i_roc(0); i_roc < GetNPlanes(); i_roc++) {
+    pair<int, int> id = make_pair(tel::Config::telescope_id_, i_roc);
+    pair<int, int> default_id = make_pair(0, i_roc >= tel::Config::n_tel_planes_ and UseDigitalCalibration() ? 0 : 1);
+    VC.emplace_back(tmp.at(tmp.find(id) != tmp.end() ? id : default_id));
+  }
 }

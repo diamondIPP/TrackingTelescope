@@ -1,0 +1,8 @@
+# vcal to election calibration constants for the CMS pixel chips
+# TID ROC gain   offsef
+   0  0   47     0      # default digital
+   0  1   65     0      # default analogue
+  35  6   43.13  333.0
+  69  6   43.13  333.0
+  70  6   43.13  333.0
+  22  5   47.5  -427.4
