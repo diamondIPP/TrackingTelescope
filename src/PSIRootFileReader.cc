@@ -107,7 +107,8 @@ int PSIRootFileReader::GetNextEvent ()
             auto * Hit = new PLTHit(1, roc, col, row, adc);
 
             /** Gain calibration */
-            fGainCal.SetCharge(*Hit, tel::Config::telescope_id_);
+            fGainCal.SetCharge(*Hit);
+            f_charge[i_hit] = Hit->Charge();  // overwrite empty charge values...
 
             /** Alignment */
             fAlignment.AlignHit(*Hit);
