@@ -46,6 +46,11 @@ namespace tel {
     cout << "\n" << banner << "\n" << message << "\n" << banner << "\n" << endl;
   }
 
+  void print_debug(bool reset, uint8_t n) {
+    if (reset) { count_ = 0;}
+    cout << string(n, '=') << count_++ << string(n, '=') << endl;
+  }
+
   ProgressBar::ProgressBar(uint32_t n_events, bool use_ETA, uint16_t update): nEvents(n_events), currentEvent(0), useETA(use_ETA), w(), updateFrequency(update), lastTime(clock()),
                                                                               nCycles(0), timePerCycle(0) {
     ioctl(0, TIOCGWINSZ, &w);

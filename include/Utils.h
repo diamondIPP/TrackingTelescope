@@ -26,6 +26,8 @@ namespace tel{
   void critical(const std::string & msg);
   void warning(const std::string & msg);
   void print_banner(const std::string &message, char seperator='-');
+  static size_t count_ = 0;
+  void print_debug(bool reset=false, uint8_t n=4);
 
 
   class ProgressBar {
