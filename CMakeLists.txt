@@ -2,7 +2,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.15)
 #============================================================
 project(TrackingTelescope)
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -std=c++14")
+SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
 #=========================================================
 # Locate sources and headers for this project
 FILE(GLOB sources  ${PROJECT_SOURCE_DIR}/src/*.cc)
