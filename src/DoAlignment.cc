@@ -27,7 +27,6 @@ Alignment::Alignment(const string & in_file_name, const TString & run_number, ui
   max_sigma_(4), min_sigma_(3), n_sigma_(max_sigma_) {
 
     ConfigROOT();
-    InitGraphs();
 
     fdX.resize(n_planes_, make_pair(0, 1));
     fdY.resize(n_planes_, make_pair(0, 1));
@@ -77,7 +76,6 @@ Alignment::Alignment(const string & in_file_name, const TString & run_number, ui
       delete FR;
     }
 
-    SaveGraphs();
 } // end constructor
 
 Alignment::~Alignment() {
@@ -166,6 +164,8 @@ void Alignment::EventLoop(const std::vector<uint16_t> & planes) {
 
 int Alignment::Align() {
 
+  InitGraphs();
+
   for (int i_align(0); i_align < maximum_steps_; i_align++) {
     cout << "BEGIN ITERATION " << i_align + 1 << " OUT OF " << maximum_steps_ << endl;
     now_ = clock();
@@ -183,7 +183,8 @@ int Alignment::Align() {
       FR->GetAlignment()->AddToLR(1, roc, (fdA.at(roc).first - fdA.at(roc).second) / 2); // take average of XdY and YdX
       FR->GetAlignment()->AddToLX(1, roc, fdX.at(roc).first);
       FR->GetAlignment()->AddToLY(1, roc, fdY.at(roc).first);
-      g_res_mean_.at(roc)->SetPoint(i_align, i_align, sqrt(pow(fdX.at(roc).first, 2) + pow(fdY.at(roc).first, 2)));
+      const float cm2um = 1e4;
+      g_res_mean_.at(roc)->SetPoint(i_align, i_align, cm2um * sqrt(pow(fdX.at(roc).first, 2) + pow(fdY.at(roc).first, 2)));
       g_res_angle_.at(roc)->SetPoint(i_align, i_align, fabs((fdA.at(roc).first - fdA.at(roc).second) / 2));
     }
     for (auto ipl:ordered_planes_) { SaveHistograms(ipl, i_align, at_step_); }
@@ -207,6 +208,7 @@ int Alignment::Align() {
   } // end alignment loop
 
   SaveAllHistograms();
+  SaveGraphs();
 
   PrintAlignment();
   FR->GetAlignment()->WriteAlignmentFile(telescope_id_, n_planes_);
@@ -408,6 +410,9 @@ void Alignment::ConfigROOT() {
 
 void Alignment::InitGraphs() {
 
+  g_res_mean_.clear();
+  g_res_angle_.clear();
+
   for(uint16_t i_pl = 0; i_pl < n_planes_; i_pl++){
     g_res_mean_.emplace_back(new TGraph());
     g_res_mean_[i_pl]->SetNameTitle(Form("gr%d", i_pl), Form("ResMean_Roc%d", i_pl));
@@ -427,11 +432,11 @@ void Alignment::SaveGraphs() {
     Can.SetGridy();
     Can.SetTicky();
     Can.SetLogy();
-    g_res_mean_.at(roc)->GetXaxis()->SetTitle("iteration");
-    g_res_mean_.at(roc)->GetYaxis()->SetTitle("Residual Mean [cm]");
+    g_res_mean_.at(roc)->GetXaxis()->SetTitle("Iteration");
+    g_res_mean_.at(roc)->GetYaxis()->SetTitle("R [#mum]");
     g_res_mean_.at(roc)->GetYaxis()->SetTitleOffset(1.5);
     g_res_mean_.at(roc)->Draw("AL");
-    TString fileNameCan = plots_dir_ + "/" + g_res_mean_.at(roc)->GetTitle();
+    TString fileNameCan = plots_dir_ + "/" + + Form("step%i", at_step_) + "/" + g_res_mean_.at(roc)->GetTitle();
     Can.SaveAs(Form("%s.root", fileNameCan.Data()));
     Can.SaveAs(Form("%s.png", fileNameCan.Data()));
     TCanvas Cana;
@@ -442,10 +447,10 @@ void Alignment::SaveGraphs() {
     Cana.SetTicky();
     Cana.SetLogy();
     g_res_angle_.at(roc)->GetXaxis()->SetTitle("Iteration");
-    g_res_angle_.at(roc)->GetYaxis()->SetTitle("Residual Angle [Rad]");
+    g_res_angle_.at(roc)->GetYaxis()->SetTitle("dA [rad]");
     g_res_angle_.at(roc)->GetYaxis()->SetTitleOffset(1.5);
     g_res_angle_.at(roc)->Draw("AL");
-    TString fileNameCana = plots_dir_ + "/" + g_res_angle_.at(roc)->GetTitle();
+    TString fileNameCana = plots_dir_ + "/" + Form("step%i", at_step_) + "/" + g_res_angle_.at(roc)->GetTitle();
     Cana.SaveAs(Form("%s.root", fileNameCana.Data()));
     Cana.SaveAs(Form("%s.png", fileNameCana.Data()));
   }
